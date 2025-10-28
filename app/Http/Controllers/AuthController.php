@@ -94,7 +94,6 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['status'=>false,'message'=>$th->getMessage(),'data'=>null]);
         }
-        
     }
 
     private function createProperty($request, $userId)
