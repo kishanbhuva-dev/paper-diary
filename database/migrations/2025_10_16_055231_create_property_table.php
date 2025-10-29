@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('property', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('userId')->constrained('users');
+            $table->foreignId('ownerId')->constrained('users');
             $table->string('title')->nullable();
             $table->string('propertyName');
             $table->string('email')->nullable();
