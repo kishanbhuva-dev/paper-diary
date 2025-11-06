@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('property', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ownerId')->constrained('users');
-            $table->string('title')->nullable();
             $table->string('propertyName');
             $table->string('email')->nullable();
             $table->longText('address');
@@ -27,22 +26,12 @@ return new class extends Migration
             $table->string('telephone')->nullable();
             $table->string('latitude');
             $table->string('longitude');
-            $table->datetime('arrivalDate')->nullable();
-            $table->datetime('departureDate')->nullable();
+            $table->time('arrivalTime')->nullable();
+            $table->time('departureTime')->nullable();
             $table->boolean('status')->default(false);
-            $table->enum('propertyType', ['0', '1'])->default('0');
-            $table->text('notes')->nullable();
-            $table->text('specialInfo')->nullable();
+            $table->boolean('isIcal')->default(false);
             $table->longText('description')->nullable();
             $table->integer('visitorCount')->default(0);
-            $table->datetime('closeStartDate')->nullable();
-            $table->datetime('closeEndDate')->nullable();
-            $table->boolean('openAllYear')->default(true);
-            $table->datetime('openingStart')->nullable();
-            $table->datetime('openingEnd')->nullable();
-            $table->string('facebookLink')->nullable();
-            $table->string('instagramLink')->nullable();
-            $table->text('youtubeLink')->nullable();
             $table->timestamps();
         });
     }
