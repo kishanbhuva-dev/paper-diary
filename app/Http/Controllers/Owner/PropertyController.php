@@ -7,6 +7,7 @@ use App\Models\Resource;
 use App\Models\ResourceType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Validator;
 
 class PropertyController extends Controller
@@ -46,59 +47,57 @@ class PropertyController extends Controller
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
     }
-
-/**
- * Show the form for creating a new resource.
- */
-    public function create()
+    public function propertyDropdown()
     {
-        //
+        try {
+            $property = Property::selectRaw('id, ownerId, propertyName')->where('ownerId', Auth::id());
+            $property = $property->get()->transform(function ($item) {
+                return [
+                    'id'   => $item->id,
+                    'name' => $item->propertyName,
+                ];
+            });
+            $response = ['status' => true, 'message' => '', 'data' => $property];
+
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+        }
     }
 
-/**
- * Store a newly created resource in storage.
- */
     public function store(Request $request)
     {
         try {
-            // return $request->all();
             $validator = Validator::make($request->all(),
                 [
-                    'propertyName'     => 'required',
-                    'address'          => 'required',
-                    'latitude'         => 'required',
-                    'longitude'        => 'required',
-                    'email'            => 'nullable|email',
-                    'country'          => 'nullable|string',
-                    'county'           => 'nullable|string',
-                    'city'             => 'nullable|string',
-                    'postcode'         => 'nullable|string',
-                    'phone'            => 'nullable|string',
-                    'telephone'        => 'nullable|string',
-                    'arrivalTime'      => 'nullable|date',
-                    'departureTime'    => 'nullable|date',
-                    'status'           => 'nullable|boolean',
-                    'isIcal'           => 'nullable|boolean',
-                    'resourceTypeName' => 'required|string',
-                    'price'            => 'required|numeric',
-                    'adjustedPrice'    => 'nullable|numeric',
-                    'adjustedStart'    => 'nullable|date',
-                    'adjustedEnd'      => 'nullable|date',
-                    'resourceName'     => 'required|string',
-                    'resourceStatus'   => 'nullable|boolean',
-
+                    'propertyName'  => 'required',
+                    'address'       => 'required',
+                    'latitude'      => 'required',
+                    'longitude'     => 'required',
+                    'email'         => 'nullable|email',
+                    'country'       => 'nullable|string',
+                    'county'        => 'nullable|string',
+                    'city'          => 'nullable|string',
+                    'postcode'      => 'nullable|string',
+                    'phone'         => 'nullable|string',
+                    'telephone'     => 'nullable|string',
+                    'arrivalTime'   => 'nullable|date',
+                    'departureTime' => 'nullable|date',
+                    'status'        => 'nullable|boolean',
+                    'isIcal'        => 'nullable|boolean',
+                    'slug'          => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:property,slug'],
                 ]
             );
             if ($validator->fails()) {
                 return $response = ['status' => false, 'message' => $validator->messages()->first()];
             }
-
             $property                = new Property();
             $property->ownerId       = Auth::id();
             $property->propertyName  = $request->propertyName;
             $property->email         = $request->email;
             $property->address       = $request->address;
             $property->address2      = $request->address2;
+            $property->slug          = $request->slug;
             $property->country       = $request->country;
             $property->county        = $request->county;
             $property->city          = $request->city;
@@ -111,26 +110,13 @@ class PropertyController extends Controller
             $property->departureTime = $request->departureTime ? date('H:i', strtotime($request->departureTime)) : null;
             $property->status        = $request->status ?? 0;
             $property->isIcal        = $request->isIcal ?? 0;
+            $property->slug          = $request->slug ?: Str::slug($request->name);
             if ($property->save()) {
-                $resourceTypes                = new ResourceType();
-                $resourceTypes->propertyId    = $property->id;
-                $resourceTypes->name          = $request->resourceTypeName;
-                $resourceTypes->price         = $request->price;
-                $resourceTypes->adjustedPrice = $request->adjustedPrice;
-                $resourceTypes->adjustedStart = $request->adjustedStart;
-                $resourceTypes->adjustedEnd   = $request->adjustedEnd;
-                $resourceTypes->save();
-
-                $resources                 = new Resource();
-                $resources->resourceTypeId = $resourceTypes->id;
-                $resources->name           = $request->resourceName;
-                $resources->status         = $request->resourceStatus ?? 1;
-                $resources->save();
-
                 $response = ['status' => true, 'message' => 'Property added successfully', 'data' => ''];
             } else {
                 $response = ['status' => false, 'message' => 'Property addition failed', 'data' => ''];
             }
+
             return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
@@ -168,28 +154,22 @@ class PropertyController extends Controller
         try {
             $validator = Validator::make($request->all(),
                 [
-                    'propertyName'     => 'required',
-                    'address'          => 'required',
-                    'latitude'         => 'required',
-                    'longitude'        => 'required',
-                    'email'            => 'nullable|email',
-                    'country'          => 'nullable|string',
-                    'county'           => 'nullable|string',
-                    'city'             => 'nullable|string',
-                    'postcode'         => 'nullable|string',
-                    'phone'            => 'nullable|string',
-                    'telephone'        => 'nullable|string',
-                    'arrivalTime'      => 'nullable|time',
-                    'departureTime'    => 'nullable|time',
-                    'status'           => 'nullable|boolean',
-                    'isIcal'           => 'nullable|boolean',
-                    'resourceTypeName' => 'required',
-                    'price'            => 'required',
-                    'adjustedPrice'    => 'nullable|numeric',
-                    'adjustedStart'    => 'nullable|date',
-                    'adjustedEnd'      => 'nullable|date',
-                    'resourceName'     => 'required',
-                    'resourceStatus'   => 'nullable|boolean',
+                    'propertyName'  => 'required',
+                    'address'       => 'required',
+                    'latitude'      => 'required',
+                    'longitude'     => 'required',
+                    'email'         => 'nullable|email',
+                    'country'       => 'nullable|string',
+                    'county'        => 'nullable|string',
+                    'city'          => 'nullable|string',
+                    'postcode'      => 'nullable|string',
+                    'phone'         => 'nullable|string',
+                    'telephone'     => 'nullable|string',
+                    'arrivalTime'   => 'nullable|time',
+                    'departureTime' => 'nullable|time',
+                    'status'        => 'nullable|boolean',
+                    'isIcal'        => 'nullable|boolean',
+                    'slug'          => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:property,slug'],
                 ]
             );
             if ($validator->fails()) {
@@ -215,39 +195,9 @@ class PropertyController extends Controller
             $property->departureTime = $request->departureTime ? date('H:i', strtotime($request->departureTime)) : null;
             $property->status        = $request->status ?? 0;
             $property->isIcal        = $request->isIcal ?? 0;
+            $property->slug          = $request->slug ?: Str::slug($request->name);
 
             if ($property->save()) {
-                $resourceTypes = ResourceType::where('propertyId', $id)->first();
-                if (empty($resourceTypes)) {
-                    $resourceTypes                = new ResourceType();
-                    $resourceTypes->propertyId    = $id;
-                    $resourceTypes->name          = $request->resourceTypeName;
-                    $resourceTypes->price         = $request->price;
-                    $resourceTypes->adjustedPrice = $request->adjustedPrice;
-                    $resourceTypes->adjustedStart = $request->adjustedStart;
-                    $resourceTypes->adjustedEnd   = $request->adjustedEnd;
-                    $resourceTypes->save();
-                    if ($resourceTypes->save()) {
-                        $resource                 = new Resource();
-                        $resource->resourceTypeId = $resourceTypes->id;
-                        $resource->name           = $request->resourceName;
-                        $resource->status         = $request->resourceStatus ?? 1;
-                        $resource->save();
-                    }
-                } else {
-                    $resourceTypes->name          = $request->resourceTypeName;
-                    $resourceTypes->price         = $request->price;
-                    $resourceTypes->adjustedPrice = $request->adjustedPrice;
-                    $resourceTypes->adjustedStart = $request->adjustedStart ? date('Y-m-d', strtotime($request->adjustedStart)) : null;
-                    $resourceTypes->adjustedEnd   = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
-                    $resourceTypes->save();
-                    if ($resourceTypes->save()) {
-                        $resource         = Resource::where('resourceTypeId', $resourceTypes->id)->first();
-                        $resource->name   = $request->resourceName;
-                        $resource->status = $request->resourceStatus ?? 1;
-                        $resource->save();
-                    }
-                }
                 $response = ['status' => true, 'message' => 'Property updated successfully', 'data' => ''];
             } else {
                 $response = ['status' => false, 'message' => 'Property addition failed', 'data' => ''];
@@ -258,9 +208,6 @@ class PropertyController extends Controller
         }
     }
 
-/**
- * Remove the specified resource from storage.
- */
     public function destroy(string $id)
     {
         try {

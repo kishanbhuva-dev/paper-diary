@@ -1,10 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Property;
+use App\Mail\SendMail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -58,7 +61,6 @@ class AuthController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
             }
-
             $user            = new User;
             $user->firstName = $request->firstName;
             $user->lastName  = $request->lastName;
@@ -73,17 +75,17 @@ class AuthController extends Controller
             $user->phone     = $request->phone;
             $user->telephone = $request->telephone;
             if ($user->save()) {
-                if ($user->role === 'owner') {
-                    $validator = Validator::make($request->all(), [
-                        'propertyName'    => 'required',
-                        'propertyAddress' => 'required',
-                    ]);
+                // if ($user->role === 'owner') {
+                //     $validator = Validator::make($request->all(), [
+                //         'propertyName'    => 'required',
+                //         'propertyAddress' => 'required',
+                //     ]);
 
-                    if ($validator->fails()) {
-                        return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
-                    }
-                    $this->createProperty($request, $user->id);
-                }
+                //     if ($validator->fails()) {
+                //         return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
+                //     }
+                //     $this->createProperty($request, $user->id);
+                // }
                 $token    = $user->createToken('api-token')->plainTextToken;
                 $response = ['status' => true, 'message' => 'User registered successfully', 'data' => compact('user', 'token')];
             } else {
@@ -95,19 +97,186 @@ class AuthController extends Controller
         }
     }
 
-    private function createProperty($request, $userId)
+    // private function createProperty($request, $userId)
+    // {
+    //     $property               = new Property();
+    //     $property->ownerId      = $userId;
+    //     $property->title        = $request->title;
+    //     $property->propertyName = $request->propertyName;
+    //     $property->email        = $request->email;
+    //     $property->address      = $request->propertyAddress;
+    //     $property->address2     = $request->propertyAddress2;
+    //     $property->description  = $request->description;
+    //     $property->status       = 0;
+    //     $property->latitude     = 0;
+    //     $property->longitude    = 0;
+    //     $property->save();
+    // }
+    public function profileUpdate(Request $request)
     {
-        $property               = new Property();
-        $property->userId       = $userId;
-        $property->title        = $request->title;
-        $property->propertyName = $request->propertyName;
-        $property->email        = $request->email;
-        $property->address      = $request->propertyAddress;
-        $property->address2     = $request->propertyAddress2;
-        $property->description  = $request->description;
-        $property->status       = 0;
-        $property->latitude     = 0;
-        $property->longitude    = 0;
-        $property->save();
+        try {
+            $validator = Validator::make($request->all(), [
+                'firstName' => 'required|string|max:255',
+                'lastName'  => 'required|string|max:255',
+                'phone'     => 'required|string|max:255',
+                'address'   => 'required|string',
+                'address2'  => 'nullable|string',
+                'city'      => 'nullable|string|max:255',
+                'country'   => 'nullable|string|max:255',
+                'postcode'  => 'nullable|string|max:255',
+                'telephone' => 'nullable|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
+            }
+            $user = User::where('id', Auth::id())->first();
+            if (! empty($user)) {
+                $user->firstName = $request->firstName;
+                $user->lastName  = $request->lastName;
+                $user->phone     = $request->phone;
+                $user->address   = $request->address;
+                $user->address2  = $request->address2;
+                $user->city      = $request->city;
+                $user->country   = $request->country;
+                $user->postcode  = $request->postcode;
+                $user->telephone = $request->telephone;
+
+                if ($user->save()) {
+                    $response = ['status' => true, 'message' => 'Profile updated successfully', 'data' => ''];
+                } else {
+                    $response = ['status' => false, 'message' => 'Profile not updated please try again', 'data' => ''];
+                }
+            } else {
+                $response = ['status' => false, 'message' => 'Admin not found', 'data' => ''];
+            }
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+    public function logOut(Request $request)
+    {
+        try {
+            $request->user()->currentAccessToken()->delete();
+            $response = ['status' => true, 'message' => 'User logged out successfully', 'data' => ''];
+        } catch (\Throwable $th) {
+            $response = ['status' => false, 'message' => $th->getMessage(), 'data' => ''];
+        }
+        return response()->json($response);
+    }
+    public function forgetPassword(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
+            }
+            $user = User::where('email', $request->email)->first();
+            if (! empty($user)) {
+                $token = $user->createToken('api-token')->plainTextToken;
+                $data  = [
+                    'name'  => $user->firstName . ' ' . $user->lastName,
+                    'token' => $token,
+                    'url'   => env('FRONTEND_URL'),
+                    'year'  => date('Y'),
+                ];
+                $existing = DB::table('password_reset_tokens')
+                    ->where('email', $user->email)
+                    ->first();
+
+                if ($existing) {
+                    DB::table('password_reset_tokens')
+                        ->where('email', $user->email)
+                        ->update([
+                            'token'      => $token,
+                            'created_at' => now(),
+                        ]);
+                } else {
+                    DB::table('password_reset_tokens')->insert([
+                        'email'      => $user->email,
+                        'token'      => $token,
+                        'created_at' => now(),
+                    ]);
+                }
+
+                Mail::to($request->email)->send(new SendMail($data));
+                $response = ['status' => true, 'message' => 'Password reset token sent successfully', 'data' => compact('token')];
+            } else {
+                $response = ['status' => false, 'message' => 'User not found', 'data' => null];
+            }
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => null]);
+        }
+    }
+    public function resetPassword(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'token'           => 'required|string',
+                'password'        => 'required|string|min:8|max:255',
+                'confirmPassword' => 'required|string|min:8|max:255|same:password',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
+            }
+            $password_reset = DB::table('password_reset_tokens')->select('*')->where('token', $request->token)->first();
+
+            if (empty($password_reset)) {
+                return $response = ['status' => false, 'message' => 'Invalid token', 'data' => ''];
+            }
+
+            $user          = User::where('email', $password_reset->email)->first();
+            $expireMinutes = config('auth.passwords.users.expire');
+            if ($password_reset && now()->diffInMinutes($password_reset->created_at) <= $expireMinutes) {
+                $user->password = Hash::make($request->password);
+                if ($user->save()) {
+                    $response             = ['status' => true, 'message' => 'Password reset successfully', 'data' => ''];
+                    $password_reset_token = DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+                } else {
+                    $response = ['status' => false, 'message' => 'Password not reset please try again', 'data' => ''];
+                }
+                return response()->json($response);
+            } else {
+                return $response = ['status' => false, 'message' => 'Token expired', 'data' => ''];
+            }
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => null]);
+        }
+    }
+    public function changePassword(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'oldPassword'     => 'required|string|min:8|max:255',
+                'password'        => 'required|string|min:8|max:255',
+                'confirmPassword' => 'required|string|min:8|max:255|same:password',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
+            }
+            $user = $request->user();
+            if (! Hash::check($request->oldPassword, $user->password)) {
+                return response()->json(['status' => false, 'message' => 'Old password does not match', 'data' => null]);
+            }
+            if (Hash::check($request->password, $user->password)) {
+                return response()->json(['status' => false, 'message' => 'Old password and new password are same', 'data' => null]);
+            }
+            $user->password = Hash::make($request->password);
+            if ($user->save()) {
+                $response = ['status' => true, 'message' => 'Password changed successfully', 'data' => ''];
+            } else {
+                $response = ['status' => false, 'message' => 'Password not changed please try again', 'data' => ''];
+            }
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => null]);
+        }
     }
 }
