@@ -67,8 +67,8 @@ class BookingController extends Controller
         if ($validator->fails()) {
             return $response = ['status' => false, 'message' => $validator->messages()->first()];
         }
-        $arrivalDateTime    = date('Y-m-d H:i:s', strtotime($request->data['arrivalDateTime']));
-        $departureDateTime  = date('Y-m-d H:i:s', strtotime($request->data['departureDateTime']));
+        $arrivalDateTime    = date('Y-m-d H:i', strtotime($request->data['arrivalDateTime']));
+        $departureDateTime  = date('Y-m-d H:i', strtotime($request->data['departureDateTime']));
         $availableResources = getResourcesAvailable($request->data['resourceTypesId'], $arrivalDateTime, $departureDateTime);
         foreach ($request->data['resourcesId'] as $key => $value) {
             if (! $availableResources->contains('id', $value)) {
