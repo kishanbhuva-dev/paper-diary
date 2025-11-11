@@ -14,4 +14,8 @@ class ResourceType extends Model
     {
         return $this->hasMany(Resource::class, 'resourceTypeId', 'id');
     }
+    public function property()
+    {
+        return $this->hasOne(Property::class, 'id', 'propertyId');
+    }
 }

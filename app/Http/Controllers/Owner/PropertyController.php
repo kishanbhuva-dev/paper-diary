@@ -123,11 +123,11 @@ class PropertyController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(string $slug)
     {
         //
         try {
-            $property = Property::where('id', $id)->first();
+            $property = Property::where('slug', $slug)->first();
             if (empty($property)) {
                 return response()->json(['status' => false, 'message' => 'Property not found', 'data' => '']);
             }

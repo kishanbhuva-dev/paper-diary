@@ -11,6 +11,10 @@ class Property extends Model
     {
         return $this->hasOne(User::class, 'id', 'ownerId');
     }
+    public function resourceType()
+    {
+        return $this->belongsTo(ResourceType::class, 'propertyId', 'id');
+    }
     protected static function boot()
     {
         parent::boot();
