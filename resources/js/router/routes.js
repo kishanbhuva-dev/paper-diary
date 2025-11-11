@@ -20,6 +20,21 @@ const routes = [
       },
     ],
   },
+  {
+    name: "owner",
+    path: "/owner",
+    redirect: { name: "owner-dashboard" },
+    component: () => import("../../js/layouts/OwnerLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        name: "owner-dashboard",
+        path: "",
+        component: () => import("../../js/pages/Dashboard.vue"),
+        meta: { pageTitle: "Owner Dashboard" },
+      },
+    ],
+  },
 ];
 
 export default routes;
