@@ -11,7 +11,7 @@ class ResourceTypeController extends Controller
     public function index(Request $request)
     {
         try {
-            $resourceTypes = ResourceType::where('propertyId', $request->id)->get();
+            $resourceTypes = ResourceType::where('propertyId', $request->id)->with('property')->get();
             $response      = ['status' => true, 'message' => '', 'data' => $resourceTypes];
             return response()->json($response);
         } catch (\Throwable $th) {
@@ -64,6 +64,42 @@ class ResourceTypeController extends Controller
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
             return response()->json($response);
         }
+        // try {
+        //     $validator = Validator::make($request->all(), [
+        //         'data'                 => 'required|array',
+        //         'data.*.propertyId'    => 'required|exists:property,id',
+        //         'data.*.name'          => 'required|string',
+        //         'data.*.price'         => 'required|numeric',
+        //         'data.*.adjustPrice'   => 'nullable|numeric',
+        //         'data.*.adjustedStart' => 'nullable|date',
+        //         'data.*.adjustedEnd'   => 'nullable|date',
+        //         'data.*.slot'          => 'nullable|in:hourly,day,monthly',
+        //     ]);
+        //     if ($validator->fails()) {
+        //         $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+        //         return response()->json($response);
+        //     }
+        //     foreach ($request->data as $key => $dataValue) {
+        //         $resourceType                = new ResourceType();
+        //         $resourceType->propertyId    = $dataValue['propertyId'];
+        //         $resourceType->name          = $dataValue['name'];
+        //         $resourceType->price         = $dataValue['price'];
+        //         $resourceType->adjustedPrice = $dataValue['adjustPrice'] ?? null;
+        //         $resourceType->adjustedStart = ($dataValue['adjustedStart'] ?? null) ? date('Y-m-d 00:00:00', strtotime($dataValue['adjustedStart'])) : null;
+        //         $resourceType->adjustedEnd   = ($dataValue['adjustedEnd'] ?? null) ? date('Y-m-d 00:00:00', strtotime($dataValue['adjustedEnd'])) : null;
+        //         if (isset($dataValue['slot'])) {
+        //             $resourceType->slot = $dataValue['slot'];
+        //         }if (! $resourceType->save()) {
+        //             $response = ['status' => false, 'message' => 'Resource Type not added', 'data' => []];
+        //             return response()->json($response);
+        //         }
+        //     }
+        //     $response = ['status' => true, 'message' => 'Resource Types successfully added', 'data' => []];
+        //     return response()->json($response);
+        // } catch (\Throwable $th) {
+        //     $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+        //     return response()->json($response);
+        // }
     }
     public function store(Request $request)
     {
@@ -146,35 +182,68 @@ class ResourceTypeController extends Controller
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
             return response()->json($response);
         }
+
+        //     try {
+        //         $validator = Validator::make($request->all(), [
+        //             'data'                 => 'required|array',
+        //             'data.ids.*'           => ''
+        //             'data.*.propertyId'    => 'required|exists:property,id',
+        //             'data.*.name'          => 'required|string',
+        //             'data.*.price'         => 'required|numeric',
+        //             'data.*.adjustPrice'   => 'nullable|numeric',
+        //             'data.*.adjustedStart' => 'nullable|date',
+        //             'data.*.adjustedEnd'   => 'nullable|date',
+        //             'data.*.slot'          => 'nullable|in:hourly,day,monthly',
+
+        //         ]);
+        //     } catch (\Throwable $th) {
+        //         $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+        //         return response()->json($response);
+        //     }
+        // }
+        // public function update(Request $request, string $id)
+        // {
+        //     try {
+
+        //         $validator = Validator::make($request->all(), [
+        //             'name'          => 'required|string',
+        //             'price'         => 'required|numeric',
+        //             'adjustPrice'   => 'nullable|numeric',
+        //             'adjustedStart' => 'nullable|date',
+        //             'adjustedEnd'   => 'nullable|date',
+        //             'slot'          => 'nullable|in:hourly,day,monthly',
+        //         ]);
+        //         if ($validator->fails()) {
+        //             $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+        //             return response()->json($response);
+        //         }
+        //         $resourceType = ResourceType::where('id', $id)->first();
+        //         if (! $resourceType) {
+        //             $response = ['status' => false, 'message' => 'Resource Type not found', 'data' => []];
+        //             return response()->json($response);
+        //         }
+        //         $resourceType->name          = $request->name;
+        //         $resourceType->price         = $request->price;
+        //         $resourceType->adjustedPrice = $request->adjustedPrice ?? null;
+        //         $resourceType->adjustedStart = $request->adjustedStart ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart)) : null;
+        //         $resourceType->adjustedEnd   = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
+        //         if (! $resourceType->save()) {
+        //             $response = ['status' => false, 'message' => 'Resource Type not updated', 'data' => []];
+        //             return response()->json($response);
+        //         }
+        //         $response = ['status' => true, 'message' => '', 'data' => $resourceType];
+        //         return response()->json($response);
+        //     } catch (\Throwable $th) {
+        //         $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+        //         return response()->json($response);
+        //     }
     }
-    public function update(Request $request, string $id)
+    public function show($id)
     {
         try {
-
-            $validator = Validator::make($request->all(), [
-                'name'          => 'required|string',
-                'price'         => 'required|numeric',
-                'adjustPrice'   => 'nullable|numeric',
-                'adjustedStart' => 'nullable|date',
-                'adjustedEnd'   => 'nullable|date',
-                'slot'          => 'nullable|in:hourly,day,monthly',
-            ]);
-            if ($validator->fails()) {
-                $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
-                return response()->json($response);
-            }
-            $resourceType = ResourceType::where('id', $id)->first();
+            $resourceType = ResourceType::where('id', $id)->with('property')->first();
             if (! $resourceType) {
                 $response = ['status' => false, 'message' => 'Resource Type not found', 'data' => []];
-                return response()->json($response);
-            }
-            $resourceType->name          = $request->name;
-            $resourceType->price         = $request->price;
-            $resourceType->adjustedPrice = $request->adjustedPrice ?? null;
-            $resourceType->adjustedStart = $request->adjustedStart ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart)) : null;
-            $resourceType->adjustedEnd   = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
-            if (! $resourceType->save()) {
-                $response = ['status' => false, 'message' => 'Resource Type not updated', 'data' => []];
                 return response()->json($response);
             }
             $response = ['status' => true, 'message' => '', 'data' => $resourceType];
