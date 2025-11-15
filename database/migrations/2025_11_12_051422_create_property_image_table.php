@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('property', function (Blueprint $table) {
-            $table->string('slug')->unique()->after('propertyName');
+        Schema::create('property_image', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('propertyId')->constrained('property');
+            $table->string('image');
+            $table->integer('position')->default(0);
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('property', function (Blueprint $table) {
-            $table->dropColumn('slug');
-        });
+        Schema::dropIfExists('property_image');
     }
 };

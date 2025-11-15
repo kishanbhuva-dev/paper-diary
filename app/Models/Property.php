@@ -39,4 +39,12 @@ class Property extends Model
 
         return $count ? "{$slug}-{$count}" : $slug;
     }
+    public function propertyImage()
+    {
+        return $this->hasMany(PropertyImage::class, 'propertyId', 'id');
+    }
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class, 'facility_property', 'propertyId', 'facilityId');
+    }
 }

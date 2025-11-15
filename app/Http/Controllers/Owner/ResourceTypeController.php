@@ -35,6 +35,8 @@ class ResourceTypeController extends Controller
                 'adjustedStart.*' => 'nullable|date',
                 'adjustedEnd'     => 'nullable|array',
                 'adjustedEnd.*'   => 'nullable|date',
+                'capacity'        => 'nullable|array',
+                'capacity.*'      => 'nullable|integer',
                 'slot'            => 'nullable|array',
                 'slot.*'          => 'nullable|in:hourly,day,monthly',
 
