@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('ownerId')->constrained('users');
             $table->string('propertyName');
+            $table->string('slug')->unique();
             $table->string('email')->nullable();
             $table->longText('address');
             $table->longText('address2')->nullable();
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->string('longitude');
             $table->time('arrivalTime')->nullable();
             $table->time('departureTime')->nullable();
+            $table->enum('type', ['room', 'tour', 'activity'])->default('room');
             $table->boolean('status')->default(false);
             $table->boolean('isIcal')->default(false);
             $table->longText('description')->nullable();

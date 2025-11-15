@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('price', 15, 2);
             $table->decimal('adjustedPrice', 15, 2)->nullable();
             $table->datetime('adjustedStart')->nullable();
+            $table->integer('capacity')->default(2);
             $table->datetime('adjustedEnd')->nullable();
             $table->timestamps();
         });

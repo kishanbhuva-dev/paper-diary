@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('booking_groups', function (Blueprint $table) {
+        Schema::create('facility_property', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('userId')->constrained('users');
-            $table->decimal('totalAmount', 10, 2);
+            $table->foreignId('facilityId')->constrained('facilities')->cascadeOnDelete();
+            $table->foreignId('propertyId')->constrained('property')->cascadeOnDelete();
+            $table->unique(['facilityId', 'propertyId']);
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('booking_groups');
+        Schema::dropIfExists('facilities_property');
     }
 };

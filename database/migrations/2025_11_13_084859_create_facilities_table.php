@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('booking', function (Blueprint $table) {
-            $table->foreignId('bookingGroupId')->constrained('booking_groups');
+        Schema::create('facilities', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('icon')->nullable();
+            $table->string('description')->nullable();
+            $table->boolean('status')->default(true);
+            $table->timestamps();
         });
     }
 
@@ -21,9 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('booking', function (Blueprint $table) {
-            $table->dropForeign(['bookingGroupId']);
-            $table->dropColumn('bookingGroupId');
-        });
+        Schema::dropIfExists('facilities');
     }
 };

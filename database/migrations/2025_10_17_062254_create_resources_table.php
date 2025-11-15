@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('resourceTypeId')->constrained('resource_types');
             $table->string('name');
             $table->boolean('status')->default(true);
+            $table->string('customPrice')->nullable();
+            $table->boolean('availability')->default(true);
+            $table->enum('slot', ['hourly', 'day', 'monthly'])->default('day');
             $table->timestamps();
         });
     }

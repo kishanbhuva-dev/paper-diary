@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingGroups;
+use App\Models\ResourceType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -99,5 +100,47 @@ class BookingController extends Controller
             $booking->save();
         }
         return $response = ['status' => true, 'message' => 'Your Booking successfully'];
+    }
+    public function index(Request $request)
+    {
+        $arrivalDateTime   = $request->arrivalDateTime ? date('Y-m-d H:i', strtotime($request->arrivalDateTime)) : date('Y-m-d H:i', strtotime('now'));
+        $departureDateTime = $request->departureDateTime ? date('Y-m-d H:i', strtotime($request->departureDateTime)) : date('Y-m-d H:i', strtotime('+1 day'));
+
+        $resourceTypes      = ResourceType::where('propertyId', $request->propertyId)->get();
+        $availableResources = collect();
+        foreach ($resourceTypes as $resourceType) {
+            $query = Booking::whereHas('resource', function ($query) use ($resourceType) {
+                $query->where('resourceTypeId', $resourceType->id);
+            });
+            if ($resourceType->slot === 'hourly') {
+                $query->where('departureDateTime', '>', $arrivalDateTime)
+                    ->where('arrivalDateTime', '<', $departureDateTime);
+            } else {
+                $query->whereDate('departureDateTime', '>', date('Y-m-d', strtotime($arrivalDateTime)))
+                    ->whereDate('arrivalDateTime', '<', date('Y-m-d', strtotime($departureDateTime)));
+            }
+            $bookedResourceIds = $query->pluck('resourcesId')->unique();
+            $resources         = ResourceType::where('id', $resourceType->id)
+                ->whereHas('resources', function ($query) use ($bookedResourceIds) {
+                    $query->whereNotIn('id', $bookedResourceIds);
+                })->with(['resources' => function ($query) use ($bookedResourceIds) {
+                $query->whereNotIn('id', $bookedResourceIds)->select('id', 'resourceTypeId', 'name');
+            }])
+                ->get();
+            $availableResources = $availableResources->merge($resources);
+        }
+        if ($availableResources->isEmpty()) {
+            return $response = ['status' => false, 'message' => 'No resources available'];
+        } else {
+            $response = ['status' => true, 'data' => $availableResources, 'message' => 'Resources available'];
+        }
+
+        return $response;
+
+    }
+
+    public function getBooking(Request $request)
+    {
+
     }
 }
