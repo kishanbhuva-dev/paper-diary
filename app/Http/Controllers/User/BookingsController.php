@@ -5,7 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Models\BookingOrder;
 use App\Models\ResourceType;
 use Illuminate\Http\Request;
-use App\Models\Booking;
+use App\Models\Bookings;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -75,7 +75,7 @@ class BookingsController extends Controller
             if ($booking->save()) {
                 $bookingOrderId = $booking->id;
                 foreach ($availableResourcesData as $key => $resource) {
-                    $booking =new Booking;
+                    $booking =new Bookings;
                     $booking->bookingOrderId = $bookingOrderId;
                     $booking->resourceId = $resource;
                     $booking->resourceTypeId = $request->resourceTypeId;
