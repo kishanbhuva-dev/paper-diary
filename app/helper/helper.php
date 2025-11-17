@@ -3,6 +3,7 @@
 use App\Models\Bookings;
 use App\Models\Resource;
 use App\Models\ResourceType;
+use App\Models\Property;
 
 function getResourcesAvailable($resourceTypesId, $arrivalDateTime, $departureDateTime)
 {
@@ -27,4 +28,19 @@ function getResourcesAvailable($resourceTypesId, $arrivalDateTime, $departureDat
         ->whereNotIn('id', $bookedResourceIds)
         ->pluck('id');        
     return $availableResourceIds;
+}
+function getPropertyName($propertyId)
+{
+    $property = Property::where('id', $propertyId)->first();
+    return $property ? $property->propertyName : '';
+}
+function getResourceTypeName($resourceTypeId)
+{
+    $resourceType = ResourceType::where('id', $resourceTypeId)->first();
+    return $resourceType ? $resourceType->name : '';
+}
+function getPropertyOwnerEmail($propertyId)
+{
+    $property = Property::where('id', $propertyId)->first();
+    return $property ? $property->email : '';
 }

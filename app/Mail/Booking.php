@@ -16,9 +16,10 @@ class Booking extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($data,string $recipientType)
     {
-        //
+        $this->data = $data;
+        $this->recipientType = $recipientType; // 
     }
 
     /**
@@ -26,8 +27,11 @@ class Booking extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subject = ($this->recipientType === 'owner')
+            ? 'New Booking Received'
+            : 'Your Booking is Confirmed';
         return new Envelope(
-            subject: 'Booking',
+            subject: $subject,
         );
     }
 
@@ -36,8 +40,14 @@ class Booking extends Mailable
      */
     public function content(): Content
     {
+        
+        $view = ($this->recipientType === 'owner')
+            ? 'emails.owner_booking'
+            : 'emails.user_booking';
+
         return new Content(
-            view: 'emails.booking',
+            view: $view,
+            with: ['data' => $this->data],
         );
     }
 
