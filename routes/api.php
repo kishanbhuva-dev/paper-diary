@@ -24,6 +24,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:sanctum', 'admin']], f
     Route::post('update-owner', [App\Http\Controllers\Admin\UserAndOwnerController::class, 'updateOwner']);
     Route::post('delete-owner', [App\Http\Controllers\Admin\UserAndOwnerController::class, 'deleteOwner']);
     Route::apiResource('facility', App\Http\Controllers\Admin\FacilityController::class);
+    Route::apiResource('booking', App\Http\Controllers\Admin\BookingsController::class);
 });
 Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], function () {
     Route::get('/', [App\Http\Controllers\Owner\DashboardController::class, 'index']);
@@ -43,9 +44,9 @@ Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], f
     Route::get('property-wise-image', [App\Http\Controllers\Owner\PropertyController::class, 'propertyWiseImage']);
     Route::post('add-facility-property', [App\Http\Controllers\Owner\FacilityController::class, 'addFacilityProperty']);
     Route::get('facility', [App\Http\Controllers\Owner\FacilityController::class, 'getFacility']);
+    Route::apiResource('bookings', App\Http\Controllers\Owner\BookingsController::class);
 
 });
 Route::group(['prefix' => 'user', 'middleware' => ['auth:sanctum', 'user']], function () {
-    // Route::post('booking', [App\Http\Controllers\User\BookingsController::class, 'store']);
     Route::apiResource('booking', App\Http\Controllers\User\BookingsController::class);
 });

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\Booking as BookingMail;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class BookingsController extends Controller
 {
@@ -18,7 +19,7 @@ class BookingsController extends Controller
     public function index(Request $request)
     {
         try {
-            $bookings = BookingOrder::selectRaw("id,propertyId,resourceTypeId,userId,adult,children,price,status,paymentStatus,date_format(arrivalDateTime,'%d-%m-%Y %H:%i') as arrivalDateTime,date_format(departureDateTime,'%d-%m-%Y %H:%i') as departureDateTime")->where('userId', Auth::user()->id)->with(['property', 'resourceType' => function($query){
+            $bookings = BookingOrder::selectRaw("id,propertyId,resourceTypeId,userId,adult,children,price,status,paymentStatus,date_format(arrivalDateTime,'%d-%m-%Y %H:%i') as arrivalDateTime,date_format(departureDateTime,'%d-%m-%Y %H:%i') as departureDateTime,created_at")->where('userId', Auth::user()->id)->with(['property', 'resourceType' => function($query){
                 $query->select('*')->withCount('resources');
             }]);  
             if ($request->search) {
@@ -37,11 +38,6 @@ class BookingsController extends Controller
                         $query->where('name', 'like', '%' . $request->search . '%');
                     });
                 });
-                // ->orWhereHas('user', function ($query) use ($request) {
-                //     $query->where('firstName', 'like', '%' . $request->search . '%')
-                //         ->orWhere('lastName', 'like', '%' . $request->search . '%')
-                //         ->orWhere('email', 'like', '%' . $request->search . '%');
-                // });
             }
             $perPage = $request->perPage ?? 10;
             $sortBy = $request->sortBy ?? 'id';
@@ -51,9 +47,9 @@ class BookingsController extends Controller
                 $item->resourceTypeName=$item->resourceType->name;
                 $item->resourceCount=$item->resourceType->resources_count;
                 $item->propertyName=$item->property->propertyName;
-                // $item->userName=$item->user->firstName.' '.$item->user->lastName;
-                // $item->userEmail=$item->user->email;
-                // unset($item->user);
+                $recordedTime = Carbon::parse($item->created_at);
+                $item->from=$recordedTime->diffForHumans();
+                unset($item->created_at);
                 unset($item->property);
                 unset($item->resourceType);
 
