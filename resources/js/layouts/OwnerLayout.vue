@@ -1,18 +1,18 @@
 <template>
-    <div class="min-h-scree bg-white">
+    <div class="min-h-screen bg-white flex">
 
         <OwnerSidebar ref="sidebarRef" />
 
-        <OwnerHeader @toggleSidebar="handleHeaderToggle" :windowWidth="sidebarRef?.windowWidth ?? 0" />
-
-        <main :class="[
-            'transition-all duration-500 pt-16 p-6 min-h-screen bg-white',
-            // Shift content to the right by the sidebar's width (w-64 = 16rem) on desktop
-            'md:ml-60'
+        <div :class="[
+            'flex flex-col flex-grow w-full',
+            'md:ml-60',
         ]">
-            <RouterView />
+            <OwnerHeader @toggleSidebar="handleHeaderToggle" :windowWidth="sidebarRef?.windowWidth ?? 0" />
 
-        </main>
+            <main class="transition-all duration-500 bg-white min-h-screen flex-grow">
+                <RouterView />
+            </main>
+        </div>
     </div>
 </template>
 
@@ -20,7 +20,6 @@
 import { ref } from 'vue';
 import OwnerHeader from '../components/owner/OwnerHeader.vue';
 import OwnerSidebar from '../components/owner/OwnerSidebar.vue';
-
 
 // Ref to access the child component's exposed methods/properties
 const sidebarRef = ref(null);

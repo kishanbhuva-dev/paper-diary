@@ -1,4 +1,14 @@
 const routes = [
+  // 1. Default Home Route (Required for standard users)
+  {
+    path: "/",
+    name: "root",
+    redirect: { name: "login" },
+    component: () => import("../../js/layouts/AuthLayout.vue"),
+    meta: { requiresAuth: false, pageTitle: "Login" },
+  },
+
+  // 2. Auth Routes
   {
     name: "auth",
     path: "/login",
@@ -20,6 +30,8 @@ const routes = [
       },
     ],
   },
+
+  // 3. Owner Routes
   {
     name: "owner",
     path: "/owner",
@@ -30,8 +42,14 @@ const routes = [
       {
         name: "owner-dashboard",
         path: "",
-        component: () => import("../../js/pages/Dashboard.vue"),
+        component: () => import("../../js/pages/owner/Dashboard.vue"),
         meta: { pageTitle: "Owner Dashboard" },
+      },
+      {
+        name: "properties",
+        path: "properties",
+        component: () => import("../../js/pages/owner/Properties.vue"),
+        meta: { pageTitle: "Property List" },
       },
     ],
   },

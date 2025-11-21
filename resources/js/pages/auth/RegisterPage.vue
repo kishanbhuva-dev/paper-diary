@@ -29,7 +29,7 @@
       <!-- Email -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Email Address</label>
-        <input v-model="form.email" type="email" @input="clearError('email')"
+        <input v-model="form.email" type="email" @input="clearError('email')" autocomplete="email"
           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
         <p v-if="errors.email" class="text-red-500 text-xs mt-1">
           {{ errors.email }}
@@ -39,7 +39,7 @@
       <!-- Password -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Password</label>
-        <input v-model="form.password" type="password" @input="clearError('password')"
+        <input v-model="form.password" type="password" @input="clearError('password')" autocomplete="new-password"
           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
         <p v-if="errors.password" class="text-red-500 text-xs mt-1">
           {{ errors.password }}
@@ -50,6 +50,7 @@
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Confirm Password</label>
         <input v-model="form.confirm_password" type="password" @input="clearError('confirm_password')"
+          autocomplete="new-password"
           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
         <p v-if="errors.confirm_password" class="text-red-500 text-xs mt-1">
           {{ errors.confirm_password }}
