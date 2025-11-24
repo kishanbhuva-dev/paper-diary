@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import axios from "axios";
 // import api from "../api"; // <--- USE THIS if you created api.js
+import Swal from "sweetalert2"; // 👈 ADDED for toast notifications
 
 import { useAuthStore } from "./authStore";
 
@@ -15,6 +16,24 @@ export const usePropertiesStore = defineStore("properties", () => {
   // --- API CONFIG ---
   // If using api.js, remove the full domain/prefix if it's in baseURL
   const API_BASE_URL = "/api/owner/property";
+
+  // --- HELPER: TOAST NOTIFICATION ---
+  const displayToast = (icon, title) => {
+    Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    }).fire({
+      icon: icon,
+      title: title,
+    });
+  };
 
   // --- HELPER: ERROR HANDLER ---
   const handleError = (err, actionName) => {
@@ -96,12 +115,25 @@ export const usePropertiesStore = defineStore("properties", () => {
     try {
       const response = await axios.post(API_BASE_URL, dataToSend);
       if (response.data.status) {
-        // Refresh the list (you might want to pass existing params here if needed)
-        await fetchProperties();
-        return response.data;
+        // Success Toast
+        displayToast(
+          "success",
+          response.data.message || "Property created successfully"
+        );
+        // Refresh the list (will be done by component after receiving success signal)
+        return true;
+      } else {
+        // Failure Toast
+        const errorMessage =
+          response.data.message || "Property creation failed";
+        displayToast("error", errorMessage);
+        error.value = errorMessage;
+        return false;
       }
     } catch (err) {
       handleError(err, "createProperty");
+      displayToast("error", "API Error: Failed to create property");
+      return false;
     } finally {
       loading.value = false;
     }
@@ -129,11 +161,24 @@ export const usePropertiesStore = defineStore("properties", () => {
         dataToSend
       );
       if (response.data.status) {
-        await fetchProperties();
-        return response.data;
+        // Success Toast
+        displayToast(
+          "success",
+          response.data.message || "Property updated successfully"
+        );
+        // await fetchProperties(); // will be done by component
+        return true;
+      } else {
+        // Failure Toast
+        const errorMessage = response.data.message || "Property update failed";
+        displayToast("error", errorMessage);
+        error.value = errorMessage;
+        return false;
       }
     } catch (err) {
       handleError(err, "updateProperty");
+      displayToast("error", "API Error: Failed to update property");
+      return false;
     } finally {
       loading.value = false;
     }
@@ -145,15 +190,36 @@ export const usePropertiesStore = defineStore("properties", () => {
     error.value = null;
     try {
       const response = await axios.delete(`${API_BASE_URL}/${id}`);
+
+      // Keep this log for backend debugging
+      console.log("Delete Response Data:", response.data);
+
       if (response.data.status) {
+        // Success Toast
+        displayToast(
+          "success",
+          response.data.message || "Property deleted successfully"
+        );
+
         // Optimistic update: remove immediately from UI
         properties.value = properties.value.filter((item) => item.id !== id);
         // Also update total count locally so pagination doesn't break
         total.value = Math.max(0, total.value - 1);
-        return response.data;
+
+        return true;
+      } else {
+        // Failure Toast (This shows the crucial backend error message)
+        const errorMessage =
+          response.data.message ||
+          "Deletion failed due to unknown backend error.";
+        displayToast("error", errorMessage);
+        error.value = errorMessage;
+        return false;
       }
     } catch (err) {
       handleError(err, "deleteProperty");
+      displayToast("error", "API Error: Failed to delete property");
+      return false;
     } finally {
       loading.value = false;
     }

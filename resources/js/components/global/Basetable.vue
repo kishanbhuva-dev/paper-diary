@@ -19,13 +19,13 @@
 
                 <div class="table-actions flex gap-2 order-1 shrink-0">
                     <button v-if="showAdd" @click="emit('open-add-modal')"
-                        class="flex items-center justify-center p-2 text-sm font-medium text-white bg-indigo-600 rounded-full hover:bg-indigo-700 transition duration-150 shadow-md h-9 w-9"
+                        class="flex items-center justify-center p-2 text-sm font-medium text-indigo-600 bg-indigo-200 rounded-md hover:bg-indigo-500 cursor-pointer hover:text-white transition duration-150 shadow-md h-9 w-9"
                         title="Add New">
                         <Icon icon="ic:round-add" class="w-5 h-5" />
                     </button>
 
                     <button v-if="showDownload" @click="emit('download')"
-                        class="flex items-center justify-center p-2 text-sm font-medium text-white bg-indigo-600 rounded-full hover:bg-indigo-700 transition duration-150 shadow-md h-9 w-9"
+                        class="flex items-center justify-center p-2 text-sm font-medium text-indigo-600 bg-indigo-200 rounded-md hover:bg-indigo-500 cursor-pointer hover:text-white transition duration-150 shadow-md h-9 w-9"
                         title="Download">
                         <Icon icon="mdi:microsoft-excel" class="w-5 h-5" />
                     </button>
