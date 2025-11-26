@@ -123,11 +123,11 @@ class PropertyController extends Controller
         }
     }
 
-    public function show(string $slug)
+    public function show($id)
     {
         //
         try {
-            $property = Property::where('slug', $slug)->first();
+            $property = Property::where('id',$id)->first();
             if (empty($property)) {
                 return response()->json(['status' => false, 'message' => 'Property not found', 'data' => '']);
             }
@@ -169,7 +169,7 @@ class PropertyController extends Controller
                     'departureTime' => 'nullable|time',
                     'status'        => 'nullable|boolean',
                     'isIcal'        => 'nullable|boolean',
-                    'slug'          => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:property,slug'],
+                    'slug'          => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
                 ]
             );
             if ($validator->fails()) {
@@ -179,7 +179,9 @@ class PropertyController extends Controller
             if (empty($property)) {
                 return response()->json(['status' => false, 'message' => 'Property not found', 'data' => '']);
             }
-            $property->propertyName  = $request->propertyName;
+            if($property->propertyName  != $request->propertyName){
+               $property->propertyName  = $request->propertyName; 
+            }
             $property->email         = $request->email;
             $property->address       = $request->address;
             $property->address2      = $request->address2;

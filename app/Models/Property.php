@@ -15,30 +15,62 @@ class Property extends Model
     {
         return $this->belongsTo(ResourceType::class, 'propertyId', 'id');
     }
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     static::creating(function ($property) {
+    //         if (empty($property->slug)) {
+    //             $property->slug = self::generateSlug($property->propertyName);
+    //         }
+    //     });
+
+    //     static::updating(function ($property) {
+    //         if (empty($property->slug)) {
+    //             $property->slug = self::generateSlug($property->propertyName);
+    //         }
+    //     });
+    // }
+
+    // private static function generateSlug($name)
+    // {
+    //     $slug  = Str::slug($name);
+    //     $count = static::where('slug', 'LIKE', "{$slug}%")->count();
+
+    //     return $count ? "{$slug}-{$count}" : $slug;
+    // }
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        static::creating(function ($property) {
-            if (empty($property->slug)) {
-                $property->slug = self::generateSlug($property->propertyName);
-            }
-        });
+    // 1. ON CREATE (Store)
+    // Generate slug if it wasn't manually provided
+    static::creating(function ($property) {
+        if (empty($property->slug)) {
+            $property->slug = self::generateSlug($property->propertyName);
+        }
+    });
 
-        static::updating(function ($property) {
-            if (empty($property->slug)) {
-                $property->slug = self::generateSlug($property->propertyName);
-            }
-        });
-    }
+    // 2. ON UPDATE
+    // Only regenerate the slug IF 'propertyName' has changed
+    static::updating(function ($property) {
+        if ($property->isDirty('propertyName')) {
+            $property->slug = self::generateSlug($property->propertyName);
+        }
+    });
+}
 
-    private static function generateSlug($name)
-    {
-        $slug  = Str::slug($name);
-        $count = static::where('slug', 'LIKE', "{$slug}%")->count();
+// 3. SLUG GENERATION LOGIC
+private static function generateSlug($name)
+{
+    $slug = Str::slug($name);
+    
+    // Check for existing slugs starting with this string
+    $count = static::where('slug', 'LIKE', "{$slug}%")->count();
 
-        return $count ? "{$slug}-{$count}" : $slug;
-    }
+    // If duplicates exist, append the count (e.g., name-1)
+    return $count ? "{$slug}-{$count}" : $slug;
+}
     public function propertyImage()
     {
         return $this->hasMany(PropertyImage::class, 'propertyId', 'id');

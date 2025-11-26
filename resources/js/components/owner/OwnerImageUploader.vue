@@ -1,0 +1,127 @@
+<template>
+    <div class="mb-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ label }}</label>
+
+        <div @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop"
+            @click="triggerFileInput" :class="{
+                'border-indigo-500 bg-indigo-50': isDragging,
+                'border-gray-300 bg-gray-50 hover:bg-gray-100': !isDragging
+            }" class="w-full p-6 text-center border-2 border-dashed rounded-lg cursor-pointer transition duration-200">
+            <input ref="fileInputRef" type="file" :accept="accept" multiple @change="handleFileChange" class="hidden">
+            <Icon icon="mdi:cloud-upload" class="w-8 h-8 mx-auto text-gray-400 mb-2" />
+            <p class="text-sm text-gray-600">
+                <span class="font-medium text-indigo-600">Click to upload</span> or drag and drop
+            </p>
+            <p v-if="accept" class="text-xs text-gray-500 mt-1">
+                {{accept.split(',').map(ext => ext.replace('image/', '.')).join(', ').toUpperCase()}} up to {{
+                    maxFiles }} files
+            </p>
+        </div>
+
+        <div v-if="images.length" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div v-for="(image, index) in images" :key="image.id || image.file.name"
+                class="relative group aspect-square rounded-lg overflow-hidden shadow-md border border-gray-200">
+                <img :src="image.url" :alt="image.file ? image.file.name : 'Uploaded Property Image'"
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+
+                <button @click.stop="deleteImage(index)" type="button"
+                    class="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition duration-300 transform group-hover:scale-100 scale-75 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                    title="Delete Image">
+                    <Icon icon="mdi:close" class="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { ref, watch } from 'vue';
+import { Icon } from "@iconify/vue";
+import { toast } from 'vue-sonner';
+
+const props = defineProps({
+    modelValue: {
+        type: Array,
+        default: () => []
+    },
+    label: {
+        type: String,
+        default: 'Property Images'
+    },
+    accept: {
+        type: String,
+        default: 'image/jpeg,image/png,image/webp'
+    },
+    maxFiles: {
+        type: Number,
+        default: 5
+    }
+});
+
+const emit = defineEmits(['update:modelValue']);
+
+// Local state for the list of images (files and URLs)
+const images = ref([...props.modelValue]);
+const isDragging = ref(false);
+const fileInputRef = ref(null);
+
+// Sync local state with external modelValue
+watch(() => props.modelValue, (newVal) => {
+    images.value = [...newVal];
+}, { deep: true });
+
+// Triggers the hidden file input when the drop area is clicked
+const triggerFileInput = () => {
+    fileInputRef.value.click();
+};
+
+const handleFileChange = (event) => {
+    const newFiles = Array.from(event.target.files);
+    processFiles(newFiles);
+    // Clear the input value so the same file can be selected again
+    if (fileInputRef.value) {
+        fileInputRef.value.value = '';
+    }
+};
+
+const handleDrop = (event) => {
+    isDragging.value = false;
+    const newFiles = Array.from(event.dataTransfer.files);
+    processFiles(newFiles);
+};
+
+const processFiles = (newFiles) => {
+    if (images.value.length + newFiles.length > props.maxFiles) {
+        toast.error(`You can only upload a maximum of ${props.maxFiles} images.`);
+        return;
+    }
+
+    // Filter for accepted types and process
+    const acceptedFiles = newFiles.filter(file => props.accept.includes(file.type));
+
+    if (acceptedFiles.length < newFiles.length) {
+        toast.warning('Some files were ignored because they are not valid image types.');
+    }
+
+    const processedImages = acceptedFiles.map(file => ({
+        file: file,
+        url: URL.createObjectURL(file), // Create a temporary URL for preview
+        // The 'id' property is left null for new uploads until they are saved to the API
+        id: null
+    }));
+
+    images.value = [...images.value, ...processedImages];
+    emit('update:modelValue', images.value);
+};
+
+const deleteImage = (index) => {
+    // Revoke the temporary URL to free up memory
+    if (images.value[index].url) {
+        URL.revokeObjectURL(images.value[index].url);
+    }
+
+    images.value.splice(index, 1);
+    emit('update:modelValue', images.value);
+    toast.info('Image deleted successfully (will be removed upon save).');
+};
+</script>

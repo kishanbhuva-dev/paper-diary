@@ -1,5 +1,5 @@
 <template>
-    <div class="base-table bg-white shadow-xl rounded-lg p-6 w-full box-border">
+    <div class="base-table bg-white shadow-xl rounded-lg p-6 w-full box-border border border-indigo-200">
         <div
             class="table-header flex flex-wrap gap-4 sm:gap-5 justify-between items-center mb-4 border-b border-gray-300 pb-4 sm:flex-nowrap">
 
@@ -10,7 +10,7 @@
                 <div v-if="showSearch" class="order-2 w-full sm:w-60">
                     <div class="relative">
                         <input type="text" v-model="localSearchTerm" placeholder="Search..."
-                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 sm:text-sm pl-10"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 sm:text-sm pl-10"
                             title="Search by keyword">
                         <Icon icon="mdi:magnify"
                             class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -19,13 +19,13 @@
 
                 <div class="table-actions flex gap-2 order-1 shrink-0">
                     <button v-if="showAdd" @click="emit('open-add-modal')"
-                        class="flex items-center justify-center p-2 text-sm font-medium text-indigo-600 bg-indigo-200 rounded-md hover:bg-indigo-500 cursor-pointer hover:text-white transition duration-150 shadow-md h-9 w-9"
+                        class="flex items-center justify-center p-2 text-sm font-medium text-indigo-600 bg-indigo-200 rounded-md hover:bg-indigo-500 cursor-pointer hover:text-white transition duration-150 h-9 w-9"
                         title="Add New">
                         <Icon icon="ic:round-add" class="w-5 h-5" />
                     </button>
 
                     <button v-if="showDownload" @click="emit('download')"
-                        class="flex items-center justify-center p-2 text-sm font-medium text-indigo-600 bg-indigo-200 rounded-md hover:bg-indigo-500 cursor-pointer hover:text-white transition duration-150 shadow-md h-9 w-9"
+                        class="flex items-center justify-center p-2 text-sm font-medium text-indigo-600 bg-indigo-200 rounded-md hover:bg-indigo-500 cursor-pointer hover:text-white transition duration-150 h-9 w-9"
                         title="Download">
                         <Icon icon="mdi:microsoft-excel" class="w-5 h-5" />
                     </button>
