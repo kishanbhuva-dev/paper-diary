@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Validator;
-
+use Illuminate\Support\Facades\Storage;
+use App\Models\PropertyImage;
 class PropertyController extends Controller
 {
     /**
@@ -226,6 +227,196 @@ class PropertyController extends Controller
                 $response = ['status' => false, 'message' => 'Property deletion failed', 'data' => ''];
             }
             return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+    public function addMultipleImage(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                    'propertyId' => 'required',
+                    'images'     => 'required|array',
+                ]
+            );
+            if ($validator->fails()) {
+                return $response = ['status' => false, 'message' => $validator->messages()->first()];
+            }
+            $property = Property::where('id', $request->propertyId)->where('ownerId', Auth::id())->first();
+            if (empty($property)) {
+                return response()->json(['status' => false, 'message' => 'Property not found', 'data' => '']);
+            }
+            $images = $request->images;
+            $imagePosition = PropertyImage::where('propertyId', $property->id)->count() + 1;
+            $failedImages = [];
+            foreach ($images as $image) {
+                if (!$image->isValid()) {
+                    $failedImages[] = $image->getClientOriginalName();
+                    continue;
+                }
+                $imageName = time() . rand(1, 1000) . '.' . $image->getClientOriginalExtension();
+                try {
+                    $image->move(public_path('storage/property/images'), $imageName);
+                    $propertyImage = new PropertyImage();
+                    $propertyImage->propertyId = $property->id;
+                    $propertyImage->position = $imagePosition++;
+                    $propertyImage->image = $imageName;
+                    $propertyImage->save();
+                } catch (\Exception $e) {
+                    $failedImages[] = $image->getClientOriginalName();
+                }
+            }
+            if (count($failedImages) > 0) {
+                $response = [
+                    'status' => false,
+                    'message' => 'Some images failed to upload: ' . implode(', ', $failedImages),
+                    'data' => ''
+                ];
+            } else {
+                $response = ['status' => true, 'message' => 'Property images added successfully', 'data' => ''];
+            }
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+    public function updateImage(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                    'imageId' => 'required',
+                    'image'           => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                ]
+            );
+            if ($validator->fails()) {
+                return $response = ['status' => false, 'message' => $validator->messages()->first()];
+            }
+            $propertyImage = PropertyImage::where('id', $request->imageId)->first();
+            if (empty($propertyImage)) {
+                return response()->json(['status' => false, 'message' => 'Property image not found', 'data' => '']);
+            }
+            $oldPath = public_path('storage/property/images/' . $propertyImage->image);
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
+            $image = $request->image;
+            $imageName = time() . rand(1, 1000) . '.' . $image->getClientOriginalExtension();
+            try {
+                $image->move(public_path('storage/property/images'), $imageName);
+                $propertyImage->image = $imageName;
+                $propertyImage->save();
+                $response = ['status' => true, 'message' => 'Property image updated successfully', 'data' => ''];
+            } catch (\Exception $e) {
+                $response = ['status' => false, 'message' => 'Property image update failed', 'data' => ''];
+            }
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+    public function deleteImage(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                    'id' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                return $response = ['status' => false, 'message' => $validator->messages()->first()];
+            }
+            $propertyImage = PropertyImage::where('id', $request->id)->first();
+            if (empty($propertyImage)) {
+                return response()->json(['status' => false, 'message' => 'Property image not found', 'data' => '']);
+            }
+            $oldPath = public_path('storage/property/images/' . $propertyImage->image);
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
+            if ($propertyImage->delete()) {
+                $response = ['status' => true, 'message' => 'Property image deleted successfully', 'data' => ''];
+            } else {
+                $response = ['status' => false, 'message' => 'Property image delete failed', 'data' => ''];
+            }
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+    public function deleteMultipleImage(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                    'ids' => 'required|array',
+                ]
+            );
+            if ($validator->fails()) {
+                return $response = ['status' => false, 'message' => $validator->messages()->first()];
+            }
+            $ids = $request->ids;
+            $propertyImages = PropertyImage::whereIn('id', $ids)->get();
+            if (empty($propertyImages)) {
+                return response()->json(['status' => false, 'message' => 'Property images not found', 'data' => '']);
+            }
+            foreach ($propertyImages as $propertyImage) {
+                $oldPath = public_path('storage/property/images/' . $propertyImage->image);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+                $propertyImage->delete();
+            }
+            $response = ['status' => true, 'message' => 'Property images deleted successfully', 'data' => ''];
+                return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+    public function changeImagePosition(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                    'ids' => 'required|array',
+                ]
+            );
+            if ($validator->fails()) {
+                return $response = ['status' => false, 'message' => $validator->messages()->first()];
+            }
+            $ids = $request->ids;
+            foreach ($ids as $key => $id) {
+                $propertyImage = PropertyImage::where('id', $id)->first();
+                if (empty($propertyImage)) {
+                    return response()->json(['status' => false, 'message' => 'Property image not found', 'data' => '']);
+                }
+                $propertyImage->position = $key+1;
+                $propertyImage->save();
+            }
+            $response = ['status' => true, 'message' => 'Property image position updated successfully', 'data' => ''];
+                return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+    public function propertyWiseImage(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                    'propertyId' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                return $response = ['status' => false, 'message' => $validator->messages()->first()];
+            }
+            $propertyImages = PropertyImage::where('propertyId', $request->propertyId)->orderBy('position', 'asc')->get();
+            if (empty($propertyImages)) {
+                return response()->json(['status' => false, 'message' => 'Property images not found', 'data' => '']);
+            }
+            $response = ['status' => true, 'message' => 'Property images fetched successfully', 'data' => $propertyImages];
+                return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
