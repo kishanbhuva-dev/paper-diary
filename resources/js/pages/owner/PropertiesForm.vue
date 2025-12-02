@@ -79,7 +79,24 @@
                                 class="absolute right-3 top-3 text-gray-400 pointer-events-none" />
                         </div>
                     </div>
+                    <!-- check Facilities -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Facilities <span
+                                class="text-red-500">*</span></label>
+                        <div
+                            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                            <div v-for="facility in availableFacilities" :key="facility.id" class="flex items-center">
+                                <input :id="`facility-${facility.id}`" type="checkbox" v-model="formData.facilities"
+                                    :value="facility.id"
+                                    class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer" />
+                                <label :for="`facility-${facility.id}`"
+                                    class="ml-2 text-sm font-medium text-gray-700 cursor-pointer">
+                                    {{ facility.name }}
+                                </label>
+                            </div>
+                        </div>
 
+                    </div>
                     <OwnerImageUploader v-model="formData.images" :max-files="10" @reorder="onImagesReorder" />
                 </form>
 
@@ -111,6 +128,19 @@ import { usePropertiesStore } from '../../stores/propertiesStore';
 const route = useRoute();
 const router = useRouter();
 const propertiesStore = usePropertiesStore();
+const availableFacilities = ref([]);
+const fallbackFacilities = [
+    { id: 1, name: 'Free Wi-Fi' },
+    { id: 2, name: 'Swimming Pool' },
+    { id: 3, name: 'Free Parking' },
+    { id: 4, name: 'Air Conditioning' },
+    { id: 5, name: 'Pet Friendly' },
+    { id: 6, name: 'Gym/Fitness Center' },
+    { id: 7, name: '24-Hour Security' },
+    { id: 8, name: 'On-site Restaurant' },
+    { id: 9, name: 'Laundry Service' },
+    { id: 10, name: 'Wheelchair Access' },
+];
 
 const defaultFormData = {
     status: 1,
@@ -124,6 +154,8 @@ const defaultFormData = {
     postcode: '',
     telephone: '',
     images: [] // <-- NEW: Initialize images array
+    ,
+    facilities: []
 };
 const formData = ref({ ...defaultFormData });
 const loadingItem = ref(false);
@@ -168,6 +200,19 @@ const loadPropertyForEdit = async (id) => {
             // Deep clone item, then override/add the images property
             const loadedData = JSON.parse(JSON.stringify(item));
             loadedData.images = loadedImages;
+            // Prefill facilities if API returned them on the property; otherwise, try cached values
+            const loadedFacilityIds = (item.facilities || []).map(f => f.id);
+            if (loadedFacilityIds.length) {
+                loadedData.facilities = loadedFacilityIds;
+            } else {
+                // Fallback: use cached property facilities if available (from prior saves in this session)
+                try {
+                    const cached = propertiesStore.getPropertyCachedFacilities(item.id);
+                    loadedData.facilities = Array.isArray(cached) ? cached : [];
+                } catch (err) {
+                    loadedData.facilities = [];
+                }
+            }
             initialImageIds.value = loadedImages.map(i => i.id).filter(Boolean);
             formData.value = loadedData;
 
@@ -191,6 +236,16 @@ onMounted(() => {
     } else {
         formData.value = { ...defaultFormData };
     }
+    // Load all available facilities so the UI can render checkboxes
+    (async () => {
+        const facs = await propertiesStore.fetchFacilities();
+        if (Array.isArray(facs) && facs.length) {
+            availableFacilities.value = facs.map(f => ({ id: f.id, name: f.name }));
+        } else {
+            // Fallback to static list if API returns no facilities
+            availableFacilities.value = fallbackFacilities;
+        }
+    })();
 });
 
 // --- Submission Logic ---
@@ -329,6 +384,23 @@ const handleSubmit = async () => {
                     const resPos = await propertiesStore.changePropertyImagePosition(savedPropertyId, orderedIdsAfter);
                     if (!resPos && propertiesStore.error) {
                         console.debug('[PropertiesForm] changePropertyImagePosition failed after upload:', propertiesStore.error);
+                    }
+                }
+
+                // Persist selected facilities (owner endpoint expects { data: { propertyId, facilityId: [] } })
+                if (Array.isArray(formData.value.facilities)) {
+                    // sanitize facility IDs - ensure only integers
+                    const facilityIds = formData.value.facilities
+                        .map(id => parseInt(id, 10))
+                        .filter(id => Number.isInteger(id) && id > 0);
+                    // Always call the endpoint, even with an empty array, so
+                    // previously set facilities can be cleared if the user
+                    // unchecks all boxes (sync([]) behavior on backend).
+                    const successFacilities = await propertiesStore.setPropertyFacilities(savedPropertyId, facilityIds);
+                    if (successFacilities) {
+                        toast.success('Facilities updated');
+                    } else if (propertiesStore.error) {
+                        toast.error(propertiesStore.error);
                     }
                 }
             }

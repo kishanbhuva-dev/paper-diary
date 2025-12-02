@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import axios from "axios";
+import { toast } from "vue-sonner";
 
 // Utility to set the global Authorization header for authenticated requests
 function setAuthHeader(token) {
@@ -77,6 +78,7 @@ export const useAuthStore = defineStore("auth", () => {
       try {
         // Ensure the API logout route exists and works
         await axios.post("/api/logout");
+        toast.success("Logout Success");
       } catch (error) {
         console.error(
           "Logout API call failed. Proceeding with local token removal:",

@@ -128,7 +128,7 @@ class PropertyController extends Controller
     {
         //
         try {
-            $property = Property::where('id',$id)->first();
+            $property = Property::where('id',$id)->with('facilities')->first();
             if (empty($property)) {
                 return response()->json(['status' => false, 'message' => 'Property not found', 'data' => '']);
             }

@@ -91,6 +91,14 @@ export const usePropertiesStore = defineStore("properties", () => {
         } catch (e) {
           prop.images = [];
         }
+
+        // Normalize facilities if backend includes them on the property
+        if (prop && Array.isArray(prop.facilities)) {
+          prop.facilities = (prop.facilities || []).map((f) => ({
+            id: f.id,
+            name: f.name,
+          }));
+        }
         return prop;
       }
       // If status is false, set error and return null
@@ -129,6 +137,47 @@ export const usePropertiesStore = defineStore("properties", () => {
     } catch (err) {
       handleError(err, "fetchPropertyImages");
       return [];
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  // --- FACILITIES ---
+  async function fetchFacilities(params = {}) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await axios.get(`/api/owner/facility`, { params });
+      if (response.data.status) {
+        // Return array of facilities
+        return response.data.data || [];
+      }
+      error.value = response.data.message || "Failed to fetch facilities";
+      return [];
+    } catch (err) {
+      handleError(err, "fetchFacilities");
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function setPropertyFacilities(propertyId, facilityIds = []) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const payload = { data: { propertyId, facilityId: facilityIds } };
+      const response = await axios.post(
+        `/api/owner/add-facility-property`,
+        payload
+      );
+      if (response.data.status) return true;
+      error.value =
+        response.data.message || "Setting property facilities failed";
+      return false;
+    } catch (err) {
+      handleError(err, "setPropertyFacilities");
+      return false;
     } finally {
       loading.value = false;
     }
@@ -421,5 +470,8 @@ export const usePropertiesStore = defineStore("properties", () => {
     deleteMultiplePropertyImages,
     updatePropertyImage,
     changePropertyImagePosition,
+    // Facilities
+    fetchFacilities,
+    setPropertyFacilities,
   };
 });

@@ -68,9 +68,8 @@
 
 <script setup>
 import { reactive, ref } from "vue";
-// REMOVED: import { useRouter } from "vue-router";
-// REMOVED: import axios from "axios";
 import { useAuth } from "../../composables/useAuth"; // <-- NEW: Import useAuth composable
+import { toast } from "vue-sonner";
 
 const { login } = useAuth(); // <-- NEW: Initialize the composable and destructure login()
 const showPassword = ref(false);
@@ -118,11 +117,13 @@ const handleLogin = async () => {
       email: form.email,
       password: form.password,
     });
-
     // 2. Handle the result from the composable
     if (!result.success) {
       // Set the error message returned from the composable
       errors.general = result.message;
+    }
+    else {
+      toast.success("Login Success")
     }
   }
 };
