@@ -129,18 +129,18 @@ const route = useRoute();
 const router = useRouter();
 const propertiesStore = usePropertiesStore();
 const availableFacilities = ref([]);
-const fallbackFacilities = [
-    { id: 1, name: 'Free Wi-Fi' },
-    { id: 2, name: 'Swimming Pool' },
-    { id: 3, name: 'Free Parking' },
-    { id: 4, name: 'Air Conditioning' },
-    { id: 5, name: 'Pet Friendly' },
-    { id: 6, name: 'Gym/Fitness Center' },
-    { id: 7, name: '24-Hour Security' },
-    { id: 8, name: 'On-site Restaurant' },
-    { id: 9, name: 'Laundry Service' },
-    { id: 10, name: 'Wheelchair Access' },
-];
+// const fallbackFacilities = [
+//     { id: 1, name: 'Free Wi-Fi' },
+//     { id: 2, name: 'Swimming Pool' },
+//     { id: 3, name: 'Free Parking' },
+//     { id: 4, name: 'Air Conditioning' },
+//     { id: 5, name: 'Pet Friendly' },
+//     { id: 6, name: 'Gym/Fitness Center' },
+//     { id: 7, name: '24-Hour Security' },
+//     { id: 8, name: 'On-site Restaurant' },
+//     { id: 9, name: 'Laundry Service' },
+//     { id: 10, name: 'Wheelchair Access' },
+// ];
 
 const defaultFormData = {
     status: 1,
