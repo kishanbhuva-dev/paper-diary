@@ -90,7 +90,7 @@ const navigateToAdd = () => {
 const navigateToEdit = (item) => {
     // Navigate to the form page, passing the property ID as a route parameter
     if (item && item.id) {
-        router.push({ name: 'property-form', params: { id: String(item.id) } });
+        router.push({ name: 'property-form', params: { id: btoa(item.id) } });
     } else {
         showToast('error', "Error: Cannot edit property without an ID.");
     }

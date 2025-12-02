@@ -7,13 +7,13 @@
                     {{ isEditing ? 'Edit Property' : 'Add New Property' }}
                 </h1>
                 <button @click="router.push({ name: 'properties' })"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-100 transition duration-150 flex items-center shadow-sm">
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-200 transition cursor-pointer duration-150 flex items-center">
                     <Icon icon="mdi:arrow-left" class="w-5 h-5 mr-1" />
                     Back to List
                 </button>
             </div>
 
-            <div class="bg-white rounded-xl shadow-2xl overflow-hidden border border-indigo-200">
+            <div class="bg-white rounded-xl overflow-hidden border border-indigo-300">
 
                 <div class="p-5 bg-indigo-100 flex justify-between items-center border-b border-indigo-200 shrink-0">
                     <h3 class="text-xl font-bold text-indigo-900">
@@ -28,9 +28,9 @@
 
                 <form v-else @submit.prevent="handleSubmit" class="p-6 space-y-4">
 
-                    <div v-if="isEditing">
+                    <!-- <div v-if="isEditing">
                         <BaseInput v-model="formData.id" label="Property ID" width="full" variant="gray" disabled />
-                    </div>
+                    </div> -->
 
                     <BaseInput :ref="setInputRef" v-model="formData.propertyName" label="Property Name" width="full"
                         placeholder="e.g. Seaside Villa" required :max-length="50" :show-count="true" />
@@ -80,16 +80,16 @@
                         </div>
                     </div>
 
-                    <OwnerImageUploader v-model="formData.images" :max-files="10" />
+                    <OwnerImageUploader v-model="formData.images" :max-files="10" @reorder="onImagesReorder" />
                 </form>
 
                 <div class="flex justify-end pt-4 px-6 pb-6 bg-white border-t border-gray-300 shrink-0">
                     <button type="button" @click="router.push({ name: 'properties' })"
-                        class="px-5 py-2 mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-150 outline-indigo-400">
+                        class="px-5 py-2 mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-150 outline-indigo-400 cursor-pointer">
                         Cancel
                     </button>
                     <button type="button" @click="handleSubmit"
-                        class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center shadow-md outline-indigo-400 shadow-indigo-200">
+                        class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center shadow-md outline-indigo-400 shadow-indigo-200 cursor-pointer">
                         <Icon icon="ic:round-save" class="w-5 h-5 inline-block mr-1" />
                         {{ isEditing ? 'Update Property' : 'Save New Property' }}
                     </button>
@@ -127,6 +127,7 @@ const defaultFormData = {
 };
 const formData = ref({ ...defaultFormData });
 const loadingItem = ref(false);
+const initialImageIds = ref([]);
 
 const propertyId = computed(() => route.params.id);
 const isEditing = computed(() => !!propertyId.value);
@@ -167,6 +168,7 @@ const loadPropertyForEdit = async (id) => {
             // Deep clone item, then override/add the images property
             const loadedData = JSON.parse(JSON.stringify(item));
             loadedData.images = loadedImages;
+            initialImageIds.value = loadedImages.map(i => i.id).filter(Boolean);
             formData.value = loadedData;
 
         } else {
@@ -245,6 +247,92 @@ const handleSubmit = async () => {
         toast.dismiss(loadingToastId);
 
         if (success) {
+            // Determine saved property ID
+            let savedPropertyId = null;
+            if (isEditing.value) {
+                savedPropertyId = formData.value.id;
+            } else {
+                // If backend returned the created object, use it
+                if (typeof success === 'object' && success.id) {
+                    savedPropertyId = success.id;
+                } else {
+                    // Fallback: try to find freshly created property using name (increase per_page)
+                    await propertiesStore.fetchProperties({ page: 1, per_page: 100, search: formData.value.propertyName });
+                    const found = propertiesStore.properties.find(p => p.propertyName === formData.value.propertyName);
+                    if (found) {
+                        savedPropertyId = found.id;
+                    }
+                }
+            }
+
+            // If savedPropertyId is found, handle images (new files and deletions)
+            if (savedPropertyId) {
+                // new files
+                const newFiles = formData.value.images.filter(img => img.file instanceof File).map(i => i.file);
+                // existing image IDs preserved in the form
+                const existingIds = formData.value.images.filter(img => img.id).map(i => i.id);
+                // deleted: existed previously but no longer present in the form
+                const removedIds = initialImageIds.value.filter(id => !existingIds.includes(id));
+
+                // Snapshot images on server before we apply changes, so we can
+                // determine how many new images are actually created.
+                const beforeRemoteImages = await propertiesStore.fetchPropertyImages(savedPropertyId);
+                const beforeRemoteIds = new Set((beforeRemoteImages || []).map(i => i.id));
+
+                if (removedIds.length) {
+                    console.debug('[PropertiesForm] deleting removed image ids =', removedIds);
+                    const deleted = await propertiesStore.deleteMultiplePropertyImages(removedIds);
+                    if (!deleted && propertiesStore.error) {
+                        toast.error(propertiesStore.error);
+                    }
+                }
+
+                if (newFiles.length) {
+                    // Debug logs
+                    console.debug('[PropertiesForm] uploading newFiles for propertyId =', savedPropertyId, newFiles.map(f => f.name));
+                    const created = await propertiesStore.addPropertyImages(savedPropertyId, newFiles);
+                    console.debug('[PropertiesForm] addPropertyImages created =', created);
+
+                    // Re-fetch remote images and determine how many were added relative
+                    // to the snapshot we took before changes. This avoids false
+                    // negative warnings if the API didn't return created objects in
+                    // the upload response but the images exist on the server.
+                    const afterRemoteImages = await propertiesStore.fetchPropertyImages(savedPropertyId);
+                    const newlyOnServer = (afterRemoteImages || []).filter(i => !beforeRemoteIds.has(i.id));
+                    const newlyCount = newlyOnServer.length;
+
+                    if (newlyCount > 0) {
+                        toast.success(`${newlyCount} image(s) uploaded successfully`);
+                    }
+                    if (newlyCount < newFiles.length) {
+                        // Only warn the user if we’re sure the server did not save all files.
+                        // If newlyCount < newFiles.length and the store shows an error, surface it.
+                        if (propertiesStore.error) {
+                            toast.error(propertiesStore.error);
+                        } else if (newlyCount === 0) {
+                            // nothing uploaded but no error message means something strange happened
+                            toast.warning('Some images did not upload successfully. Check server error or try smaller files.');
+                        } else {
+                            // Partial success: still warn, but be explicit
+                            toast.warning(`${newlyCount} of ${newFiles.length} images uploaded. Try smaller files or re-upload the failed ones.`);
+                        }
+                    }
+                }
+
+                // refresh images from backend
+                const remoteImages = await propertiesStore.fetchPropertyImages(savedPropertyId);
+                formData.value.images = (remoteImages || []).map(img => ({ id: img.id, url: img.url, file: null }));
+
+                // Ensure server position matches UI order; persist if multiple images present
+                const orderedIdsAfter = formData.value.images.map(i => i.id).filter(Boolean);
+                if (orderedIdsAfter.length > 1) {
+                    const resPos = await propertiesStore.changePropertyImagePosition(savedPropertyId, orderedIdsAfter);
+                    if (!resPos && propertiesStore.error) {
+                        console.debug('[PropertiesForm] changePropertyImagePosition failed after upload:', propertiesStore.error);
+                    }
+                }
+            }
+
             toast.success(`Property ${action.toLowerCase()}d successfully`, { duration: 4000 });
             router.push({ name: 'properties' });
         } else {
@@ -255,6 +343,26 @@ const handleSubmit = async () => {
         console.error(e);
         toast.dismiss(loadingToastId);
         toast.error(`An unexpected error occurred during ${action.toLowerCase()}.`);
+    }
+};
+
+// Handler fired when uploader emits a reorder event (images array updated)
+const onImagesReorder = async (newImages) => {
+    // Update local form data (already done by v-model) just ensure it's consistent
+    formData.value.images = [...newImages];
+
+    // If editing and we have a saved property id, persist order to server
+    if (isEditing.value && formData.value.id) {
+        // keep only existing ids
+        const ids = formData.value.images.map(i => i.id).filter(Boolean);
+        if (ids.length) {
+            const success = await propertiesStore.changePropertyImagePosition(formData.value.id, ids);
+            if (success) {
+                toast.success('Image order updated');
+            } else {
+                toast.error(propertiesStore.error || 'Failed to update image order');
+            }
+        }
     }
 };
 </script>

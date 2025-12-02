@@ -61,13 +61,13 @@
                             class="actions px-3 py-2 whitespace-nowrap text-center text-sm font-medium">
 
                             <button v-if="showEdit" @click="emit('open-edit-modal', item)"
-                                class="text-indigo-600 hover:text-white mr-3 p-1 rounded-full hover:bg-indigo-600 transition duration-150"
+                                class="text-indigo-600 hover:text-white cursor-pointer mr-3 p-1 rounded-full hover:bg-indigo-600 transition duration-150"
                                 title="Edit">
                                 <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
                             </button>
 
                             <button v-if="showDelete" @click="emit('delete', item.id)"
-                                class="text-red-600 hover:text-white p-1 rounded-full font-bold hover:bg-red-500 transition duration-150"
+                                class="text-red-600 hover:text-white cursor-pointer p-1 rounded-full font-bold hover:bg-red-500 transition duration-150"
                                 title="Delete">
                                 <Icon icon="mdi:delete-forever" class="w-5 h-5" />
                             </button>
