@@ -77,10 +77,21 @@ export const usePropertiesStore = defineStore("properties", () => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await axios.get(`${API_BASE_URL}/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/${atob(id)}`);
       if (response.data.status) {
-        // Assuming the API returns the single property data directly under 'data'
-        return response.data.data;
+        const prop = response.data.data;
+        // attach images (if backend provides a separate endpoint)
+        try {
+          const images = await fetchPropertyImages(prop.id);
+          prop.images = (images || []).map((img) => ({
+            id: img.id,
+            url: img.url,
+            position: img.position,
+          }));
+        } catch (e) {
+          prop.images = [];
+        }
+        return prop;
       }
       // If status is false, set error and return null
       error.value =
@@ -89,6 +100,211 @@ export const usePropertiesStore = defineStore("properties", () => {
     } catch (err) {
       handleError(err, `fetchPropertyById(${id})`);
       return null;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  // --- IMAGES: CRUD OPERATIONS (Owner property images) ---
+  async function fetchPropertyImages(propertyId) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await axios.get(`/api/owner/property-wise-image`, {
+        params: { propertyId },
+      });
+      if (response.data.status) {
+        const base = window.location.origin || "";
+        const normalized = (response.data.data || []).map((img) => ({
+          id: img.id,
+          url: img.image
+            ? `${base}/storage/property/images/${img.image}`
+            : img.url || img.path || "",
+          position: img.position || 0,
+        }));
+        return normalized;
+      }
+      error.value = response.data.message || "Failed to fetch property images";
+      return [];
+    } catch (err) {
+      handleError(err, "fetchPropertyImages");
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function addPropertyImages(propertyId, files) {
+    loading.value = true;
+    error.value = null;
+    try {
+      console.debug(
+        "[propertiesStore] addPropertyImages called for propertyId=",
+        propertyId,
+        "files=",
+        files.map((f) => f.name)
+      );
+
+      // Fetch the current list of images before uploading so we can
+      // determine which images were newly created after upload. This
+      // makes the function's return value reliable even if the backend
+      // responses don't include created objects for each upload.
+      const beforeImages = await fetchPropertyImages(propertyId).catch(
+        () => []
+      );
+      const beforeIds = new Set((beforeImages || []).map((i) => i.id));
+
+      const createdImages = [];
+      for (const file of files) {
+        try {
+          const formData = new FormData();
+          formData.append("propertyId", propertyId);
+          formData.append("images[]", file);
+          const response = await axios.post(
+            `/api/owner/property-image-store`,
+            formData,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
+          console.debug(
+            "[propertiesStore] addPropertyImages response:",
+            response.data
+          );
+          if (response.data.status) {
+            // backend returns image records for this upload or nothing;
+            // we try to push if present but don't rely solely on it.
+            if (
+              Array.isArray(response.data.data) &&
+              response.data.data.length
+            ) {
+              createdImages.push(...response.data.data);
+            } else if (response.data.data) {
+              createdImages.push(response.data.data);
+            }
+          }
+        } catch (err) {
+          if (err && err.response && err.response.status === 413) {
+            error.value =
+              "One or more images are too large. Please upload smaller files.";
+          } else {
+            handleError(err, "addPropertyImages");
+          }
+          console.error(
+            "[propertiesStore] addPropertyImages file upload failed for",
+            file.name,
+            err
+          );
+        }
+      }
+      // Fetch images after uploads and derive the newly created ones by
+      // comparing their ids with `beforeIds`. This handles backend
+      // implementations that don't return created objects on upload.
+      const afterImages = await fetchPropertyImages(propertyId).catch(() => []);
+      const newlyCreated = (afterImages || []).filter(
+        (i) => !beforeIds.has(i.id)
+      );
+
+      // If we couldn't detect newly created images from server fetch,
+      // fall back to any objects we collected directly from upload
+      // responses (createdImages). This keeps previous behavior.
+      if (newlyCreated && newlyCreated.length) {
+        console.debug(
+          "[propertiesStore] addPropertyImages newly created count =",
+          newlyCreated.length
+        );
+        return newlyCreated;
+      }
+
+      console.debug(
+        "[propertiesStore] addPropertyImages falling back to response-collected createdImages count =",
+        createdImages.length
+      );
+      return createdImages;
+    } catch (err) {
+      handleError(err, "addPropertyImages");
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function deletePropertyImage(imageId) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await axios.post(
+        `/api/owner/single-property-image-delete`,
+        { id: imageId }
+      );
+      if (response.data.status) return true;
+      error.value = response.data.message || "Image delete failed";
+      return false;
+    } catch (err) {
+      handleError(err, "deletePropertyImage");
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function deleteMultiplePropertyImages(ids) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await axios.post(`/api/owner/property-image-delete`, {
+        ids,
+      });
+      if (response.data.status) return true;
+      error.value = response.data.message || "Multi image delete failed";
+      return false;
+    } catch (err) {
+      handleError(err, "deleteMultiplePropertyImages");
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function updatePropertyImage(imageId, file) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const formData = new FormData();
+      formData.append("imageId", imageId);
+      formData.append("image", file);
+      const response = await axios.post(
+        `/api/owner/property-image-update`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      if (response.data.status) return response.data.data || true;
+      error.value = response.data.message || "Image update failed";
+      return false;
+    } catch (err) {
+      handleError(err, "updatePropertyImage");
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function changePropertyImagePosition(propertyId, positions) {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await axios.post(
+        `/api/owner/property-image-position-change`,
+        { propertyId, ids: positions }
+      );
+      if (response.data.status) return true;
+      error.value = response.data.message || "Image position change failed";
+      return false;
+    } catch (err) {
+      handleError(err, "changePropertyImagePosition");
+      return false;
     } finally {
       loading.value = false;
     }
@@ -109,6 +325,14 @@ export const usePropertiesStore = defineStore("properties", () => {
     try {
       const response = await axios.post(API_BASE_URL, dataToSend);
       if (response.data.status) {
+        // If data returned is a property object, return it; otherwise return true
+        if (
+          response.data.data &&
+          typeof response.data.data === "object" &&
+          response.data.data.id
+        ) {
+          return response.data.data;
+        }
         return true; // Success
       } else {
         error.value = response.data.message || "Property creation failed";
@@ -190,5 +414,12 @@ export const usePropertiesStore = defineStore("properties", () => {
     createProperty,
     updateProperty,
     deleteProperty,
+    // Image operations
+    fetchPropertyImages,
+    addPropertyImages,
+    deletePropertyImage,
+    deleteMultiplePropertyImages,
+    updatePropertyImage,
+    changePropertyImagePosition,
   };
 });

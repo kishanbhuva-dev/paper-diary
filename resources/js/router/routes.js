@@ -55,7 +55,7 @@ const routes = [
       {
         name: "property-form",
         // The ':id?' makes the ID parameter optional for 'Add New' functionality
-        path: "properties/form/:id?",
+        path: "properties-form/:id?",
         component: () => import("../../js/pages/owner/PropertiesForm.vue"),
         meta: { pageTitle: "Property Form" },
       },
