@@ -1,15 +1,16 @@
 <template>
   <footer class="bg-blue-50 text-gray-700 border-t border-gray-100">
-    <div class="container mx-auto py-6 px-4 md:px-0">
+    <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-y-12 lg:gap-x-16">
         <div class="flex flex-col space-y-4 lg:col-span-3">
           <div class="flex flex-col space-y-4">
-            <div class="w-10 h-10 p-1 rounded-lg bg-blue-100">
-              <Icon icon="lucide:zap" class="w-full h-full text-blue-600" />
-            </div>
+            <a href="/" class="flex items-center space-x-2">
+              <img src="/public/main_logo.png" alt="Paper Diary" />
+            </a>
+
             <h2 class="text-3xl font-extrabold text-gray-900 leading-tight">
               Your Complex Booking World, Made
-              <span class="text-blue-600">Effortlessly Simple.</span>
+              <span class="text-primary">Effortlessly Simple.</span>
             </h2>
           </div>
 
@@ -25,7 +26,7 @@
               :key="social.icon"
               :href="social.href"
               target="_blank"
-              class="p-2 rounded-full text-blue-500 bg-white hover:bg-blue-600 hover:text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+              class="p-2 rounded-full text-primary bg-white hover:bg-primary hover:text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105"
             >
               <Icon :icon="social.icon" class="w-5 h-5" />
             </a>
@@ -43,7 +44,7 @@
             <div class="flex items-start space-x-3">
               <Icon
                 icon="lucide:map-pin"
-                class="w-6 h-6 text-blue-600 flex-shrink-0 mt-1"
+                class="w-6 h-6 text-primary flex-shrink-0 mt-1"
               />
               <p class="text-base text-gray-700">
                 <span class="font-semibold text-gray-800">Location:</span><br />
@@ -54,11 +55,11 @@
             <div class="flex items-center space-x-3">
               <Icon
                 icon="lucide:mail"
-                class="w-6 h-6 text-blue-600 flex-shrink-0"
+                class="w-6 h-6 text-primary flex-shrink-0"
               />
               <a
                 href="mailto:support@fintech.co"
-                class="text-base text-gray-700 hover:text-blue-600 font-medium transition"
+                class="text-base text-gray-700 hover:text-primary font-medium transition"
               >
                 support@fintech.co
               </a>
@@ -73,7 +74,7 @@
             />
             <button
               type="submit"
-              class="h-12 px-6 text-white text-sm font-semibold bg-blue-600 rounded-r-lg hover:bg-blue-700 transition duration-300 whitespace-nowrap"
+              class="h-12 px-6 text-white text-sm font-semibold bg-primary rounded-r-lg hover:bg-primary-dark transition duration-300 whitespace-nowrap"
             >
               Get in touch
             </button>
@@ -91,7 +92,7 @@
             v-for="link in footerLinks"
             :key="link.text"
             :href="link.href"
-            class="text-gray-600 hover:text-blue-600 font-medium transition duration-150"
+            class="text-gray-600 hover:text-primary font-medium transition duration-150"
           >
             {{ link.text }}
           </a>
