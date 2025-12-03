@@ -94,7 +94,7 @@
           commission-free direct bookings, giving you an immediate boost in
           revenue and complete control over the guest relationship.
         </p>
-        <button class="btn-primary">View The Integrals</button>
+        <button class="btn-primary relative z-10">View The Integrals</button>
       </div>
       <div class="flex-center -mt-24">
         <img src="/public/hero4.png" alt="Hero Image" />
