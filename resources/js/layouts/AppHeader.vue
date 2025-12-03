@@ -1,10 +1,10 @@
 <template>
   <header class="sticky top-0 z-50 bg-white shadow-sm">
-    <div class="container mx-auto px-4 md:px-0">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16 lg:h-20">
         <div class="flex items-center">
           <a href="/" class="flex items-center space-x-2">
-            <Icon icon="lucide:zap" class="w-8 h-8 text-blue-600" />
+            <img src="/public/main_logo.png" alt="Paper Diary" />
           </a>
         </div>
 
@@ -56,12 +56,12 @@
         </nav>
 
         <div class="flex items-center">
-          <a
-            href="/contact"
+          <router-link
+            to="/login"
             class="px-6 py-2.5 text-base font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
           >
-            Get in touch
-          </a>
+            Login Now
+          </router-link>
         </div>
       </div>
     </div>
