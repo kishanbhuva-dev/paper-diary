@@ -1,6 +1,6 @@
 <template>
   <main class="container mx-auto">
-    <section class="px-4 sm:px-6 lg:px-8 py-18">
+    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div class="space-y-6">
           <h1 class="max-w-xl">
@@ -24,7 +24,7 @@
               Based on 1,000,000+ Reviews
             </div>
           </div>
-          <div class="flex space-x-4">
+          <div class="flex flex-wrap gap-4">
             <button class="btn-primary">Request a Demo</button>
             <button class="btn-outlined">Start Your Free Trial</button>
           </div>
@@ -35,7 +35,7 @@
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-18">
+    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div class="flex justify-center lg:justify-start">
           <img src="/public/hero2.png" alt="Hero Image" />
@@ -50,7 +50,7 @@
             Property Management Dashboard is one simple-to-use place to
             streamline your entire accommodation business.
           </p>
-          <div class="flex space-x-4">
+          <div class="flex flex-wrap gap-4">
             <button class="btn-outlined">View Key Features</button>
             <button class="btn-primary">See Product Roadmap</button>
           </div>
@@ -58,7 +58,7 @@
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-18">
+    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div class="space-y-6">
           <h2>
@@ -71,7 +71,7 @@
             commission-free direct bookings, giving you an immediate boost in
             revenue and complete control over the guest relationship.
           </p>
-          <div class="flex space-x-4">
+          <div class="flex flex-wrap gap-4">
             <button class="btn-primary">Request a Demo</button>
             <button class="btn-outlined">See All Features</button>
           </div>
@@ -82,7 +82,7 @@
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-18">
+    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
       <div class="space-y-6 text-center">
         <h2>
           Convert Visitors to Guests with <br />
@@ -101,7 +101,7 @@
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-18">
+    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
       <div class="space-y-12 text-center">
         <h2>
           Trusted and Recommended by <br />
