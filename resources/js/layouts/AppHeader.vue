@@ -1,10 +1,10 @@
 <template>
   <header class="sticky top-0 z-50 bg-white shadow-sm">
-    <div class="container mx-auto">
+    <div class="container mx-auto px-4 md:px-0">
       <div class="flex justify-between items-center h-16 lg:h-20">
         <div class="flex items-center">
           <a href="/" class="flex items-center space-x-2">
-            <Icon icon="lucide:zap" class="w-8 h-8 text-blue-600 shadow-lg" />
+            <Icon icon="lucide:zap" class="w-8 h-8 text-blue-600" />
           </a>
         </div>
 
@@ -84,11 +84,11 @@ const navigationMenu = [
     label: "Home",
   },
   {
-    to: "/about",
+    to: "/",
     label: "About us",
   },
   {
-    to: "/blog",
+    to: "/",
     label: "Blog",
   },
   {

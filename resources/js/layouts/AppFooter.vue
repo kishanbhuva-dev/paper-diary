@@ -1,8 +1,8 @@
 <template>
   <footer class="bg-blue-50 text-gray-700 border-t border-gray-100">
-    <div class="container mx-auto py-8">
+    <div class="container mx-auto py-6 px-4 md:px-0">
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-y-12 lg:gap-x-16">
-        <div class="flex flex-col space-y-7 lg:col-span-3">
+        <div class="flex flex-col space-y-4 lg:col-span-3">
           <div class="flex flex-col space-y-4">
             <div class="w-10 h-10 p-1 rounded-lg bg-blue-100">
               <Icon icon="lucide:zap" class="w-full h-full text-blue-600" />
@@ -19,7 +19,7 @@
             space for rent in Chennai.
           </p>
 
-          <div class="flex space-x-3 pt-3">
+          <div class="flex space-x-3 pt-2">
             <a
               v-for="social in socialLinks"
               :key="social.icon"
@@ -32,8 +32,8 @@
           </div>
         </div>
 
-        <div class="flex flex-col space-y-10 lg:col-span-2 lg:mt-3">
-          <div class="flex flex-col space-y-5">
+        <div class="flex flex-col space-y-6 lg:col-span-2 lg:mt-3">
+          <div class="flex flex-col space-y-4">
             <h3
               class="text-lg font-semibold text-gray-900 border-b border-blue-200 pb-2"
             >
@@ -81,12 +81,12 @@
         </div>
       </div>
 
-      <hr class="my-8 border-gray-200" />
+      <hr class="my-6 border-gray-200" />
 
       <div
         class="flex flex-col md:flex-row justify-between items-center text-sm space-y-4 md:space-y-0"
       >
-        <nav class="flex space-x-6">
+        <nav class="flex space-x-8">
           <a
             v-for="link in footerLinks"
             :key="link.text"
