@@ -8,24 +8,67 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme {
-  --font-sans: "Quicksand", sans-serif;
-  --font-oswald: "Oswald", sans-serif;
+@theme inline {
+    --font-sans: "Quicksand", sans-serif;
+    --font-oswald: "Oswald", sans-serif;
 
-  --color-primary: #1c5af5;
+    --color-primary: #1c5af5;
 }
 
-@layer base {
-  html {
-    font-family: var(--font-sans);
-  }
+@utility flex-center {
+    @apply flex items-center justify-center;
+}
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-oswald);
-  }
+@utility flex-between {
+    @apply flex items-center justify-between;
+}
+
+@utility btn-primary {
+    @apply bg-primary text-white font-semibold py-3 px-8 rounded-lg text-lg hover:bg-blue-700 transition duration-300 cursor-pointer;
+}
+
+@utility btn-outlined {
+    @apply border border-primary font-semibold py-3 px-8 rounded-lg text-primary text-lg hover:bg-gray-50 transition duration-300 cursor-pointer;
+}
+
+
+@layer base {
+    html {
+        font-family: var(--font-sans);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-oswald);
+    }
+
+    h1 {
+        @apply text-6xl font-semibold;
+    }
+
+    h2 {
+        @apply text-5xl font-semibold;
+    }
+
+    h3 {
+        @apply text-4xl font-semibold;
+    }
+
+    h4 {
+        @apply text-3xl font-semibold;
+    }
+
+    h5 {
+        @apply text-2xl font-semibold;
+    }
+
+    h6 {
+        @apply text-xl font-semibold;
+    }
+
+
 }
