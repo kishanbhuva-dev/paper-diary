@@ -257,7 +257,12 @@ const computedMaxLength = computed(
       </button>
     </div>
 
-    <div class="flex justify-between items-start mt-1">
+    <div
+      class="flex justify-between items-start"
+      :class="{
+        'mt-1': !isValid && touched,
+      }"
+    >
       <span
         class="text-xs transition-colors duration-200 font-medium"
         :class="!isValid && touched ? 'text-red-500' : theme.helper"
