@@ -15,31 +15,14 @@ const apiClient = axios.create({
   },
 });
 
-const pendingRequests = new Map();
-
 // Request interceptor for adding auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken");
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
-    // Use a unique key for each request, e.g., the URL
-    const requestKey = config.url;
-
-    // If a pending request with the same key exists, abort it
-    if (pendingRequests.has(requestKey)) {
-      const previousController = pendingRequests.get(requestKey);
-      previousController.abort();
-      pendingRequests.delete(requestKey);
-    }
-
-    // Create a new AbortController and store it
-    const newController = new AbortController();
-    config.signal = newController.signal;
-    pendingRequests.set(requestKey, newController);
 
     return config;
   },
@@ -55,12 +38,6 @@ apiClient.interceptors.response.use(
       toast(message, { type: status ? "success" : "error" });
     }
 
-    // Clean up the pending request after a successful response
-    const requestKey = response.config.url;
-    if (pendingRequests.has(requestKey)) {
-      pendingRequests.delete(requestKey);
-    }
-
     return response;
   },
   (error) => {
@@ -73,11 +50,10 @@ apiClient.interceptors.response.use(
     // Handle 402 Payment Required responses
     if (error.response?.status === 402) {
       const responseData = error.response.data || {};
-      const defaultMessage =
-        "Payment required. Please purchase a subscription or credits to continue.";
-      const message = responseData.message || defaultMessage;
+
+      const message = responseData.message;
       toast(message, { type: "warning" });
-    } else if (!axios.isCancel(error)) {
+    } else {
       if (isValidationError(error)) {
         const formattedMessage = formatValidationErrors(
           error.response.data.errors
@@ -93,20 +69,7 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Clean up the pending request even if there's an error
-    if (error.config?.url) {
-      const requestKey = error.config.url;
-      if (pendingRequests.has(requestKey)) {
-        pendingRequests.delete(requestKey);
-      }
-    }
-
-    // Check if the error is due to a cancelled request
-    if (axios.isCancel(error)) {
-      console.log("Request was automatically aborted:", error.message);
-    } else {
-      console.error("API error:", error);
-    }
+    console.error("API error:", error);
 
     return Promise.reject(error);
   }
