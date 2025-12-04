@@ -158,24 +158,24 @@
             <h5>Popular Service</h5>
             <div class="flex flex-wrap gap-4 mt-4">
               <div
-                class="flex items-center gap-2 p-3 border rounded-lg text-gray-700"
+                class="flex items-center gap-2 p-3 border border-gray-400 rounded-lg text-gray-700"
               >
                 <Icon icon="mdi:parking" class="text-xl" /> <span>Parking</span>
               </div>
               <div
-                class="flex items-center gap-2 p-3 border rounded-lg text-gray-700"
+                class="flex items-center gap-2 p-3 border border-gray-400 rounded-lg text-gray-700"
               >
                 <Icon icon="mdi:bathtub-outline" class="text-xl" />
                 <span>Attached Bathroom</span>
               </div>
               <div
-                class="flex items-center gap-2 p-3 border rounded-lg text-gray-700"
+                class="flex items-center gap-2 p-3 border border-gray-400 rounded-lg text-gray-700"
               >
                 <Icon icon="mdi:cctv" class="text-xl" />
                 <span>CCTV Cameras</span>
               </div>
               <div
-                class="flex items-center gap-2 p-3 border rounded-lg text-gray-700"
+                class="flex items-center gap-2 p-3 border border-gray-400 rounded-lg text-gray-700"
               >
                 <Icon icon="mdi:wifi" class="text-xl" /> <span>Wifi</span>
               </div>
@@ -212,7 +212,7 @@
         </div>
 
         <!-- Ratings and Reviews -->
-        <aside class="border rounded-lg p-6 h-fit">
+        <aside class="border border-gray-400 rounded-lg p-6 h-fit">
           <h5>Ratings and reviews</h5>
           <div class="flex items-center gap-4 mt-4">
             <div class="bg-green-100 text-green-800 p-4 rounded-lg text-center">
@@ -275,7 +275,7 @@
               </div>
             </div>
           </div>
-          <div class="mt-6 border-t pt-6">
+          <div class="mt-6 border-t border-gray-400 pt-6">
             <div class="flex-between">
               <div class="flex gap-3">
                 <img src="/public/user-1.jpg" class="w-10 h-10 rounded-full" />
@@ -331,7 +331,7 @@
           <div
             v-for="roomType in roomTypes"
             :key="roomType.id"
-            class="grid md:grid-cols-3 gap-6 bg-white border rounded-xl p-2"
+            class="grid md:grid-cols-3 gap-6 bg-white border border-gray-400 rounded-2xl p-2"
           >
             <img
               :src="roomType.image"
