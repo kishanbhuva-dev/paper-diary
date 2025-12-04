@@ -109,9 +109,9 @@ import { Icon } from "@iconify/vue";
 
 const footerLinks = [
   { text: "Home", href: "/" },
-  { text: "About us", href: "/about" },
-  { text: "Blog", href: "/blog" },
-  { text: "Center", href: "/center" },
+  { text: "About us", href: "/" },
+  { text: "Blog", href: "/" },
+  { text: "Center", href: "/" },
 ];
 
 const socialLinks = [
