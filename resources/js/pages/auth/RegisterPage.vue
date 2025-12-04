@@ -9,8 +9,11 @@
       <!-- First Name -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">First Name</label>
-        <input v-model="form.firstName" @input="clearError('firstName')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.firstName"
+          @input="clearError('firstName')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.firstName" class="text-red-500 text-xs mt-1">
           {{ errors.firstName }}
         </p>
@@ -19,8 +22,11 @@
       <!-- Last Name -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">Last Name</label>
-        <input v-model="form.lastName" @input="clearError('lastName')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.lastName"
+          @input="clearError('lastName')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.lastName" class="text-red-500 text-xs mt-1">
           {{ errors.lastName }}
         </p>
@@ -29,8 +35,13 @@
       <!-- Email -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Email Address</label>
-        <input v-model="form.email" type="email" @input="clearError('email')" autocomplete="email"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.email"
+          type="email"
+          @input="clearError('email')"
+          autocomplete="email"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.email" class="text-red-500 text-xs mt-1">
           {{ errors.email }}
         </p>
@@ -39,8 +50,13 @@
       <!-- Password -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Password</label>
-        <input v-model="form.password" type="password" @input="clearError('password')" autocomplete="new-password"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.password"
+          type="password"
+          @input="clearError('password')"
+          autocomplete="new-password"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.password" class="text-red-500 text-xs mt-1">
           {{ errors.password }}
         </p>
@@ -49,9 +65,13 @@
       <!-- Confirm Password -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Confirm Password</label>
-        <input v-model="form.confirm_password" type="password" @input="clearError('confirm_password')"
+        <input
+          v-model="form.confirm_password"
+          type="password"
+          @input="clearError('confirm_password')"
           autocomplete="new-password"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.confirm_password" class="text-red-500 text-xs mt-1">
           {{ errors.confirm_password }}
         </p>
@@ -60,8 +80,11 @@
       <!-- Role -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Role</label>
-        <select v-model="form.role" @change="clearError('role')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none">
+        <select
+          v-model="form.role"
+          @change="clearError('role')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        >
           <option class="" value="user">User</option>
           <option value="owner">Owner</option>
         </select>
@@ -73,8 +96,11 @@
       <!-- Address -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Address</label>
-        <input v-model="form.address" @input="clearError('address')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.address"
+          @input="clearError('address')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.address" class="text-red-500 text-xs mt-1">
           {{ errors.address }}
         </p>
@@ -83,15 +109,20 @@
       <!-- Address 2 -->
       <div class="col-span-2">
         <label class="block text-sm text-gray-700 mb-1">Address 2</label>
-        <input v-model="form.address2"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.address2"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
       </div>
 
       <!-- City -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">City</label>
-        <input v-model="form.city" @input="clearError('city')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.city"
+          @input="clearError('city')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.city" class="text-red-500 text-xs mt-1">
           {{ errors.city }}
         </p>
@@ -100,8 +131,11 @@
       <!-- Country -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">Country</label>
-        <input v-model="form.country" @input="clearError('country')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.country"
+          @input="clearError('country')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.country" class="text-red-500 text-xs mt-1">
           {{ errors.country }}
         </p>
@@ -110,8 +144,11 @@
       <!-- Postcode -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">Postcode</label>
-        <input v-model="form.postcode" @input="clearError('postcode')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.postcode"
+          @input="clearError('postcode')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.postcode" class="text-red-500 text-xs mt-1">
           {{ errors.postcode }}
         </p>
@@ -120,8 +157,11 @@
       <!-- Phone -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">Phone</label>
-        <input v-model="form.phone" @input="clearError('phone')"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none" />
+        <input
+          v-model="form.phone"
+          @input="clearError('phone')"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        />
         <p v-if="errors.phone" class="text-red-500 text-xs mt-1">
           {{ errors.phone }}
         </p>
@@ -129,7 +169,10 @@
 
       <!-- Submit -->
       <div class="col-span-2">
-        <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-800 transition-colors">
+        <button
+          type="submit"
+          class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-800 transition-colors"
+        >
           Register
         </button>
       </div>
@@ -139,10 +182,11 @@
 
 <script setup>
 import { reactive } from "vue";
-import axios from "axios";
-import { useRouter } from "vue-router";
+import { useAuth } from "../../composables/useAuth";
+import { toast } from "vue-sonner";
+import authService from "../../services/authService";
 
-const router = useRouter();
+const { login } = useAuth();
 
 const form = reactive({
   firstName: "",
@@ -198,15 +242,22 @@ const handleRegister = async () => {
 
   // If all valid, send request
   try {
-    const res = await axios.post("/api/register", form);
-    if (res.data.status) {
-      alert("Registered successfully!");
-      router.push("/login");
-    } else {
-      alert(res.data.message || "Registration failed");
+    const res = await authService.register(form);
+    if (res) {
+      toast.success("Registered successfully!");
+      // Auto-login after registration
+      await login({
+        email: form.email,
+        password: form.password,
+      });
     }
   } catch (error) {
-    alert(error.response?.data?.message || "Server error during registration");
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      "Server error during registration";
+    errors.general = message;
+    toast.error(message);
   }
 };
 
