@@ -45,11 +45,10 @@
 
 <script setup>
 import Basetable from "../../components/global/Basetable.vue";
-import { ref, reactive, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
-import { toast } from "vue-sonner";
 import ownerService from "../../services/ownerService";
 
 // Initialize Router
@@ -124,8 +123,6 @@ const navigateToEdit = (item) => {
   if (item && item.id) {
     // FIX: Using the correct route name 'owner-property-form'
     router.push({ name: "property-form", params: { id: btoa(item.id) } });
-  } else {
-    toast.error("Error: Cannot edit property without an ID.");
   }
 };
 
@@ -167,7 +164,6 @@ const handleDelete = async (id) => {
 
     try {
       await ownerService.deleteProperty(id);
-      toast.success("Property deleted successfully");
 
       // Ensure that if the last item on the page is deleted, we go back a page
       if (properties.value.length === 1 && currentPage.value > 1) {
@@ -181,7 +177,6 @@ const handleDelete = async (id) => {
           : err.message || "Deletion failed";
 
       error.value = errorMessage;
-      toast.error(error.value);
     }
   }
 };
