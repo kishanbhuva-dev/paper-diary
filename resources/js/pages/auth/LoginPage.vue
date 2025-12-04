@@ -1,5 +1,7 @@
 <template>
-  <div class="max-w-lg mx-auto border border-gray-300 rounded-lg p-6">
+  <div
+    class="max-w-lg sm:mx-auto mx-4 my-10 border border-gray-300 rounded-lg p-6"
+  >
     <h2 class="text-2xl font-semibold text-gray-800 mb-1">
       Login to your account
     </h2>

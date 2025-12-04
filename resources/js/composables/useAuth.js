@@ -8,14 +8,6 @@ const user = ref(
 );
 
 const isAuthenticated = computed(() => !!token.value);
-const isAdmin = computed(
-  () =>
-    !!(
-      user.value &&
-      user.value.role &&
-      user.value.role.toLowerCase() === "admin"
-    )
-);
 let routerInstance = null;
 
 function persistAuth(newToken, newUser) {
@@ -55,7 +47,7 @@ export function useAuth() {
         res?.message || "Login failed: Invalid response from server"
       );
     }
-    console.log("Login successful:", res);
+
     persistAuth(res.data.token, res.data.user);
 
     setTimeout(() => {
@@ -85,30 +77,12 @@ export function useAuth() {
     routerInstance.push({ name: "login" });
   }
 
-  async function refreshToken() {
-    const res = await authService.refreshToken();
-    if (res && res.status && res.data) {
-      const tkn = res.data.token || res.data.access_token || null;
-      if (tkn) persistAuth(tkn, user.value);
-    }
-    return res;
-  }
-
-  function setUser(u) {
-    persistAuth(token.value, u);
-  }
-
   return {
     token,
     user,
     isAuthenticated,
-    isAdmin,
     login,
     logout,
-    refreshToken,
-    setUser,
-
-    setAuth: (tkn, usr) => persistAuth(tkn, usr),
   };
 }
 
