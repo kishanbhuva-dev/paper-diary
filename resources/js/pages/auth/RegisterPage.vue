@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="max-w-3xl border border-gray-300 rounded-lg p-6 my-10 mx-4 sm:mx-auto"
-  >
+  <div class="max-w-3xl shadow-md rounded-lg p-6 my-10 mx-4 sm:mx-auto">
     <h2 class="text-2xl font-semibold text-gray-800 mb-1">Create an Account</h2>
     <p class="text-gray-500 mb-8 text-sm">
       Register now to access your Paper Diary account.
@@ -14,6 +12,8 @@
         v-model="form.firstName"
         width="full"
         required
+        icon="lucide:user"
+        placeholder="John"
       />
       <BaseInput
         ref="lastNameInput"
@@ -21,6 +21,8 @@
         v-model="form.lastName"
         width="full"
         required
+        icon="lucide:user"
+        placeholder="Doe"
       />
       <BaseInput
         ref="emailInput"
@@ -30,16 +32,30 @@
         autocomplete="email"
         width="full"
         required
+        icon="lucide:mail"
+        placeholder="name@example.com"
       />
       <div>
-        <label class="block text-sm text-gray-700 mb-1">Role</label>
-        <select
-          v-model="form.role"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:border-indigo-500 focus:ring-indigo-200 focus:outline-none"
+        <label class="block text-sm font-semibold text-gray-700 mb-1"
+          >Role</label
         >
-          <option class="" value="user">User</option>
-          <option value="owner">Owner</option>
-        </select>
+        <div class="relative">
+          <Icon
+            icon="lucide:users"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <select
+            v-model="form.role"
+            class="w-full appearance-none rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-sm"
+          >
+            <option class="" value="user">User</option>
+            <option value="owner">Owner</option>
+          </select>
+          <Icon
+            icon="lucide:chevron-down"
+            class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+        </div>
       </div>
       <BaseInput
         ref="passwordInput"
@@ -50,6 +66,8 @@
         width="full"
         required
         :minLength="6"
+        icon="lucide:lock"
+        placeholder="••••••••"
       />
       <BaseInput
         ref="confirmPasswordInput"
@@ -61,6 +79,8 @@
         required
         :pattern="new RegExp(`^${form.password}$`)"
         customError="Passwords do not match."
+        icon="lucide:lock"
+        placeholder="••••••••"
       />
 
       <BaseInput
@@ -70,12 +90,16 @@
         width="full"
         required
         class="col-span-2"
+        icon="lucide:map-pin"
+        placeholder="123 Main St"
       />
       <BaseInput
         label="Address 2"
         v-model="form.address2"
         width="full"
         class="col-span-2"
+        icon="lucide:map-pin"
+        placeholder="Apt/Suite"
       />
       <BaseInput
         ref="cityInput"
@@ -83,6 +107,8 @@
         v-model="form.city"
         width="full"
         required
+        icon="mdi:city"
+        placeholder="City"
       />
       <BaseInput
         ref="countryInput"
@@ -90,6 +116,8 @@
         v-model="form.country"
         width="full"
         required
+        icon="lucide:globe"
+        placeholder="United States"
       />
       <BaseInput
         ref="postcodeInput"
@@ -98,6 +126,8 @@
         width="full"
         required
         class="col-span-2"
+        icon="lucide:map-pin"
+        placeholder="12345"
       />
       <BaseInput
         ref="phoneInput"
@@ -106,6 +136,8 @@
         type="phone"
         width="full"
         required
+        icon="lucide:phone"
+        placeholder="(123) 456-7890"
       />
       <BaseInput
         ref="telephoneInput"
@@ -113,6 +145,8 @@
         v-model="form.telephone"
         type="phone"
         width="full"
+        icon="lucide:phone"
+        placeholder="(123) 456-7890"
       />
 
       <div class="col-span-2 pt-1">
@@ -132,6 +166,7 @@
 
 <script setup>
 import { ref } from "vue";
+import { Icon } from "@iconify/vue";
 import authService from "../../services/authService";
 import BaseInput from "../../components/global/BaseInput.vue";
 import { useRouter } from "vue-router";
