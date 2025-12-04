@@ -61,12 +61,7 @@
         >
       </div>
 
-      <button
-        type="submit"
-        class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-800 transition-all"
-      >
-        Log In
-      </button>
+      <button type="submit" class="btn-primary w-full py-1.5">Log In</button>
     </form>
 
     <p class="text-center text-gray-500 text-sm mt-6">
