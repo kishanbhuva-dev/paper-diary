@@ -1,14 +1,12 @@
 <template>
-  <div id="app-root">
-    <router-view />
+  <router-view />
 
-    <Toaster
-      position="top-right"
-      :expand="true"
-      richColors
-      :style="{ zIndex: 99999 }"
-    />
-  </div>
+  <Toaster
+    position="top-right"
+    :expand="true"
+    richColors
+    :style="{ zIndex: 99999 }"
+  />
 </template>
 
 <script setup>

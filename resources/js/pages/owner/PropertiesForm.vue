@@ -216,7 +216,6 @@
 import { ref, computed, onMounted, onBeforeUpdate } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
-import { toast } from "vue-sonner";
 import BaseInput from "../../components/global/BaseInput.vue";
 import OwnerImageUploader from "../../components/owner/OwnerImageUploader.vue";
 import ownerService from "../../services/ownerService";
@@ -279,12 +278,9 @@ const loadPropertyForEdit = async (id) => {
       initialImageIds.value = loadedImages.map((i) => i.id).filter(Boolean);
       formData.value = loadedData;
     } else {
-      toast.error(`Property with ID ${id} not found or failed to load.`);
       router.push({ name: "properties" });
     }
   } catch (e) {
-    toast.error("Failed to load property data.");
-    console.error("Error loading property:", e);
     router.push({ name: "properties" });
   } finally {
     loadingItem.value = false;
@@ -300,17 +296,12 @@ onMounted(() => {
 
   // Load all available facilities
   (async () => {
-    try {
-      const facs = await ownerService.fetchFacilities();
-      if (Array.isArray(facs) && facs.length) {
-        availableFacilities.value = facs.map((f) => ({
-          id: f.id,
-          name: f.name,
-        }));
-      }
-    } catch (err) {
-      console.error("Failed to load facilities:", err);
-      toast.error("Failed to load facilities");
+    const facs = await ownerService.fetchFacilities();
+    if (Array.isArray(facs) && facs.length) {
+      availableFacilities.value = facs.map((f) => ({
+        id: f.id,
+        name: f.name,
+      }));
     }
   })();
 });
@@ -329,14 +320,6 @@ const handleSubmit = async () => {
     }
   });
 
-  if (!isFormValid) {
-    toast.warning("Please correct the validation errors before submitting.");
-    return;
-  }
-
-  const action = isEditing.value ? "Update" : "Create";
-  const loadingToastId = toast.loading(`${action} property...`);
-
   try {
     let savedPropertyId = null;
 
@@ -345,6 +328,7 @@ const handleSubmit = async () => {
       (img) => img.file instanceof File
     );
     const apiPayload = JSON.parse(JSON.stringify(formData.value));
+
     delete apiPayload.images;
     delete apiPayload.facilities; // Remove facilities from property payload; send separately
 
@@ -375,11 +359,6 @@ const handleSubmit = async () => {
           savedPropertyId = createdProperty?.id;
         }
       }
-      if (!savedPropertyId) {
-        toast.error("Property created but could not retrieve its ID.");
-        toast.dismiss(loadingToastId);
-        return;
-      }
     }
 
     // Handle images and facilities if property was saved
@@ -398,9 +377,7 @@ const handleSubmit = async () => {
           for (const imgId of removedIds) {
             await ownerService.deletePropertyImage(imgId);
           }
-        } catch (err) {
-          toast.error("Failed to delete some images");
-        }
+        } catch (err) {}
       }
 
       // Upload new images
@@ -414,12 +391,7 @@ const handleSubmit = async () => {
           if (uploaded && Array.isArray(uploaded)) {
             console.log("[PropertiesForm] Images uploaded:", uploaded.length);
           }
-        } catch (err) {
-          console.error("[PropertiesForm] Failed to upload images:", err);
-          toast.error(
-            "Failed to upload images. Property saved but images not attached."
-          );
-        }
+        } catch (err) {}
       }
 
       // Refresh images from server
@@ -461,30 +433,13 @@ const handleSubmit = async () => {
               facilityIds
             );
             console.log("[PropertiesForm] Facilities updated:", facilityIds);
-          } catch (err) {
-            console.error("[PropertiesForm] Failed to update facilities:", err);
-            toast.error("Failed to update facilities");
-          }
+          } catch (err) {}
         }
       }
 
-      toast.dismiss(loadingToastId);
-      toast.success(`Property ${action.toLowerCase()}d successfully`);
-      // Small delay to allow user to see success toast before redirect
-      setTimeout(() => {
-        router.push({ name: "properties" });
-      }, 500);
-    } else {
-      toast.dismiss(loadingToastId);
-      toast.error("Failed to save property: No ID received.");
+      router.push({ name: "properties" });
     }
-  } catch (e) {
-    console.error("[PropertiesForm] Submission error:", e);
-    toast.dismiss(loadingToastId);
-    const errorMsg =
-      e.response?.data?.message || e.message || "An unexpected error occurred";
-    toast.error(`${action} failed: ${errorMsg}`);
-  }
+  } catch (e) {}
 };
 
 // Handle image reordering
@@ -501,7 +456,6 @@ const onImagesReorder = async (newImages) => {
           "[PropertiesForm] changePropertyImagePosition error:",
           err
         );
-        toast.error("Failed to update image order");
       }
     }
   }
