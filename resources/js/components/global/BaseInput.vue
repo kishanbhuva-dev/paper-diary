@@ -206,7 +206,7 @@ const computedMaxLength = computed(
     </label>
 
     <div :class="containerClasses">
-      <Icon v-if="icon" :icon="icon" class="text-lg text-slate-400 shrink-0" />
+      <Icon v-if="icon" :icon="icon" class="text-md text-slate-400 shrink-0" />
 
       <span
         v-if="prefix"
