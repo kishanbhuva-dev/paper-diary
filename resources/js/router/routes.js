@@ -39,8 +39,8 @@ const routes = [
         meta: { pageTitle: "Property List" },
       },
       {
-        name: "/owner/property-form",
-        path: "properties-form/:id?",
+        name: "property-form",
+        path: "/owner/property-form/:id?",
         component: () => import("../../js/pages/owner/PropertiesForm.vue"),
         meta: { pageTitle: "Property Form" },
       },

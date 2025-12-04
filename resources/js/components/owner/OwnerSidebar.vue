@@ -26,7 +26,7 @@
         </button>
       </div>
       <!-- FIX: Now uses the reactive userName from the composable -->
-      <span class="text-sm text-gray-600"> welcome {{ user.firstName }}</span>
+      <span v-if="user" class="text-sm text-gray-600"> welcome {{ user.firstName }}</span>
     </div>
 
     <ul class="flex-1 overflow-y-auto">

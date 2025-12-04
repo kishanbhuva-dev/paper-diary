@@ -38,7 +38,9 @@ const ownerService = {
   // Create a new property
   async createProperty(payload) {
     const res = await apiClient.post("/owner/property", payload);
-    return res.data.data;
+    // Backend returns { status, message, data: '' }, so response.data.data is empty string
+    // We return the full response to allow caller to handle it
+    return res.data;
   },
 
   // Update an existing property
@@ -88,7 +90,12 @@ const ownerService = {
 
   // Sync property facilities (POST the selected facility IDs)
   async setPropertyFacilities(propertyId, facilityIds = []) {
-    const payload = { data: { propertyId, facilityId: facilityIds } };
+    const payload = {
+      data: {
+        propertyId: parseInt(propertyId, 10),
+        facilityId: facilityIds.map((id) => parseInt(id, 10)),
+      },
+    };
     const res = await apiClient.post("/owner/add-facility-property", payload);
     return res.data.data;
   },
