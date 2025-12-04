@@ -346,14 +346,40 @@ const handleSubmit = async () => {
     );
     const apiPayload = JSON.parse(JSON.stringify(formData.value));
     delete apiPayload.images;
+    delete apiPayload.facilities; // Remove facilities from property payload; send separately
 
     // Create or update property
     if (isEditing.value) {
       await ownerService.updateProperty(formData.value.id, apiPayload);
       savedPropertyId = formData.value.id;
     } else {
-      const result = await ownerService.createProperty(apiPayload);
-      savedPropertyId = result.data?.id || result.id;
+      const response = await ownerService.createProperty(apiPayload);
+      // Backend returns { status, message, data: '' }, try to extract ID if present
+      if (response?.data?.id) {
+        savedPropertyId = response.data.id;
+      } else if (response?.id) {
+        savedPropertyId = response.id;
+      } else {
+        // Fallback: fetch properties and get the latest one by the name we just created
+        const paginatedResponse = await ownerService.fetchProperties({
+          limit: 1,
+        });
+        if (
+          paginatedResponse &&
+          Array.isArray(paginatedResponse.data) &&
+          paginatedResponse.data.length > 0
+        ) {
+          const createdProperty = paginatedResponse.data.find(
+            (p) => p.propertyName === apiPayload.propertyName
+          );
+          savedPropertyId = createdProperty?.id;
+        }
+      }
+      if (!savedPropertyId) {
+        toast.error("Property created but could not retrieve its ID.");
+        toast.dismiss(loadingToastId);
+        return;
+      }
     }
 
     // Handle images and facilities if property was saved
@@ -368,7 +394,6 @@ const handleSubmit = async () => {
 
       // Delete removed images
       if (removedIds.length) {
-        console.debug("[PropertiesForm] Deleting images:", removedIds);
         try {
           for (const imgId of removedIds) {
             await ownerService.deletePropertyImage(imgId);
@@ -380,17 +405,20 @@ const handleSubmit = async () => {
 
       // Upload new images
       if (newFiles.length) {
-        console.debug(
-          "[PropertiesForm] Uploading images for property:",
-          savedPropertyId
-        );
-        const filesToUpload = newFiles.map((f) => f.file);
-        const uploaded = await ownerService.addPropertyImages(
-          savedPropertyId,
-          filesToUpload
-        );
-        if (uploaded && Array.isArray(uploaded)) {
-          toast.success(`${uploaded.length} image(s) uploaded`);
+        try {
+          const filesToUpload = newFiles.map((f) => f.file);
+          const uploaded = await ownerService.addPropertyImages(
+            savedPropertyId,
+            filesToUpload
+          );
+          if (uploaded && Array.isArray(uploaded)) {
+            console.log("[PropertiesForm] Images uploaded:", uploaded.length);
+          }
+        } catch (err) {
+          console.error("[PropertiesForm] Failed to upload images:", err);
+          toast.error(
+            "Failed to upload images. Property saved but images not attached."
+          );
         }
       }
 
@@ -419,29 +447,43 @@ const handleSubmit = async () => {
       }
 
       // Update facilities
-      if (Array.isArray(formData.value.facilities)) {
+      if (
+        Array.isArray(formData.value.facilities) &&
+        formData.value.facilities.length > 0
+      ) {
         const facilityIds = formData.value.facilities
           .map((id) => parseInt(id, 10))
           .filter((id) => Number.isInteger(id) && id > 0);
-        try {
-          await ownerService.setPropertyFacilities(
-            savedPropertyId,
-            facilityIds
-          );
-          // toast.success("Facilities updated");
-        } catch (err) {
-          toast.error("Failed to update facilities");
+        if (facilityIds.length > 0) {
+          try {
+            await ownerService.setPropertyFacilities(
+              savedPropertyId,
+              facilityIds
+            );
+            console.log("[PropertiesForm] Facilities updated:", facilityIds);
+          } catch (err) {
+            console.error("[PropertiesForm] Failed to update facilities:", err);
+            toast.error("Failed to update facilities");
+          }
         }
       }
 
       toast.dismiss(loadingToastId);
       toast.success(`Property ${action.toLowerCase()}d successfully`);
-      router.push({ name: "properties" });
+      // Small delay to allow user to see success toast before redirect
+      setTimeout(() => {
+        router.push({ name: "properties" });
+      }, 500);
+    } else {
+      toast.dismiss(loadingToastId);
+      toast.error("Failed to save property: No ID received.");
     }
   } catch (e) {
-    console.error(e);
+    console.error("[PropertiesForm] Submission error:", e);
     toast.dismiss(loadingToastId);
-    toast.error(`An unexpected error occurred during ${action.toLowerCase()}.`);
+    const errorMsg =
+      e.response?.data?.message || e.message || "An unexpected error occurred";
+    toast.error(`${action} failed: ${errorMsg}`);
   }
 };
 

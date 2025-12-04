@@ -41,8 +41,6 @@
       :showEdit="true"
     />
   </div>
-
-  <!-- Global Toaster is in App.vue so toasts persist across pages -->
 </template>
 
 <script setup>
@@ -76,7 +74,7 @@ const tableColumns = [
   { label: "Postcode", key: "postcode" },
   { label: "Telephone", key: "telephone" },
   { label: "Email", key: "email" },
-  { label: "Status", key: "statusDisplay" },
+  { label: "Status", key: "status" },
 ];
 
 // --- DATA FETCHING ---
@@ -89,25 +87,42 @@ const loadData = async () => {
       per_page: perPage.value,
       search: currentSearch.value,
     });
-    properties.value = data.data || [];
+
+    // FIX: Map data to convert status (assuming API sends 1/0, true/false, or 'Active'/'Inactive')
+    properties.value =
+      data.data.map((property) => ({
+        ...property,
+        // Change this logic if your API uses different values (e.g., true/false)
+        status:
+          property.status === 1 || property.status === "Active"
+            ? "Active"
+            : "Inactive",
+      })) || [];
+
     total.value = data.total || 0;
   } catch (err) {
-    error.value = err.message || "Failed to load properties";
+    // FIX: Improved error handling for 401 Unauthorized
+    const errorMessage =
+      err.response?.status === 401
+        ? "Unauthorized. Please log in again."
+        : err.message || "Failed to load properties";
+
+    error.value = errorMessage;
   } finally {
     loading.value = false;
   }
 };
 
-// --- NAVIGATION HANDLERS (New/Restored Logic) ---
+// --- NAVIGATION HANDLERS (FIXED ROUTE NAMES) ---
 
 const navigateToAdd = () => {
-  // Navigate to the form page for creation (ID parameter is optional)
+  // FIX: Using the correct, simple route name 'owner-property-form'
   router.push({ name: "property-form" });
 };
 
 const navigateToEdit = (item) => {
-  // Navigate to the form page, passing the property ID as a route parameter
   if (item && item.id) {
+    // FIX: Using the correct route name 'owner-property-form'
     router.push({ name: "property-form", params: { id: btoa(item.id) } });
   } else {
     toast.error("Error: Cannot edit property without an ID.");
@@ -154,12 +169,18 @@ const handleDelete = async (id) => {
       await ownerService.deleteProperty(id);
       toast.success("Property deleted successfully");
 
-      if (properties.value.length === 0 && currentPage.value > 1) {
+      // Ensure that if the last item on the page is deleted, we go back a page
+      if (properties.value.length === 1 && currentPage.value > 1) {
         currentPage.value--;
       }
       await loadData();
     } catch (err) {
-      error.value = err.message || "Deletion failed";
+      const errorMessage =
+        err.response?.status === 401
+          ? "Unauthorized: Deletion failed."
+          : err.message || "Deletion failed";
+
+      error.value = errorMessage;
       toast.error(error.value);
     }
   }
