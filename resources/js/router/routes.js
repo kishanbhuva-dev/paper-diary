@@ -33,8 +33,8 @@ const routes = [
         meta: { pageTitle: "Owner Dashboard" },
       },
       {
-        name: "/owner/properties",
-        path: "properties",
+        name: "properties",
+        path: "/owner/properties",
         component: () => import("../../js/pages/owner/Properties.vue"),
         meta: { pageTitle: "Property List" },
       },
