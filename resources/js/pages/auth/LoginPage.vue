@@ -52,6 +52,7 @@
 <script setup>
 import { ref } from "vue";
 import BaseInput from "../../components/global/BaseInput.vue";
+import authService from "../../services/authService";
 
 const form = ref({
   email: "",
@@ -66,10 +67,8 @@ const handleLogin = async () => {
   const isPasswordValid = passwordInput.value.validate();
 
   if (isEmailValid && isPasswordValid) {
-    const result = await login({
-      email: form.email,
-      password: form.password,
-    });
+    const result = await authService.login(form.value);
+    console.log(result);
   }
 };
 </script>
