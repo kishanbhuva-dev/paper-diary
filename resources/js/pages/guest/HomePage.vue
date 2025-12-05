@@ -1,7 +1,7 @@
 <template>
   <main class="container mx-auto">
-    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <section class="px-4 py-6 sm:px-6 sm:py-12 lg:px-8 lg:py-18">
+      <div class="grid items-center gap-12 lg:grid-cols-2">
         <div class="space-y-6">
           <h1 class="max-w-xl">
             Your Complex Booking World, Made
@@ -35,8 +35,8 @@
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <section class="px-4 py-6 sm:px-6 sm:py-12 lg:px-8 lg:py-18">
+      <div class="grid items-center gap-12 lg:grid-cols-2">
         <div class="flex justify-center lg:justify-start">
           <img src="/public/hero2.png" alt="Hero Image" />
         </div>
@@ -58,8 +58,8 @@
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <section class="px-4 py-6 sm:px-6 sm:py-12 lg:px-8 lg:py-18">
+      <div class="grid items-center gap-12 lg:grid-cols-2">
         <div class="space-y-6">
           <h2>
             Convert Visitors to Guests with
@@ -82,32 +82,32 @@
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
+    <section class="px-4 py-6 sm:px-6 sm:py-12 lg:px-8 lg:py-18">
       <div class="space-y-6 text-center">
         <h2>
           Convert Visitors to Guests with <br />
           <span class="text-primary">Paper Note.</span>
         </h2>
-        <p class="text-lg max-w-2xl mx-auto">
+        <p class="mx-auto max-w-2xl text-lg">
           Paper Note’s integrated booking engine turns your website into a
           powerful, automated reservation tool. Deploy it instantly to secure
           commission-free direct bookings, giving you an immediate boost in
           revenue and complete control over the guest relationship.
         </p>
-        <button class="btn-primary relative z-10">View The Integrals</button>
+        <button class="relative z-10 btn-primary">View The Integrals</button>
       </div>
-      <div class="flex-center -mt-24">
+      <div class="-mt-24 flex-center">
         <img src="/public/hero4.png" alt="Hero Image" />
       </div>
     </section>
 
-    <section class="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-18">
+    <section class="px-4 py-6 sm:px-6 sm:py-12 lg:px-8 lg:py-18">
       <div class="space-y-12 text-center">
         <h2>
           Trusted and Recommended by <br />
           <span class="text-primary">Property Managers.</span>
         </h2>
-        <div class="grid md:grid-cols-4 gap-8">
+        <div class="grid gap-8 md:grid-cols-4">
           <div class="flex flex-col items-center gap-4">
             <h3 class="text-primary">&pound;80m+</h3>
             <p class="max-w-xs text-lg">

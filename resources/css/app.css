@@ -24,13 +24,12 @@
 }
 
 @utility btn-primary {
-    @apply bg-primary text-white font-semibold py-3 px-8 rounded-lg text-lg hover:bg-blue-700 transition duration-300 cursor-pointer;
+    @apply cursor-pointer rounded-lg bg-primary px-8 py-3 text-lg font-semibold text-white transition duration-300 hover:bg-blue-700;
 }
 
 @utility btn-outlined {
-    @apply border border-primary font-semibold py-3 px-8 rounded-lg text-primary text-lg hover:bg-gray-50 transition duration-300 cursor-pointer;
+    @apply cursor-pointer rounded-lg border border-primary px-8 py-3 text-lg font-semibold text-primary transition duration-300 hover:bg-gray-50;
 }
-
 
 @layer base {
     html {
