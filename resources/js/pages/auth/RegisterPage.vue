@@ -36,9 +36,9 @@
         placeholder="name@example.com"
       />
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1"
-          >Role</label
-        >
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          Role
+        </label>
         <div class="relative">
           <Icon
             icon="lucide:users"
@@ -46,7 +46,7 @@
           />
           <select
             v-model="form.role"
-            class="w-full appearance-none rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-sm"
+            class="w-full appearance-none rounded-lg border border-gray-300 py-[8.3px] pl-10 pr-4 text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-sm"
           >
             <option class="" value="user">User</option>
             <option value="owner">Owner</option>

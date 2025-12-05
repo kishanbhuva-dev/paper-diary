@@ -73,60 +73,83 @@
         </div>
       </div>
     </div>
-    <!-- mobile menu -->
+    <!-- Mobile Menu -->
     <div v-if="isMobileMenuOpen" class="lg:hidden">
+      <!-- Backdrop -->
       <div
-        class="fixed inset-0 bg-black opacity-50 z-40"
+        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
         @click="toggleMobileMenu"
       ></div>
-      <div class="fixed inset-y-0 right-0 max-w-64 w-full bg-white z-50 p-6">
+
+      <!-- Slide-in Drawer -->
+      <div
+        class="fixed inset-y-0 right-0 w-64 bg-blue-50 backdrop-blur-xl z-50 p-6 rounded-l-lg transform transition-transform duration-300 ease-out"
+      >
+        <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-lg font-semibold">Menu</h2>
+          <h2 class="text-xl font-semibold text-gray-800 tracking-tight">
+            Menu
+          </h2>
+
           <button
             @click="toggleMobileMenu"
-            class="p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+            class="p-2 rounded-full text-gray-600 hover:bg-gray-100 transition"
           >
             <Icon icon="lucide:x" class="h-6 w-6" />
           </button>
         </div>
-        <nav class="flex flex-col space-y-4">
+
+        <!-- Navigation -->
+        <nav class="flex flex-col space-y-3">
           <template v-for="item in navigationMenu" :key="item.label">
+            <!-- Normal Link -->
             <a
               v-if="!item.isDropdown"
               :href="item.to"
-              class="block px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              class="block px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-xl transition"
               @click="toggleMobileMenu"
             >
               {{ item.label }}
             </a>
-            <div v-else>
+
+            <!-- Dropdown Menu -->
+            <div v-else class="w-full">
               <button
                 @click="toggleDropdown(item.label)"
-                class="w-full text-left flex items-center justify-between px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                class="w-full flex items-center justify-between px-4 py-2 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-100 transition"
               >
                 <span>{{ item.label }}</span>
                 <Icon
                   icon="lucide:chevron-down"
+                  class="h-5 w-5 transition-transform duration-200"
                   :class="{ 'rotate-180': openDropdown === item.label }"
-                  class="h-5 w-5 transform transition-transform duration-200"
                 />
               </button>
-              <div v-if="openDropdown === item.label" class="mt-2 pl-4">
-                <a
-                  v-for="subItem in item.dropdownItems"
-                  :key="subItem.label"
-                  :href="subItem.to"
-                  class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md"
-                  @click="toggleMobileMenu"
+
+              <!-- Dropdown Items -->
+              <transition name="fade-slide">
+                <div
+                  v-if="openDropdown === item.label"
+                  class="mt-2 pl-4 space-y-2"
                 >
-                  {{ subItem.label }}
-                </a>
-              </div>
+                  <a
+                    v-for="subItem in item.dropdownItems"
+                    :key="subItem.label"
+                    :href="subItem.to"
+                    class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition"
+                    @click="toggleMobileMenu"
+                  >
+                    {{ subItem.label }}
+                  </a>
+                </div>
+              </transition>
             </div>
           </template>
+
+          <!-- Login Button -->
           <router-link
             to="/login"
-            class="btn-primary px-6 py-2 mt-4 text-center"
+            class="btn-primary text-center p-2"
             @click="toggleMobileMenu"
           >
             Login Now
