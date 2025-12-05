@@ -1,13 +1,13 @@
 <template>
   <div class="w-full max-w-xs min-w-[100px]">
-    <label :for="labelSlug" class="block text-sm text-gray-500 font-medium">
+    <label :for="labelSlug" class="block text-sm font-medium text-gray-500">
       {{ label }}
     </label>
     <div class="relative">
       <select
         :id="labelSlug"
         v-model="model"
-        class="w-full bg-white placeholder:text-gray-400 text-sm font-medium border border-gray-200 rounded-lg pl-3 pr-8 py-2 transition duration-300 ease focus:outline-none focus:border-gray-400 hover:border-gray-400 shadow-sm focus:shadow-md appearance-none cursor-pointer"
+        class="ease w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white py-2 pr-8 pl-3 text-sm font-medium shadow-sm transition duration-300 placeholder:text-gray-400 hover:border-gray-400 focus:border-gray-400 focus:shadow-md focus:outline-none"
       >
         <option value="">{{ placeholder }}</option>
         <option
@@ -24,7 +24,7 @@
         viewBox="0 0 24 24"
         stroke-width="1.2"
         stroke="currentColor"
-        class="h-5 w-5 ml-1 absolute top-2.5 right-2.5"
+        class="absolute top-2.5 right-2.5 ml-1 h-5 w-5"
       >
         <path
           stroke-linecap="round"
