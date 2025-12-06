@@ -89,14 +89,8 @@ const ownerService = {
   },
 
   // Sync property facilities (POST the selected facility IDs)
-  async setPropertyFacilities(propertyId, facilityIds = []) {
-    const payload = {
-      data: {
-        propertyId: parseInt(propertyId, 10),
-        facilityId: facilityIds.map((id) => parseInt(id, 10)),
-      },
-    };
-    const res = await apiClient.post("/owner/add-facility-property", payload);
+  async setPropertyFacilities(payload) {
+    res = await apiClient.post("/owner/add-facility-property", payload);
     return res.data.data;
   },
 

@@ -1,87 +1,122 @@
 <template>
   <aside
+    class="flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ease-in-out"
     :class="[
-      'bg-white text-gray-800 fixed h-screen transition-all duration-500 ease-in-out z-30 flex flex-col overflow-hidden border-r border-indigo-100',
-      'md:w-60 md:translate-x-0',
+      // Mobile Styles: Full screen fixed overlay
+      'fixed inset-0 z-50 w-full',
+      isMobileOpen ? 'translate-x-0' : '-translate-x-full',
 
-      windowWidth < 768 && isCollapsed
-        ? '-translate-x-full'
-        : windowWidth < 768
-        ? 'w-full translate-x-0 transition-all duration-500 ease-in-out'
-        : '',
+      // Desktop Styles: Reset to static side column
+      'md:relative md:translate-x-0 md:w-72 md:inset-auto md:h-screen',
     ]"
   >
-    <div class="border-indigo-200 border-b h-18 py-2 px-4">
-      <div class="flex items-center justify-between">
-        <span class="text-lg font-bold tracking-wide text-indigo-700"
-          >PAPER DIARY</span
+    <div
+      class="h-16 flex items-center justify-between px-6 border-b border-slate-100 flex-shrink-0"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200"
         >
-
-        <button
-          v-if="windowWidth < 768 && !isCollapsed"
-          @click="toggleSidebar"
-          class="text-3xl focus:outline-none hover:text-red-500 transition-colors"
-        >
-          <Icon icon="mdi:close" />
-        </button>
+          <Icon icon="mdi:paper-roll-outline" class="text-white text-lg" />
+        </div>
+        <span class="text-xl font-bold tracking-tight text-slate-800">
+          PAPER <span class="text-indigo-600">DIARY</span>
+        </span>
       </div>
-      <!-- FIX: Now uses the reactive userName from the composable -->
-      <span v-if="user" class="text-sm text-gray-600"> welcome {{ user.firstName }}</span>
+
+      <button
+        class="md:hidden p-2 text-slate-400 hover:text-red-500 transition-colors"
+        @click="$emit('closeSidebar')"
+      >
+        <Icon icon="mdi:close" class="text-2xl" />
+      </button>
     </div>
 
-    <ul class="flex-1 overflow-y-auto">
-      <li v-for="item in mainMenuItems" :key="item.name">
-        <RouterLink
-          :to="item.to"
-          class="flex items-center px-5 py-2 transition-all duration-200 hover:scale-105 group justify-start hover:bg-indigo-50 hover:text-indigo-700"
-          :class="{
-            'bg-indigo-100 text-indigo-800 font-semibold':
-              $route.name === item.name,
-          }"
-          @click="windowWidth < 768 ? toggleSidebar() : null"
-        >
-          <Icon
-            :icon="item.icon"
-            class="text-2xl min-w-[2rem] transition-colors duration-300"
-          />
-          <span
-            class="ml-3 text-sm font-medium transition-colors duration-300 whitespace-nowrap"
-          >
-            {{ item.label }}
-          </span>
-        </RouterLink>
-      </li>
-    </ul>
-
-    <div class="p-2 border-t border-indigo-200">
-      <button
-        @click="handleLogout"
-        class="w-full flex items-center px-3 py-2 transition-all duration-200 hover:bg-indigo-100 hover:text-indigo-700 rounded justify-start text-gray-700"
+    <div class="flex-1 overflow-y-auto py-6 space-y-1">
+      <div
+        class="px-6 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider"
       >
-        <Icon
-          icon="mdi:logout"
-          class="text-2xl min-w-[2rem] transition-colors duration-300"
-        />
-        <span class="ml-3 text-md font-medium whitespace-nowrap"> Logout </span>
-      </button>
+        Main Menu
+      </div>
+
+      <ul class="space-y-1">
+        <li v-for="item in mainMenuItems" :key="item.name">
+          <RouterLink
+            :to="item.to"
+            class="group relative flex items-center px-4 py-3 mx-3 rounded-xl transition-all duration-200 font-medium text-sm"
+            :class="{
+              // Active State: Solid Indigo, White Text, Shadow
+              'bg-indigo-600 text-white shadow-md shadow-indigo-200':
+                $route.name === item.name,
+              // Inactive State: Slate text, Hover Light Indigo
+              'text-slate-600 hover:bg-indigo-50 hover:text-indigo-700':
+                $route.name !== item.name,
+            }"
+          >
+            <Icon
+              :icon="item.icon"
+              class="text-xl mr-3 transition-colors"
+              :class="
+                $route.name === item.name
+                  ? 'text-white'
+                  : 'text-slate-400 group-hover:text-indigo-600'
+              "
+            />
+
+            <span>{{ item.label }}</span>
+
+            <!-- <Icon
+              v-if="$route.name === item.name"
+              icon="mdi:chevron-right"
+              class="ml-auto text-indigo-200"
+            /> -->
+          </RouterLink>
+        </li>
+      </ul>
+    </div>
+
+    <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+      <div
+        class="flex items-center p-3 bg-white border border-slate-200 rounded-xl shadow-sm"
+      >
+        <div
+          class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200 shrink-0"
+        >
+          {{ user?.firstName?.charAt(0) || "U" }}
+        </div>
+
+        <div class="ml-3 flex-1 overflow-hidden">
+          <p class="text-sm font-bold text-slate-800 truncate">
+            {{ user?.firstName || "User" }}
+          </p>
+          <p class="text-xs text-slate-500 truncate">Owner Account</p>
+        </div>
+
+        <button
+          @click="handleLogout"
+          class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          title="Logout"
+        >
+          <Icon icon="mdi:logout" class="text-xl" />
+        </button>
+      </div>
     </div>
   </aside>
 </template>
 
 <script setup>
 import { Icon } from "@iconify/vue";
-import { ref, onMounted, onUnmounted, defineExpose } from "vue";
-import { useRouter, useRoute } from "vue-router";
 import { useAuth } from "../../composables/useAuth";
 
-const router = useRouter();
-const route = useRoute();
+const props = defineProps({
+  isMobileOpen: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-// Destructure logout and userName from the composable
+const emits = defineEmits(["closeSidebar"]);
 const { logout, user } = useAuth();
-
-const isCollapsed = ref(true);
-const windowWidth = ref(window.innerWidth);
 
 const mainMenuItems = [
   {
@@ -96,53 +131,16 @@ const mainMenuItems = [
     icon: "mdi:home-city-outline",
     to: { name: "properties" },
   },
+  // Added an extra item to show how the list looks
+  // {
+  //   name: "settings",
+  //   label: "Settings",
+  //   icon: "mdi:cog-outline",
+  //   to: { name: "properties" }, // Temporarily pointing to properties
+  // },
 ];
 
-function toggleSidebar() {
-  if (windowWidth.value < 768) {
-    isCollapsed.value = !isCollapsed.value;
-  }
-}
-
-function handleResize() {
-  windowWidth.value = window.innerWidth;
-  if (window.innerWidth >= 768) {
-    isCollapsed.value = false;
-  } else {
-    isCollapsed.value = true;
-  }
-}
-
 async function handleLogout() {
-  // Use the centralized logout function from useAuth
-  // This handles the API call, Pinia state clearing, localStorage cleanup, and redirection.
   await logout();
-
-  if (windowWidth.value < 768) {
-    isCollapsed.value = true;
-  }
 }
-
-onMounted(() => {
-  handleResize();
-  window.addEventListener("resize", handleResize);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("resize", handleResize);
-});
-
-defineExpose({ isCollapsed, toggleSidebar, windowWidth });
 </script>
-
-<style scoped>
-/* Hide scrollbar */
-ul::-webkit-scrollbar {
-  display: none;
-}
-
-ul {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>

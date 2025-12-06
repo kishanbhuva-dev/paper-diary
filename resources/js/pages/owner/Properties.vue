@@ -1,5 +1,5 @@
 <template>
-  <div class="px-40 sm:px-6 py-4 bg-gray-100 min-h-screen">
+  <div class="px-4 sm:px-6 py-4 bg-gray-100 min-h-screen">
     <div
       v-if="loading && !properties.length"
       class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center backdrop-blur-sm"

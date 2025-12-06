@@ -1,47 +1,36 @@
 <template>
-    <header class=" sticky top-0 z-10 flex items-center h-18 px-4 bg-white transition-all duration-500 border-b border-indigo-100">
+  <header
+    class="flex-shrink-0 bg-white h-16 flex items-center justify-between px-4 md:px-8 border-b border-slate-200 shadow-sm z-20 relative"
+  >
+    <div class="flex items-center gap-4">
+      <button
+        class="md:hidden p-2 -ml-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors focus:outline-none"
+        @click="$emit('toggleSidebar')"
+      >
+        <Icon icon="mdi:menu" class="text-2xl" />
+      </button>
+    </div>
 
-        <!-- (Mobile Menu Toggle) -->
-        <!-- This takes up space on mobile to push the logo slightly right, ensuring true center -->
-        <div class="flex items-center justify-start w-10 h-10 md:w-auto">
-            <button v-if="windowWidth < 768"
-                class="flex items-center justify-center w-full h-full rounded hover:bg-gray-100"
-                @click="$emit('toggleSidebar')">
-                <Icon icon="mdi:view-grid-outline" class="text-2xl text-gray-700" />
-            </button>
-        </div>
+    <!-- <div class="flex items-center gap-4">
+      <button
+        class="p-2 text-slate-400 hover:text-indigo-600 transition-colors relative"
+      >
+        <Icon icon="mdi:bell-outline" class="text-2xl" />
+        <span
+          class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"
+        ></span>
+      </button>
 
-        <!-- (Logo) -->
-        <div class="flex-grow flex justify-center">
-            <a href="/dashboard">
-                <!-- <img src="" alt="Paper Diary Logo" class="max-h-10 object-contain" /> -->
-            </a>
-        </div>
-
-
-        <!-- (Spacer/Profile/Other Buttons) -->
-        <!-- On desktop, you can put user info or notifications here. -->
-        <div class="flex items-center justify-end w-10 h-10 md:w-auto">
-            <!-- Currently empty, or add profile/notifications here -->
-            <div v-if="windowWidth < 768" class="w-10 h-10"></div>
-            <!-- If you had profile icons, they'd go here: -->
-            <!-- <Icon v-else icon="mdi:bell-outline" class="text-2xl text-gray-700 ml-4 cursor-pointer" /> -->
-        </div>
-
-    </header>
+      <div
+        class="h-8 w-8 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xs"
+      >
+        PD
+      </div>
+    </div> -->
+  </header>
 </template>
 
 <script setup>
 import { Icon } from "@iconify/vue";
-import { ref, computed } from "vue";
-
-const props = defineProps({
-    windowWidth: {
-        type: Number,
-        required: true,
-    },
-});
-
-// Define emits
-const emits = defineEmits(['toggleSidebar']);
+const emits = defineEmits(["toggleSidebar"]);
 </script>

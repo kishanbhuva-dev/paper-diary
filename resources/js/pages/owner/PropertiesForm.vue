@@ -428,11 +428,10 @@ const handleSubmit = async () => {
           .filter((id) => Number.isInteger(id) && id > 0);
         if (facilityIds.length > 0) {
           try {
-            await ownerService.setPropertyFacilities(
-              savedPropertyId,
-              facilityIds
-            );
-            console.log("[PropertiesForm] Facilities updated:", facilityIds);
+            await ownerService.setPropertyFacilities({
+              propertyId: savedPropertyId,
+              facilityId: facilityIds,
+            });
           } catch (err) {}
         }
       }
