@@ -1,45 +1,39 @@
-// index.js (Vue Router Setup)
 import { createRouter, createWebHistory } from "vue-router";
 import routes from "./routes";
+import { useAuth } from "../composables/useAuth";
 
-// Create router instance
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-// Navigation guard for authentication and roles
-router.beforeEach(async (to, from, next) => {
-  const localToken = localStorage.getItem("authToken");
-  const localUser = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user"))
-    : null;
-  const isAuthLocally = !!localToken;
+router.beforeEach((to, from, next) => {
+  const { isAuthenticated, isAdmin, isOwner } = useAuth();
 
-  const userRole = localUser?.role.toLowerCase();
-  const dashboardRoutes = {
-    owner: "owner-dashboard",
-    admin: "admin-dashboard",
-  };
-
-  if (to.path === "/" && isAuthLocally) {
-    return next({ name: dashboardRoutes[userRole] || "/" });
-  }
-
-  if (to.meta.requiresAuth && !isAuthLocally) {
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
     return next({ name: "login" });
   }
 
-  if (isAuthLocally && to.meta.authRoutes) {
-    return next({ name: dashboardRoutes[userRole] || "/" });
+  const path = to.path;
+
+  if (path.startsWith("/admin")) {
+    if (!isAuthenticated.value) return next({ name: "login" });
+
+    if (!isAdmin.value) {
+      return next(
+        isOwner.value ? { name: "owner-dashboard" } : { name: "home" }
+      );
+    }
   }
 
-  if (to.path.startsWith("/owner") && userRole !== "owner") {
-    return next({ name: dashboardRoutes[userRole] || "login" });
-  }
+  if (path.startsWith("/owner")) {
+    if (!isAuthenticated.value) return next({ name: "login" });
 
-  if (to.path.startsWith("/admin") && userRole !== "admin") {
-    return next({ name: dashboardRoutes[userRole] || "login" });
+    if (!isOwner.value) {
+      return next(
+        isAdmin.value ? { name: "admin-dashboard" } : { name: "home" }
+      );
+    }
   }
 
   next();
