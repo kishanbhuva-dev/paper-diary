@@ -20,6 +20,10 @@ const token = ref(localStorage.getItem(TOKEN_KEY) || null);
 const user = ref(loadStoredUser());
 const isAuthenticated = computed(() => !!token.value);
 
+const isAdmin = computed(() => user.value?.role === "admin");
+const isOwner = computed(() => user.value?.role === "owner");
+const isGuest = computed(() => !isAuthenticated.value);
+
 let routerInstance = null;
 
 function persistAuth(newToken, newUser) {
@@ -95,6 +99,9 @@ export function useAuth() {
     token,
     user,
     isAuthenticated,
+    isAdmin,
+    isOwner,
+    isGuest,
     login,
     logout,
     checkAuth,

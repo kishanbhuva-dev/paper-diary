@@ -56,7 +56,14 @@ const routes = [
     path: "/admin",
     component: () => import("../../js/layouts/AdminLayout.vue"),
     meta: { requiresAuth: true },
-    children: [],
+    children: [
+      {
+        path: "",
+        name: "admin-dashboard",
+        component: () => import("../../js/pages/admin/Dashboard.vue"),
+        meta: { pageTitle: "Admin Dashboard" },
+      },
+    ],
   },
 ];
 
