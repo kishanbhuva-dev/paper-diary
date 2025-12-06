@@ -2,78 +2,92 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import authService from "../services/authService";
 
-const token = ref(localStorage.getItem("authToken") || null);
-const user = ref(
-  localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null
-);
+const TOKEN_KEY = "authToken";
+const USER_KEY = "user";
 
+function loadStoredUser() {
+  try {
+    const stored = localStorage.getItem(USER_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch (e) {
+    console.error("[useAuth] Invalid user JSON:", e);
+    localStorage.removeItem(USER_KEY);
+    return null;
+  }
+}
+
+const token = ref(localStorage.getItem(TOKEN_KEY) || null);
+const user = ref(loadStoredUser());
 const isAuthenticated = computed(() => !!token.value);
+
 let routerInstance = null;
 
 function persistAuth(newToken, newUser) {
-  try {
-    if (newToken) {
-      localStorage.setItem("authToken", newToken);
-      token.value = newToken;
-    } else {
-      localStorage.removeItem("authToken");
-      token.value = null;
-    }
-  } catch (e) {
-    console.error("[persistAuth] Error saving token:", e);
+  if (newToken) {
+    localStorage.setItem(TOKEN_KEY, newToken);
+    token.value = newToken;
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+    token.value = null;
   }
 
-  try {
-    if (newUser) {
-      localStorage.setItem("user", JSON.stringify(newUser));
+  if (newUser) {
+    try {
+      localStorage.setItem(USER_KEY, JSON.stringify(newUser));
       user.value = newUser;
-    } else {
-      localStorage.removeItem("user");
+    } catch (e) {
+      console.error("[useAuth] Failed to save user:", e);
       user.value = null;
     }
-  } catch (e) {
-    console.error("[persistAuth] Error saving user:", e);
+  } else {
+    localStorage.removeItem(USER_KEY);
+    user.value = null;
   }
 }
 
 export function useAuth() {
-  if (!routerInstance) {
-    routerInstance = useRouter();
-  }
+  if (!routerInstance) routerInstance = useRouter();
+
+  const checkAuth = () => {
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    const storedUser = loadStoredUser();
+
+    if (storedToken && storedUser) {
+      token.value = storedToken;
+      user.value = storedUser;
+    } else {
+      persistAuth(null, null);
+    }
+  };
+
   async function login(credentials) {
     const res = await authService.login(credentials);
-    if (!res || !res.data || !res.data.token || !res.data.user) {
-      throw new Error(
-        res?.message || "Login failed: Invalid response from server"
-      );
+
+    if (!res?.data?.token || !res?.data?.user) {
+      throw new Error("Login failed: Invalid response from server.");
     }
 
     persistAuth(res.data.token, res.data.user);
 
-    setTimeout(() => {
-      const role = res.data.user?.role?.toLowerCase();
+    const role = res.data.user.role?.toLowerCase();
+    const roleRoutes = {
+      owner: "owner-dashboard",
+      admin: "admin-dashboard",
+    };
 
-      if (role === "owner") {
-        routerInstance.push({ name: "owner-dashboard" });
-      } else if (role === "admin") {
-        routerInstance.push({ name: "admin-dashboard" });
-      } else {
-        routerInstance.push("/");
-      }
-    }, 300);
+    routerInstance.push({ name: roleRoutes[role] || "home" });
 
-    return { success: true, data: res };
+    return { success: true, data: res.data };
   }
 
   async function logout() {
     try {
       await authService.logout();
     } catch (e) {
-      console.debug("Logout API failed:", e);
+      console.warn("[logout] API failed:", e);
     }
 
     persistAuth(null, null);
-
     routerInstance.push({ name: "login" });
   }
 
@@ -83,6 +97,7 @@ export function useAuth() {
     isAuthenticated,
     login,
     logout,
+    checkAuth,
   };
 }
 

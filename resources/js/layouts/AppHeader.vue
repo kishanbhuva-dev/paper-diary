@@ -83,7 +83,7 @@
 
       <!-- Slide-in Drawer -->
       <div
-        class="fixed inset-y-0 right-0 w-64 bg-blue-50 backdrop-blur-xl z-50 p-6 rounded-l-lg transform transition-transform duration-300 ease-out"
+        class="overflow-y-auto fixed inset-y-0 right-0 w-64 bg-blue-50 backdrop-blur-xl z-50 p-6 rounded-l-lg transform transition-transform duration-300 ease-out"
       >
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
@@ -95,7 +95,7 @@
             @click="toggleMobileMenu"
             class="p-2 rounded-full text-gray-600 hover:bg-gray-100 transition"
           >
-            <Icon icon="lucide:x" class="h-6 w-6" />
+            <Icon icon="lucide:x" class="h-5 w-5" />
           </button>
         </div>
 

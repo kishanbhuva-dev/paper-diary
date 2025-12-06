@@ -213,21 +213,11 @@ const handleRegister = async () => {
     phoneInput,
   ];
 
-  if (confirmPasswordInput.value.customError) {
-    confirmPasswordInput.value.customError = "";
-  }
-
   const allValid = inputs.every((input) => input.value.validate());
-
-  if (form.value.password !== form.value.confirm_password) {
-    confirmPasswordInput.value.customError = "Passwords do not match.";
-    confirmPasswordInput.value.validate();
-    return;
-  }
 
   if (allValid) {
     const res = await authService.register(form.value);
-    if (res) {
+    if (res.status) {
       router.push({ name: "login" });
     }
   }
