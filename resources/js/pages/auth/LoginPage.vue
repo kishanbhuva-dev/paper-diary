@@ -33,9 +33,9 @@
       />
 
       <div class="flex justify-between text-sm text-primary">
-        <a href="#" class="hover:text-primary hover:underline"
-          >Forgot password?</a
-        >
+        <a href="#" class="hover:text-primary hover:underline">
+          Forgot password?
+        </a>
       </div>
 
       <button type="submit" class="btn-primary w-full py-1.5">Log In</button>

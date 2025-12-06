@@ -5,9 +5,9 @@ Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
 Route::post('register', [App\Http\Controllers\AuthController::class, 'register']);
 Route::post('forget-password', [App\Http\Controllers\AuthController::class, 'forgetPassword']);
 Route::post('reset-password', [App\Http\Controllers\AuthController::class, 'resetPassword']);
-Route::post('logout', [App\Http\Controllers\AuthController::class, 'logOut']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [App\Http\Controllers\AuthController::class, 'logOut']);
     Route::post('profile', [App\Http\Controllers\AuthController::class, 'profileUpdate']);
     Route::post('change-password', [App\Http\Controllers\AuthController::class, 'changePassword']);
 });

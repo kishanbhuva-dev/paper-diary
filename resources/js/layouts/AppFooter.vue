@@ -4,9 +4,9 @@
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-y-12 lg:gap-x-16">
         <div class="flex flex-col space-y-4 lg:col-span-3">
           <div class="flex flex-col space-y-4">
-            <a href="/" class="flex items-center space-x-2">
+            <router-link to="/" class="w-16">
               <img src="/public/main_logo.png" alt="Paper Diary" />
-            </a>
+            </router-link>
 
             <h2 class="text-3xl font-extrabold text-gray-900 leading-tight">
               Your Complex Booking World, Made
