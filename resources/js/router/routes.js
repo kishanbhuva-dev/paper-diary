@@ -19,6 +19,11 @@ const routes = [
         component: () => import("../../js/pages/guest/BookingPage.vue"),
       },
       {
+        path: "/my-bookings",
+        name: "my-bookings",
+        component: () => import("../../js/pages/guest/MyBookings.vue"),
+      },
+      {
         path: "/login",
         name: "login",
         component: () => import("../../js/pages/auth/LoginPage.vue"),
