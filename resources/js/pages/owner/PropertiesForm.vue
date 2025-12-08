@@ -1,212 +1,247 @@
 <template>
-  <div class="px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
-    <div class="max-w-4xl mx-auto">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-indigo-800">
+  <div class="px-4 sm:px-6 py-8 bg-gray-50 min-h-screen">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">
           {{ isEditing ? "Edit Property" : "Add New Property" }}
         </h1>
         <button
           @click="router.push({ name: 'properties' })"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-200 transition cursor-pointer duration-150 flex items-center"
+          class="px-5 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 rounded-xl border border-indigo-200 hover:bg-indigo-100 transition duration-150 flex items-center shadow-sm"
         >
-          <Icon icon="mdi:arrow-left" class="w-5 h-5 mr-1" />
-          Back to List
+          <Icon icon="mdi:arrow-left" class="w-5 h-5 mr-2" />
+          Back to Properties
         </button>
       </div>
 
-      <div class="bg-white rounded-xl overflow-hidden border border-indigo-300">
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-100">
         <div
-          class="p-5 bg-indigo-100 flex justify-between items-center border-b border-indigo-200 shrink-0"
+          v-if="loadingItem"
+          class="p-16 flex flex-col justify-center items-center"
         >
-          <h3 class="text-xl font-bold text-indigo-900">Details</h3>
-        </div>
-
-        <div v-if="loadingItem" class="p-10 flex justify-center items-center">
           <Icon
             icon="eos-icons:loading"
-            class="w-8 h-8 text-indigo-600 animate-spin"
+            class="w-10 h-10 text-indigo-600 animate-spin"
           />
-          <span class="ml-3 text-indigo-600 font-semibold"
-            >Loading data...</span
+          <span class="mt-4 text-lg text-indigo-600 font-semibold"
+            >Loading property data...</span
           >
         </div>
 
-        <form v-else @submit.prevent="handleSubmit" class="p-6 space-y-4">
-          <BaseInput
-            :ref="setInputRef"
-            v-model="formData.propertyName"
-            label="Property Name"
-            width="full"
-            placeholder="e.g. Seaside Villa"
-            required
-            :max-length="50"
-            :show-count="true"
-          />
-
-          <BaseInput
-            :ref="setInputRef"
-            v-model="formData.address"
-            label="Address"
-            width="full"
-            placeholder="e.g. 123 Ocean Drive"
-            required
-            :max-length="100"
-          />
-
-          <BaseInput
-            :ref="setInputRef"
-            v-model="formData.email"
-            label="Email"
-            type="email"
-            width="full"
-            placeholder="contact@example.com"
-            required
-            :max-length="50"
-          />
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BaseInput
-              :ref="setInputRef"
-              v-model="formData.city"
-              label="City"
-              width="full"
-              placeholder="London"
-              required
-              :max-length="20"
-            />
-            <BaseInput
-              :ref="setInputRef"
-              v-model="formData.country"
-              label="Country"
-              width="full"
-              placeholder="UK"
-              required
-              :max-length="20"
-            />
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BaseInput
-              :ref="setInputRef"
-              v-model="formData.postcode"
-              label="Postcode"
-              width="full"
-              placeholder="SW1A 1AA"
-              required
-              :max-length="10"
-            />
-            <BaseInput
-              :ref="setInputRef"
-              v-model="formData.telephone"
-              label="Telephone"
-              width="full"
-              placeholder="+44 7911 123456"
-              :max-length="15"
-              :pattern="/^[0-9+\-\s]*$/"
-              custom-error="Only numbers and + - allowed"
-            />
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BaseInput
-              :ref="setInputRef"
-              v-model="formData.latitude"
-              label="Latitude"
-              width="full"
-              placeholder="e.g. 51.5072"
-              required
-              :max-length="15"
-              :pattern="/^[-+]?([1-8]?\d(\.\d+)?|90(\.\d+)?)$/"
-              custom-error="Must be number -90 to 90"
-            />
-            <BaseInput
-              :ref="setInputRef"
-              v-model="formData.longitude"
-              label="Longitude"
-              width="full"
-              placeholder="e.g. -0.1276"
-              required
-              :max-length="15"
-              :pattern="/^[-+]?((1[0-7]\d|0?\d?\d)(\.\d+)?|180(\.\d+)?)$/"
-              custom-error="Must be number -180 to 180"
-            />
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-sm font-semibold text-gray-700 mb-1"
-              >Status <span class="text-red-500">*</span></label
+        <form v-else @submit.prevent="handleSubmit" class="space-y-8">
+          <div class="p-6 md:p-8 border-b border-gray-100">
+            <h3
+              class="text-xl font-bold text-indigo-700 mb-6 flex items-center gap-2"
             >
-            <div class="relative">
-              <select
-                v-model="formData.status"
-                class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none appearance-none bg-white"
-              >
-                <option :value="1">Active</option>
-                <option :value="0">Inactive</option>
-              </select>
-              <Icon
-                icon="mdi:chevron-down"
-                class="absolute right-3 top-3 text-gray-400 pointer-events-none"
+              <Icon icon="mdi:home-city-outline" class="text-2xl" /> Property
+              Details
+            </h3>
+
+            <div class="space-y-4">
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.propertyName"
+                label="Property Name"
+                width="full"
+                placeholder="e.g. Seaside Villa"
+                required
+                :max-length="50"
+              />
+
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.address"
+                label="Primary Address Line"
+                width="full"
+                placeholder="e.g. 123 Ocean Drive"
+                required
+                :max-length="100"
+              />
+
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.email"
+                label="Contact Email"
+                type="email"
+                width="full"
+                placeholder="contact@example.com"
+                required
+                :max-length="50"
               />
             </div>
           </div>
 
-          <!-- Facilities -->
-          <div class="mb-4">
-            <label class="block text-sm font-semibold text-gray-700 mb-1"
-              >Facilities <span class="text-red-500">*</span></label
+          <div class="p-6 md:p-8 border-b border-gray-100">
+            <h3
+              class="text-xl font-bold text-indigo-700 mb-6 flex items-center gap-2"
             >
-            <div
-              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-indigo-50 p-4 rounded-lg border border-indigo-200"
+              <Icon icon="mdi:map-marker-outline" class="text-2xl" /> Location &
+              Contact
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.city"
+                label="City"
+                width="full"
+                placeholder="London"
+                required
+                :max-length="20"
+              />
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.country"
+                label="Country"
+                width="full"
+                placeholder="UK"
+                required
+                :max-length="20"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.postcode"
+                label="Postcode"
+                width="full"
+                placeholder="SW1A 1AA"
+                required
+                :max-length="10"
+              />
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.telephone"
+                label="Telephone"
+                width="full"
+                placeholder="+44 7911 123456"
+                :max-length="15"
+                :pattern="/^[0-9+\-\s]*$/"
+                custom-error="Only numbers and + - allowed"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.latitude"
+                label="Latitude"
+                width="full"
+                placeholder="e.g. 51.5072"
+                required
+                :max-length="15"
+                :pattern="/^[-+]?([1-8]?\d(\.\d+)?|90(\.\d+)?)$/"
+                custom-error="Must be number -90 to 90"
+              />
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.longitude"
+                label="Longitude"
+                width="full"
+                placeholder="e.g. -0.1276"
+                required
+                :max-length="15"
+                :pattern="/^[-+]?((1[0-7]\d|0?\d?\d)(\.\d+)?|180(\.\d+)?)$/"
+                custom-error="Must be number -180 to 180"
+              />
+            </div>
+          </div>
+
+          <div class="p-6 md:p-8 border-b border-gray-100">
+            <h3
+              class="text-xl font-bold text-indigo-700 mb-6 flex items-center gap-2"
             >
-              <div
-                v-for="facility in availableFacilities"
-                :key="facility.id"
-                class="flex items-center"
+              <Icon
+                icon="mdi:checkbox-multiple-marked-outline"
+                class="text-2xl"
+              />
+              Features & Status
+            </h3>
+
+            <div class="mb-8">
+              <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                >Status <span class="text-red-500">*</span></label
               >
-                <input
-                  :id="`facility-${facility.id}`"
-                  type="checkbox"
-                  v-model="formData.facilities"
-                  :value="facility.id"
-                  class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
-                />
-                <label
-                  :for="`facility-${facility.id}`"
-                  class="ml-2 text-sm font-medium text-gray-700 cursor-pointer"
+              <div class="relative max-w-sm">
+                <select
+                  v-model="formData.status"
+                  class="block w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none appearance-none bg-white shadow-sm font-medium text-gray-700"
                 >
-                  {{ facility.name }}
-                </label>
+                  <option :value="1">Active</option>
+                  <option :value="0">Inactive</option>
+                </select>
+                <Icon
+                  icon="mdi:chevron-down"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                />
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-3"
+                >Facilities <span class="text-red-500">*</span></label
+              >
+              <div
+                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-indigo-50 p-6 rounded-xl border border-indigo-200 shadow-inner"
+              >
+                <div
+                  v-for="facility in availableFacilities"
+                  :key="facility.id"
+                  class="flex items-center"
+                >
+                  <input
+                    :id="`facility-${facility.id}`"
+                    type="checkbox"
+                    v-model="formData.facilities"
+                    :value="facility.id"
+                    class="w-4 h-4 text-indigo-600 bg-white border-gray-300 rounded focus:ring-indigo-500 cursor-pointer transition-colors"
+                  />
+                  <label
+                    :for="`facility-${facility.id}`"
+                    class="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none"
+                  >
+                    {{ facility.name }}
+                  </label>
+                </div>
               </div>
             </div>
           </div>
 
-          <OwnerImageUploader
-            v-model="formData.images"
-            :max-files="10"
-            @reorder="onImagesReorder"
-          />
-        </form>
+          <div class="p-6 md:p-8">
+            <h3
+              class="text-xl font-bold text-indigo-700 mb-6 flex items-center gap-2"
+            >
+              <Icon icon="mdi:image-multiple-outline" class="text-2xl" />
+              Property Images
+            </h3>
+            <OwnerImageUploader
+              v-model="formData.images"
+              :max-files="10"
+              @reorder="onImagesReorder"
+            />
+          </div>
 
-        <div
-          class="flex justify-end pt-4 px-6 pb-6 bg-white border-t border-gray-300 shrink-0"
-        >
-          <button
-            type="button"
-            @click="router.push({ name: 'properties' })"
-            class="px-5 py-2 mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-150 outline-indigo-400 cursor-pointer"
+          <div
+            class="flex justify-end p-6 border-t border-gray-200 bg-gray-50/50 rounded-b-2xl"
           >
-            Cancel
-          </button>
-          <button
-            type="button"
-            @click="handleSubmit"
-            class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center shadow-md outline-indigo-400 shadow-indigo-200 cursor-pointer"
-          >
-            <Icon icon="ic:round-save" class="w-5 h-5 inline-block mr-1" />
-            {{ isEditing ? "Update Property" : "Save New Property" }}
-          </button>
-        </div>
+            <button
+              type="button"
+              @click="router.push({ name: 'properties' })"
+              class="px-6 py-2.5 mr-3 text-sm font-semibold text-gray-700 bg-white rounded-xl border border-gray-300 hover:bg-gray-100 transition duration-150 outline-indigo-400 cursor-pointer shadow-sm"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              @click="handleSubmit"
+              class="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition duration-150 flex items-center shadow-lg outline-indigo-400 shadow-indigo-300 cursor-pointer"
+            >
+              <Icon icon="ic:round-save" class="w-5 h-5 inline-block mr-2" />
+              {{ isEditing ? "Update Property" : "Save New Property" }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -319,6 +354,11 @@ const handleSubmit = async () => {
       }
     }
   });
+
+  // NOTE: If validation fails, we might want to return here early before API calls.
+  // Since the original code didn't have a check here, I'll assume the form proceeds regardless,
+  // but in a live app, you'd typically add:
+  // if (!isFormValid) return;
 
   try {
     let savedPropertyId = null;

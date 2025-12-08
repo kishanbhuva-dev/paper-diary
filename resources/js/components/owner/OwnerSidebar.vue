@@ -11,7 +11,7 @@
     ]"
   >
     <div
-      class="h-16 flex items-center justify-between px-6 border-b border-slate-100 flex-shrink-0"
+      class="h-20 flex items-center justify-between px-6 border-b border-slate-100 flex-shrink-0"
     >
       <div class="flex items-center gap-3">
         <div

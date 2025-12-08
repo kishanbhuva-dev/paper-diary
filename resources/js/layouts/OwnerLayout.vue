@@ -8,7 +8,9 @@
     <div class="flex-1 flex flex-col min-w-0 h-screen">
       <OwnerHeader @toggle-sidebar="isMobileSidebarOpen = true" />
 
-      <main class="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth">
+      <main
+        class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth"
+      >
         <RouterView />
       </main>
     </div>

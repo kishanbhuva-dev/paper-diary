@@ -1,28 +1,31 @@
 <template>
-  <div class="px-4 sm:px-6 py-4 bg-gray-100 min-h-screen">
+  <div class="px-4 sm:px-6 py-8 bg-gray-50 min-h-screen">
     <div
       v-if="loading && !properties.length"
-      class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center backdrop-blur-sm"
+      class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center backdrop-blur-sm transition-opacity duration-300"
     >
-      <Icon icon="eos-icons:loading" class="w-10 h-10 text-indigo-600" />
-      <span class="mt-2 text-indigo-600 font-semibold"
+      <Icon
+        icon="eos-icons:loading"
+        class="w-12 h-12 text-indigo-600 animate-spin"
+      />
+      <span class="mt-4 text-xl text-indigo-700 font-semibold"
         >Loading properties...</span
       >
     </div>
 
     <div
       v-if="error"
-      class="mb-4 p-4 bg-red-100 text-red-700 border border-red-200 rounded flex items-start font-medium"
+      class="max-w-7xl mx-auto mb-6 p-4 bg-red-100 text-red-700 border border-red-200 rounded-xl flex items-start font-medium shadow-md"
     >
       <Icon
         icon="mdi:alert-circle"
-        class="w-5 h-5 mr-2 flex-shrink-0 text-red-500 mt-0.5"
+        class="w-6 h-6 mr-3 flex-shrink-0 text-red-500"
       />
-      <span class="whitespace-pre-wrap">{{ error }}</span>
+      <span class="whitespace-pre-wrap text-base">{{ error }}</span>
     </div>
 
     <Basetable
-      title="Properties"
+      title="Property Management"
       :columns="tableColumns"
       :rows="properties"
       :server-side="true"
@@ -116,13 +119,13 @@ const loadData = async () => {
 
 const navigateToAdd = () => {
   // FIX: Using the correct, simple route name 'owner-property-form'
-  router.push({ name: "property-form" });
+  router.push({ name: "property-wizard" });
 };
 
 const navigateToEdit = (item) => {
   if (item && item.id) {
     // FIX: Using the correct route name 'owner-property-form'
-    router.push({ name: "property-form", params: { id: btoa(item.id) } });
+    router.push({ name: "property-wizard", params: { id: btoa(item.id) } });
   }
 };
 
@@ -152,8 +155,8 @@ const handleDelete = async (id) => {
     text: "This action cannot be undone and will delete associated data!",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#4f46e5",
-    cancelButtonColor: "#ef4444",
+    confirmButtonColor: "#4f46e5", // Indigo-600
+    cancelButtonColor: "#ef4444", // Red-500
     confirmButtonText: "Yes, delete it!",
     cancelButtonText: "Cancel",
     reverseButtons: true,
@@ -170,6 +173,13 @@ const handleDelete = async (id) => {
         currentPage.value--;
       }
       await loadData();
+
+      Swal.fire({
+        title: "Deleted!",
+        text: "The property has been successfully deleted.",
+        icon: "success",
+        confirmButtonColor: "#4f46e5",
+      });
     } catch (err) {
       const errorMessage =
         err.response?.status === 401
@@ -177,6 +187,12 @@ const handleDelete = async (id) => {
           : err.message || "Deletion failed";
 
       error.value = errorMessage;
+      Swal.fire({
+        title: "Error!",
+        text: errorMessage,
+        icon: "error",
+        confirmButtonColor: "#4f46e5",
+      });
     }
   }
 };
