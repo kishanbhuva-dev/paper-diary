@@ -14,6 +14,11 @@ const routes = [
         component: () => import("../../js/pages/guest/DetailsPage.vue"),
       },
       {
+        path: "/booking-summary",
+        name: "booking-summary",
+        component: () => import("../../js/pages/guest/BookingPage.vue"),
+      },
+      {
         path: "/login",
         name: "login",
         component: () => import("../../js/pages/auth/LoginPage.vue"),
@@ -64,6 +69,11 @@ const routes = [
         meta: { pageTitle: "Admin Dashboard" },
       },
     ],
+  },
+
+  {
+    path: "/:catchAll(.*)*",
+    component: () => import("../../js/pages/NotFound.vue"),
   },
 ];
 
