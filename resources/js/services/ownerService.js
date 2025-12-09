@@ -31,7 +31,9 @@ const ownerService = {
 
   // Fetch a single property by ID
   async fetchPropertyById(id) {
-    const res = await apiClient.get(`/owner/property/${atob(id)}`);
+    // The caller should resolve/decode the ID (if needed). Service is a thin
+    // wrapper and will use the id as provided.
+    const res = await apiClient.get(`/owner/property/${id}`);
     return res.data.data;
   },
 
@@ -55,22 +57,24 @@ const ownerService = {
     return res.data.data;
   },
 
+  // Delete multiple property images by ids
+  async deletePropertyImages(ids = []) {
+    const res = await apiClient.post("/owner/property-image-delete", { ids });
+    return res.data.data;
+  },
+
+  // Note: high-level orchestration (cascading deletes, transformations, id
+  // decoding, etc.) should live in the UI layer or a dedicated helper. The
+  // service should only make API calls and return response data.
+
   // Fetch images for a property
   async fetchPropertyImages(propertyId) {
     const res = await apiClient.get("/owner/property-wise-image", {
       params: { propertyId },
     });
 
-    // Transform images: backend returns 'image' field (filename), need to convert to 'url'
-    const images = res.data.data || [];
-    const transformedImages = images.map((img) => ({
-      id: img.id,
-      image: img.image,
-      url: `/storage/property/images/${img.image}`, // Construct full URL
-      position: img.position,
-    }));
-
-    return transformedImages;
+    // Return raw server data; caller will handle any transformation (e.g. building URLs)
+    return res.data.data || [];
   },
 
   // Upload images one-by-one to avoid 413 payload too large errors
@@ -90,7 +94,10 @@ const ownerService = {
 
   // Sync property facilities (POST the selected facility IDs)
   async setPropertyFacilities(payload) {
-    res = await apiClient.post("/owner/add-facility-property", payload);
+    // Backend expects { data: { propertyId, facilityId } }
+    const res = await apiClient.post("/owner/add-facility-property", {
+      data: payload,
+    });
     return res.data.data;
   },
 
@@ -116,6 +123,68 @@ const ownerService = {
     });
 
     return res.data.data;
+  },
+
+  // Create multiple resource types (room types) in bulk
+  async resourceTypeMultipleStore(payload) {
+    const res = await apiClient.post(
+      "/owner/resource-type-multiple-store",
+      payload
+    );
+    return res.data;
+  },
+
+  // Update multiple resource types in bulk
+  async resourceTypeMultipleUpdate(payload) {
+    const res = await apiClient.post(
+      "/owner/resource-type-multiple-update",
+      payload
+    );
+    return res.data;
+  },
+
+  // Fetch resource types for a property
+  async fetchResourceTypes(propertyId) {
+    // Controller expects query param 'id' containing property id
+    const res = await apiClient.get("/owner/resource-type", {
+      params: { id: propertyId },
+    });
+    return res.data.data;
+  },
+
+  // Create multiple resources (rooms) in bulk
+  async resourceMultipleStore(payload) {
+    const res = await apiClient.post("/owner/resource-multiple-store", payload);
+    return res.data;
+  },
+
+  // Update multiple resources in bulk
+  async resourceMultipleUpdate(payload) {
+    const res = await apiClient.post(
+      "/owner/resource-multiple-update",
+      payload
+    );
+    return res.data;
+  },
+
+  // Fetch resources for a property
+  async fetchResources(propertyId) {
+    const res = await apiClient.get("/owner/resource", {
+      params: { propertyId },
+    });
+    return res.data.data;
+  },
+
+  // Delete a resource type by id
+  async deleteResourceType(id) {
+    const res = await apiClient.delete(`/owner/resource-type/${id}`);
+    return res.data;
+  },
+
+  // Delete a single resource by id
+  async deleteResource(id) {
+    const res = await apiClient.delete(`/owner/resource/${id}`);
+    return res.data;
   },
 };
 

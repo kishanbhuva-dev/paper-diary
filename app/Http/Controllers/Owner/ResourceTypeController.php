@@ -53,6 +53,7 @@ class ResourceTypeController extends Controller
                 $resourceType->adjustedPrice = $request->adjustedPrice[$key] ?? null;
                 $resourceType->adjustedStart = ($request->adjustedStart[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart[$key])) : null;
                 $resourceType->adjustedEnd   = ($request->adjustedEnd[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedEnd[$key])) : null;
+                $resourceType->capacity      = $request->capacity[$key];
                 if (isset($request->slot[$key])) {
                     $resourceType->slot = $request->slot[$key];
                 }if (! $resourceType->save()) {
@@ -113,6 +114,7 @@ class ResourceTypeController extends Controller
                 'adjustedPrice' => 'nullable|numeric',
                 'adjustedStart' => 'nullable|date',
                 'adjustedEnd'   => 'nullable|date',
+                'capacity'      => 'nullable|integer',
                 'slot'          => 'nullable|in:hourly,day,monthly',
             ]);
             if ($validator->fails()) {
@@ -126,6 +128,7 @@ class ResourceTypeController extends Controller
             $resourceType->adjustedPrice = $request->adjustPrice;
             $resourceType->adjustedStart = $request->adjustedStart ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart)) : null;
             $resourceType->adjustedEnd   = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
+            $resourceType->capacity=$request->capacity;
             if (! $resourceType->save()) {
                 $response = ['status' => false, 'message' => 'Resource Type not updated', 'data' => []];
                 return response()->json($response);
@@ -137,7 +140,42 @@ class ResourceTypeController extends Controller
             return response()->json($response);
         }
     }
-
+    public function update(Request $request,$id)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'propertyId'    => 'required|integer',
+                'name'          => 'required|string',
+                'price'         => 'required|numeric',
+                'adjustedPrice' => 'nullable|numeric',
+                'adjustedStart' => 'nullable|date',
+                'adjustedEnd'   => 'nullable|date',
+                'capacity'      => 'nullable|integer',
+                'slot'          => 'nullable|in:hourly,day,monthly',
+            ]);
+            if ($validator->fails()) {
+                $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+                return response()->json($response);
+            }
+            $resourceType                = ResourceType::where('id',$id)->first();
+            $resourceType->propertyId    = $request->propertyId;
+            $resourceType->name          = $request->name;
+            $resourceType->price         = $request->price;
+            $resourceType->adjustedPrice = $request->adjustPrice;
+            $resourceType->adjustedStart = $request->adjustedStart ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart)) : null;
+            $resourceType->adjustedEnd   = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
+            $resourceType->capacity=$request->capacity;
+            if (! $resourceType->save()) {
+                $response = ['status' => false, 'message' => 'Resource Type not updated', 'data' => []];
+                return response()->json($response);
+            }
+            $response = ['status' => true, 'message' => '', 'data' => $resourceType];
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+            return response()->json($response);
+        }
+    }
     public function multipleUpdate(Request $request)
     {
         try {
@@ -156,6 +194,8 @@ class ResourceTypeController extends Controller
                 'adjustedEnd.*'   => 'nullable|date',
                 'slot'            => 'nullable|array',
                 'slot.*'          => 'nullable|in:hourly,day,monthly',
+                'capacity'        => 'nullable|array',
+                'capacity.*'      => 'nullable|integer',
 
             ]);
             if ($validator->fails()) {
@@ -170,6 +210,7 @@ class ResourceTypeController extends Controller
                 $resourceType->adjustedPrice = $request->adjustedPrice[$key] ?? null;
                 $resourceType->adjustedStart = ($request->adjustedStart[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart[$key])) : null;
                 $resourceType->adjustedEnd   = ($request->adjustedEnd[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedEnd[$key])) : null;
+                $resourceType->capacity      = $request->capacity[$key];
                 if (isset($request->slot[$key])) {
                     $resourceType->slot = $request->slot[$key];
                 }if (! $resourceType->save()) {
