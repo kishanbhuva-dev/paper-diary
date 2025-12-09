@@ -1,8 +1,7 @@
 <template>
   <main class="container mx-auto py-12">
     <div class="px-4 sm:px-6 lg:px-8">
-      <!-- Filter Section -->
-      <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-12">
+      <!-- <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-12">
         <div class="relative w-full md:col-span-2">
           <select
             class="w-full appearance-none rounded-md border border-gray-300 p-2.5 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
@@ -55,6 +54,87 @@
             <Icon icon="mdi:magnify" />
           </button>
         </div>
+      </div> -->
+
+      <!-- Filter Section -->
+      <div
+        class="mb-3 flex flex-col justify-between gap-3 text-sm font-semibold text-gray-600 md:flex-row"
+      >
+        <div
+          class="grid divide-gray-300 overflow-hidden rounded-md border border-gray-300 max-md:divide-y md:grid-cols-4 md:divide-x"
+        >
+          <div class="relative transition-colors hover:bg-gray-50">
+            <label for="status-filter" class="sr-only">Status</label>
+            <select
+              id="status-filter"
+              class="mr-6 w-full cursor-pointer appearance-none p-2 outline-0"
+            >
+              <option value="" selected>Status</option>
+              <option value="Booked">Booked</option>
+              <option value="Pending">Pending</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+            <Icon
+              icon="mdi:chevron-up-down"
+              class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
+            />
+          </div>
+          <div class="relative transition-colors hover:bg-gray-50">
+            <label for="from-date-filter" class="sr-only">Date</label>
+            <input
+              id="from-date-filter"
+              type="date"
+              class="w-full cursor-pointer p-2 outline-0"
+              onclick="this.showPicker()"
+              :value="dayjs().format('YYYY-MM-DD')"
+              :min="dayjs().format('YYYY-MM-DD')"
+            />
+            <Icon
+              icon="mdi:calendar-month"
+              class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
+            />
+          </div>
+          <div class="relative transition-colors hover:bg-gray-50">
+            <label for="to-date-filter" class="sr-only">Date</label>
+            <input
+              id="to-date-filter"
+              type="date"
+              class="w-full cursor-pointer p-2 outline-0"
+              onclick="this.showPicker()"
+              :value="dayjs().add(1, 'day').format('YYYY-MM-DD')"
+              :min="dayjs().format('YYYY-MM-DD')"
+            />
+            <Icon
+              icon="mdi:calendar-month"
+              class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
+            />
+          </div>
+          <div class="">
+            <button
+              class="flex-center w-full cursor-pointer gap-1 p-2 text-red-600 outline-0 transition-colors hover:bg-red-50"
+              aria-label="Reset Filter"
+            >
+              <Icon icon="mdi:refresh" />
+              Reset Filter
+            </button>
+          </div>
+        </div>
+        <!-- Search Input -->
+        <div class="relative transition-colors hover:bg-gray-50">
+          <label for="search-filter" class="sr-only">Search</label>
+          <input
+            id="search-filter"
+            type="text"
+            placeholder="Enter Your Interest"
+            class="w-full rounded-md border border-gray-300 p-2 pr-10 outline-0"
+          />
+          <button
+            class="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer rounded bg-primary p-2 text-white"
+            aria-label="Search"
+          >
+            <Icon icon="mdi:search" />
+          </button>
+        </div>
       </div>
 
       <!-- Tabs -->
@@ -68,7 +148,7 @@
               activeTab === tab.name
                 ? 'border-primary text-primary'
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-              'border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap',
+              'cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap',
             ]"
           >
             {{ tab.name }}
@@ -77,52 +157,52 @@
       </div>
 
       <!-- Bookings Table -->
-      <div class="overflow-hidden rounded-lg border shadow-sm">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th
-                v-for="header in tableHeaders"
-                :key="header"
-                scope="col"
-                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-              >
-                {{ header }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
-            <tr v-for="booking in filteredBookings" :key="booking.id">
-              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                {{ booking.id }}
-              </td>
-              <td
-                class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900"
-              >
-                {{ booking.name }}
-              </td>
-              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                {{ booking.address }}
-              </td>
-              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                {{ booking.date }}
-              </td>
-              <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                {{ booking.type }}
-              </td>
-              <td class="px-6 py-4 text-sm whitespace-nowrap">
-                <span
-                  :class="[
-                    'inline-flex rounded-full px-2 text-xs leading-5 font-semibold',
-                    statusClasses[booking.status],
-                  ]"
+      <div class="overflow-hidden rounded-lg border border-gray-300">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  v-for="header in tableHeaders"
+                  :key="header"
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-semibold tracking-wider uppercase"
                 >
-                  {{ booking.status }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  {{ header }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <tr v-for="booking in filteredBookings" :key="booking.id">
+                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                  {{ booking.id }}
+                </td>
+                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                  {{ booking.name }}
+                </td>
+                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                  {{ booking.address }}
+                </td>
+                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                  {{ booking.date }}
+                </td>
+                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                  {{ booking.type }}
+                </td>
+                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                  <span
+                    :class="[
+                      'inline-flex rounded-full px-2 text-xs leading-5 font-semibold',
+                      statusClasses[booking.status],
+                    ]"
+                  >
+                    {{ booking.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
@@ -254,3 +334,9 @@ const filteredBookings = computed(() => {
   return bookings.value.filter((b) => b.bookingType === "upcoming");
 });
 </script>
+
+<style scoped>
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+</style>
