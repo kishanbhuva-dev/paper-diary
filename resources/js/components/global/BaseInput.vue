@@ -179,7 +179,7 @@ const containerClasses = computed(() =>
     // Conditional Border Color
     !isValid.value && touched.value
       ? "border-red-500 ring-1 ring-red-100"
-      : `${theme.value.border} focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100`
+      : `${theme.value.border} focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100`
   )
 );
 

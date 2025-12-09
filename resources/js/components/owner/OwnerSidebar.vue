@@ -11,16 +11,15 @@
     ]"
   >
     <div
-      class="h-20 flex items-center justify-between px-6 border-b border-slate-100 flex-shrink-0"
+      class="h-16 flex items-center justify-between px-6 border-b border-slate-100 flex-shrink-0"
     >
       <div class="flex items-center gap-3">
-        <div
-          class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200"
-        >
-          <Icon icon="mdi:paper-roll-outline" class="text-white text-lg" />
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center">
+          <!-- <Icon icon="mdi:paper-roll-outline" class="text-white text-lg" /> -->
+          <img src="../../../../public/main_logo.png" alt="Main_Logo" />
         </div>
         <span class="text-xl font-bold tracking-tight text-slate-800">
-          PAPER <span class="text-indigo-600">DIARY</span>
+          PAPER <span class="text-blue-600">DIARY</span>
         </span>
       </div>
 
@@ -45,11 +44,11 @@
             :to="item.to"
             class="group relative flex items-center px-4 py-3 mx-3 rounded-xl transition-all duration-200 font-medium text-sm"
             :class="{
-              // Active State: Solid Indigo, White Text, Shadow
-              'bg-indigo-600 text-white shadow-md shadow-indigo-200':
+              // Active State: Solid blue, White Text, Shadow
+              'bg-blue-700 text-white shadow-md shadow-blue-200':
                 $route.name === item.name,
-              // Inactive State: Slate text, Hover Light Indigo
-              'text-slate-600 hover:bg-indigo-50 hover:text-indigo-700':
+              // Inactive State: Slate text, Hover Light blue
+              'text-slate-600 hover:bg-blue-50 hover:text-blue-800':
                 $route.name !== item.name,
             }"
           >
@@ -59,7 +58,7 @@
               :class="
                 $route.name === item.name
                   ? 'text-white'
-                  : 'text-slate-400 group-hover:text-indigo-600'
+                  : 'text-slate-400 group-hover:text-blue-600'
               "
             />
 
@@ -68,7 +67,7 @@
             <!-- <Icon
               v-if="$route.name === item.name"
               icon="mdi:chevron-right"
-              class="ml-auto text-indigo-200"
+              class="ml-auto text-blue-200"
             /> -->
           </RouterLink>
         </li>
@@ -77,10 +76,10 @@
 
     <div class="p-4 border-t border-slate-100 bg-slate-50/50">
       <div
-        class="flex items-center p-3 bg-white border border-slate-200 rounded-xl shadow-sm"
+        class="flex items-center p-3 bg-white border border-slate-200 rounded-xl hover:shadow-lg"
       >
         <div
-          class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200 shrink-0"
+          class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center uppercase text-blue-700 font-bold border border-blue-200 shrink-0"
         >
           {{ user?.firstName?.charAt(0) || "U" }}
         </div>
@@ -89,12 +88,14 @@
           <p class="text-sm font-bold text-slate-800 truncate">
             {{ user?.firstName || "User" }}
           </p>
-          <p class="text-xs text-slate-500 truncate">Owner Account</p>
+          <p class="text-xs text-slate-500 truncate">
+            {{ user?.email }}
+          </p>
         </div>
 
         <button
           @click="handleLogout"
-          class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors"
           title="Logout"
         >
           <Icon icon="mdi:logout" class="text-xl" />

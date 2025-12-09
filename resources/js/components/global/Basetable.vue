@@ -20,7 +20,7 @@
               type="text"
               v-model="localSearchTerm"
               placeholder="Search..."
-              class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 text-sm pl-10 transition duration-150 shadow-sm"
+              class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm pl-10 transition duration-150 shadow-sm"
               title="Search by keyword"
             />
             <Icon
@@ -34,7 +34,7 @@
           <button
             v-if="showAdd"
             @click="emit('open-add-modal')"
-            class="flex items-center justify-center p-2 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 cursor-pointer transition duration-150 h-10 w-10 shadow-md shadow-indigo-300"
+            class="flex items-center justify-center p-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 cursor-pointer transition duration-150 h-10 w-10 shadow-md shadow-blue-300"
             title="Add New"
           >
             <Icon icon="ic:round-add" class="w-6 h-6" />
@@ -43,7 +43,7 @@
           <button
             v-if="showDownload"
             @click="emit('download')"
-            class="flex items-center justify-center p-2 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-xl hover:bg-indigo-200 cursor-pointer transition duration-150 h-10 w-10"
+            class="flex items-center justify-center p-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200 cursor-pointer transition duration-150 h-10 w-10"
             title="Download"
           >
             <Icon icon="mdi:microsoft-excel" class="w-6 h-6" />
@@ -52,9 +52,11 @@
       </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-gray-200">
+    <div
+      class="overflow-x-auto rounded-xl border border-gray-200 table-wrapper"
+    >
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-indigo-50/70">
+        <thead class="bg-blue-50/70">
           <tr>
             <th
               v-for="col in columns"
@@ -76,7 +78,7 @@
           <tr
             v-for="item in paginatedData"
             :key="item.id"
-            class="hover:bg-indigo-50 transition duration-150"
+            class="hover:bg-blue-50 transition duration-150"
           >
             <td
               v-for="col in columns"
@@ -93,7 +95,7 @@
               <button
                 v-if="showEdit"
                 @click="emit('open-edit-modal', item)"
-                class="text-indigo-600 hover:text-white cursor-pointer mr-3 p-2 rounded-full hover:bg-indigo-600 transition duration-150"
+                class="text-blue-600 hover:text-white cursor-pointer mr-3 p-2 rounded-full hover:bg-blue-600 transition duration-150"
                 title="Edit"
               >
                 <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
@@ -146,7 +148,7 @@
           <select
             id="perPage"
             v-model="perPageRef"
-            class="block w-auto px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none shadow-sm"
+            class="block w-auto px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 focus:outline-none shadow-sm"
           >
             <option v-for="size in perPageOptions" :key="size" :value="size">
               {{ size }}
@@ -163,7 +165,7 @@
               :disabled="currentPage === 1"
               :class="[
                 'relative inline-flex items-center rounded-l-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white',
-                'hover:bg-indigo-50 hover:text-indigo-600 transition duration-150',
+                'hover:bg-blue-50 hover:text-blue-600 transition duration-150',
                 {
                   'cursor-not-allowed text-gray-300 bg-gray-50':
                     currentPage === 1,
@@ -191,8 +193,8 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border bg-white',
                   page === currentPage
-                    ? 'z-10 bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-600'
-                    : 'text-gray-700 border-gray-300 hover:bg-indigo-50 hover:text-indigo-600',
+                    ? 'z-10 bg-blue-600 text-white border-blue-600 hover:bg-blue-600'
+                    : 'text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-600',
                 ]"
               >
                 {{ page }}
@@ -204,7 +206,7 @@
               :disabled="currentPage === totalPages"
               :class="[
                 'relative inline-flex items-center rounded-r-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white',
-                'hover:bg-indigo-50 hover:text-indigo-600 transition duration-150',
+                'hover:bg-blue-50 hover:text-blue-600 transition duration-150',
                 {
                   'cursor-not-allowed text-gray-300 bg-gray-50':
                     currentPage === totalPages,
@@ -404,5 +406,26 @@ watch(
 </script>
 
 <style scoped>
-/* Removed fixed class as it was empty */
+/*Fallback for Chrome  */
+.table-wrapper::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #a5b4fc;
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: #6366f1;
+}
+
+/* Fallback for Firefox */
+.table-wrapper {
+  scrollbar-color: #a5b4fc #f1f5f9; /* thumb color track color */
+  scrollbar-width: thin; /* makes it thinner than auto */
+}
 </style>
