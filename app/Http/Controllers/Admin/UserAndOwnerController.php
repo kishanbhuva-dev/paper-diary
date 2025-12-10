@@ -71,21 +71,30 @@ class UserAndOwnerController extends Controller
                 ->with('properties:id,ownerId,propertyName');
 
             if ($request->search) {
-                $search = strtolower($request->search);
-                if ($search) {
-                    $owner->where('name', 'LIKE', '%'.$request->search.'%');
-                    $owner->orWhereHas('properties', function ($query) use ($search) {
-                        $query->where('propertyName', 'LIKE', '%'.$search.'%');
+                $search = $request->search;
+                $owner->where(function ($q) use ($search) {
+                    $q->where('firstName', 'LIKE', '%'.$search.'%')
+                        ->orWhere('lastName', 'LIKE', '%'.$search.'%')
+                        ->orWhere('email', 'LIKE', '%'.$search.'%')
+                        ->orWhere('phone', 'LIKE', '%'.$search.'%');
+                });
+                $search = explode(' ', $search);
+                if (count($search) > 0) {
+                    $owner->orWhere(function ($q) use ($search) {
+                        $q->where('firstName', 'LIKE', '%'.$search[0].'%')
+                            ->where('lastName', 'LIKE', '%'.$search[1].'%');
                     });
                 }
             }
+
             $orderby = $request->descending == 'true' ? 'DESC' : 'ASC';
             $column = $request->sortBy ?? 'id';
 
             if (! empty($column)) {
                 $owner->orderBy($column, $orderby);
             }
-            $owners = $owner->get();
+            $perPage = $request->input('per_page', 15);
+            $owners = $owner->paginate($perPage);
             $response = ['status' => true, 'message' => '', 'data' => $owners];
 
             return response()->json($response);
