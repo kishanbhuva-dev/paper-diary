@@ -292,8 +292,6 @@ const handleSubmit = async () => {
 
     emits("success");
   } catch (err) {
-    console.warn("[RoomAllocationForm] failed to save rooms", err);
-    alert("Failed to save rooms. Please try again.");
   } finally {
     submitting.value = false;
   }
