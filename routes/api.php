@@ -25,6 +25,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:sanctum', 'admin']], f
     Route::post('delete-owner', [App\Http\Controllers\Admin\UserAndOwnerController::class, 'deleteOwner']);
     Route::apiResource('facility', App\Http\Controllers\Admin\FacilityController::class);
     Route::apiResource('booking', App\Http\Controllers\Admin\BookingsController::class);
+    Route::apiResource('owner', App\Http\Controllers\Admin\OwnerController::class);
 });
 Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], function () {
     Route::get('/', [App\Http\Controllers\Owner\DashboardController::class, 'index']);
