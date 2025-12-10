@@ -70,7 +70,7 @@ const currentSearch = ref("");
 // Table Configuration
 const tableColumns = [
   { label: "ID", key: "id" },
-  { label: "Name", key: "propertyName" },
+  { label: "Name", key: (row) => row },
   { label: "Address", key: "address" },
   { label: "City", key: "city" },
   { label: "Country", key: "country" },

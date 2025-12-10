@@ -85,7 +85,7 @@
               :key="col.key"
               class="px-6 py-3 whitespace-nowrap text-sm text-gray-700"
             >
-              {{ getNestedValue(item, col.key) }}
+              {{ getCellValue(item, col) }}
             </td>
 
             <td
@@ -264,7 +264,18 @@ const props = defineProps({
 // Solves the 'owner.name' issue by traversing objects safely
 const getNestedValue = (obj, path) => {
   if (!obj || !path) return "";
+
+  if (typeof path !== "string") return "";
+
   return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+};
+
+const getCellValue = (item, col) => {
+  if (typeof col.key === "function") {
+    const rawValue = col.key(item);
+    return rawValue === null || rawValue === undefined ? "" : rawValue;
+  }
+  return getNestedValue(item, col.key);
 };
 
 // --- SEARCH & DEBOUNCE ---
@@ -319,15 +330,10 @@ const processedData = computed(() => {
       let rawValue;
 
       if (typeof col.key === "function") {
-        // If the 'key' is a function, CALL it with the current row data (item)
-        // to get the computed value (e.g., "Firstname Lastname").
         rawValue = col.key(item);
       } else {
-        // If the 'key' is a string (like "id" or "address.main"),
-        // use the helper function to safely get the nested value.
         rawValue = getNestedValue(item, col.key);
       }
-      // ------------------------------------
 
       if (rawValue === null || rawValue === undefined) return false;
       return String(rawValue).toLowerCase().includes(term);
