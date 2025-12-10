@@ -20,7 +20,7 @@
       :showEdit="true"
     />
     <BaseModal
-      title="Owner Management"
+      :title="form?.id ? 'Edit Owner' : 'Add Owner'"
       v-model="isOpen"
       width="max-w-xl"
       @save="handleSubmit"
@@ -62,7 +62,7 @@
           type="password"
           autocomplete="new-password"
           width="full"
-          required
+          :required="!form.id"
           :minLength="6"
           icon="lucide:lock"
           placeholder="••••••••"
@@ -196,16 +196,25 @@ const handleSubmit = async () => {
     passwordInput,
     addressInput,
   ];
+
   const allValid = inputs.every((input) => input.value.validate());
 
-  if (allValid) {
-    const res = await adminService.createOwner(form.value);
-    if (res.status) {
-      isOpen.value = false;
-      fetchAllOwners();
-    }
+  if (!allValid) return;
+
+  let res;
+
+  if (form.value.id) {
+    res = await adminService.updateOwner(form.value);
+  } else {
+    res = await adminService.createOwner(form.value);
+  }
+
+  if (res?.status) {
+    isOpen.value = false;
+    fetchAllOwners();
   }
 };
+
 const isOpenDelete = ref(false);
 const deleteOwner = ref(null);
 
