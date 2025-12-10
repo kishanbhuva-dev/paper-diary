@@ -50,7 +50,7 @@
           <button
             type="button"
             @click="removeRoom(idx)"
-            class="px-3 py-2 text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
+            class="px-3 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
             title="Delete room"
           >
             <Icon icon="mdi:trash-can-outline" class="w-4 h-4" />
@@ -62,7 +62,7 @@
         <button
           type="button"
           @click="addRoom"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700"
+          class="px-4 py-2 cursor-pointer text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700"
         >
           Add Room
         </button>
@@ -178,7 +178,7 @@ const validate = () => {
 
 const handleSubmit = async () => {
   if (!validate()) {
-    alert("Please provide a name and type for every room before submitting.");
+    toast.error("Fill the Resources");
     return;
   }
 

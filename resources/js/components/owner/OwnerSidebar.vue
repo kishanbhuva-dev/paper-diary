@@ -95,7 +95,7 @@
 
         <button
           @click="handleLogout"
-          class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+          class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-100 cursor-pointer rounded-lg transition-colors"
           title="Logout"
         >
           <Icon icon="mdi:logout" class="text-xl" />

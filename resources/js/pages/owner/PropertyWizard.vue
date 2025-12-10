@@ -5,7 +5,7 @@
         <div>
           <button
             @click="handleBackButton"
-            class="px-3 py-1 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50 mr-3"
+            class="px-3 py-1 cursor-pointer text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50 mr-3"
           >
             <Icon icon="mdi:arrow-left" class="w-4 h-4 inline-block mr-2" />
             Back
@@ -47,9 +47,9 @@
 
     <div class="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
       <button
-        v-if="currentStep > 1"
+        v-if="currentStep > 0"
         @click="cancelWizard"
-        class="px-5 py-2 mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
+        class="px-5 py-2 cursor-pointer mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
       >
         Cancel
       </button>
@@ -57,7 +57,7 @@
       <button
         @click="submitCurrentStep"
         :disabled="loading"
-        class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition flex items-center shadow-md"
+        class="px-5 py-2 cursor-pointer text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition flex items-center shadow-md"
       >
         <Icon
           v-if="loading"
