@@ -18,21 +18,17 @@ defineExpose({ show, hide });
     v-if="visible"
     class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md flex items-center justify-center"
   >
-    <!-- Main glass loader -->
     <div
       class="relative w-40 h-40 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl animate-[fadeIn_.35s_ease-out]"
     >
-      <!-- Blue glow -->
       <div
         class="absolute inset-0 rounded-3xl bg-blue-500/30 blur-2xl animate-[pulseGlow_2.5s_ease-in-out_infinite]"
       ></div>
 
-      <!-- Rotating halo border -->
       <div
         class="absolute w-28 h-28 border-[4px] border-blue-500/40 border-t-transparent rounded-full animate-spin-slow"
       ></div>
 
-      <!-- Logo pulse -->
       <img
         src="/public/main_logo.png"
         alt="Paper Diary"
@@ -40,7 +36,6 @@ defineExpose({ show, hide });
       />
     </div>
 
-    <!-- Loading text -->
     <p
       class="absolute bottom-20 text-white/90 text-lg font-semibold tracking-wide drop-shadow"
     >
@@ -77,7 +72,7 @@ defineExpose({ show, hide });
   0%,
   100% {
     transform: scale(1);
-    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.4)); /* blue-500 */
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.4));
   }
   50% {
     transform: scale(1.15);
