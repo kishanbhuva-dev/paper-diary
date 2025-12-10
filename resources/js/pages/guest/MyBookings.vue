@@ -89,10 +89,10 @@
               :value="dayjs().format('YYYY-MM-DD')"
               :min="dayjs().format('YYYY-MM-DD')"
             />
-            <Icon
+            <!-- <Icon
               icon="mdi:calendar-month"
               class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
-            />
+            /> -->
           </div>
           <div class="relative transition-colors hover:bg-gray-50">
             <label for="to-date-filter" class="sr-only">Date</label>
@@ -104,12 +104,12 @@
               :value="dayjs().add(1, 'day').format('YYYY-MM-DD')"
               :min="dayjs().format('YYYY-MM-DD')"
             />
-            <Icon
+            <!-- <Icon
               icon="mdi:calendar-month"
               class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
-            />
+            /> -->
           </div>
-          <div class="">
+          <div>
             <button
               class="flex-center w-full cursor-pointer gap-1 p-2 text-red-600 outline-0 transition-colors hover:bg-red-50"
               aria-label="Reset Filter"
@@ -335,8 +335,8 @@ const filteredBookings = computed(() => {
 });
 </script>
 
-<style scoped>
+<!-- <style scoped>
 input[type="date"]::-webkit-calendar-picker-indicator {
   display: none;
 }
-</style>
+</style> -->

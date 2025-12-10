@@ -28,12 +28,14 @@
               :options="[{ value: 'hotel_haramain', label: 'Hotel Haramain' }]"
             />
             <div class="w-full self-end-safe">
-              <button
-                type="button"
-                class="h-fit w-full btn-primary py-2 text-sm"
-              >
-                Select Room
-              </button>
+              <router-link :to="{ name: 'booking-summary' }">
+                <button
+                  type="button"
+                  class="h-fit w-full btn-primary py-2 text-sm"
+                >
+                  Select Room
+                </button>
+              </router-link>
             </div>
           </form>
         </div>
