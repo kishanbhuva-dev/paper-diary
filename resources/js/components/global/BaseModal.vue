@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="modelValue"
-    class="fixed inset-0 z-50 md:p-0 p-4 flex items-center bg-black/5 backdrop-blur-sm justify-center transition-all duration-300 animate-[fadeIn_0.25s_ease-out]"
+    class="fixed inset-0 z-50 md:p-0 p-4 flex items-center bg-black/50 backdrop-blur-sm justify-center transition-all duration-300 animate-[fadeIn_0.25s_ease-out]"
   >
     <div
       :class="`relative ${width} w-full p-7 rounded-2xl shadow-2xl 

@@ -13,6 +13,11 @@ const authService = {
     return response.data;
   },
 
+  async updateOwner(payload) {
+    const response = await apiClient.post("/admin/update-owner", payload);
+    return response.data;
+  },
+
   async deleteOwner(id) {
     const response = await apiClient.post("/admin/delete-owner", id);
     return response.data;

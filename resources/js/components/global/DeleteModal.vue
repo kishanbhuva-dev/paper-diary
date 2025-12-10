@@ -7,8 +7,15 @@
       class="w-full max-w-xl p-6 rounded-2xl bg-white backdrop-blur-xl border border-white/40 scale-95"
     >
       <!-- Title & Description -->
-      <div class="space-y-1">
-        <h2 class="text-xl font-bold text-blue-600">{{ title }}</h2>
+      <div class="space-y-2">
+        <!-- Title -->
+        <div class="space-y-1">
+          <h2 class="text-xl font-extrabold text-blue-600 tracking-tight">
+            {{ title }}
+          </h2>
+          <div class="w-14 h-0.5 bg-blue-600 rounded-full"></div>
+        </div>
+
         <p class="text-sm text-gray-600">{{ message }}</p>
       </div>
 
