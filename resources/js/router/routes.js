@@ -78,7 +78,7 @@ const routes = [
 
   {
     path: "/:pathMatch(.*)*",
-    name: "404",
+    name: "catch-all",
     component: () => import("../../js/pages/NotFound.vue"),
     meta: { pageTitle: "404 Not Found" },
   },
