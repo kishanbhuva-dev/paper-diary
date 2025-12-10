@@ -48,7 +48,7 @@ class UserAndOwnerController extends Controller
             $user = User::selectRaw('id, concat(firstName, " ", lastName) as name,  phone, email, address, role')->where(function ($query) use ($request) {
                 $query->where('firstName', 'like', '%'.$request->search.'%')->orWhere('lastName', 'like', '%'.$request->search.'%')->orWhere('id', 'like', '%'.$request->search.'%')->orWhere('email', 'like', '%'.$request->search.'%')->orWhere('phone', 'like', '%'.$request->search.'%')->orWhere('address', 'like', '%'.$request->search.'%');
             })->where('role', 'user');
-            // /order by and pagination for variable: orderBy, sort, pagination   default value: id, asc, 10
+            
             $order = $request->orderBy ?? 'id';
             $pagination = $request->pagination ?? 10;
             $user = $user->orderBy($order, $request->sort ?? 'asc')->paginate($pagination);
@@ -178,7 +178,6 @@ class UserAndOwnerController extends Controller
             $user->firstName = $request->firstName;
             $user->lastName = $request->lastName;
             $user->email = $request->email;
-            $user->role = 'user';
             $user->address = $request->address;
             $user->address2 = $request->address2;
             $user->city = $request->city;
@@ -292,7 +291,6 @@ class UserAndOwnerController extends Controller
             $owner->firstName = $request->firstName;
             $owner->lastName = $request->lastName;
             $owner->email = $request->email;
-            $owner->role = 'owner';
             $owner->address = $request->address;
             $owner->address2 = $request->address2;
             $owner->city = $request->city;
