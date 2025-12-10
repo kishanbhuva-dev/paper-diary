@@ -214,7 +214,9 @@
             </label>
           </div>
 
-          <button class="w-full btn-primary sm:w-auto">BOOK ROOM</button>
+          <router-link :to="{ name: 'my-bookings' }">
+            <button class="w-full btn-primary sm:w-auto">BOOK ROOM</button>
+          </router-link>
         </div>
 
         <!-- Right side: Property details -->
