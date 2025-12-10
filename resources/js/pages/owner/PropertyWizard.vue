@@ -62,9 +62,19 @@
         <Icon
           v-if="loading"
           icon="eos-icons:loading"
-          class="w-5 h-5 mr-2 animate-spin"
+          class="w-5 h-5 mr-3 animate-spin"
         />
-        {{ currentStep < 3 ? "Next" : "Submit" }}
+        {{ currentStep < 3 ? "Save & Continue" : "Complete Setup" }}
+        <Icon
+          v-if="!loading && currentStep < 3"
+          icon="mdi:arrow-right"
+          class="w-5 h-5 ml-2"
+        />
+        <Icon
+          v-else-if="!loading && currentStep === 3"
+          icon="mdi:check-bold"
+          class="w-5 h-5 ml-2"
+        />
       </button>
     </div>
   </div>
@@ -281,7 +291,6 @@ const handleStep3Success = () => {
     applyEdits();
     return;
   }
-  alert("Property setup complete!");
   router.push({ name: "properties" });
 };
 
@@ -378,11 +387,8 @@ const applyEdits = async () => {
       }
     }
 
-    alert("Property updated successfully");
     router.push({ name: "properties" });
   } catch (err) {
-    console.error("Failed to apply edits:", err);
-    alert("Failed to apply changes. See console for details.");
   } finally {
     loading.value = false;
   }

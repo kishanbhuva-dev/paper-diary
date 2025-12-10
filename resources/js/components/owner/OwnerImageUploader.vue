@@ -10,7 +10,7 @@
       @drop="onParentDrop"
       @click="triggerFileInput"
       :class="{
-        'border-indigo-500 bg-indigo-50': isDragging,
+        'border-blue-500 bg-blue-50': isDragging,
         'border-gray-300 bg-gray-50 hover:bg-gray-100': !isDragging,
       }"
       class="w-full p-6 text-center border-2 border-dashed rounded-lg cursor-pointer transition duration-200"
@@ -28,7 +28,7 @@
         class="w-8 h-8 mx-auto text-gray-400 mb-2"
       />
       <p class="text-sm text-gray-600">
-        <span class="font-medium text-indigo-600">Click to upload</span> or drag
+        <span class="font-medium text-blue-600">Click to upload</span> or drag
         and drop
       </p>
       <p v-if="accept" class="text-xs text-gray-500 mt-1">

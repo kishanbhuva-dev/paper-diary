@@ -393,13 +393,7 @@ const loadPropertyForEdit = async (id) => {
 };
 
 onMounted(() => {
-  if (isEditing.value) {
-    loadPropertyForEdit(effectiveId.value);
-  } else {
-    formData.value = { ...defaultFormData };
-  }
-
-  // Load all available facilities
+  // Load all available facilities (STATIC DATA - always needed for the form)
   (async () => {
     try {
       const facs = await ownerService.fetchFacilities();
@@ -413,16 +407,29 @@ onMounted(() => {
       console.error("Failed to load facilities:", e);
     }
   })();
+  
+  // The initial logic to check if we are in CREATE mode on mount.
+  if (!isEditing.value) {
+    formData.value = { ...defaultFormData };
+  }
+  // Data loading for edit mode is now entirely handled by the watch below.
 });
 
-// Watch the prop.id for re-loading data when the wizard changes steps/properties
+// Watch the effectiveId:
+// 1. If it has a value, load data (happens on initial load in edit mode, or when returning to step 1)
+// 2. If it is null, reset the form (happens if you clear the ID)
 watch(
-  () => props.id,
+  () => effectiveId.value,
   (val) => {
     if (val) {
+      // Loads data for edit mode
       loadPropertyForEdit(val);
+    } else {
+      // Resets form for create mode
+      formData.value = { ...defaultFormData };
     }
-  }
+  },
+  { immediate: true } // This ensures initial loading happens if an ID exists
 );
 
 // --- 5. DEPENDENT DATA HANDLERS (Images & Facilities) ---
@@ -539,7 +546,9 @@ const savePropertyData = async (apiPayload) => {
 
     // Fallback: fetch properties and get the latest one by name
     if (!savedPropertyId) {
-      const paginatedResponse = await ownerService.fetchProperties({ limit: 1 });
+      const paginatedResponse = await ownerService.fetchProperties({
+        limit: 1,
+      });
       const createdProperty = paginatedResponse?.data?.find(
         (p) => p.propertyName === apiPayload.propertyName
       );

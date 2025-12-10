@@ -315,7 +315,20 @@ const processedData = computed(() => {
   const term = debouncedSearchTerm.value.toLowerCase().trim();
   return props.rows.filter((item) => {
     return props.columns.some((col) => {
-      const rawValue = getNestedValue(item, col.key);
+      // --- THIS IS THE CRITICAL CHANGE ---
+      let rawValue;
+
+      if (typeof col.key === "function") {
+        // If the 'key' is a function, CALL it with the current row data (item)
+        // to get the computed value (e.g., "Firstname Lastname").
+        rawValue = col.key(item);
+      } else {
+        // If the 'key' is a string (like "id" or "address.main"),
+        // use the helper function to safely get the nested value.
+        rawValue = getNestedValue(item, col.key);
+      }
+      // ------------------------------------
+
       if (rawValue === null || rawValue === undefined) return false;
       return String(rawValue).toLowerCase().includes(term);
     });
