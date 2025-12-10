@@ -1,3 +1,3 @@
 <template>
-  <div class="min-h-screen bg-white flex">Admin Dashboard</div>
+  <div class="">Admin Dashboard</div>
 </template>

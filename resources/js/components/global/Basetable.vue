@@ -1,6 +1,6 @@
 <template>
   <div
-    class="base-table bg-white shadow-2xl rounded-2xl p-6 w-full box-border border border-slate-100"
+    class="base-table bg-white rounded-2xl p-6 w-full box-border border border-slate-100"
   >
     <div
       class="table-header flex flex-wrap gap-4 sm:gap-6 justify-between items-center mb-6 border-b border-gray-200 pb-4 sm:flex-nowrap"

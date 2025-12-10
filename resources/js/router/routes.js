@@ -73,6 +73,12 @@ const routes = [
         component: () => import("../../js/pages/admin/Dashboard.vue"),
         meta: { pageTitle: "Admin Dashboard" },
       },
+      {
+        path: "/admin/owners",
+        name: "admin-owners",
+        component: () => import("../../js/pages/admin/Owners.vue"),
+        meta: { pageTitle: "Owner List" },
+      },
     ],
   },
 
