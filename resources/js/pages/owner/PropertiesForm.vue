@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 sm:px-6 py-8 bg-gray-50 min-h-screen">
+  <div class="px-4 sm:px-6 py-4 bg-gray-50 min-h-screen">
     <div class="max-w-5xl mx-auto">
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">
@@ -7,7 +7,7 @@
         </h1>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-xl border border-slate-100">
+      <div class="bg-white rounded-2xl shadow-inner border border-blue-100">
         <div
           v-if="loadingItem"
           class="p-16 flex flex-col justify-center items-center"
@@ -407,7 +407,7 @@ onMounted(() => {
       console.error("Failed to load facilities:", e);
     }
   })();
-  
+
   // The initial logic to check if we are in CREATE mode on mount.
   if (!isEditing.value) {
     formData.value = { ...defaultFormData };

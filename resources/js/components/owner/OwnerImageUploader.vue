@@ -189,7 +189,6 @@ const onParentDragOver = (e) => {
   if (types.includes("Files") || types.includes("application/x-moz-file")) {
     e.preventDefault();
     isDragging.value = true;
-    console.debug("[OwnerImageUploader] onParentDragOver (file keep)");
   }
 };
 
@@ -207,10 +206,6 @@ const onParentDrop = (e) => {
   if (files.length) {
     e.preventDefault();
     handleDrop(e);
-    console.debug(
-      "[OwnerImageUploader] onParentDrop: files dropped count=",
-      files.length
-    );
   }
 };
 

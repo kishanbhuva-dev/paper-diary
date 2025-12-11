@@ -1,59 +1,49 @@
 <template>
-  <div class="p-6 bg-white rounded-2xl shadow-inner border border-blue-100">
+  <div class="p-6 mb-4 bg-white rounded-2xl shadow-inner border border-blue-100">
     <h3 class="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
       <Icon icon="mdi:door-open" class="text-2xl" /> Resources
     </h3>
 
     <div class="space-y-4">
       <div
-        v-for="(room, idx) in rooms"
+        v-for="(resourceItem, idx) in resourceItems"
         :key="idx"
         class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end p-4 bg-blue-50 rounded-lg border border-blue-200"
       >
         <div>
-          <label class="text-sm font-medium text-slate-700">Name</label>
-          <input
-            v-model="room.name"
-            type="text"
-            class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
+          <BaseInput
+            v-model="resourceItem.name"
+            label="Name"
+            width="full"
             placeholder="e.g. Room 101"
           />
         </div>
 
         <div>
-          <label class="text-sm font-medium text-slate-700"
-            >Resources Type</label
-          >
-          <select
-            v-model="room.resourceTypeId"
-            class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          >
-            <option value="">Select type</option>
-            <option v-for="rt in availableTypes" :key="rt.id" :value="rt.id">
-              {{ rt.name }}
-            </option>
-          </select>
+          <BaseSelect
+            v-model="resourceItem.resourceTypeId"
+            :label="'Resources Type'"
+            :placeholder="'Select type'"
+            :options="availableTypeOptions"
+          />
         </div>
 
         <div>
-          <label class="text-sm font-medium text-slate-700">Status</label>
-          <select
-            v-model="room.status"
-            class="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          >
-            <option :value="1">Active</option>
-            <option :value="0">Inactive</option>
-          </select>
+          <BaseSelect
+            v-model="resourceItem.status"
+            :label="'Status'"
+            :options="statusOptions"
+          />
         </div>
 
         <div class="flex gap-2">
           <button
             type="button"
-            @click="removeRoom(idx)"
+            @click="openRemoveResourceItemModal(idx)"
             class="px-3 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
-            title="Delete room"
+            title="Delete resource"
           >
-            <Icon icon="mdi:trash-can-outline" class="w-4 h-4" />
+            <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -61,10 +51,10 @@
       <div class="pt-2">
         <button
           type="button"
-          @click="addRoom"
+          @click="addResourceItem"
           class="px-4 py-2 cursor-pointer text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700"
         >
-          Add Room
+          Add Resource
         </button>
       </div>
     </div>
@@ -88,53 +78,93 @@
       </div>
     </div>
   </div>
+
+  <DeleteModal
+    v-model="isConfirmationModalVisible"
+    :title="'Remove Resource'"
+    :message="`Are you sure you want to remove the resource: ${resourceItemNameToRemove}?`"
+    :warning="
+      resourceItemIndexToRemove !== null &&
+      resourceItems[resourceItemIndexToRemove]?.id
+        ? 'This resource will be permanently deleted from the server upon submission.'
+        : 'This is a local change and will be removed from the list.'
+    "
+    @confirm="confirmRemoval"
+  />
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { Icon } from "@iconify/vue";
+import BaseInput from "../../components/global/BaseInput.vue"; // Reused
+import BaseSelect from "../../components/global/BaseSelect.vue"; // Reused
+import DeleteModal from "../../components/global/DeleteModal.vue"; // Reused
 import ownerService from "../../services/ownerService";
+import { toast } from "vue-sonner";
 
 const props = defineProps({
   propertyId: { type: [String, Number], required: true },
   resourceTypes: { type: Array, default: () => [] },
   inWizard: { type: Boolean, default: false },
+  editMode: { type: Boolean, default: false },
 });
 const emits = defineEmits(["success", "cancel"]);
 
 const availableTypes = ref([]);
-const rooms = ref([{ name: "", resourceTypeId: "", status: 1 }]);
+const resourceItems = ref([{ name: "", resourceTypeId: "", status: 1 }]);
 // track deletions locally and perform deletes on submit
-const deletedRoomIds = ref([]);
+const deletedResourceItemIds = ref([]);
 const submitting = ref(false);
+
+// --- CONVERTED OPTIONS FOR BASESELECT ---
+const statusOptions = ref([
+  { label: "Active", value: 1 },
+  { label: "Inactive", value: 0 },
+]);
+
+const availableTypeOptions = computed(() => {
+  return availableTypes.value.map((rt) => ({
+    label: rt.name,
+    value: rt.id,
+  }));
+});
+// --- END OPTIONS ---
+
+// --- CONFIRMATION MODAL STATE ---
+const isConfirmationModalVisible = ref(false);
+const resourceItemIndexToRemove = ref(null);
+const resourceItemNameToRemove = computed(() => {
+  const idx = resourceItemIndexToRemove.value;
+  return idx !== null && resourceItems.value[idx]?.name
+    ? resourceItems.value[idx].name
+    : "this resource";
+});
+// --------------------------------
 
 const loadData = async () => {
   try {
     const fetched = await ownerService.fetchResourceTypes(props.propertyId);
     availableTypes.value = fetched || [];
   } catch (err) {
-    console.warn("[RoomAllocationForm] failed to fetch resource types", err);
+    console.warn("[ResourceForm] failed to fetch resource types", err);
   }
 
   try {
     const existing = await ownerService.fetchResources(props.propertyId);
     if (Array.isArray(existing) && existing.length) {
-      rooms.value = existing.map((r) => ({
+      resourceItems.value = existing.map((r) => ({
         id: r.id,
         name: r.name || "",
         resourceTypeId: r.resourceTypeId,
         status: typeof r.status !== "undefined" ? Number(r.status) : 1,
       }));
       // Always keep one empty row to allow quick adding
-      rooms.value.push({ name: "", resourceTypeId: "", status: 1 });
+      resourceItems.value.push({ name: "", resourceTypeId: "", status: 1 });
     } else {
-      rooms.value = [{ name: "", resourceTypeId: "", status: 1 }];
+      resourceItems.value = [{ name: "", resourceTypeId: "", status: 1 }];
     }
   } catch (err) {
-    console.warn(
-      "[RoomAllocationForm] failed to fetch existing resources",
-      err
-    );
+    console.warn("[ResourceForm] failed to fetch existing resources", err);
   }
 };
 
@@ -149,36 +179,65 @@ watch(
   }
 );
 
-const addRoom = () => {
-  rooms.value.push({ name: "", resourceTypeId: "", status: 1 });
+const addResourceItem = () => {
+  resourceItems.value.push({ name: "", resourceTypeId: "", status: 1 });
 };
-const removeRoom = (idx) => {
-  if (rooms.value.length === 1) return;
-  const r = rooms.value[idx];
-  if (r && r.id) {
-    deletedRoomIds.value.push(r.id);
-    rooms.value.splice(idx, 1);
-  } else {
-    rooms.value.splice(idx, 1);
+
+// --- MODAL HANDLERS ---
+const openRemoveResourceItemModal = (idx) => {
+  if (resourceItems.value.length === 1) return;
+  resourceItemIndexToRemove.value = idx;
+  isConfirmationModalVisible.value = true;
+};
+
+const confirmRemoval = () => {
+  const idx = resourceItemIndexToRemove.value;
+  if (idx === null || idx === undefined) {
+    isConfirmationModalVisible.value = false;
+    return;
   }
+
+  const r = resourceItems.value[idx];
+
+  if (r && r.id) {
+    // mark for deletion and remove from UI
+    deletedResourceItemIds.value.push(r.id);
+    resourceItems.value.splice(idx, 1);
+  } else {
+    // local-only row, just remove
+    resourceItems.value.splice(idx, 1);
+  }
+
+  // Reset state after deletion
+  isConfirmationModalVisible.value = false;
+  resourceItemIndexToRemove.value = null;
 };
+// --- END MODAL HANDLERS ---
 
 const validate = () => {
   if (!props.propertyId) return false;
-  // Ignore empty placeholder rows (no name). Require at least one filled room.
-  const filled = (rooms.value || []).filter(
+
+  // Ignore empty placeholder rows (no name). Require at least one filled resourceItem.
+  const filled = (resourceItems.value || []).filter(
     (r) => r.name && r.name.toString().trim() !== ""
   );
-  if (filled.length === 0) return false; // require at least one room
+  if (filled.length === 0) {
+    toast.error("At least one resource must be filled.");
+    return false;
+  }
+
+  // Ensure all filled rows have a selected resource type
   for (const r of filled) {
-    if (!r.resourceTypeId) return false;
+    if (!r.resourceTypeId) {
+      toast.error(`Resource "${r.name}" requires a Resource Type.`);
+      return false;
+    }
   }
   return true;
 };
 
 const handleSubmit = async () => {
   if (!validate()) {
-    toast.error("Fill the Resources");
     return;
   }
 
@@ -200,7 +259,7 @@ const handleSubmit = async () => {
     const toCreate = [];
     const toUpdate = [];
 
-    for (const rm of rooms.value) {
+    for (const rm of resourceItems.value) {
       const normalized = {
         name: (rm.name || "").toString().trim(),
         status: typeof rm.status !== "undefined" ? Number(rm.status) : 1,
@@ -256,19 +315,23 @@ const handleSubmit = async () => {
 
     // If editing in the wizard, return diffs and deletions to parent
     if (props.inWizard && props.editMode) {
-      return { toCreate, toUpdate, deleted: deletedRoomIds.value.slice() };
+      return {
+        toCreate,
+        toUpdate,
+        deleted: deletedResourceItemIds.value.slice(),
+      };
     }
 
-    // Perform deletes first for any rooms the user removed in the UI
-    if (deletedRoomIds.value && deletedRoomIds.value.length) {
-      for (const id of deletedRoomIds.value) {
+    // Perform deletes first for any resources the user removed in the UI
+    if (deletedResourceItemIds.value && deletedResourceItemIds.value.length) {
+      for (const id of deletedResourceItemIds.value) {
         try {
           await ownerService.deleteResource(id);
         } catch (err) {
-          console.debug("[RoomAllocationForm] failed to delete room", id, err);
+          console.debug("[ResourceForm] failed to delete resource", id, err);
         }
       }
-      deletedRoomIds.value = [];
+      deletedResourceItemIds.value = [];
     }
 
     if (toUpdate.length > 0) {
@@ -292,6 +355,7 @@ const handleSubmit = async () => {
 
     emits("success");
   } catch (err) {
+    toast.error("An error occurred during submission.");
   } finally {
     submitting.value = false;
   }
