@@ -48,7 +48,7 @@
   <DeleteModal
     v-model="isConfirmationModalVisible"
     :title="'Delete Property'"
-    :message="`Are you sure you want to delete the property: <span class='text-lg font-bold'>${propertyNameToDelete}</span> ?`"
+    :message="`Are you sure you want to delete the property: ${propertyNameToDelete} ?`"
     :warning="'This action cannot be undone and will permanently delete the property, all associated resource types, and images!'"
     @confirm="handleDeleteConfirmation"
   />

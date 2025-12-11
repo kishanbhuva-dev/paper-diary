@@ -16,7 +16,7 @@
           <div class="w-14 h-0.5 bg-blue-600 rounded-full"></div>
         </div>
 
-        <p class="text-sm text-gray-600" v-html="message"></p>
+        <p class="text-sm text-gray-600">{{ message }}</p>
       </div>
 
       <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4">
