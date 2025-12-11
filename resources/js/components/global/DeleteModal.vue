@@ -35,7 +35,7 @@
       <div class="flex gap-3 mt-6">
         <button
           @click="$emit('update:modelValue', false)"
-          class="w-full py-2 px-4 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-100 hover:scale-105 transition-all"
+          class="w-full py-2 px-4 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-100 hover:scale-105 transition-all cursor-pointer"
         >
           Cancel
         </button>
@@ -43,7 +43,7 @@
         <button
           @click="confirmDelete"
           :class="[
-            'w-full py-2 px-4 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-105',
+            'w-full py-2 px-4 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-105 cursor-pointer',
             action === 'deactivate'
               ? 'bg-blue-600 hover:bg-blue-700'
               : 'bg-red-600 hover:bg-red-700',
