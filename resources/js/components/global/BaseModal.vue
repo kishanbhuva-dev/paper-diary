@@ -28,14 +28,14 @@
       <div class="flex gap-4 pt-2">
         <button
           @click="$emit('update:modelValue', false)"
-          class="w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 border border-gray-200 hover:bg-gray-200 hover:scale-[1.03] transition-all duration-200"
+          class="w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 border border-gray-200 hover:bg-gray-200 hover:scale-[1.03] transition-all duration-200 cursor-pointer"
         >
           Cancel
         </button>
 
         <button
           @click="$emit('save')"
-          class="w-full py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center bg-blue-600 text-white shadow-sm hover:bg-blue-700 hover:shadow-md hover:scale-[1.03] transition-all duration-200"
+          class="w-full py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center bg-blue-600 text-white shadow-sm hover:bg-blue-700 hover:shadow-md hover:scale-[1.03] transition-all duration-200 cursor-pointer"
         >
           <Icon
             icon="mdi:content-save-outline"

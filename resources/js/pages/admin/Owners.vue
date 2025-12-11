@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen">
+  <div>
     <Basetable
       title="Owner Management"
       :columns="tableColumns"
@@ -252,7 +252,7 @@ const owners = ref([]);
 
 const tableColumns = [
   { label: "ID", key: "id" },
-  { label: "Name", key: "name" },
+  { label: "Name", key: (row) => row.firstName + " " + row.lastName },
   { label: "Email", key: "email" },
   { label: "Address", key: "address" },
   { label: "Phone", key: "phone" },

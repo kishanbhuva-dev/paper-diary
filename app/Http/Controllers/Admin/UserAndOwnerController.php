@@ -79,7 +79,7 @@ class UserAndOwnerController extends Controller
                         ->orWhere('phone', 'LIKE', '%'.$search.'%');
                 });
                 $search = explode(' ', $search);
-                if (count($search) > 0) {
+                if (count($search) > 1) {
                     $owner->orWhere(function ($q) use ($search) {
                         $q->where('firstName', 'LIKE', '%'.$search[0].'%')
                             ->where('lastName', 'LIKE', '%'.$search[1].'%');
