@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 sm:px-6 py-8 bg-gray-50 min-h-screen">
+  <div class="px-4 sm:px-6 py-4 bg-gray-50 min-h-screen">
     <div class="max-w-5xl mx-auto">
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">
@@ -7,7 +7,7 @@
         </h1>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-xl border border-slate-100">
+      <div class="bg-white rounded-2xl shadow-inner border border-blue-100">
         <div
           v-if="loadingItem"
           class="p-16 flex flex-col justify-center items-center"
@@ -207,7 +207,7 @@
             </h3>
             <OwnerImageUploader
               v-model="formData.images"
-              :max-files="10"
+              :max-files="50"
               @reorder="onImagesReorder"
             />
           </div>
@@ -246,23 +246,15 @@ import BaseInput from "../../components/global/BaseInput.vue";
 import OwnerImageUploader from "../../components/owner/OwnerImageUploader.vue";
 import ownerService from "../../services/ownerService";
 
-// --- 1. PROPS, EMITS, & CORE SETUP ---
-
 const props = defineProps({
-  /** True when this component is used as a step in a multi-step wizard. */
   inWizard: { type: Boolean, default: false },
-  /** Property ID passed by the wizard (overrides route param). */
   id: { type: [String, Number], default: null },
-  /** True when the wizard is in edit mode. */
   editMode: { type: Boolean, default: false },
 });
-
 const emits = defineEmits(["success", "cancel"]);
 
 const route = useRoute();
 const router = useRouter();
-
-// --- 2. STATE MANAGEMENT & DEFAULTS ---
 
 const defaultFormData = {
   status: 1,
@@ -282,56 +274,30 @@ const defaultFormData = {
 const formData = ref({ ...defaultFormData });
 const loadingItem = ref(false);
 const submitting = ref(false);
-// Stores IDs of images originally loaded from the server for diffing on save/update
 const initialImageIds = ref([]);
 const availableFacilities = ref([]);
 
-// --- 3. COMPUTED & UTILITY ---
-
-const effectiveId = computed(() => {
-  // Prioritize prop.id (from wizard) over route.params.id (from standalone page)
-  return props.id || route.params.id || null;
-});
-
+const effectiveId = computed(() => props.id || route.params.id || null);
 const isEditing = computed(() => !!effectiveId.value);
 const inWizard = computed(() => !!props.inWizard);
 
-// Component Refs for Validation
 const inputRefs = ref([]);
-const setInputRef = (el) => {
-  if (el) {
-    inputRefs.value.push(el);
-  }
-};
-onBeforeUpdate(() => {
-  // Clears refs before component updates to ensure we collect only current elements
-  inputRefs.value = [];
-});
+const setInputRef = (el) => el && inputRefs.value.push(el);
+onBeforeUpdate(() => (inputRefs.value = []));
 
-/**
- * Validates all registered form inputs.
- * @returns {boolean} True if all inputs are valid, otherwise false.
- */
 const validateForm = () => {
-  let isValid = true;
-  inputRefs.value.forEach((inputComponent) => {
-    if (inputComponent && typeof inputComponent.validate === "function") {
-      const isInputValid = inputComponent.validate();
-      if (!isInputValid) {
-        isValid = false;
-      }
+  let ok = true;
+  inputRefs.value.forEach((c) => {
+    if (c && typeof c.validate === "function") {
+      if (!c.validate()) ok = false;
     }
   });
-  return isValid;
+  return ok;
 };
 
-/**
- * Decodes base64 ID or ensures ID is numeric for API calls.
- * @param {string | number} val - The raw ID value.
- * @returns {string | number} The resolved numeric ID or original string/number.
- */
 const decodeId = (val) => {
-  if (!val || typeof val === "number" || /^\d+$/.test(String(val))) return val;
+  if (!val) return val;
+  if (typeof val === "number" || /^\d+$/.test(String(val))) return Number(val);
   try {
     const maybe = atob(String(val));
     return !isNaN(Number(maybe)) ? Number(maybe) : val;
@@ -340,272 +306,239 @@ const decodeId = (val) => {
   }
 };
 
-/**
- * Converts image objects from the API response into the local state format.
- * @param {Array<Object>} remoteImages - Images array from the server.
- * @returns {Array<Object>} Formatted images for the form state.
- */
-const formatImages = (remoteImages) => {
-  return (remoteImages || []).map((img) => ({
+const formatImages = (images = []) => {
+  return (images || []).map((img) => ({
     id: img.id,
-    // Build URL from image (filename) or use existing url property
     url: img.url ? img.url : `/storage/property/images/${img.image}`,
     file: null,
+    image: img.image,
+    position: img.position,
   }));
 };
 
-// --- 4. DATA LOADING & WATCHERS ---
-
-/**
- * Loads property data and associated images/facilities for editing.
- * @param {string | number} id - The property ID (may be base64 encoded).
- */
 const loadPropertyForEdit = async (id) => {
   loadingItem.value = true;
   try {
-    const resolvedId = decodeId(id);
-    const item = await ownerService.fetchPropertyById(resolvedId);
-
-    if (item) {
-      // 1. Fetch & format Images
-      const remoteImages = await ownerService.fetchPropertyImages(item.id);
-      const loadedImages = formatImages(remoteImages);
-
-      // 2. Prepare Facilities
-      const loadedFacilityIds = (item.facilities || []).map((f) => f.id);
-
-      // 3. Update State
-      const loadedData = JSON.parse(JSON.stringify(item));
-      loadedData.images = loadedImages;
-      loadedData.facilities = loadedFacilityIds;
-
-      initialImageIds.value = loadedImages.map((i) => i.id).filter(Boolean);
-      formData.value = loadedData;
-    } else {
-      // If fetching fails for a standalone edit, redirect to the list
+    const resolved = decodeId(id);
+    const item = await ownerService.fetchPropertyById(resolved);
+    if (!item) {
       if (!inWizard.value) router.push({ name: "properties" });
+      return;
     }
-  } catch (e) {
-    console.error("Failed to load property:", e);
+
+    const remoteImages = await ownerService.fetchPropertyImages(item.id);
+    const loadedImages = formatImages(remoteImages);
+    const loadedFacilityIds = (item.facilities || []).map((f) => f.id);
+
+    const loadedData = JSON.parse(JSON.stringify(item));
+    loadedData.images = loadedImages;
+    loadedData.facilities = loadedFacilityIds;
+
+    initialImageIds.value = loadedImages.map((i) => i.id).filter(Boolean);
+    formData.value = loadedData;
+  } catch (err) {
+    console.error("Failed to load property:", err);
+    if (!inWizard.value) router.push({ name: "properties" });
   } finally {
     loadingItem.value = false;
   }
 };
 
-onMounted(() => {
-  // Load all available facilities (STATIC DATA - always needed for the form)
-  (async () => {
-    try {
-      const facs = await ownerService.fetchFacilities();
-      if (Array.isArray(facs) && facs.length) {
-        availableFacilities.value = facs.map((f) => ({
-          id: f.id,
-          name: f.name,
-        }));
-      }
-    } catch (e) {
-      console.error("Failed to load facilities:", e);
-    }
-  })();
-  
-  // The initial logic to check if we are in CREATE mode on mount.
-  if (!isEditing.value) {
-    formData.value = { ...defaultFormData };
+onMounted(async () => {
+  try {
+    const facs = await ownerService.fetchFacilities();
+    availableFacilities.value = Array.isArray(facs)
+      ? facs.map((f) => ({ id: f.id, name: f.name }))
+      : [];
+  } catch (e) {
+    console.error("Failed to load facilities:", e);
   }
-  // Data loading for edit mode is now entirely handled by the watch below.
+
+  if (!isEditing.value) formData.value = { ...defaultFormData };
 });
 
-// Watch the effectiveId:
-// 1. If it has a value, load data (happens on initial load in edit mode, or when returning to step 1)
-// 2. If it is null, reset the form (happens if you clear the ID)
 watch(
   () => effectiveId.value,
   (val) => {
-    if (val) {
-      // Loads data for edit mode
-      loadPropertyForEdit(val);
-    } else {
-      // Resets form for create mode
-      formData.value = { ...defaultFormData };
-    }
+    if (val) loadPropertyForEdit(val);
+    else formData.value = { ...defaultFormData };
   },
-  { immediate: true } // This ensures initial loading happens if an ID exists
+  { immediate: true }
 );
 
-// --- 5. DEPENDENT DATA HANDLERS (Images & Facilities) ---
-
-/**
- * Processes images: calculates removed IDs, prepares new files for upload.
- * @returns {{ newFiles: Array<File>, removedIds: Array<number> }}
- */
+// Images helper: get list of File objects to upload and ids removed
 const processImages = () => {
   const newFiles = formData.value.images
     .filter((img) => img.file instanceof File)
-    .map((f) => f.file);
-
+    .map((i) => i.file);
   const existingIds = formData.value.images
     .filter((img) => img.id)
     .map((i) => i.id);
-
   const removedIds = initialImageIds.value.filter(
     (id) => !existingIds.includes(id)
   );
-
   return { newFiles, removedIds };
 };
 
-/**
- * Saves/Updates images and facilities to the API after the property data is saved.
- * @param {number} propertyId - The ID of the saved property.
- * @param {Array<File>} newFiles - Files to upload.
- * @param {Array<number>} removedIds - IDs of images to delete.
- */
-const handleDependentDataUpdates = async (propertyId, newFiles, removedIds) => {
-  // A. Delete removed images
-  if (removedIds.length) {
-    for (const imgId of removedIds) {
-      await ownerService.deletePropertyImage(imgId).catch((err) => {});
+// Handle image deletes/uploads and ordering, then facility sync
+const handleDependentDataUpdates = async (
+  propertyId,
+  newFiles,
+  removedIds,
+  uiOrder = null
+) => {
+  // Delete removed images
+  if (removedIds && removedIds.length) {
+    for (const id of removedIds) {
+      try {
+        await ownerService.deletePropertyImage(id);
+      } catch (e) {
+        console.debug("Failed to delete image:", id, e);
+      }
     }
   }
 
-  // B. Upload new images
-  if (newFiles.length) {
-    await ownerService.addPropertyImages(propertyId, newFiles).catch((err) => {
-      console.error("Image upload failed:", err);
-    });
+  // Upload new files in same order as provided
+  let uploaded = [];
+  if (newFiles && newFiles.length) {
+    try {
+      // newFiles is an array of File objects
+      uploaded = await ownerService.addPropertyImages(propertyId, newFiles);
+    } catch (e) {
+      console.debug("Failed to upload images:", e);
+    }
   }
 
-  // C. Update image order (requires re-fetching final state)
-  const remoteImages = await ownerService.fetchPropertyImages(propertyId);
-  formData.value.images = formatImages(remoteImages); // Update state
+  // Compute ordered IDs according to uiOrder when provided, otherwise use current UI state
+  const uiOrdered = uiOrder || formData.value.images;
+  const uploadedIdsQueue = (uploaded || []).map((u) => u.id || null);
+  const orderedIds = [];
+  for (const slot of uiOrdered) {
+    if (slot.id) orderedIds.push(slot.id);
+    else if (slot.file) {
+      const next = uploadedIdsQueue.shift();
+      if (next) orderedIds.push(next);
+    }
+  }
 
-  const orderedIds = formData.value.images.map((i) => i.id).filter(Boolean);
+  // Apply order if more than one id
   if (orderedIds.length > 1) {
-    await ownerService
-      .changePropertyImagePosition(propertyId, orderedIds)
-      .catch((err) => {
-        console.debug("[PropertiesForm] Failed to update image order:", err);
-      });
+    try {
+      await ownerService.changePropertyImagePosition(propertyId, orderedIds);
+    } catch (e) {
+      console.debug("Failed to change image positions:", e);
+    }
   }
 
-  // D. Update facilities
-  const facilityIds = formData.value.facilities
-    .map((id) => parseInt(id, 10))
-    .filter((id) => Number.isInteger(id) && id > 0);
+  // Refresh images and set local state
+  try {
+    const remote = await ownerService.fetchPropertyImages(propertyId);
+    formData.value.images = formatImages(remote);
+    initialImageIds.value = formData.value.images
+      .map((i) => i.id)
+      .filter(Boolean);
+  } catch (e) {
+    console.debug("Failed to refresh images:", e);
+  }
 
-  if (facilityIds.length > 0) {
-    await ownerService
-      .setPropertyFacilities({
-        propertyId: propertyId,
+  // Sync facilities
+  const facilityIds = Array.isArray(formData.value.facilities)
+    ? formData.value.facilities
+        .map((id) => parseInt(id, 10))
+        .filter((n) => Number.isInteger(n) && n > 0)
+    : [];
+  if (facilityIds.length) {
+    try {
+      await ownerService.setPropertyFacilities({
+        propertyId,
         facilityId: facilityIds,
-      })
-      .catch((err) => {});
+      });
+    } catch (e) {
+      console.debug("Failed to sync facilities:", e);
+    }
   }
 };
 
-/**
- * Handles image reordering when emitted from the uploader component.
- * @param {Array<Object>} newImages - The new order of image objects.
- */
 const onImagesReorder = async (newImages) => {
   formData.value.images = [...newImages];
-
-  // Only perform API call if in standalone edit mode
+  // Only apply immediate reorder for non-wizard inline edit (keep wizard changes deferred)
   if (isEditing.value && formData.value.id && !inWizard.value) {
     const ids = formData.value.images.map((i) => i.id).filter(Boolean);
     if (ids.length > 1) {
-      await ownerService
-        .changePropertyImagePosition(formData.value.id, ids)
-        .catch((err) => {
-          console.error(
-            "[PropertiesForm] changePropertyImagePosition error:",
-            err
-          );
-        });
+      try {
+        await ownerService.changePropertyImagePosition(formData.value.id, ids);
+      } catch (e) {
+        console.error("[PropertiesForm] changePropertyImagePosition error:", e);
+      }
     }
   }
 };
 
-// --- 6. SUBMISSION HANDLERS ---
-
-/**
- * Saves or creates the property data and returns the saved ID.
- * Includes fallback logic to find the ID if the API doesn't return it.
- * @param {object} apiPayload - The property data payload.
- * @returns {number | null} The ID of the created or updated property.
- */
 const savePropertyData = async (apiPayload) => {
   let savedPropertyId = null;
-
   if (isEditing.value) {
     await ownerService.updateProperty(formData.value.id, apiPayload);
     savedPropertyId = formData.value.id;
   } else {
     const response = await ownerService.createProperty(apiPayload);
     savedPropertyId = response?.data?.id || response?.id;
-
-    // Fallback: fetch properties and get the latest one by name
     if (!savedPropertyId) {
-      const paginatedResponse = await ownerService.fetchProperties({
-        limit: 1,
-      });
-      const createdProperty = paginatedResponse?.data?.find(
-        (p) => p.propertyName === apiPayload.propertyName
-      );
-      savedPropertyId = createdProperty?.id;
+      // best-effort fallback
+      const paginated = await ownerService.fetchProperties({ limit: 1 });
+      if (paginated && Array.isArray(paginated.data)) {
+        const found = paginated.data.find(
+          (p) => p.propertyName === apiPayload.propertyName
+        );
+        savedPropertyId = found?.id;
+      }
     }
   }
-
   return savedPropertyId;
 };
 
-/**
- * Main function called on form submit.
- */
 const handleSubmit = async () => {
   if (submitting.value) return;
+  if (!validateForm()) return;
   submitting.value = true;
-
-  if (!validateForm()) {
-    submitting.value = false;
-    return;
-  }
-
   try {
-    // A. Prepare Data: Separate files/facilities from property payload
     const { newFiles, removedIds } = processImages();
     const apiPayload = JSON.parse(JSON.stringify(formData.value));
     delete apiPayload.images;
     delete apiPayload.facilities;
 
-    // B. WIZARD EDIT MODE: Return payload for parent component to apply later
+    // Edit-in-wizard: return diffs to parent for final apply
     if (inWizard.value && props.editMode) {
-      const facilityIds = formData.value.facilities
-        .map((id) => parseInt(id, 10))
-        .filter((id) => Number.isInteger(id) && id > 0);
-
+      const facilityIds = Array.isArray(formData.value.facilities)
+        ? formData.value.facilities
+            .map((id) => parseInt(id, 10))
+            .filter((n) => Number.isInteger(n) && n > 0)
+        : [];
+      const orderedImageIds = formData.value.images
+        .map((img) => img.id)
+        .filter(Boolean);
       return {
         propertyPayload: apiPayload,
         newFiles,
         removedImageIds: removedIds,
+        orderedImageIds,
         facilityIds,
       };
     }
 
-    // C. STANDALONE/WIZARD CREATE MODE: Execute API calls
     const savedPropertyId = await savePropertyData(apiPayload);
+    if (!savedPropertyId)
+      throw new Error("Could not determine saved property id");
 
-    if (savedPropertyId) {
-      // D. Handle Dependent Data (Images & Facilities)
-      await handleDependentDataUpdates(savedPropertyId, newFiles, removedIds);
+    // Apply dependent updates using UI order preserved
+    await handleDependentDataUpdates(
+      savedPropertyId,
+      newFiles,
+      removedIds,
+      formData.value.images
+    );
 
-      // E. Final Action
-      if (inWizard.value) {
-        emits("success", { id: savedPropertyId });
-      } else {
-        router.push({ name: "properties" });
-      }
-    }
+    if (inWizard.value) emits("success", { id: savedPropertyId });
+    else router.push({ name: "properties" });
   } catch (e) {
     console.error("[PropertiesForm] Submission Error:", e);
   } finally {
@@ -613,17 +546,10 @@ const handleSubmit = async () => {
   }
 };
 
-/**
- * Handles the cancel action, routing/emitting based on wizard mode.
- */
 const handleCancel = () => {
-  if (inWizard.value) {
-    emits("cancel");
-  } else {
-    router.push({ name: "properties" });
-  }
+  if (inWizard.value) emits("cancel");
+  else router.push({ name: "properties" });
 };
 
-// --- 7. EXPOSE FOR WIZARD USE ---
-defineExpose({ handleSubmit });
+defineExpose({ handleSubmit, onImagesReorder });
 </script>

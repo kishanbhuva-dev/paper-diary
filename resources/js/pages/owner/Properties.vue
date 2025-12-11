@@ -44,14 +44,22 @@
       :showEdit="true"
     />
   </div>
+
+  <DeleteModal
+    v-model="isConfirmationModalVisible"
+    :title="'Delete Property'"
+    :message="`Are you sure you want to delete the property: ${propertyNameToDelete} ?`"
+    :warning="'This action cannot be undone and will permanently delete the property, all associated resource types, and images!'"
+    @confirm="handleDeleteConfirmation"
+  />
 </template>
 
 <script setup>
 import Basetable from "../../components/global/Basetable.vue";
+import DeleteModal from "../../components/global/DeleteModal.vue";
 import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
-import Swal from "sweetalert2";
 import ownerService from "../../services/ownerService";
 
 // --- 1. STATE MANAGEMENT & INITIALIZATION ---
@@ -67,10 +75,15 @@ const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 
+// Delete Modal State
+const isConfirmationModalVisible = ref(false);
+const propertyIdToDelete = ref(null);
+const propertyNameToDelete = ref(""); // NEW: State to hold the property name
+
 // Table Configuration
 const tableColumns = [
   { label: "ID", key: "id" },
-  { label: "Name", key: (row) => row },
+  { label: "Name", key: "propertyName" },
   { label: "Address", key: "address" },
   { label: "City", key: "city" },
   { label: "Country", key: "country" },
@@ -169,6 +182,19 @@ const handlePerPageChange = (size) => {
 // --- 5. DELETION LOGIC ---
 
 /**
+ * Executes when the custom modal's confirmation button is clicked.
+ */
+const handleDeleteConfirmation = async () => {
+  isConfirmationModalVisible.value = false;
+
+  if (propertyIdToDelete.value !== null) {
+    await handleDelete(propertyIdToDelete.value);
+    propertyIdToDelete.value = null;
+    propertyNameToDelete.value = ""; // Clear name state
+  }
+};
+
+/**
  * Performs the actual property deletion via the service and updates the view.
  * @param {number} id - The ID of the property to delete.
  */
@@ -196,12 +222,7 @@ const handleDelete = async (id) => {
     }
     await loadData(); // Reload data to show updated list
 
-    Swal.fire({
-      title: "Deleted!",
-      text: "The property has been successfully deleted.",
-      icon: "success",
-      confirmButtonColor: "#4f46e5",
-    });
+    // Success notification (using console log as SweetAlert was removed)
   } catch (err) {
     const errorMessage =
       err.response?.status === 401
@@ -209,35 +230,24 @@ const handleDelete = async (id) => {
         : err.message || "Deletion failed";
 
     error.value = errorMessage;
-    Swal.fire({
-      title: "Error!",
-      text: errorMessage,
-      icon: "error",
-      confirmButtonColor: "#4f46e5",
-    });
+
+    // Error notification (using console log as SweetAlert was removed)
+    console.error("Deletion failed:", errorMessage);
   }
 };
 
 /**
- * Shows the confirmation dialog before attempting deletion.
+ * Shows the custom confirmation dialog before attempting deletion.
  * @param {number} id - The ID of the property to delete.
  */
-const confirmDelete = async (id) => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "This action cannot be undone and will delete associated data!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#4f46e5", // Indigo-600
-    cancelButtonColor: "#ef4444", // Red-500
-    confirmButtonText: "Yes, delete it!",
-    cancelButtonText: "Cancel",
-    reverseButtons: true,
-  });
+const confirmDelete = (id) => {
+  const property = properties.value.find((p) => p.id === id);
 
-  if (result.isConfirmed) {
-    await handleDelete(id);
-  }
+  propertyIdToDelete.value = id;
+  propertyNameToDelete.value = property
+    ? property.propertyName
+    : "this property";
+  isConfirmationModalVisible.value = true;
 };
 
 // --- 6. SETUP HOOKS ---

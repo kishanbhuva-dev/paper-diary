@@ -3,13 +3,19 @@
     <label
       v-if="label"
       :for="label"
-      class="block text-sm font-semibold text-gray-700 mb-1"
+      class="block text-sm font-semibold mb-1"
+      :class="[theme.txt]"
     >
       {{ label }} <span v-if="required" class="text-red-500">*</span>
     </label>
 
     <div :class="containerClasses">
-      <Icon v-if="icon" :icon="icon" class="text-md text-slate-400 shrink-0" />
+      <Icon
+        v-if="icon"
+        :icon="icon"
+        class="text-md shrink-0"
+        :class="theme.txt"
+      />
 
       <span
         v-if="prefix"
@@ -47,7 +53,7 @@
         @input="handleInput"
       />
 
-      <span v-if="suffix" class="text-sm text-slate-500 shrink-0">{{
+      <span v-if="suffix" class="text-sm shrink-0" :class="theme.txt">{{
         suffix
       }}</span>
 
