@@ -132,13 +132,13 @@
       class="pagination flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200"
       v-if="totalPages > 0"
     >
-      <div class="flex items-center space-x-6 order-2 sm:order-1 mt-4 sm:mt-0">
+      <div class="flex items-center space-x-6 mt-4 sm:mt-0">
         <p class="text-sm text-gray-700 whitespace-nowrap">
           Page <span class="font-bold">{{ currentPage }}</span> of
           <span class="font-bold">{{ totalPages }}</span>
         </p>
       </div>
-      <div>
+      <div class="flex gap-4">
         <div class="flex items-center">
           <label
             for="perPage"
@@ -155,7 +155,7 @@
             </option>
           </select>
         </div>
-        <div v-if="totalPages > 1" class="order-1 sm:order-2">
+        <div v-if="totalPages > 1" class="">
           <nav
             aria-label="Pagination"
             class="isolate inline-flex -space-x-px rounded-xl shadow-md"
@@ -191,7 +191,7 @@
                 v-else
                 @click="changePage(page)"
                 :class="[
-                  'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border bg-white',
+                  'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border',
                   page === currentPage
                     ? 'z-10 bg-blue-600 text-white border-blue-600 hover:bg-blue-600'
                     : 'text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-600',

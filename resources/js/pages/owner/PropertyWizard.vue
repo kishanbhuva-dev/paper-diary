@@ -267,7 +267,18 @@ const handleBackButton = async () => {
 
 // --- HANDLERS (Receiving success/data from children) ---
 
-const handleStep1Success = (data) => {
+// HELPER: Fetch resource types so Step 3 has data in edit mode
+const loadResourceTypes = async (id) => {
+  try {
+    const types = await ownerService.fetchResourceTypes(id);
+    resourceTypes.value = (types || []).map((t) => t.id);
+  } catch (e) {
+    console.error("Failed to load resource types:", e);
+    resourceTypes.value = [];
+  }
+};
+
+const handleStep1Success = async (data) => {
   // Property was created/updated, store the ID
   // If the wizard was opened without an existing id, then this creation
   // happened in this wizard and should be deleted on Cancel.
@@ -275,6 +286,18 @@ const handleStep1Success = (data) => {
     if (!propertyId.value) createdInWizard.value = true;
   }
   propertyId.value = data.id;
+
+  // FIX: Load resource types if we are in Edit Mode
+  if (startedWithId.value) {
+    // Resolve ID in case it's base64
+    let id = data.id;
+    try {
+      const maybe = atob(String(id));
+      if (!isNaN(Number(maybe))) id = Number(maybe);
+    } catch (e) {}
+    await loadResourceTypes(id);
+  }
+
   nextStep();
 };
 
@@ -312,13 +335,55 @@ const applyEdits = async () => {
       if (p.propertyPayload) {
         await ownerService.updateProperty(numericId, p.propertyPayload);
       }
+
       if (p.removedImageIds && p.removedImageIds.length) {
         await ownerService.deletePropertyImages(p.removedImageIds);
       }
+
+      // Upload any new files first to obtain their IDs
+      let uploadedNewIds = [];
       if (p.newFiles && p.newFiles.length) {
-        await ownerService.addPropertyImages(numericId, p.newFiles);
+        const uploaded = await ownerService.addPropertyImages(
+          numericId,
+          p.newFiles
+        );
+        uploadedNewIds = (uploaded || []).map((u) => u.id).filter(Boolean);
       }
-      if (Array.isArray(p.facilityIds) && p.facilityIds.length > 0) {
+
+      // Apply ordering: prefer explicit order sent from the child (p.orderedImageIds).
+      // If child provided an order for existing images, append newly uploaded ids at the end.
+      if (p.orderedImageIds && p.orderedImageIds.length) {
+        const finalOrder = [...p.orderedImageIds];
+        if (uploadedNewIds.length) finalOrder.push(...uploadedNewIds);
+        if (finalOrder.length > 1) {
+          await ownerService
+            .changePropertyImagePosition(numericId, finalOrder)
+            .catch((err) => {
+              console.debug(
+                "[PropertyWizard] Failed to update image order:",
+                err
+              );
+            });
+        }
+      } else {
+        // Fallback: fetch server order and leave as-is
+        const remoteImages = await ownerService.fetchPropertyImages(numericId);
+        const orderedIds = (remoteImages || [])
+          .map((i) => i.id)
+          .filter(Boolean);
+        if (orderedIds.length > 1) {
+          await ownerService
+            .changePropertyImagePosition(numericId, orderedIds)
+            .catch((err) => {
+              console.debug(
+                "[PropertyWizard] Failed to update image order:",
+                err
+              );
+            });
+        }
+      }
+
+      if (Array.isArray(p.facilityIds) && p.facilityIds.length >= 0) {
         await ownerService.setPropertyFacilities({
           propertyId: numericId,
           facilityId: p.facilityIds,
@@ -389,6 +454,7 @@ const applyEdits = async () => {
 
     router.push({ name: "properties" });
   } catch (err) {
+    console.error("Failed to apply edits", err);
   } finally {
     loading.value = false;
   }

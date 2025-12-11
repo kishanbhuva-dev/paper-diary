@@ -1,5 +1,7 @@
 <template>
-  <div class="p-6 mb-4 bg-white rounded-2xl shadow-inner border border-blue-100">
+  <div
+    class="p-6 mb-4 bg-white rounded-2xl shadow-inner border border-blue-100"
+  >
     <h3 class="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
       <Icon icon="mdi:bed-empty-outline" class="text-2xl" /> Resource Types
     </h3>
@@ -44,14 +46,14 @@
           />
         </div>
 
-        <div class="flex items-end self-stretch">
+        <div class="flex items-start self-stretch mt-6">
           <button
             type="button"
             @click="openRemoveTypeModal(idx)"
-            class="px-3 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
+            class="px-2 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
             title="Delete type"
           >
-            <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
+            <Icon icon="mdi:delete-forever" class="w-6 h-6" />
           </button>
         </div>
       </div>
@@ -221,9 +223,29 @@ const addType = () => {
 };
 
 const openRemoveTypeModal = (idx) => {
-  if (types.value.length === 1) return;
-  typeIndexToRemove.value = idx;
-  isConfirmationModalVisible.value = true;
+  // We remove the length check here to allow removing the last one if it's a dummy/blank row.
+  // The logic inside confirmRemoval prevents the list from becoming completely empty, if needed.
+
+  const type = types.value[idx];
+
+  // Checks if the row is new (no id) AND if the name field is empty/blank
+  const isDummyOrBlank =
+    !type.id && (!type.name || type.name.toString().trim() === "");
+
+  if (types.value.length === 1 && !isDummyOrBlank) {
+    // If only one remains AND it has content/ID, we prevent deletion.
+    return;
+  }
+
+  if (isDummyOrBlank) {
+    // If it's a dummy/blank row, skip the modal and proceed straight to removal
+    typeIndexToRemove.value = idx;
+    confirmRemoval();
+  } else {
+    // If it has an ID or a name (user has started filling it out), show the modal
+    typeIndexToRemove.value = idx;
+    isConfirmationModalVisible.value = true;
+  }
 };
 
 const confirmRemoval = () => {
@@ -234,6 +256,23 @@ const confirmRemoval = () => {
   }
 
   const t = types.value[idx];
+
+  if (types.value.length === 1) {
+    // If only one item remains, reset it instead of deleting the array item
+    // This is safer than having an empty array of resource types
+    types.value[0] = {
+      name: "",
+      price: null,
+      capacity: 1,
+      slot: null,
+      adjustedPrice: null,
+      adjustedStart: null,
+      adjustedEnd: null,
+    };
+    isConfirmationModalVisible.value = false;
+    typeIndexToRemove.value = null;
+    return;
+  }
 
   if (t && t.id) {
     deletedTypeIds.value.push(t.id);

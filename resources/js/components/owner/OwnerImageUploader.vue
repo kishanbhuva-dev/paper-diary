@@ -95,7 +95,7 @@ const props = defineProps({
   },
   maxFiles: {
     type: Number,
-    default: 5,
+    default: 50,
   },
   maxFileSize: {
     type: Number,
@@ -103,7 +103,7 @@ const props = defineProps({
   },
   maxTotalFileSize: {
     type: Number,
-    default: 20 * 1024 * 1024, // 20MB combined default
+    default: 50 * 1024 * 1024, // 20MB combined default
   },
 });
 

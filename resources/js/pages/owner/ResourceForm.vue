@@ -1,5 +1,7 @@
 <template>
-  <div class="p-6 mb-4 bg-white rounded-2xl shadow-inner border border-blue-100">
+  <div
+    class="p-6 mb-4 bg-white rounded-2xl shadow-inner border border-blue-100"
+  >
     <h3 class="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
       <Icon icon="mdi:door-open" class="text-2xl" /> Resources
     </h3>
@@ -36,14 +38,14 @@
           />
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex items-start self-stretch mt-6">
           <button
             type="button"
             @click="openRemoveResourceItemModal(idx)"
-            class="px-3 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
+            class="px-2 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
             title="Delete resource"
           >
-            <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
+            <Icon icon="mdi:delete-forever" class="w-6 h-6" />
           </button>
         </div>
       </div>
