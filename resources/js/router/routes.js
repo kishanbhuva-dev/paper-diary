@@ -79,6 +79,12 @@ const routes = [
         component: () => import("../../js/pages/admin/Owners.vue"),
         meta: { pageTitle: "Owner List" },
       },
+      {
+        path: "/admin/users",
+        name: "admin-users",
+        component: () => import("../../js/pages/admin/Users.vue"),
+        meta: { pageTitle: "User List" },
+      },
     ],
   },
 

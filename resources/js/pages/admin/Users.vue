@@ -1,9 +1,9 @@
 <template>
   <div>
     <Basetable
-      title="Owner Management"
+      title="User Management"
       :columns="tableColumns"
-      :rows="owners"
+      :rows="users"
       :server-side="true"
       :total-items="total"
       :per-page="perPage"
@@ -20,7 +20,7 @@
       :showEdit="true"
     />
     <BaseModal
-      :title="form?.id ? 'Edit Owner' : 'Add Owner'"
+      :title="form?.id ? 'Edit User' : 'Add User'"
       v-model="isOpen"
       width="max-w-xl"
       @save="handleSubmit"
@@ -128,10 +128,10 @@
 
     <DeleteModal
       v-model="isOpenDelete"
-      title="Delete Owner"
-      message="Are you sure you want to delete this owner?"
-      warning="This action cannot be undone. Please confirm that you want to delete this owner."
-      :deleteData="deleteOwner"
+      title="Delete User"
+      message="Are you sure you want to delete this user?"
+      warning="This action cannot be undone. Please confirm that you want to delete this user."
+      :deleteData="deleteUser"
       action="delete"
       @confirm="handleDeleteData"
     />
@@ -166,14 +166,14 @@ const emailInput = ref(null);
 const passwordInput = ref(null);
 const addressInput = ref(null);
 
-const fetchAllOwners = async () => {
-  const res = await adminService.fetchAllOwners({
+const fetchAllUsers = async () => {
+  const res = await adminService.fetchAllUsers({
     page: currentPage.value,
     per_page: perPage.value,
     search: currentSearch.value,
   });
   if (res.status) {
-    owners.value = res.data.data;
+    users.value = res.data.data;
     total.value = res.data.total || 0;
   }
 };
@@ -183,9 +183,9 @@ const handleAdd = () => {
   form.value = {};
 };
 
-const handleEdit = (owner) => {
+const handleEdit = (user) => {
   isOpen.value = true;
-  form.value = { ...owner };
+  form.value = { ...user };
 };
 
 const handleSubmit = async () => {
@@ -204,29 +204,29 @@ const handleSubmit = async () => {
   let res;
 
   if (form.value.id) {
-    res = await adminService.updateOwner(form.value);
+    res = await adminService.updateUser(form.value);
   } else {
-    res = await adminService.createOwner(form.value);
+    res = await adminService.createUser(form.value);
   }
 
   if (res?.status) {
     isOpen.value = false;
-    fetchAllOwners();
+    fetchAllUsers();
   }
 };
 
 const isOpenDelete = ref(false);
-const deleteOwner = ref(null);
+const deleteUser = ref(null);
 
-const handleDelete = async (owner) => {
-  deleteOwner.value = owner;
+const handleDelete = async (user) => {
+  deleteUser.value = user;
   isOpenDelete.value = true;
 };
 
 const handleDeleteData = async () => {
-  const res = await adminService.deleteOwner({ id: deleteOwner.value });
+  const res = await adminService.deleteUser({ id: deleteUser.value });
   if (res.status) {
-    fetchAllOwners();
+    fetchAllUsers();
     isOpenDelete.value = false;
   }
 };
@@ -234,21 +234,21 @@ const handleDeleteData = async () => {
 const handleSearch = (term) => {
   currentSearch.value = term;
   currentPage.value = 1;
-  fetchAllOwners();
+  fetchAllUsers();
 };
 
 const handlePageChange = (page) => {
   currentPage.value = page;
-  fetchAllOwners();
+  fetchAllUsers();
 };
 
 const handlePerPageChange = (size) => {
   perPage.value = size;
   currentPage.value = 1;
-  fetchAllOwners();
+  fetchAllUsers();
 };
 
-const owners = ref([]);
+const users = ref([]);
 
 const tableColumns = [
   { label: "ID", key: "id" },
@@ -260,6 +260,6 @@ const tableColumns = [
 ];
 
 onMounted(() => {
-  fetchAllOwners();
+  fetchAllUsers();
 });
 </script>
