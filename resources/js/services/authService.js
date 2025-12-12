@@ -16,6 +16,16 @@ const authService = {
     return response.data;
   },
 
+  async forgotPassword(payload) {
+    const response = await apiClient.post("/forget-password", payload);
+    return response.data;
+  },
+
+  async resetPassword(data) {
+    const response = await apiClient.post("/reset-password", data);
+    return response.data;
+  },
+
   async refreshToken() {
     const response = await apiClient.post("/refresh-token");
     return response.data;

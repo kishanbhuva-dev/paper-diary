@@ -33,7 +33,7 @@
       />
 
       <div class="flex justify-between text-sm text-primary">
-        <a href="#" class="hover:text-primary hover:underline">
+        <a href="/forgot-password" class="hover:text-primary hover:underline">
           Forgot password?
         </a>
       </div>

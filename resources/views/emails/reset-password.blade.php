@@ -31,7 +31,7 @@
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;">
                 <tr>
                   <td align="center">
-                    <a href="{{ $url . '/reset-password?token=' . $token }}" target="_blank" style="display:inline-block;padding:12px 20px;border-radius:6px;background:#007bff;color:#ffffff;text-decoration:none;font-weight:600;">
+                    <a href="{{ url('/reset-password?token=') . $token }}" target="_blank" style="display:inline-block;padding:12px 20px;border-radius:6px;background:#007bff;color:#ffffff;text-decoration:none;font-weight:600;">
                       Reset Password
                     </a>
                   </td>
@@ -42,7 +42,7 @@
                 If the button doesn’t work, copy and paste this URL into your browser:
               </p>
               <p style="word-break:break-all;font-size:13px;color:#007bff;margin:8px 0 0 0;">
-                <a href="{{ $url . '/reset-password?token=' . $token }}" target="_blank" style="color:#007bff;text-decoration:underline;">{{ $url . '/reset-password?token=' . $token }}</a>
+                <a href="{{ url('/reset-password?token=') . $token }}" target="_blank" style="color:#007bff;text-decoration:underline;">{{ $url . '/reset-password?token=' . $token }}</a>
               </p>
 
             </td>

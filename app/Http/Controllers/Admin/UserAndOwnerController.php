@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Booking;
-use App\Models\BookingGroups;
+use App\Models\Bookings;
 use App\Models\Property;
 use App\Models\PropertyImage;
+use App\Models\BookingOrder;
 use App\Models\Resource;
 use App\Models\ResourceType;
 use App\Models\User;
@@ -311,8 +311,9 @@ class UserAndOwnerController extends Controller
             PropertyImage::whereIn('propertyId', $property)->delete();
             Property::where('ownerId', $user->id)->delete();
         } else {
-            Booking::where('userId', $user->id)->delete();
-            BookingGroups::where('userId', $user->id)->delete();
+            $bookingOrderIds = BookingOrder::where('userId', $user->id);
+            Bookings::whereIn('bookingOrderId', $bookingOrderIds->pluck('id'))->delete();
+            $bookingOrderIds->delete();
         }
         if (empty($user)) {
             return response()->json(['status' => false, 'message' => ucwords($role).' not found', 'data' => '']);

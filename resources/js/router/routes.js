@@ -33,6 +33,16 @@ const routes = [
         name: "register",
         component: () => import("../../js/pages/auth/RegisterPage.vue"),
       },
+      {
+        path: "/forgot-password",
+        name: "forgot-password",
+        component: () => import("../../js/pages/auth/ForgotPassword.vue"),
+      },
+      {
+        path: "/reset-password",
+        name: "reset-password",
+        component: () => import("../../js/pages/auth/ResetPassword.vue"),
+      },
     ],
   },
 
