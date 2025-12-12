@@ -45,20 +45,7 @@ class UserAndOwnerController extends Controller
     public function fetchAllUser(Request $request)
     {
         try {
-            $user = User::selectRaw('id, concat(firstName, " ", lastName) as name,  phone, email, address, role')->where(function ($query) use ($request) {
-                $query->where('firstName', 'like', '%'.$request->search.'%')->orWhere('lastName', 'like', '%'.$request->search.'%')->orWhere('id', 'like', '%'.$request->search.'%')->orWhere('email', 'like', '%'.$request->search.'%')->orWhere('phone', 'like', '%'.$request->search.'%')->orWhere('address', 'like', '%'.$request->search.'%');
-            })->where('role', 'user');
-            
-            $order = $request->orderBy ?? 'id';
-            $pagination = $request->pagination ?? 10;
-            $user = $user->orderBy($order, $request->sort ?? 'asc')->paginate($pagination);
-            if (count($user) > 0) {
-                $response = ['status' => true, 'message' => '', 'data' => $user];
-            } else {
-                $response = ['status' => false, 'message' => 'No user found', 'data' => ''];
-            }
-
-            return response()->json($response);
+            return $this->fetchAll($request, 'user');
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
@@ -67,37 +54,7 @@ class UserAndOwnerController extends Controller
     public function fetchAllOwner(Request $request)
     {
         try {
-            $owner = User::where('role', 'owner')
-                ->with('properties:id,ownerId,propertyName');
-
-            if ($request->search) {
-                $search = $request->search;
-                $owner->where(function ($q) use ($search) {
-                    $q->where('firstName', 'LIKE', '%'.$search.'%')
-                        ->orWhere('lastName', 'LIKE', '%'.$search.'%')
-                        ->orWhere('email', 'LIKE', '%'.$search.'%')
-                        ->orWhere('phone', 'LIKE', '%'.$search.'%');
-                });
-                $search = explode(' ', $search);
-                if (count($search) > 1) {
-                    $owner->orWhere(function ($q) use ($search) {
-                        $q->where('firstName', 'LIKE', '%'.$search[0].'%')
-                            ->where('lastName', 'LIKE', '%'.$search[1].'%');
-                    });
-                }
-            }
-
-            $orderby = $request->descending == 'true' ? 'DESC' : 'ASC';
-            $column = $request->sortBy ?? 'id';
-
-            if (! empty($column)) {
-                $owner->orderBy($column, $orderby);
-            }
-            $perPage = $request->input('per_page', 15);
-            $owners = $owner->paginate($perPage);
-            $response = ['status' => true, 'message' => '', 'data' => $owners];
-
-            return response()->json($response);
+            return $this->fetchAll($request, 'owner');
         } catch (\Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
 
@@ -126,24 +83,9 @@ class UserAndOwnerController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => '']);
             }
-            $user = new User;
-            $user->firstName = $request->firstName;
-            $user->lastName = $request->lastName;
-            $user->email = $request->email;
-            $user->password = Hash::make($request->password);
-            $user->role = 'user';
-            $user->address = $request->address;
-            $user->address2 = $request->address2;
-            $user->city = $request->city;
-            $user->country = $request->country;
-            $user->postcode = $request->postcode;
-            $user->phone = $request->phone;
-            $user->telephone = $request->telephone;
-            $user->save();
 
-            $response = ['status' => true, 'message' => 'User created successfully', 'data' => ''];
+            return $this->store($request, 'user');
 
-            return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
@@ -171,24 +113,9 @@ class UserAndOwnerController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => '']);
             }
-            $user = User::where('id', $request->id)->where('role', 'user')->first();
-            if (empty($user)) {
-                return response()->json(['status' => false, 'message' => 'User not found', 'data' => '']);
-            }
-            $user->firstName = $request->firstName;
-            $user->lastName = $request->lastName;
-            $user->email = $request->email;
-            $user->address = $request->address;
-            $user->address2 = $request->address2;
-            $user->city = $request->city;
-            $user->country = $request->country;
-            $user->postcode = $request->postcode;
-            $user->phone = $request->phone;
-            $user->telephone = $request->telephone;
-            $user->save();
-            $response = ['status' => true, 'message' => 'User updated successfully', 'data' => ''];
 
-            return response()->json($response);
+            return $this->update($request, 'user');
+
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
@@ -205,16 +132,8 @@ class UserAndOwnerController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => '']);
             }
-            $user = User::where('id', $request->id)->where('role', 'user')->first();
-            if (empty($user)) {
-                return response()->json(['status' => false, 'message' => 'User not found', 'data' => '']);
-            }
-            Booking::where('userId', $user->id)->delete();
-            BookingGroups::where('userId', $user->id)->delete();
-            $user->delete();
-            $response = ['status' => true, 'message' => 'User deleted successfully', 'data' => ''];
 
-            return response()->json($response);
+            return $this->delete($request, 'user');
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
@@ -241,23 +160,8 @@ class UserAndOwnerController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => '']);
             }
-            $owner = new User;
-            $owner->firstName = $request->firstName;
-            $owner->lastName = $request->lastName;
-            $owner->email = $request->email;
-            $owner->password = Hash::make($request->password);
-            $owner->role = 'owner';
-            $owner->address = $request->address;
-            $owner->address2 = $request->address2;
-            $owner->city = $request->city;
-            $owner->country = $request->country;
-            $owner->postcode = $request->postcode;
-            $owner->phone = $request->phone;
-            $owner->telephone = $request->telephone;
-            $owner->save();
-            $response = ['status' => true, 'message' => 'Owner created successfully', 'data' => ''];
 
-            return response()->json($response);
+            return $this->store($request, 'owner');
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
@@ -284,25 +188,8 @@ class UserAndOwnerController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => '']);
             }
-            $owner = User::where('id', $request->id)->where('role', 'owner')->first();
-            if (empty($owner)) {
-                return response()->json(['status' => false, 'message' => 'Owner not found', 'data' => '']);
-            }
-            $owner->firstName = $request->firstName;
-            $owner->lastName = $request->lastName;
-            $owner->email = $request->email;
-            $owner->address = $request->address;
-            $owner->address2 = $request->address2;
-            $owner->city = $request->city;
-            $owner->country = $request->country;
-            $owner->postcode = $request->postcode;
-            $owner->phone = $request->phone;
-            $owner->password = $request->password ? Hash::make($request->password) : $owner->password;
-            $owner->telephone = $request->telephone;
-            $owner->save();
-            $response = ['status' => true, 'message' => 'Owner updated successfully', 'data' => ''];
 
-            return response()->json($response);
+            return $this->update($request, 'owner');
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
@@ -319,25 +206,123 @@ class UserAndOwnerController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => '']);
             }
-            $owner = User::where('id', $request->id)->where('role', 'owner')->first();
-            if (empty($owner)) {
-                return response()->json(['status' => false, 'message' => 'Owner not found', 'data' => '']);
+
+            return $this->delete($request, 'owner');
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        }
+    }
+
+    private function fetchAll($request, $role)
+    {
+        $data = User::where('role', $role);
+
+        if ($request->search) {
+            $search = $request->search;
+            $data->where(function ($q) use ($search) {
+                $q->where('firstName', 'LIKE', '%'.$search.'%')
+                    ->orWhere('lastName', 'LIKE', '%'.$search.'%')
+                    ->orWhere('email', 'LIKE', '%'.$search.'%')
+                    ->orWhere('phone', 'LIKE', '%'.$search.'%');
+            });
+            $search = explode(' ', $search);
+            if (count($search) > 1) {
+                $data->orWhere(function ($q) use ($search) {
+                    $q->where('firstName', 'LIKE', '%'.$search[0].'%')
+                        ->where('lastName', 'LIKE', '%'.$search[1].'%');
+                });
             }
-            $property = Property::where('ownerId', $owner->id)->pluck('id');
+        }
+
+        $orderby = $request->descending == 'true' ? 'DESC' : 'ASC';
+        $column = $request->sortBy ?? 'id';
+
+        if (! empty($column)) {
+            $data->orderBy($column, $orderby);
+        }
+        $perPage = $request->input('per_page', 15);
+        $data = $data->paginate($perPage);
+        $response = ['status' => true, 'message' => '', 'data' => $data];
+
+        return response()->json($response);
+    }
+
+    private function store($request, $role)
+    {
+        $user = new User;
+        $user->firstName = $request->firstName;
+        $user->lastName = $request->lastName;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->role = $role;
+        $user->address = $request->address;
+        $user->address2 = $request->address2;
+        $user->city = $request->city;
+        $user->country = $request->country;
+        $user->postcode = $request->postcode;
+        $user->phone = $request->phone;
+        $user->telephone = $request->telephone;
+        if ($user->save()) {
+            $response = ['status' => true, 'message' => ucwords($role).' created successfully', 'data' => ''];
+        } else {
+            $response = ['status' => false, 'message' => ucwords($role).' not created Something went wrong', 'data' => ''];
+        }
+
+        return response()->json($response);
+
+    }
+
+    private function update($request, $role)
+    {
+        $user = User::where('id', $request->id)->where('role', $role)->first();
+        if (empty($user)) {
+            return response()->json(['status' => false, 'message' => ucwords($role).' not found', 'data' => '']);
+        }
+        $user->firstName = $request->firstName;
+        $user->lastName = $request->lastName;
+        $user->email = $request->email;
+        $user->address = $request->address;
+        $user->address2 = $request->address2;
+        $user->city = $request->city;
+        $user->country = $request->country;
+        $user->postcode = $request->postcode;
+        if (! empty($request->password)) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->phone = $request->phone;
+        $user->telephone = $request->telephone;
+        if ($user->save()) {
+            return response()->json(['status' => true, 'message' => ucwords($role).' updated successfully', 'data' => '']);
+        } else {
+            return response()->json(['status' => false, 'message' => ucwords($role).' not updated Something went wrong', 'data' => '']);
+        }
+
+        return response()->json($response);
+    }
+
+    private function delete($request, $role)
+    {
+        $user = User::where('id', $request->id)->where('role', $role)->first();
+        if ($role == 'owner') {
+            $property = Property::where('ownerId', $user->id)->pluck('id');
             $resourceTypeId = ResourceType::whereIn('propertyId', $property)->pluck('id');
             Resource::whereIn('resourceTypeId', $resourceTypeId)->delete();
             ResourceType::whereIn('propertyId', $property)->delete();
             PropertyImage::whereIn('propertyId', $property)->delete();
-            Property::where('ownerId', $owner->id)->delete();
-            if ($owner->delete()) {
-                $response = ['status' => true, 'message' => 'Owner deleted successfully', 'data' => ''];
-            } else {
-                $response = ['status' => false, 'message' => 'Owner not deleted Something went wrong', 'data' => ''];
-            }
-
-            return response()->json($response);
-        } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+            Property::where('ownerId', $user->id)->delete();
+        } else {
+            Booking::where('userId', $user->id)->delete();
+            BookingGroups::where('userId', $user->id)->delete();
         }
+        if (empty($user)) {
+            return response()->json(['status' => false, 'message' => ucwords($role).' not found', 'data' => '']);
+        }
+        if ($user->delete()) {
+            return response()->json(['status' => true, 'message' => ucwords($role).' deleted successfully', 'data' => '']);
+        } else {
+            return response()->json(['status' => false, 'message' => ucwords($role).' not deleted Something went wrong', 'data' => '']);
+        }
+
+        return response()->json($response);
     }
 }
