@@ -107,8 +107,8 @@
                 width="full"
                 placeholder="+44 7911 123456"
                 :max-length="15"
-                :pattern="/^[0-9+\-\s]*$/"
-                custom-error="Only numbers and + - allowed"
+                :pattern="/^[0-9+\-\s()]*$/"
+                custom-error="Only numbers and + - () allowed"
               />
             </div>
 
@@ -157,6 +157,7 @@
                 <select
                   v-model="formData.status"
                   class="block w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none appearance-none bg-white shadow-sm font-medium text-gray-700"
+                  required
                 >
                   <option :value="1">Active</option>
                   <option :value="0">Inactive</option>
@@ -170,7 +171,9 @@
 
             <div class="mb-4">
               <label class="block text-sm font-medium text-slate-700 mb-3"
-                >Facilities <span class="text-red-500">*</span></label
+                >Facilities 
+                <!-- <span class="text-red-500">*</span> -->
+                </label
               >
               <div
                 class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-inner"
@@ -480,18 +483,12 @@ const savePropertyData = async (apiPayload) => {
     await ownerService.updateProperty(formData.value.id, apiPayload);
     savedPropertyId = formData.value.id;
   } else {
+    // FIX APPLIED HERE: The backend now correctly returns the ID in the 'data' field.
     const response = await ownerService.createProperty(apiPayload);
-    savedPropertyId = response?.data?.id || response?.id;
-    if (!savedPropertyId) {
-      // best-effort fallback
-      const paginated = await ownerService.fetchProperties({ limit: 1 });
-      if (paginated && Array.isArray(paginated.data)) {
-        const found = paginated.data.find(
-          (p) => p.propertyName === apiPayload.propertyName
-        );
-        savedPropertyId = found?.id;
-      }
-    }
+    // Directly retrieve the ID from the response data field.
+    savedPropertyId = response?.data;
+
+    // Removed the fragile fallback logic that attempted to fetch the newest property by name/limit.
   }
   return savedPropertyId;
 };

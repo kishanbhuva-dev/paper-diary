@@ -113,7 +113,7 @@ class PropertyController extends Controller
             $property->isIcal        = $request->isIcal ?? 0;
             $property->slug          = $request->slug ?: Str::slug($request->name);
             if ($property->save()) {
-                $response = ['status' => true, 'message' => 'Property added successfully', 'data' => ''];
+                $response = ['status' => true, 'message' => 'Property added successfully', 'data' => $property->id];
             } else {
                 $response = ['status' => false, 'message' => 'Property addition failed', 'data' => ''];
             }

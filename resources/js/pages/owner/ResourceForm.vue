@@ -185,11 +185,29 @@ const addResourceItem = () => {
   resourceItems.value.push({ name: "", resourceTypeId: "", status: 1 });
 };
 
-// --- MODAL HANDLERS ---
+// --- MODAL HANDLERS (UPDATED) ---
 const openRemoveResourceItemModal = (idx) => {
-  if (resourceItems.value.length === 1) return;
-  resourceItemIndexToRemove.value = idx;
-  isConfirmationModalVisible.value = true;
+  const resourceItem = resourceItems.value[idx];
+
+  // Checks if the row is new (no id) AND if the name field is empty/blank
+  const isDummyOrBlank =
+    !resourceItem.id &&
+    (!resourceItem.name || resourceItem.name.toString().trim() === "");
+
+  // Prevent deletion if it's the only remaining item AND it has content/ID
+  if (resourceItems.value.length === 1 && !isDummyOrBlank) {
+    return;
+  }
+
+  if (isDummyOrBlank) {
+    // If it's a dummy/blank row, skip the modal and proceed straight to removal
+    resourceItemIndexToRemove.value = idx;
+    confirmRemoval();
+  } else {
+    // If it has an ID or a name (user has started filling it out), show the modal
+    resourceItemIndexToRemove.value = idx;
+    isConfirmationModalVisible.value = true;
+  }
 };
 
 const confirmRemoval = () => {
@@ -201,12 +219,24 @@ const confirmRemoval = () => {
 
   const r = resourceItems.value[idx];
 
+  // If only one item remains, reset it instead of deleting the array item
+  if (resourceItems.value.length === 1) {
+    resourceItems.value[0] = {
+      name: "",
+      resourceTypeId: "",
+      status: 1,
+    };
+    isConfirmationModalVisible.value = false;
+    resourceItemIndexToRemove.value = null;
+    return;
+  }
+
+  // Mark for deletion if it has an ID
   if (r && r.id) {
-    // mark for deletion and remove from UI
     deletedResourceItemIds.value.push(r.id);
     resourceItems.value.splice(idx, 1);
   } else {
-    // local-only row, just remove
+    // Local-only row, just remove
     resourceItems.value.splice(idx, 1);
   }
 
