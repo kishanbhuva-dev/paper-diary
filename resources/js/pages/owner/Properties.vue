@@ -116,7 +116,7 @@ const loadData = async () => {
   try {
     const data = await ownerService.fetchProperties({
       page: currentPage.value,
-      per_page: perPage.value,
+      pagination: perPage.value,
       search: currentSearch.value,
     });
 

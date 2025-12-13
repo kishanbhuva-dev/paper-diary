@@ -129,16 +129,21 @@
     </div>
 
     <div
-      class="pagination flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200"
+      class="pagination flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200 px-1 sm:px-0 mb-2"
       v-if="totalPages > 0"
     >
-      <div class="flex items-center space-x-6 mt-4 sm:mt-0">
-        <p class="text-sm text-gray-700 whitespace-nowrap">
+      <div
+        class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto mt-2 sm:mt-0"
+      >
+        <p class="text-sm text-gray-700 whitespace-nowrap font-medium">
           Page <span class="font-bold">{{ currentPage }}</span> of
           <span class="font-bold">{{ totalPages }}</span>
         </p>
       </div>
-      <div class="flex gap-4">
+
+      <div
+        class="flex flex-col md:flex-col lg:flex-row items-center gap-4 sm:mt-0 w-full justify-center sm:justify-end"
+      >
         <div class="flex items-center">
           <label
             for="perPage"
@@ -155,10 +160,10 @@
             </option>
           </select>
         </div>
-        <div v-if="totalPages > 1" class="">
+        <div v-if="totalPages > 1" class="w-full sm:w-auto">
           <nav
             aria-label="Pagination"
-            class="isolate inline-flex -space-x-px rounded-xl shadow-md"
+            class="isolate inline-flex -space-x-px rounded-xl md:shadow-md w-full sm:w-auto justify-center"
           >
             <button
               @click="changePage(currentPage - 1)"
@@ -183,7 +188,7 @@
             >
               <span
                 v-if="page === '...'"
-                class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-500 border border-gray-300 bg-white"
+                class="hidden md:inline-flex relative items-center px-4 py-2 text-sm font-semibold text-gray-500 border border-gray-300 bg-white"
               >
                 ...
               </span>
@@ -192,6 +197,11 @@
                 @click="changePage(page)"
                 :class="[
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border',
+                  // Use sm:inline-flex to hide most buttons on mobile screens
+                  {
+                    'hidden sm:inline-flex':
+                      page !== currentPage && Math.abs(page - currentPage) > 1,
+                  },
                   page === currentPage
                     ? 'z-10 bg-blue-600 text-white border-blue-600 hover:bg-blue-600'
                     : 'text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-600',
@@ -409,6 +419,16 @@ const visiblePages = computed(() => {
   return rangeWithDots;
 });
 
+// --- FIX FOR PAGINATION DISPLAY GLITCH ---
+// When deleting the last item on the last page in server-side mode,
+// totalItems decreases, causing totalPages to decrease.
+// We must watch totalPages and auto-correct currentPage if it falls out of bounds.
+watch(totalPages, (newTotal) => {
+  if (newTotal > 0 && currentPage.value > newTotal) {
+    currentPage.value = newTotal;
+  }
+});
+
 // Watch for external row updates to fix potential empty page issues
 watch(
   () => props.rows,
@@ -425,26 +445,8 @@ watch(
 </script>
 
 <style scoped>
-/*Fallback for Chrome  */
-.table-wrapper::-webkit-scrollbar {
-  height: 10px;
-  width: 10px;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb {
-  background-color: #a5b4fc;
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb:hover {
-  background-color: #6366f1;
-}
-
-/* Fallback for Firefox */
 .table-wrapper {
-  scrollbar-color: #a5b4fc #f1f5f9; /* thumb color track color */
-  scrollbar-width: thin; /* makes it thinner than auto */
+  scrollbar-color: #a5b4fc #f1f5f9;
+  scrollbar-width: thin;
 }
 </style>
