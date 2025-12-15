@@ -69,6 +69,12 @@ const routes = [
         component: () => import("../../js/pages/owner/PropertyWizard.vue"),
         meta: { pageTitle: "Property Form" },
       },
+      {
+        name: "bookings",
+        path: "/owner/bookings",
+        component: () => import("../../js/pages/owner/Bookings.vue"),
+        meta: { pageTitle: "Booking List" },
+      },
     ],
   },
 

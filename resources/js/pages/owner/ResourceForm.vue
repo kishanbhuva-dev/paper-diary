@@ -98,9 +98,9 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
 import { Icon } from "@iconify/vue";
-import BaseInput from "../../components/global/BaseInput.vue"; // Reused
-import BaseSelect from "../../components/global/BaseSelect.vue"; // Reused
-import DeleteModal from "../../components/global/DeleteModal.vue"; // Reused
+import BaseInput from "../../components/global/BaseInput.vue";
+import BaseSelect from "../../components/global/BaseSelect.vue";
+import DeleteModal from "../../components/global/DeleteModal.vue";
 import ownerService from "../../services/ownerService";
 import { toast } from "vue-sonner";
 

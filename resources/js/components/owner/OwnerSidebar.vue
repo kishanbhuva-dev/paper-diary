@@ -132,13 +132,19 @@ const mainMenuItems = [
     icon: "mdi:home-city-outline",
     to: { name: "properties" },
   },
+  {
+    name: "bookings",
+    label: "Bookings",
+    icon: "mdi:calendar-check",
+    to: { name: "bookings" },
+  },
   // Added an extra item to show how the list looks
-  // {
-  //   name: "settings",
-  //   label: "Settings",
-  //   icon: "mdi:cog-outline",
-  //   to: { name: "properties" }, // Temporarily pointing to properties
-  // },
+  {
+    name: "settings",
+    label: "Settings",
+    icon: "mdi:cog-outline",
+    to: { name: "properties" }, // Temporarily pointing to properties
+  },
 ];
 
 async function handleLogout() {

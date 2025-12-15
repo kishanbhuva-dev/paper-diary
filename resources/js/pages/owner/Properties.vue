@@ -80,11 +80,28 @@ const isConfirmationModalVisible = ref(false);
 const propertyIdToDelete = ref(null);
 const propertyNameToDelete = ref(""); // NEW: State to hold the property name
 
+// --- ADDRESS TRUNCATION HELPER ---
+
+/**
+ * Truncates a string if it exceeds a maximum length.
+ * @param {string} str - The input string.
+ * @param {number} maxLen - The maximum length before truncation.
+ * @returns {string} The truncated string followed by '...' or the original string.
+ */
+const truncateString = (str, maxLen = 15) => {
+  if (!str) return "";
+  const s = String(str);
+  return s.length > maxLen ? s.substring(0, maxLen) + "..." : s;
+};
+
 // Table Configuration
 const tableColumns = [
   { label: "ID", key: "id" },
   { label: "Name", key: "propertyName" },
-  { label: "Address", key: "address" },
+  {
+    label: "Address",
+    key: (item) => truncateString(item.address, 15),
+  },
   { label: "City", key: "city" },
   { label: "Country", key: "country" },
   { label: "Postcode", key: "postcode" },
@@ -107,8 +124,7 @@ const formatStatus = (property) => {
     : "Inactive";
 };
 
-/**
- * Fetches the property data from the API based on current pagination/search state.
+/** Fetches the property data from the API based on current pagination/search state.
  */
 const loadData = async () => {
   error.value = null;
@@ -142,17 +158,13 @@ const loadData = async () => {
 
 // --- 3. NAVIGATION HANDLERS ---
 
-/**
- * Navigates to the property creation form.
- */
+/* Navigates to the property creation form.*/
 const navigateToAdd = () => {
   router.push({ name: "property-wizard" });
 };
 
-/**
- * Navigates to the property edit form.
- * @param {object} item - The property object to edit.
- */
+/*Navigates to the property edit form.
+ * @param {object} item - The property object to edit.*/
 const navigateToEdit = (item) => {
   if (item && item.id) {
     // Encodes ID before passing as a URL parameter (using btoa for simple base64 encoding)
