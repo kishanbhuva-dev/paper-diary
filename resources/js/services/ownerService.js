@@ -1,3 +1,5 @@
+// 3. ownerService.js
+
 /*
 Owner service: property and owner-related API calls.
 Centralizes all property/facility-related endpoints so the UI layer calls plain
@@ -13,6 +15,11 @@ Methods included:
  - addPropertyImages(propertyId, files)
  - setPropertyFacilities(propertyId, facilityIds)
  - fetchFacilities(params)
+ 
+ - NEW: fetchBookings(params)
+ - NEW: fetchBookingById(id)
+ - NEW: updateBooking(id, payload)
+ - NEW: deleteBooking(id)
 
 This mirrors the Laravel routes under /api/owner/* observed in the project.
 Note: apiClient already has baseURL='/api', so we use relative paths.
@@ -21,6 +28,8 @@ Note: apiClient already has baseURL='/api', so we use relative paths.
 import apiClient from "./apiClient";
 
 const ownerService = {
+  // --- PROPERTY METHODS ---
+
   // Fetch all properties for the owner
   async fetchProperties(params = {}) {
     const res = await apiClient.get("/owner/property", { params });
@@ -125,6 +134,8 @@ const ownerService = {
     return res.data.data;
   },
 
+  // --- RESOURCE TYPE METHODS ---
+
   // Create multiple resource types (room types) in bulk
   async resourceTypeMultipleStore(payload) {
     const res = await apiClient.post(
@@ -152,6 +163,14 @@ const ownerService = {
     return res.data.data;
   },
 
+  // Delete a resource type by id
+  async deleteResourceType(id) {
+    const res = await apiClient.delete(`/owner/resource-type/${id}`);
+    return res.data;
+  },
+
+  // --- RESOURCE METHODS ---
+
   // Create multiple resources (rooms) in bulk
   async resourceMultipleStore(payload) {
     const res = await apiClient.post("/owner/resource-multiple-store", payload);
@@ -175,16 +194,41 @@ const ownerService = {
     return res.data.data;
   },
 
-  // Delete a resource type by id
-  async deleteResourceType(id) {
-    const res = await apiClient.delete(`/owner/resource-type/${id}`);
-    return res.data;
-  },
-
   // Delete a single resource by id
   async deleteResource(id) {
     const res = await apiClient.delete(`/owner/resource/${id}`);
     return res.data;
+  },
+
+  // --- BOOKINGS METHODS (NEW) ---
+
+  // Fetch all bookings for the owner's properties
+  async fetchBookings(params = {}) {
+    // Corresponds to the route: GET /owner/bookings
+    const res = await apiClient.get("/owner/bookings", { params });
+    // Backend returns { status, message, data: { current_page, data: [...], total, ... } }
+    return res.data.data;
+  },
+
+  // Fetch a single booking by ID
+  async fetchBookingById(id) {
+    // Corresponds to the route: GET /owner/bookings/{id}
+    const res = await apiClient.get(`/owner/bookings/${id}`);
+    return res.data.data;
+  },
+
+  // Update a booking
+  async updateBooking(id, payload) {
+    // Corresponds to the route: PUT/PATCH /owner/bookings/{id}
+    const res = await apiClient.put(`/owner/bookings/${id}`, payload);
+    return res.data.data;
+  },
+
+  // Delete a booking
+  async deleteBooking(id) {
+    // Corresponds to the route: DELETE /owner/bookings/{id}
+    const res = await apiClient.delete(`/owner/bookings/${id}`);
+    return res.data.data;
   },
 };
 
