@@ -54,7 +54,7 @@ const routes = [
       {
         path: "/owner/dashboard",
         name: "owner-dashboard",
-        component: () => import("../../js/pages/owner/Dashboard.vue"),
+        component: () => import("../pages/owner/OwnerDashboard.vue"),
         meta: { pageTitle: "Owner Dashboard" },
       },
       {

@@ -1,36 +1,210 @@
 <template>
-  <div class="flex h-screen bg-slate-50 overflow-hidden font-sans">
-    <OwnerSidebar
-      :is-mobile-open="isMobileSidebarOpen"
-      @close-sidebar="isMobileSidebarOpen = false"
-    />
+  <section
+    class="h-screen w-full flex bg-gray-50 relative overflow-hidden font-sans"
+  >
+    <div
+      class="lg:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-gray-100 fixed top-0 left-0 right-0 z-40 shadow-sm"
+    >
+      <button @click="sidebarOpen = !sidebarOpen">
+        <Icon
+          icon="material-symbols:menu-rounded"
+          width="30"
+          class="text-blue-600"
+        />
+      </button>
 
-    <div class="flex-1 flex flex-col min-w-0 h-screen">
-      <OwnerHeader @toggle-sidebar="isMobileSidebarOpen = true" />
-
-      <main
-        class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth"
-      >
-        <RouterView />
-      </main>
+      <img src="/public/main_logo.png" class="h-10" alt="Logo" />
     </div>
-  </div>
+
+    <aside
+      :class="[
+        'fixed lg:static top-0 left-0 h-full w-64 z-50 backdrop-blur-xl bg-white/70 shadow-2xl lg:shadow-xl transition-all duration-300',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+      ]"
+    >
+      <div
+        class="flex items-center justify-center py-6 border-b border-gray-100"
+      >
+        <img src="/public/main_logo.png" class="h-14" alt="Logo" />
+      </div>
+
+      <nav
+        class="p-4 space-y-3 overflow-y-auto scrollbar-hide h-[calc(100%-12rem)]"
+      >
+        <div
+          class="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2 px-3"
+        >
+          Main Navigation
+        </div>
+
+        <div v-for="item in mainMenuItems" :key="item.name">
+          <router-link
+            :to="item.to"
+            class="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200"
+            :class="{
+              // Active State (Senior Style)
+              'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
+                $route.name === item.name,
+              // Inactive State
+              'text-gray-700 hover:bg-blue-50': $route.name !== item.name,
+            }"
+            @click="closeOnMobile"
+          >
+            <div
+              class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200"
+              :class="$route.name === item.name ? 'bg-white/20' : 'bg-blue-100'"
+            >
+              <Icon
+                :icon="item.icon"
+                width="18"
+                :class="
+                  $route.name === item.name ? 'text-white' : 'text-blue-600'
+                "
+              />
+            </div>
+            {{ item.label }}
+          </router-link>
+        </div>
+
+        <div
+          class="text-[10px] uppercase font-bold text-gray-500 tracking-widest mt-6 pt-4 border-t border-gray-100 px-3"
+        >
+          System
+        </div>
+
+        <div v-for="item in systemMenuItems" :key="item.name">
+          <router-link
+            :to="item.to"
+            class="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200"
+            :class="{
+              'bg-blue-600 text-white shadow-lg shadow-blue-500/50':
+                $route.name === item.name,
+              'text-gray-700 hover:bg-blue-50': $route.name !== item.name,
+            }"
+            @click="closeOnMobile"
+          >
+            <div
+              class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200"
+              :class="$route.name === item.name ? 'bg-white/20' : 'bg-blue-100'"
+            >
+              <Icon
+                :icon="item.icon"
+                width="18"
+                :class="
+                  $route.name === item.name ? 'text-white' : 'text-blue-600'
+                "
+              />
+            </div>
+            {{ item.label }}
+          </router-link>
+        </div>
+      </nav>
+
+      <div
+        class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white z-10"
+      >
+        <div
+          class="flex items-center gap-3 p-3 rounded-2xl bg-blue-50 border border-blue-200 shadow-md transition duration-300 hover:shadow-lg"
+        >
+          <div
+            class="w-10 h-10 uppercase rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700 text-lg border border-blue-200"
+          >
+            {{ userData?.initials }}
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <p class="text-gray-900 font-bold text-sm truncate">
+              {{ userData?.firstName }}
+            </p>
+            <p class="text-gray-600 text-xs truncate">{{ userData?.email }}</p>
+          </div>
+
+          <button
+            class="p-2 rounded-xl text-gray-400 hover:bg-red-100 hover:text-red-600 transition duration-150 group cursor-pointer ml-auto"
+            title="Logout"
+            @click="handleLogout"
+          >
+            <Icon
+              icon="heroicons:arrow-right-on-rectangle"
+              width="20"
+              class="group-hover:scale-105 transition-transform"
+            />
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div
+      class="owner-content flex-1 flex flex-col overflow-y-auto lg:ml-0 mt-16 lg:mt-0 p-4 lg:shadow-inner scroll-smooth"
+    >
+      <router-view />
+    </div>
+  </section>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import OwnerHeader from "../components/owner/OwnerHeader.vue";
-import OwnerSidebar from "../components/owner/OwnerSidebar.vue";
+import { ref, computed } from "vue";
+import { Icon } from "@iconify/vue";
+// Using the path from your old sidebar file
+import { useAuth } from "../../js/composables/useAuth";
 
-const route = useRoute();
-const isMobileSidebarOpen = ref(false);
+const { logout, user } = useAuth();
+const sidebarOpen = ref(false);
 
-// Close mobile menu immediately when route changes (user clicks a link)
-watch(
-  () => route.path,
-  () => {
-    isMobileSidebarOpen.value = false;
-  }
-);
+// Computed property for User Data (Safe access)
+const userData = computed(() => ({
+  firstName: user.value?.firstName || "User",
+  email: user.value?.email || "",
+  initials: user.value?.firstName?.charAt(0) || "U",
+}));
+
+// Main Menu Items (From your old sidebar)
+const mainMenuItems = [
+  {
+    name: "owner-dashboard",
+    label: "Dashboard",
+    icon: "mdi:view-dashboard-outline",
+    to: { name: "owner-dashboard" },
+  },
+  {
+    name: "properties",
+    label: "Properties",
+    icon: "mdi:home-city-outline",
+    to: { name: "properties" },
+  },
+  {
+    name: "bookings",
+    label: "Bookings",
+    icon: "mdi:calendar-check",
+    to: { name: "bookings" },
+  },
+];
+
+// System/Settings Menu Items
+const systemMenuItems = [
+  {
+    name: "settings",
+    label: "Settings",
+    icon: "mdi:cog-outline",
+    to: { name: "properties" }, // Temporarily pointing to properties as requested
+  },
+];
+
+function closeOnMobile() {
+  if (window.innerWidth < 1024) sidebarOpen.value = false;
+}
+
+const handleLogout = async () => {
+  await logout();
+};
 </script>
+
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.owner-content {
+  scrollbar-color: #96a7fa #f1f5f9;
+  scrollbar-width: thin;
+}
+</style>

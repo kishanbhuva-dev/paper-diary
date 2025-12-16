@@ -1,7 +1,7 @@
 // 4. Booking.vue (Refactored for Bookings Management)
 
 <template>
-  <div class="px-4 sm:px-6 py-8 bg-gray-50 min-h-screen">
+  <div class="px-2 sm:px-3 py-4 bg-gray-50 min-h-screen">
     <div
       v-if="loading && !bookings.length"
       class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center backdrop-blur-sm transition-opacity duration-300"
