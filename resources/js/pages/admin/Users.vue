@@ -131,7 +131,6 @@
       title="Delete User"
       message="Are you sure you want to delete this user?"
       warning="This action cannot be undone. Please confirm that you want to delete this user."
-      :deleteData="deleteUser"
       action="delete"
       @confirm="handleDeleteData"
     />

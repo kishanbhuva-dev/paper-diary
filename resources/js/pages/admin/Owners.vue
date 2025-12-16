@@ -131,7 +131,6 @@
       title="Delete Owner"
       message="Are you sure you want to delete this owner?"
       warning="This action cannot be undone. Please confirm that you want to delete this owner."
-      :deleteData="deleteOwner"
       action="delete"
       @confirm="handleDeleteData"
     />
