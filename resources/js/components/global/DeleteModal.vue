@@ -76,13 +76,13 @@ const props = defineProps({
     default: "Are you sure you want to delete this item?",
   },
   warning: { type: String, default: "This action cannot be undone." },
-  deleteData: { type: [Object, String, Number], default: null },
+
   action: { type: String, default: "delete" },
 });
 
 const emit = defineEmits(["update:modelValue", "confirm"]);
 
 const confirmDelete = () => {
-  emit("confirm", props.deleteData);
+  emit("confirm");
 };
 </script>
