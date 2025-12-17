@@ -1,6 +1,5 @@
 <template>
-  <main class="space-y-8">
-    <!-- Room Selection Form -->
+  <main class="space-y-8" v-if="propertyData">
     <section class="space-y-6 bg-blue-100 py-4 sm:py-6 lg:py-8">
       <div class="container mx-auto">
         <div class="px-4 sm:px-6 lg:px-8">
@@ -11,7 +10,9 @@
               label="WHERE"
               placeholder="Select Location"
               v-model="details.location"
-              :options="[{ value: 'goa', label: 'Goa, India' }]"
+              :options="[
+                { value: propertyData.city, label: propertyData.city },
+              ]"
             />
             <BaseDatePicker label="CHECK-IN" v-model="details.checkIn" />
             <BaseDatePicker label="CHECK-OUT" v-model="details.checkOut" />
@@ -25,7 +26,9 @@
               label="HOTEL NAME"
               placeholder="Select Hotel"
               v-model="details.hotel"
-              :options="[{ value: 'hotel_haramain', label: 'Hotel Haramain' }]"
+              :options="[
+                { value: propertyData.id, label: propertyData.propertyName },
+              ]"
             />
             <div class="w-full self-end-safe">
               <router-link :to="{ name: 'booking-summary' }">
@@ -45,21 +48,20 @@
           class="flex-center gap-x-3 px-4 py-1 max-sm:flex-wrap sm:px-6 lg:px-8"
         >
           <h4 class="font-bold">SOLD OUT</h4>
-          <span class="block sm:inline">
-            This Property is Sold Out on 13 Nov - 15 Nov.
-          </span>
+          <span class="block sm:inline"
+            >This Property is Sold Out on 15 Nov - 18 Nov</span
+          >
         </div>
       </div>
     </section>
 
-    <!-- Available Dates -->
     <section class="container mx-auto">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex-center flex-col">
           <h6 class="text-lg font-semibold">Available Dates</h6>
           <div class="mt-2 flex items-center space-x-2">
             <button
-              class="cursor-pointer rounded-full border border-gray-200 p-1 transition duration-150 hover:bg-gray-100"
+              class="cursor-pointer rounded-full border border-gray-200 p-1"
               @click="navigateBackward"
             >
               <Icon icon="mdi:chevron-left" />
@@ -69,22 +71,19 @@
                 v-for="date in dateList"
                 :key="date.dateString"
                 @click="selectDate(date.dateString)"
-                class="cursor-pointer rounded-md border border-gray-200 p-2 transition duration-150"
-                :class="{
-                  'bg-green-600 text-white':
-                    date.dateString === selectedDate.format('YYYY-MM-DD'),
-                  'bg-white hover:bg-gray-100':
-                    date.dateString !== selectedDate.format('YYYY-MM-DD'),
-                  'text-gray-900':
-                    date.dateString !== selectedDate.format('YYYY-MM-DD'),
-                }"
+                class="cursor-pointer rounded-md border border-gray-200 p-2"
+                :class="
+                  date.dateString === selectedDate.format('YYYY-MM-DD')
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white text-gray-900'
+                "
               >
                 <div class="font-semibold">{{ date.dayNumber }}</div>
                 <div>{{ date.dayName }}</div>
               </button>
             </div>
             <button
-              class="cursor-pointer rounded-full border border-gray-200 p-1 transition duration-150 hover:bg-gray-100"
+              class="cursor-pointer rounded-full border border-gray-200 p-1"
               @click="navigateForward"
             >
               <Icon icon="mdi:chevron-right" />
@@ -94,17 +93,14 @@
       </div>
     </section>
 
-    <!-- Hotel Info & Gallery -->
     <section class="container mx-auto">
       <div class="space-y-6 px-4 sm:px-6 lg:px-8">
         <div class="flex-between">
           <div class="space-y-2">
-            <h3>San Francisco Marriott Marquis</h3>
+            <h3>{{ propertyData.propertyName }}</h3>
             <div class="flex items-center space-x-2 text-lg text-gray-500">
               <Icon icon="mdi:location" />
-              <span>
-                110 Mission Street, San Francisco, CA 94101, United States
-              </span>
+              <span>{{ propertyData.address }}, {{ propertyData.city }}</span>
             </div>
           </div>
           <div
@@ -113,26 +109,22 @@
             4.6 <Icon icon="mdi:star" />
           </div>
         </div>
-        <!-- Gallery -->
         <div class="flex h-[400px] w-full gap-2" @mouseleave="resetExpanded">
           <div
-            v-for="image in images"
+            v-for="(image, index) in propertyImages"
             :key="image.id"
+            v-show="index < 5"
+            @click="openCarousel(index)"
             :class="getFlexGrowClass(image.id)"
             class="relative flex-1 cursor-pointer overflow-hidden rounded-lg transition-all duration-500 ease-in-out"
             @mouseover="setExpanded(image.id)"
           >
-            <img
-              :src="image.src"
-              :alt="image.alt"
-              class="h-full w-full object-cover"
-            />
-
+            <img :src="image.image" class="h-full w-full object-cover" />
             <div
-              v-if="image.isViewMore"
+              v-if="index === 4 && propertyImages.length > 5"
               class="absolute inset-0 flex-center bg-black/50"
             >
-              <span class="font-bold text-white">View More</span>
+              <span class="font-bold text-white uppercase">View More</span>
             </div>
           </div>
         </div>
@@ -142,44 +134,27 @@
     <section class="container mx-auto">
       <div class="grid gap-8 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
         <div class="space-y-8 lg:col-span-2">
-          <!-- About -->
           <section>
             <h5>About</h5>
-            <p class="mt-4 text-gray-700">
-              Whether you are in town for business or leisure, San Francisco
-              welcomes travelers to Northern California with exceptional
-              service, hotel rooms and suites and a prime downtown location.
-            </p>
-            <button class="mt-2 font-semibold text-primary">
+            <div
+              class="mt-4 text-gray-700"
+              v-html="propertyData.description"
+            ></div>
+            <button class="mt-2 font-semibold text-primary uppercase text-sm">
               Show More <Icon icon="mdi:chevron-down" class="inline" />
             </button>
           </section>
 
-          <!-- Popular Services -->
           <section>
             <h5>Popular Service</h5>
             <div class="mt-4 flex flex-wrap gap-4">
               <div
-                class="flex items-center gap-2 rounded-lg border border-gray-400 p-3 text-gray-700"
+                v-for="facility in propertyData.facilities"
+                :key="facility.id"
+                class="flex items-center gap-2 rounded-lg border border-gray-400 p-3 text-gray-700 font-semibold text-xs"
               >
-                <Icon icon="mdi:parking" class="text-xl" /> <span>Parking</span>
-              </div>
-              <div
-                class="flex items-center gap-2 rounded-lg border border-gray-400 p-3 text-gray-700"
-              >
-                <Icon icon="mdi:bathtub-outline" class="text-xl" />
-                <span>Attached Bathroom</span>
-              </div>
-              <div
-                class="flex items-center gap-2 rounded-lg border border-gray-400 p-3 text-gray-700"
-              >
-                <Icon icon="mdi:cctv" class="text-xl" />
-                <span>CCTV Cameras</span>
-              </div>
-              <div
-                class="flex items-center gap-2 rounded-lg border border-gray-400 p-3 text-gray-700"
-              >
-                <Icon icon="mdi:wifi" class="text-xl" /> <span>Wifi</span>
+                <Icon :icon="facility.icon" class="text-xl" />
+                <span>{{ facility.name }}</span>
               </div>
             </div>
           </section>
@@ -312,7 +287,6 @@
         </aside>
       </div>
     </section>
-
     <!-- Location and Map -->
     <section class="container mx-auto px-4 sm:px-6 lg:px-8">
       <h5>Location of The Oberoi Udaivilas</h5>
@@ -325,54 +299,56 @@
       </div>
     </section>
 
-    <!-- Room Types -->
     <div class="bg-stone-100 py-8">
       <section class="container mx-auto px-4 sm:px-6 lg:px-8">
         <h5>Room Types</h5>
         <div class="mt-4 space-y-6">
           <div
-            v-for="roomType in roomTypes"
+            v-for="roomType in propertyData.resource_types"
             :key="roomType.id"
             class="grid gap-6 rounded-2xl border border-gray-400 bg-white p-2 md:grid-cols-3"
           >
             <img
-              :src="roomType.image"
-              class="aspect-video h-full w-full rounded-lg object-cover md:col-span-1"
+              :src="propertyImages[0]?.image || '/placeholder.jpg'"
+              class="aspect-video h-full w-full rounded-lg object-cover"
             />
             <div
-              class="flex flex-col justify-between sm:flex-row md:col-span-2"
+              class="flex flex-col justify-between sm:flex-row md:col-span-2 p-4"
             >
               <div class="space-y-4">
-                <h6 class="text-primary">{{ roomType.type }}</h6>
+                <h6 class="text-primary font-bold">{{ roomType.name }}</h6>
                 <div class="font-semibold">
-                  <p class="text-lg">
-                    {{ roomType.hotel }}
+                  <p class="text-lg uppercase">
+                    {{ propertyData.propertyName }}
                   </p>
-                  <span class="text-gray-600">{{ roomType.address }}</span>
+                  <span class="text-gray-600 text-sm"
+                    >Near railway station, Shirdi</span
+                  >
                 </div>
                 <div
-                  class="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600"
+                  class="flex gap-4 text-gray-400 uppercase text-[10px] font-bold"
                 >
-                  <span
-                    v-for="feature in roomType.features"
-                    :key="feature.label"
-                    class="flex items-center gap-1"
+                  <span class="flex items-center gap-1"
+                    ><Icon icon="mdi:parking" /> Parking</span
                   >
-                    <Icon :icon="feature.icon" /> {{ feature.label }}
-                  </span>
-                  <span class="font-semibold text-primary">More+</span>
+                  <span class="flex items-center gap-1"
+                    ><Icon icon="mdi:shower" /> Attached Bathroom</span
+                  >
+                  <span class="flex items-center gap-1"
+                    ><Icon icon="mdi:video-closed-circuit" /> CCTV Camaras</span
+                  >
                 </div>
               </div>
               <div
                 class="mt-4 flex flex-col items-start justify-between sm:mt-0 sm:items-end"
               >
                 <div class="text-right">
-                  <span class="font-semibold text-green-600">
-                    {{ roomType.discount }}% off
-                  </span>
-                  <h5 class="ml-2 inline">&pound;{{ roomType.price }}</h5>
+                  <span class="text-xs text-green-600 font-bold">20% off</span>
+                  <h5 class="ml-2 inline">£{{ roomType.price }}</h5>
                 </div>
-                <button class="mt-2 w-full btn-primary sm:w-auto">
+                <button
+                  class="mt-2 w-full btn-primary px-8 py-2 text-xs sm:w-auto uppercase"
+                >
                   Select Room
                 </button>
               </div>
@@ -381,154 +357,138 @@
         </div>
       </section>
     </div>
+    <!-- lightbox / carousal section -->
+    <Teleport to="body">
+      <div
+        v-if="isCarouselOpen"
+        class="fixed inset-0 z-[999] flex items-center justify-center bg-black/95"
+      >
+        <button
+          @click="closeCarousel"
+          class="absolute top-6 right-6 text-white hover:text-gray-300 z-[1000]"
+        >
+          <Icon icon="mdi:close" class="text-4xl" />
+        </button>
+
+        <button
+          @click="prevImage"
+          class="absolute left-4 text-white hover:bg-white/10 p-2 rounded-full transition z-[1000]"
+        >
+          <Icon icon="mdi:chevron-left" class="text-5xl" />
+        </button>
+
+        <div class="max-w-5xl max-h-[80vh] px-4 select-none">
+          <img
+            :src="propertyImages[activeImageIndex].image"
+            class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl transition-all duration-300"
+          />
+          <p class="text-white text-center mt-4 font-semibold">
+            Image {{ activeImageIndex + 1 }} of {{ propertyImages.length }}
+          </p>
+        </div>
+
+        <button
+          @click="nextImage"
+          class="absolute right-4 text-white hover:bg-white/10 p-2 rounded-full transition z-[1000]"
+        >
+          <Icon icon="mdi:chevron-right" class="text-5xl" />
+        </button>
+      </div>
+    </Teleport>
   </main>
+  <div v-else class="flex-center h-screen">
+    <p v-if="loading">Loading...</p>
+    <p v-else class="text-red-500">Property not found.</p>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { Icon } from "@iconify/vue";
 import dayjs from "dayjs";
+import { userService } from "../../services/userService";
 import BaseSelect from "../../components/global/BaseSelect.vue";
 import BaseDatePicker from "../../components/global/BaseDatePicker.vue";
 
-// Room Details
+const route = useRoute();
+const propertyData = ref(null);
+const loading = ref(true);
+// Carousel State
+const isCarouselOpen = ref(false);
+const activeImageIndex = ref(0);
+
+// Carousel Functions
+const openCarousel = (index) => {
+  activeImageIndex.value = index;
+  isCarouselOpen.value = true;
+  document.body.style.overflow = "hidden"; // Prevent scrolling when open
+};
+
+const closeCarousel = () => {
+  isCarouselOpen.value = false;
+  document.body.style.overflow = "auto"; // Re-enable scrolling
+};
+
+const nextImage = () => {
+  activeImageIndex.value =
+    (activeImageIndex.value + 1) % propertyImages.value.length;
+};
+
+const prevImage = () => {
+  activeImageIndex.value =
+    (activeImageIndex.value - 1 + propertyImages.value.length) %
+    propertyImages.value.length;
+};
+
+const fetchProperty = async () => {
+  try {
+    const slug = route.params.slug;
+    const res = await userService.getPropertyDetails(slug);
+    if (res.data.status) {
+      propertyData.value = res.data.data;
+      if (propertyImages.value.length > 0)
+        expandedImageId.value = propertyImages.value[0].id;
+    }
+  } catch (err) {
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(fetchProperty);
+
+// Form / Calendar UI Logic
 const details = ref({
-  location: "goa",
+  location: "",
   roomGuests: "1room_3adults",
-  hotel: "hotel_haramain",
-  checkIn: formatDate(dayjs()),
-  checkOut: formatDate(dayjs().add(1, "day")),
+  hotel: "",
+  checkIn: dayjs().format("YYYY-MM-DD"),
+  checkOut: dayjs().add(1, "day").format("YYYY-MM-DD"),
 });
-
-function formatDate(dateObject) {
-  return dayjs(dateObject).format("YYYY-MM-DD");
-}
-
-// Interactive Calendar
 const startDate = ref(dayjs().startOf("day"));
 const selectedDate = ref(dayjs().startOf("day"));
-
-const dateList = computed(() => {
-  const dates = [];
-  for (let i = 0; i < 7; i++) {
+const dateList = computed(() =>
+  Array.from({ length: 7 }, (_, i) => {
     const date = startDate.value.add(i, "day");
-    dates.push({
+    return {
       dateString: date.format("YYYY-MM-DD"),
       dayNumber: date.date(),
       dayName: date.format("ddd"),
-    });
-  }
-  return dates;
-});
+    };
+  })
+);
+const navigateBackward = () =>
+  (startDate.value = startDate.value.subtract(7, "day"));
+const navigateForward = () => (startDate.value = startDate.value.add(7, "day"));
+const selectDate = (dateString) => (selectedDate.value = dayjs(dateString));
 
-const navigateBackward = () => {
-  startDate.value = startDate.value.subtract(7, "day");
-};
-
-const navigateForward = () => {
-  startDate.value = startDate.value.add(7, "day");
-};
-
-const selectDate = (dateString) => {
-  selectedDate.value = dayjs(dateString);
-  console.log("Selected Date:", dateString);
-};
-
-// Interactive Gallery
-const images = [
-  {
-    id: 1,
-    src: "/hotel-1.jpg",
-    alt: "Modern Villa with Pool",
-    isViewMore: false,
-  },
-  {
-    id: 2,
-    src: "/hotel-2.jpg",
-    alt: "Kitchen and Dining Area",
-    isViewMore: false,
-  },
-  {
-    id: 3,
-    src: "/hotel-3.jpg",
-    alt: "Staircase and Hallway",
-    isViewMore: false,
-  },
-  {
-    id: 4,
-    src: "/hotel-4.jpg",
-    alt: "Luxury Bedroom",
-    isViewMore: false,
-  },
-  {
-    id: 5,
-    src: "/hotel-5.jpg",
-    alt: "Classic Wooden Bedroom",
-    isViewMore: true,
-  },
-];
-
-const expandedImageId = ref(1);
-
-const setExpanded = (id) => {
-  expandedImageId.value = id;
-};
-
-const resetExpanded = () => {
-  expandedImageId.value = 1;
-};
-
-const getFlexGrowClass = (id) => {
-  if (id === expandedImageId.value) return "grow-2";
-  return "grow-1";
-};
-
-// Room Types
-const roomTypes = [
-  {
-    id: 1,
-    type: "Deluxe Twin Room",
-    image: "/hotel-1.jpg",
-    hotel: "Le ROI, Udaipur Udaipur City Railway Station",
-    address: "Near railway station, Shirdi",
-    price: 473,
-    discount: 23,
-    features: [
-      { label: "Parking", icon: "mdi:parking" },
-      { label: "Attached Bathroom", icon: "mdi:bathtub-outline" },
-      { label: "CCTV Cameras", icon: "mdi:cctv" },
-      { label: "Wifi", icon: "mdi:wifi" },
-    ],
-  },
-  {
-    id: 2,
-    type: "Deluxe Silver with Balcony",
-    image: "/hotel-2.jpg",
-    hotel: "Shahpura Bariyas House, Udaipur",
-    address: "Shavri Colony, Udaipur",
-    price: 474,
-    discount: 24,
-    features: [
-      { label: "Parking", icon: "mdi:parking" },
-      { label: "Attached Bathroom", icon: "mdi:bathtub-outline" },
-      { label: "CCTV Cameras", icon: "mdi:cctv" },
-      { label: "Wifi", icon: "mdi:wifi" },
-    ],
-  },
-  {
-    id: 3,
-    type: "Golden Premium with Balcony",
-    image: "/hotel-3.jpg",
-    hotel: "Zone Connect by The Park Udaipur",
-    address: "Near Sukhadia Circle, Panchwati, Udaipur",
-    price: 475,
-    discount: 25,
-    features: [
-      { label: "Parking", icon: "mdi:parking" },
-      { label: "Attached Bathroom", icon: "mdi:bathtub-outline" },
-      { label: "CCTV Cameras", icon: "mdi:cctv" },
-      { label: "Wifi", icon: "mdi:wifi" },
-    ],
-  },
-];
+// Gallery Logic
+const propertyImages = computed(() => propertyData.value?.property_image || []);
+const expandedImageId = ref(null);
+const setExpanded = (id) => (expandedImageId.value = id);
+const resetExpanded = () =>
+  (expandedImageId.value = propertyImages.value[0]?.id);
+const getFlexGrowClass = (id) =>
+  id === expandedImageId.value ? "grow-2" : "grow-1";
 </script>

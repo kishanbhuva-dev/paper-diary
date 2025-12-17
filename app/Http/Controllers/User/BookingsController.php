@@ -179,11 +179,11 @@ class BookingsController extends Controller
         $property = Property::where('slug', $request->slug)->with(['owner','resourceTypes','facilities','propertyImage'=>function($query) {
             $query->orderBy('position','asc');
         },'resourceTypes.resources'=>function($query){
-            $query->select('id','name','price','status')->where('status',1);
+            $query->select('id','name','customPrice','status')->where('status',1);
         }])->first();
         if ($property) {
             $property->propertyImage->transform(function ($item) {
-                $item->image = asset('storage/uploads/' . $item->image); 
+                $item->image = asset('storage/property/images/' . $item->image); 
                 return $item;
             });
             $property->ownerName = $property->owner->firstName . ' ' . $property->owner->lastName;

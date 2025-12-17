@@ -41,6 +41,18 @@
               />
               <BaseInput
                 :ref="setInputRef"
+                v-model="formData.description"
+                label="Property Description"
+                width="full"
+                placeholder="Describe your property, its unique features, and surroundings..."
+                multiline
+                :rows="5"
+                :max-length="1000"
+                show-count
+                required
+              />
+              <BaseInput
+                :ref="setInputRef"
                 v-model="formData.address"
                 label="Primary Address Line"
                 width="full"
@@ -171,10 +183,9 @@
 
             <div class="mb-4">
               <label class="block text-sm font-medium text-slate-700 mb-3"
-                >Facilities 
+                >Facilities
                 <!-- <span class="text-red-500">*</span> -->
-                </label
-              >
+              </label>
               <div
                 class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-inner"
               >
@@ -262,6 +273,7 @@ const router = useRouter();
 const defaultFormData = {
   status: 1,
   propertyName: "",
+  description: "",
   email: "",
   address: "",
   city: "",
@@ -500,6 +512,7 @@ const handleSubmit = async () => {
   try {
     const { newFiles, removedIds } = processImages();
     const apiPayload = JSON.parse(JSON.stringify(formData.value));
+    console.log("Payload before send:", apiPayload);
     delete apiPayload.images;
     delete apiPayload.facilities;
 
