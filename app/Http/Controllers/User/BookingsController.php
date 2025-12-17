@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Mail\Booking as BookingMail;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use App\Models\Property;
 
 class BookingsController extends Controller
 {
@@ -172,5 +173,24 @@ class BookingsController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function propertyDetails(Request $request)
+    {
+        $property = Property::where('slug', $request->slug)->with(['owner','resourceTypes','facilities','propertyImage'=>function($query) {
+            $query->orderBy('position','asc');
+        },'resourceTypes.resources'=>function($query){
+            $query->select('id','name','price','status')->where('status',1);
+        }])->first();
+        if ($property) {
+            $property->propertyImage->transform(function ($item) {
+                $item->image = asset('storage/uploads/' . $item->image); 
+                return $item;
+            });
+            $property->ownerName = $property->owner->firstName . ' ' . $property->owner->lastName;
+            unset($property->owner);
+            return response()->json(['status' => true, 'message' => '', 'data' => $property]);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Property not found', 'data' => []]);
+        }
     }
 }

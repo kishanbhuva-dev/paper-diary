@@ -15,30 +15,10 @@ class Property extends Model
     {
         return $this->belongsTo(ResourceType::class, 'propertyId', 'id');
     }
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($property) {
-    //         if (empty($property->slug)) {
-    //             $property->slug = self::generateSlug($property->propertyName);
-    //         }
-    //     });
-
-    //     static::updating(function ($property) {
-    //         if (empty($property->slug)) {
-    //             $property->slug = self::generateSlug($property->propertyName);
-    //         }
-    //     });
-    // }
-
-    // private static function generateSlug($name)
-    // {
-    //     $slug  = Str::slug($name);
-    //     $count = static::where('slug', 'LIKE', "{$slug}%")->count();
-
-    //     return $count ? "{$slug}-{$count}" : $slug;
-    // }
+    public function resourceTypes()
+    {
+        return $this->hasMany(ResourceType::class, 'propertyId', 'id');
+    }
     protected static function boot()
 {
     parent::boot();
