@@ -10,7 +10,7 @@
               Total Inventory
             </p>
             <div class="mt-2 flex items-baseline gap-2">
-              <span class="text-2xl text-gray-800">
+              <span class="text-xl text-gray-800">
                 {{ dashboardStats.totalProperties }}
               </span>
               <span class="text-sm text-gray-500 font-medium">Units</span>
@@ -31,7 +31,7 @@
               Total Bookings
             </p>
             <div class="mt-2 flex items-baseline gap-2">
-              <span class="text-2xl text-gray-800">
+              <span class="text-xl text-gray-800">
                 {{ dashboardStats.totalBookings }}
               </span>
               <span class="text-sm text-gray-500 font-medium">Lifetime</span>
@@ -53,14 +53,14 @@
             </p>
             <div class="mt-2 flex items-baseline gap-4">
               <div class="flex items-baseline gap-1">
-                <span class="text-2xl text-green-600">{{
+                <span class="text-xl text-green-600">{{
                   operationalStats.checkIns
                 }}</span>
                 <span class="text-sm text-gray-500 font-medium">In</span>
               </div>
               <span class="text-gray-200">|</span>
               <div class="flex items-baseline gap-1">
-                <span class="text-2xl text-amber-600">{{
+                <span class="text-xl text-amber-600">{{
                   operationalStats.checkOuts
                 }}</span>
                 <span class="text-sm text-gray-500 font-medium">Out</span>
@@ -82,7 +82,7 @@
               Next Payout
             </p>
             <div class="mt-2 flex items-baseline gap-2">
-              <span class="text-2xl text-gray-800">₹85.5k</span>
+              <span class="text-xl text-gray-800">₹85.5k</span>
               <span class="text-sm text-blue-600 font-medium">Dec 20</span>
             </div>
           </div>
