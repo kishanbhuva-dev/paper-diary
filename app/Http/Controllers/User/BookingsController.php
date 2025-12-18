@@ -6,6 +6,7 @@ use App\Models\BookingOrder;
 use App\Models\ResourceType;
 use Illuminate\Http\Request;
 use App\Models\Bookings;
+use App\Models\Resource;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -72,10 +73,13 @@ class BookingsController extends Controller
                 'departureDateTime' => 'required|date|after:arrivalDateTime',
                 'adults' => 'required|integer',
                 'children' => 'nullable|integer',
-                'price' => 'required|numeric',
                 'status' => 'nullable|in:pending,cancelled,confirmed',
                 'paymentStatus' => 'nullable|in:paid,unpaid,failed,cancelled,confirm',
                 'resources' => 'required|integer',
+                'guestFullName' => 'required|string',
+                'guestEmail' => 'required|email',
+                'guestPhone' => 'required|string',
+                'guestAddress' => 'required|string',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
@@ -85,22 +89,25 @@ class BookingsController extends Controller
             $availableResources=count($availableResourcesData);
 
             if ($availableResources != $request->resources) {
-
                 return response()->json(['status' => false, 'message' => 'resources not available', 'data' => []]);
             }
-            
+            $resourcePriceTotal=Resource::whereIn('id',$availableResourcesData)->sum('customPrice');
             $resourceType = ResourceType::where('id', $request->resourceTypeId)->first();
             $booking = new BookingOrder;
             $booking->propertyId = $request->propertyId;
             $booking->resourceTypeId = $request->resourceTypeId;
-            $booking->arrivalDateTime = $request->arrivalDateTime? date('Y-m-d H:i:s', strtotime($request->arrivalDateTime)) : null;
-            $booking->departureDateTime = $request->departureDateTime? date('Y-m-d H:i:s', strtotime($request->departureDateTime)) : null;
+            $booking->arrivalDateTime = $request->arrivalDateTime? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
+            $booking->departureDateTime = $request->departureDateTime? date('Y-m-d', strtotime($request->departureDateTime)) : null;
             $booking->adult = $request->adults;
+            $booking->guestFullName = $request->guestFullName;
+            $booking->guestEmail = $request->guestEmail;
+            $booking->guestPhone = $request->guestPhone;
+            $booking->guestAddress = $request->guestAddress;
             if (isset($request->children)) {
                 $booking->children = $request->children;
             }
-            $booking->price = $request->price;
-            $booking->cost = $resourceType->price;
+            $booking->price = $resourcePriceTotal;
+            $booking->cost = $resourcePriceTotal;
             $booking->userId = Auth::user()->id;
             if (isset($request->status)) {
                 $booking->status = $request->status;
@@ -111,31 +118,32 @@ class BookingsController extends Controller
             if ($booking->save()) {
                 $bookingOrderId = $booking->id;
                 foreach ($availableResourcesData as $key => $resource) {
+                    $resourcePrice=Resource::where('id',$resource)->first();
                     $booking =new Bookings;
                     $booking->bookingOrderId = $bookingOrderId;
                     $booking->resourceId = $resource;
                     $booking->resourceTypeId = $request->resourceTypeId;
-                    $booking->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d H:i:s', strtotime($request->arrivalDateTime)) : null;
-                    $booking->departureDateTime = $request->departureDateTime ? date('Y-m-d H:i:s', strtotime($request->departureDateTime)) : null;
-                    $booking->price = $request->price ?? 0;
+                    $booking->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
+                    $booking->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
+                    $booking->price = $resourcePrice->customPrice;
                     $booking->save();
                 }
-                $propertyOwnerEmail = getPropertyOwnerEmail($request->propertyId);
-                $data=[];
-                $data['bookingId']=$bookingOrderId;
-                $data['userName']=Auth::user()->firstName.' '.Auth::user()->lastName;
-                $data['arrivalDateTime']=date('d M Y H:i', strtotime($request->arrivalDateTime));
-                $data['departureDateTime']=date('d M Y H:i', strtotime($request->departureDateTime));
-                $data['propertyName']= getPropertyName($request->propertyId);
-                $data['resourceTypeName']= getResourceTypeName($request->resourceTypeId);
-                $data['totalAdults']=$request->adults;
-                $data['totalChildren']=$request->children ?? 0;
-                $data['totalGuests']=$request->adults + ($request->children ?? 0);
-                $data['totalPrice']=$request->price;
-                $data['guestEmail']=Auth::user()->email;
-                $data['guestPhone']=Auth::user()->phone;
-                Mail::to(Auth::user()->email)->send(new BookingMail($data, 'user'));
-                Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($data, 'owner'));
+                // $propertyOwnerEmail = getPropertyOwnerEmail($request->propertyId);
+                // $data=[];
+                // $data['bookingId']=$bookingOrderId;
+                // $data['userName']=Auth::user()->firstName.' '.Auth::user()->lastName;
+                // $data['arrivalDateTime']=date('d M Y H:i', strtotime($request->arrivalDateTime));
+                // $data['departureDateTime']=date('d M Y H:i', strtotime($request->departureDateTime));
+                // $data['propertyName']= getPropertyName($request->propertyId);
+                // $data['resourceTypeName']= getResourceTypeName($request->resourceTypeId);
+                // $data['totalAdults']=$request->adults;
+                // $data['totalChildren']=$request->children ?? 0;
+                // $data['totalGuests']=$request->adults + ($request->children ?? 0);
+                // $data['totalPrice']=$request->price;
+                // $data['guestEmail']=Auth::user()->email;
+                // $data['guestPhone']=Auth::user()->phone;
+                // Mail::to(Auth::user()->email)->send(new BookingMail($data, 'user'));
+                // Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($data, 'owner'));
                 return response()->json(['status' => true, 'message' => 'Booking created successfully', 'data' => ''], 201);
             }else {
                 return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
@@ -144,35 +152,6 @@ class BookingsController extends Controller
         }catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
-    }
-
-    public function show( $id)
-    {
-        
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
     }
     public function propertyDetails(Request $request)
     {
