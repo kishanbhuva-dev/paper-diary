@@ -193,4 +193,34 @@ class BookingsController extends Controller
             return response()->json(['status' => false, 'message' => 'Property not found', 'data' => []]);
         }
     }
+    public function getAvailableResourcesTypes(Request $request) 
+    { 
+        try { 
+            $validator = Validator::make($request->all(), [ 
+                'slug' => 'required|exists:property,slug', 
+                'arrivalDateTime' => 'required|date', 
+                'departureDateTime' => 'required|date|after:arrivalDateTime', 
+                'totalResources' => 'required|integer', 
+            ]); 
+            if ($validator->fails()) { 
+                return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]); 
+            }
+            $property = Property::where('slug', $request->slug)
+                ->with(['resourceTypes.resources' => function($query) {
+                    $query->select('id','name','customPrice','status')->where('status',1);
+                }])->first(); 
+
+            if (!$property) { 
+                return response()->json(['status' => false, 'message' => 'Property not found', 'data' => []], 404); 
+            } 
+
+            $arrivalDateTime = date('Y-m-d', strtotime($request->arrivalDateTime)); 
+            $departureDateTime = date('Y-m-d', strtotime($request->departureDateTime)); 
+            $availableResourcesData = getResourcesTypeAvailableByProperty($property->id, $arrivalDateTime, $departureDateTime, $request->totalResources); 
+            
+            return response()->json(['status' => true, 'message' => '', 'data' => $availableResourcesData]); 
+        } catch (\Throwable $th) { 
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]); 
+        } 
+    }
 }
