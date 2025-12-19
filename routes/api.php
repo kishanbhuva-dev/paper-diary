@@ -50,6 +50,8 @@ Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], f
 });
 Route::group(['prefix' => 'user', 'middleware' => ['auth:sanctum', 'user']], function () {
     Route::apiResource('booking', App\Http\Controllers\User\BookingsController::class);
+    Route::get('bookings', [App\Http\Controllers\User\BookingsController::class, 'booking']);
+    Route::post('booking-status-update', [App\Http\Controllers\User\BookingsController::class, 'bookingStatusUpdate']);
     Route::get('property-details', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);
     Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
 });

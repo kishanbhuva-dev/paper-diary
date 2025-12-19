@@ -62,7 +62,62 @@ class BookingsController extends Controller
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
     }
-
+    public function booking(Request $request){
+        $bookingOrder = BookingOrder::selectRaw("id,userId,propertyId,status,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime")->where('userId', Auth::user()->id);
+        if ($request->type=='past') {   
+            $bookingOrder->where('arrivalDateTime','<',date('Y-m-d H:i:s'));
+        }else{
+            $bookingOrder->where('arrivalDateTime','>',date('Y-m-d H:i:s'));
+        }
+        if ($request->search) {
+            $bookingOrder->whereHas('property', function ($query) use ($request) {
+                $query->where('propertyName', 'like', '%' . $request->search . '%');
+            })
+            ->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
+            ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%');            
+        }else{
+            $bookingOrder->with(['property' => function($query){
+                $query->select('id','propertyName');
+            }]);
+        }
+        if ($request->status) {
+            $bookingOrder->where('status', $request->status);
+        }
+        if ($request->arrivalDateTime && $request->departureDateTime) {
+            $bookingOrder->where('arrivalDateTime', '<', Carbon::parse($request->departureDateTime)->format('Y-m-d H:i:s'))
+            ->where('departureDateTime', '>', Carbon::parse($request->arrivalDateTime)->format('Y-m-d H:i:s'));
+        }
+        $pagination = $request->pagination ?? 10;
+        $sortBy = $request->sortBy ?? 'id';
+        $sortOrder = $request->sortOrder ?? 'desc';
+        $bookingOrder = $bookingOrder->orderBy($sortBy, $sortOrder)->paginate($pagination);
+        return response()->json(['status' => true, 'message' => '', 'data' => $bookingOrder]);
+    }
+    public function bookingStatusUpdate(Request $request){
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|exists:booking_orders,id',
+                'status' => 'required|in:pending,cancelled,confirmed',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
+            }
+            $bookingOrder = BookingOrder::where('id', $request->id)->first();
+            if ($bookingOrder->userId != Auth::user()->id) {
+                return response()->json(['status' => false, 'message' => 'you are not authorized to update this booking status', 'data' => []]);
+            }
+            $booking=Bookings::where('bookingOrderId',$bookingOrder->id)->get();
+            foreach ($booking as $item) {
+                $item->status = $request->status;
+                $item->save();
+            }           
+            $bookingOrder->status = $request->status;
+            $bookingOrder->save();
+            return response()->json(['status' => true, 'message' => 'booking status updated', 'data' => '']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+        }
+    }
     public function store(Request $request)
     {
         try {
