@@ -16,25 +16,27 @@ class BookingsController extends Controller
     public function index(Request $request)
     {
         try {
-            $propertyIds = Auth::user()->properties->pluck('id')->toArray();
-            $bookings = BookingOrder::selectRaw("id,propertyId,resourceTypeId,userId,adult,children,price,status,paymentStatus,date_format(arrivalDateTime,'%d-%m-%Y %H:%i') as arrivalDateTime,date_format(departureDateTime,'%d-%m-%Y %H:%i') as departureDateTime,created_at")->whereIn('propertyId', $propertyIds)->with(['property', 'resourceType' => function($query){
-                $query->select('*')->withCount('resources');
+            $propertyIds = Auth::user()->properties->pluck('id');
+            $bookings = BookingOrder::selectRaw("id,userId,propertyId,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime,status,guestFullName,guestEmail,guestAddress")->whereIn('propertyId', $propertyIds)->with(['property'=>function($query){
+                $query->select('id','propertyName');
             }]);  
             if ($request->search) {
                 $bookings->whereHas('property', function ($query) use ($request) {
                     $query->where('propertyName', 'like', '%' . $request->search . '%');
                 })
                 ->orWhere('status', 'like', '%' . $request->search . '%')
-                ->orWhere('paymentStatus', $request->search)
-                ->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
-                ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
-                ->orWhereHas('resourceType', function ($query) use ($request) {
+                ->orWhere('guestFullName', 'like', '%' . $request->search . '%')
+                ->orWhere('guestEmail', 'like', '%' . $request->search . '%')
+                ->orWhere('guestAddress', 'like', '%' . $request->search . '%');
+                
+                // Only parse date if valid
+                if (strtotime($request->search)) {
+                    $bookings->orWhere('arrivalDateTime', 'like', '%' . Carbon::parse($request->search)->format('d M Y') . '%')
+                        ->orWhere('departureDateTime', 'like', '%' . Carbon::parse($request->search)->format('d M Y') . '%');
+                }
+                
+                $bookings->orWhereHas('resourceType', function ($query) use ($request) {
                     $query->where('name', 'like', '%' . $request->search . '%');
-                })
-                ->orWhereHas('resourceType', function ($query) use ($request) {
-                    $query->whereHas('resources', function ($query) use ($request) {
-                        $query->where('name', 'like', '%' . $request->search . '%');
-                    });
                 })
                 ->orWhereHas('user', function ($query) use ($request) {
                     $query->where('firstName', 'like', '%' . $request->search . '%')
@@ -42,25 +44,14 @@ class BookingsController extends Controller
                         ->orWhere('email', 'like', '%' . $request->search . '%');
                 });
             }
+            $bookings->with(['user'=>function($query){
+                $query->select('id','firstName','lastName','email');
+            }]);
             $perPage = $request->perPage ?? 10;
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'desc';
             $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
-            $bookings->getCollection()->transform(function ($item) {
-                $item->resourceTypeName=$item->resourceType->name;
-                $item->resourceCount=$item->resourceType->resources_count;
-                $item->propertyName=$item->property->propertyName;
-                $recordedTime = Carbon::parse($item->created_at);
-                $item->from=$recordedTime->diffForHumans();
-                $item->userName=$item->user->firstName.' '.$item->user->lastName;
-                $item->userEmail=$item->user->email;
-                unset($item->user);
-                unset($item->created_at);
-                unset($item->property);
-                unset($item->resourceType);
-
-                return $item;
-            });
+            
             return response()->json(['status' => true, 'message' => '', 'data' => $bookings]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
