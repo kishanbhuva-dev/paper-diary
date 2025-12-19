@@ -2,60 +2,65 @@
   <main class="space-y-8" v-if="propertyData">
     <section class="space-y-6 bg-blue-100 py-4 sm:py-6 lg:py-8">
       <div class="container mx-auto">
-        <div class="px-4 sm:px-6 lg:px-8">
+        <div class="px-4 sm:px-6 lg:px-8 flex justify-center">
           <form
-            class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-fit max-w-full items-end justify-center"
           >
-            <BaseSelect
-              label="WHERE"
-              placeholder="Select Location"
-              v-model="details.location"
-              :options="[
-                { value: propertyData.city, label: propertyData.city },
-              ]"
-            />
-            <BaseDatePicker label="CHECK-IN" v-model="details.checkIn" />
-            <BaseDatePicker label="CHECK-OUT" v-model="details.checkOut" />
-            <BaseSelect
-              label="ROOM & GUESTS"
-              placeholder="Select Room & Guests"
-              v-model="details.roomGuests"
-              :options="[{ value: '1room_3adults', label: '1 Room, 3 Adults' }]"
-            />
-            <BaseSelect
-              label="HOTEL NAME"
-              placeholder="Select Hotel"
-              v-model="details.hotel"
-              :options="[
-                { value: propertyData.id, label: propertyData.propertyName },
-              ]"
-            />
-            <div class="w-full self-end-safe">
-              <router-link :to="{ name: 'booking-summary' }">
-                <button
-                  type="button"
-                  class="h-fit w-full btn-primary py-2 text-sm"
-                >
-                  Select Room
-                </button>
-              </router-link>
+            <div class="w-full sm:w-[180px] lg:w-[220px]">
+              <BaseDatePicker label="CHECK-IN" v-model="details.checkIn" />
+            </div>
+
+            <div class="w-full sm:w-[180px] lg:w-[220px]">
+              <BaseDatePicker label="CHECK-OUT" v-model="details.checkOut" />
+            </div>
+
+            <div class="w-full sm:w-[180px] lg:w-[220px]">
+              <BaseSelect
+                label="ROOM & GUESTS"
+                placeholder="Select Room & Guests"
+                v-model="details.roomGuests"
+                :options="[
+                  { value: '1room_3adults', label: '1 Room, 3 Adults' },
+                ]"
+              />
+            </div>
+
+            <div class="w-full sm:w-[180px] lg:w-[220px]">
+              <button
+                type="button"
+                @click="handleShowResources"
+                class="w-full btn-primary px-2 py-2.5 text-sm uppercase font-bold h-[42px] flex items-center justify-center box-border m-0 overflow-hidden"
+                :disabled="fetchingResources"
+              >
+                <span class="truncate text-center w-full">
+                  {{ fetchingResources ? "..." : "Show Resources" }}
+                </span>
+              </button>
             </div>
           </form>
         </div>
       </div>
-      <div class="bg-red-500 text-white" role="alert">
+      <div
+        v-if="hasSearched && availableResourceTypes.length === 0"
+        class="bg-red-500 text-white"
+        role="alert"
+      >
         <div
           class="flex-center gap-x-3 px-4 py-1 max-sm:flex-wrap sm:px-6 lg:px-8"
         >
           <h4 class="font-bold">SOLD OUT</h4>
           <span class="block sm:inline"
-            >This Property is Sold Out on 15 Nov - 18 Nov</span
+            >This Property is Sold Out on {{ details.checkIn }} -
+            {{ details.checkOut }}</span
           >
         </div>
       </div>
     </section>
 
-    <section class="container mx-auto">
+    <section
+      v-if="hasSearched && availableResourceTypes.length === 0"
+      class="container mx-auto"
+    >
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex-center flex-col">
           <h6 class="text-lg font-semibold">Available Dates</h6>
@@ -137,11 +142,19 @@
           <section>
             <h5>About</h5>
             <div
-              class="mt-4 text-gray-700"
+              class="mt-4 text-gray-700 transition-all duration-300"
+              :class="{ 'line-clamp-3': !isAboutExpanded }"
               v-html="propertyData.description"
             ></div>
-            <button class="mt-2 font-semibold text-primary uppercase text-sm">
-              Show More <Icon icon="mdi:chevron-down" class="inline" />
+            <button
+              @click="isAboutExpanded = !isAboutExpanded"
+              class="mt-2 font-semibold text-primary uppercase text-sm"
+            >
+              {{ isAboutExpanded ? "Show Less" : "Show More" }}
+              <Icon
+                :icon="isAboutExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'"
+                class="inline"
+              />
             </button>
           </section>
 
@@ -159,7 +172,6 @@
             </div>
           </section>
 
-          <!-- Property Policies -->
           <section>
             <h5>Property Policies</h5>
             <ul class="mt-4 list-inside list-disc space-y-2 text-gray-700">
@@ -188,7 +200,6 @@
           </section>
         </div>
 
-        <!-- Ratings and Reviews -->
         <aside class="h-fit rounded-lg border border-gray-400 p-6">
           <h5>Ratings and reviews</h5>
           <div class="mt-4 flex items-center gap-4">
@@ -287,24 +298,27 @@
         </aside>
       </div>
     </section>
-    <!-- Location and Map -->
-    <section class="container mx-auto px-4 sm:px-6 lg:px-8">
-      <h5>Location of The Oberoi Udaivilas</h5>
+    <section class="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      <h5>Location of {{ propertyData.propertyName }}</h5>
       <div class="flex items-center space-x-2 text-lg text-gray-500">
         <Icon icon="mdi:location" />
-        <span> Haridasji Ki Magri </span>
+        <span> {{ propertyData.address }} </span>
       </div>
       <div class="mt-4 flex-center rounded-lg">
         <img src="/public/map.png" alt="Map Image" class="h-full w-full" />
       </div>
     </section>
 
-    <div class="bg-stone-100 py-8">
+    <div
+      v-if="availableResourceTypes.length > 0"
+      class="bg-stone-100 py-8"
+      ref="resourcesSection"
+    >
       <section class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h5>Room Types</h5>
+        <h5>Resource Types</h5>
         <div class="mt-4 space-y-6">
           <div
-            v-for="roomType in propertyData.resource_types"
+            v-for="roomType in availableResourceTypes"
             :key="roomType.id"
             class="grid gap-6 rounded-2xl border border-gray-400 bg-white p-2 md:grid-cols-3"
           >
@@ -321,9 +335,9 @@
                   <p class="text-lg uppercase">
                     {{ propertyData.propertyName }}
                   </p>
-                  <span class="text-gray-600 text-sm"
-                    >Near railway station, Shirdi</span
-                  >
+                  <span class="text-gray-600 text-sm">{{
+                    propertyData.address
+                  }}</span>
                 </div>
                 <div
                   class="flex gap-4 text-gray-400 uppercase text-[10px] font-bold"
@@ -347,9 +361,10 @@
                   <h5 class="ml-2 inline">£{{ roomType.price }}</h5>
                 </div>
                 <button
+                  @click="goToBooking(roomType)"
                   class="mt-2 w-full btn-primary px-8 py-2 text-xs sm:w-auto uppercase"
                 >
-                  Select Room
+                  Book now
                 </button>
               </div>
             </div>
@@ -357,7 +372,6 @@
         </div>
       </section>
     </div>
-    <!-- lightbox / carousal section -->
     <Teleport to="body">
       <div
         v-if="isCarouselOpen"
@@ -403,8 +417,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { ref, computed, onMounted, nextTick } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
 import dayjs from "dayjs";
 import { userService } from "../../services/userService";
@@ -412,22 +426,73 @@ import BaseSelect from "../../components/global/BaseSelect.vue";
 import BaseDatePicker from "../../components/global/BaseDatePicker.vue";
 
 const route = useRoute();
+const router = useRouter();
 const propertyData = ref(null);
 const loading = ref(true);
+const fetchingResources = ref(false);
+const availableResourceTypes = ref([]);
+const resourcesSection = ref(null);
+const hasSearched = ref(false);
+const isAboutExpanded = ref(false);
+
+// Requirement 3: Redirect with Data
+const goToBooking = (roomType) => {
+  const bookingData = {
+    property: {
+      id: propertyData.value.id,
+      name: propertyData.value.propertyName,
+      address: propertyData.value.address,
+      image: propertyImages.value[0]?.image || "",
+    },
+    room: roomType,
+    dates: { checkIn: details.value.checkIn, checkOut: details.value.checkOut },
+  };
+  localStorage.setItem("pending_booking", JSON.stringify(bookingData));
+  router.push({ name: "booking-summary" });
+};
+
 // Carousel State
 const isCarouselOpen = ref(false);
 const activeImageIndex = ref(0);
+
+// Fetch Resources
+const handleShowResources = async () => {
+  fetchingResources.value = true;
+  hasSearched.value = true;
+  try {
+    const params = {
+      slug: route.params.slug,
+      arrivalDateTime: details.value.checkIn,
+      departureDateTime: details.value.checkOut,
+      totalResources: 1,
+    };
+
+    const res = await userService.getAvailableResourcesTypes(params);
+    if (res.data.status) {
+      availableResourceTypes.value = res.data.data;
+
+      await nextTick();
+      if (resourcesSection.value && availableResourceTypes.value.length > 0) {
+        resourcesSection.value.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching resources:", err);
+  } finally {
+    fetchingResources.value = false;
+  }
+};
 
 // Carousel Functions
 const openCarousel = (index) => {
   activeImageIndex.value = index;
   isCarouselOpen.value = true;
-  document.body.style.overflow = "hidden"; // Prevent scrolling when open
+  document.body.style.overflow = "hidden";
 };
 
 const closeCarousel = () => {
   isCarouselOpen.value = false;
-  document.body.style.overflow = "auto"; // Re-enable scrolling
+  document.body.style.overflow = "auto";
 };
 
 const nextImage = () => {
