@@ -16,57 +16,38 @@ class BookingsController extends Controller
     public function index(Request $request)
     {
         try {
-            $bookings = BookingOrder::selectRaw("id,propertyId,resourceTypeId,userId,adult,children,price,status,paymentStatus,date_format(arrivalDateTime,'%d-%m-%Y %H:%i') as arrivalDateTime,date_format(departureDateTime,'%d-%m-%Y %H:%i') as departureDateTime,created_at")->with(['property.owner', 'resourceType' => function($query){
-                $query->select('*')->withCount('resources');
-            }]);  
-            if ($request->search) {
-                $bookings->whereHas('property', function ($query) use ($request) {
-                    $query->where('propertyName', 'like', '%' . $request->search . '%');
-                })
-                ->orWhereHas('property.owner', function ($query) use ($request) {
-                    $query->where('firstName', 'like', '%' . $request->search . '%')
-                        ->orWhere('lastName', 'like', '%' . $request->search . '%')
-                        ->orWhere('email', 'like', '%' . $request->search . '%');
-                })
-                ->orWhere('status', 'like', '%' . $request->search . '%')
-                ->orWhere('paymentStatus', $request->search)
-                ->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
-                ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
-                ->orWhereHas('resourceType', function ($query) use ($request) {
-                    $query->where('name', 'like', '%' . $request->search . '%');
-                })
-                ->orWhereHas('resourceType', function ($query) use ($request) {
-                    $query->whereHas('resources', function ($query) use ($request) {
-                        $query->where('name', 'like', '%' . $request->search . '%');
-                    });
-                })
-                ->orWhereHas('user', function ($query) use ($request) {
-                    $query->where('firstName', 'like', '%' . $request->search . '%')
-                        ->orWhere('lastName', 'like', '%' . $request->search . '%')
-                        ->orWhere('email', 'like', '%' . $request->search . '%');
-                });
+            $bookings = BookingOrder::selectRaw("id,propertyId,resourceTypeId,userId,status,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime");  
+            if ($request->search) { 
+                $bookings->whereHas('property', function ($query) use ($request) { 
+                    $query->where('propertyName', 'like', '%' . $request->search . '%'); 
+                }) 
+                ->orWhereHas('property.owner', function ($query) use ($request) { 
+                    $query->where('firstName', 'like', '%' . $request->search . '%') 
+                        ->orWhere('lastName', 'like', '%' . $request->search . '%') 
+                        ->orWhere('email', 'like', '%' . $request->search . '%'); 
+                }) 
+                ->orWhere('status', 'like', '%' . $request->search . '%');
+                if (strtotime($request->search)) {
+                    $bookings->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
+                        ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%');
+                }
+    
+                $bookings->orWhereHas('user', function ($query) use ($request) { 
+                    $query->where('firstName', 'like', '%' . $request->search . '%') 
+                        ->orWhere('lastName', 'like', '%' . $request->search . '%') 
+                        ->orWhere('email', 'like', '%' . $request->search . '%'); 
+                }); 
             }
+            $bookings->with(['property'=>function($query){
+                $query->select('id','ownerId','propertyName');
+            },'property.owner'=>function($query){
+                $query->select('id','firstName','lastName','email');
+            }]);  
             $perPage = $request->perPage ?? 10;
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'desc';
             $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
-            $bookings->getCollection()->transform(function ($item) {
-                $item->resourceTypeName=$item->resourceType->name;
-                $item->resourceCount=$item->resourceType->resources_count;
-                $item->propertyName=$item->property->propertyName;
-                $recordedTime = Carbon::parse($item->created_at);
-                $item->from=$recordedTime->diffForHumans();
-                $item->userName=$item->user->firstName.' '.$item->user->lastName;
-                $item->userEmail=$item->user->email;
-                $item->ownerName=$item->property->owner->firstName.' '.$item->property->owner->lastName;
-                $item->ownerEmail=$item->property->owner->email;
-                unset($item->user);
-                unset($item->created_at);
-                unset($item->property);
-                unset($item->resourceType);
-
-                return $item;
-            });
+            
             return response()->json(['status' => true, 'message' => '', 'data' => $bookings]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
