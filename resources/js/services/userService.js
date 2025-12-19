@@ -1,20 +1,30 @@
-import apiClient from "./apiClient";
+import api from "./apiClient"; // Assuming your axios instance is in an api.js file
 
 export const userService = {
-  // Fetch property details for the DetailsPage
   getPropertyDetails(slug) {
-    return apiClient.get(`/user/property-details`, {
+    return api.get("/user/property-details", {
       params: { slug },
     });
   },
 
-  // Fetch the logged-in user's booking history
-  getBookings(params) {
-    return apiClient.get("/user/booking", { params });
+  getAvailableResourcesTypes(params) {
+    return api.get("/user/available-resources-types", {
+      params: {
+        slug: params.slug,
+        arrivalDateTime: params.arrivalDateTime,
+        departureDateTime: params.departureDateTime,
+        totalResources: params.totalResources,
+      },
+    });
   },
 
-  // Create a new booking
   createBooking(bookingData) {
-    return apiClient.post("/user/booking", bookingData);
+    return api.post("/user/booking", bookingData);
+  },
+
+  getBookings(params) {
+    return api.get("/user/booking", { params });
   },
 };
+
+export default userService;

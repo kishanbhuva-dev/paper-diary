@@ -86,6 +86,7 @@ class PropertyController extends Controller
                     'departureTime' => 'nullable|date',
                     'status'        => 'nullable|boolean',
                     'isIcal'        => 'nullable|boolean',
+                    'description'   => 'nullable',
                     'slug'          => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:property,slug'],
                 ]
             );
@@ -100,6 +101,7 @@ class PropertyController extends Controller
             $property->address2      = $request->address2;
             $property->slug          = $request->slug;
             $property->country       = $request->country;
+            $property->description   = $request->description;
             $property->county        = $request->county;
             $property->city          = $request->city;
             $property->postcode      = $request->postcode;
@@ -167,6 +169,7 @@ class PropertyController extends Controller
                     'phone'         => 'nullable|string',
                     'telephone'     => 'nullable|string',
                     'arrivalTime'   => 'nullable|time',
+                    'description'   => 'nullable',
                     'departureTime' => 'nullable|time',
                     'status'        => 'nullable|boolean',
                     'isIcal'        => 'nullable|boolean',
@@ -197,6 +200,7 @@ class PropertyController extends Controller
             $property->arrivalTime   = $request->arrivalTime ? date('H:i', strtotime($request->arrivalTime)) : null;
             $property->departureTime = $request->departureTime ? date('H:i', strtotime($request->departureTime)) : null;
             $property->status        = $request->status ?? 0;
+            $property->description   = $request->description;
             $property->isIcal        = $request->isIcal ?? 0;
             $property->slug          = $request->slug ?: Str::slug($request->name);
 

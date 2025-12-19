@@ -166,7 +166,7 @@ const handlePerPageChange = (size) => {
 const handleDeleteConfirmation = async () => {
   isConfirmationModalVisible.value = false;
 
-  if (bookingIdToDelete.value !== null) {
+    if (bookingIdToDelete.value !== null) {
     // In a real application, you might use an update to change status to 'Cancelled'
     // rather than a hard delete, but based on the original property logic, we'll use delete.
     await handleDelete(bookingIdToDelete.value);
