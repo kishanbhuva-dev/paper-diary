@@ -17,7 +17,7 @@ class BookingsController extends Controller
     {
         try {
             $propertyIds = Auth::user()->properties->pluck('id');
-            $bookings = BookingOrder::selectRaw("id,userId,propertyId,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime,status,guestFullName,guestEmail,guestAddress")->whereIn('propertyId', $propertyIds)->with(['property'=>function($query){
+            $bookings = BookingOrder::selectRaw("id,userId,propertyId,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime,status,guestFullName as guestName,paymentStatus,price,guestEmail,guestAddress,date_format(created_at,'%d %b %Y ') as bookedOn")->withAggregate('resourceType','name')->whereIn('propertyId', $propertyIds)->with(['property'=>function($query){
                 $query->select('id','propertyName');
             }]);  
             if ($request->search) {
@@ -25,14 +25,16 @@ class BookingsController extends Controller
                     $query->where('propertyName', 'like', '%' . $request->search . '%');
                 })
                 ->orWhere('status', 'like', '%' . $request->search . '%')
+                ->orWhere('price', 'like', '%' . $request->search . '%')
+                ->orWhere('paymentStatus', 'like', '%' . $request->search . '%')
                 ->orWhere('guestFullName', 'like', '%' . $request->search . '%')
                 ->orWhere('guestEmail', 'like', '%' . $request->search . '%')
                 ->orWhere('guestAddress', 'like', '%' . $request->search . '%');
                 
-                // Only parse date if valid
                 if (strtotime($request->search)) {
-                    $bookings->orWhere('arrivalDateTime', 'like', '%' . Carbon::parse($request->search)->format('d M Y') . '%')
-                        ->orWhere('departureDateTime', 'like', '%' . Carbon::parse($request->search)->format('d M Y') . '%');
+                    $searchDate = date('Y-m-d', strtotime($request->search));
+                    $bookings->orWhere('arrivalDateTime', 'like', '%' . $searchDate . '%')
+                        ->orWhere('departureDateTime', 'like', '%' . $searchDate . '%');
                 }
                 
                 $bookings->orWhereHas('resourceType', function ($query) use ($request) {
