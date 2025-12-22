@@ -54,4 +54,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:sanctum', 'user']], fun
     Route::post('booking-status-update', [App\Http\Controllers\User\BookingsController::class, 'bookingStatusUpdate']);
     Route::get('property-details', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);
     Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
+    Route::post('create-payment-intent', [App\Http\Controllers\User\BookingsController::class, 'createPaymentIntent']);
+    Route::post('complete-payment', [App\Http\Controllers\User\BookingsController::class, 'completePayment']);
+    Route::post('charge', [App\Http\Controllers\User\BookingsController::class, 'charge']);
 });
