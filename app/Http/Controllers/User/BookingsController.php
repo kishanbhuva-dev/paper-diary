@@ -99,25 +99,51 @@ class BookingsController extends Controller
     }
     public function bookingStatusUpdate(Request $request){
         try {
+            // $validator = Validator::make($request->all(), [
+            //     'id' => 'required|exists:booking_orders,id',
+            //     'status' => 'required|in:pending,cancelled,confirmed',
+            // ]);
+            // if ($validator->fails()) {
+            //     return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
+            // }
+            // $bookingOrder = BookingOrder::where('id', $request->id)->first();
+            // if ($bookingOrder->userId != Auth::user()->id) {
+            //     return response()->json(['status' => false, 'message' => 'you are not authorized to update this booking status', 'data' => []]);
+            // }
+            // $booking=Bookings::where('bookingOrderId',$bookingOrder->id)->get();
+            // foreach ($booking as $item) {
+            //     $item->status = $request->status;
+            //     $item->save();
+            // }           
+            // $bookingOrder->status = $request->status;
+            // $bookingOrder->save();
+            // return response()->json(['status' => true, 'message' => 'booking status updated', 'data' => '']);
             $validator = Validator::make($request->all(), [
-                'id' => 'required|exists:booking_orders,id',
-                'status' => 'required|in:pending,cancelled,confirmed',
+            'bookingId' => 'required|exists:bookings,id',
+            'status' => 'required|in:pending,cancelled,completed',
             ]);
+
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
             }
-            $bookingOrder = BookingOrder::where('id', $request->id)->first();
-            if ($bookingOrder->userId != Auth::user()->id) {
-                return response()->json(['status' => false, 'message' => 'you are not authorized to update this booking status', 'data' => []]);
+
+            $bookingOrder = BookingOrder::where('id',$request->bookingId)->first();
+            $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
+            foreach ($booking as $key => $value) {
+                $value->status = $request->status;
+                $value->save();
             }
-            $booking=Bookings::where('bookingOrderId',$bookingOrder->id)->get();
-            foreach ($booking as $item) {
-                $item->status = $request->status;
-                $item->save();
-            }           
             $bookingOrder->status = $request->status;
+            if ($request->status =='pending') {
+                $bookingOrder->paymentStatus = 'unpaid';
+            }elseif ($request->status =='cancelled') {
+                $bookingOrder->paymentStatus = 'failed';
+            }else{
+                $bookingOrder->paymentStatus = 'paid';
+            }
             $bookingOrder->save();
-            return response()->json(['status' => true, 'message' => 'booking status updated', 'data' => '']);
+
+            return response()->json(['status' => true, 'message' => 'Booking status updated successfully', 'data' => []]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
