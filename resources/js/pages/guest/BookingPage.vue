@@ -307,17 +307,23 @@ const handleBooking = async () => {
   isSubmitting.value = true;
   try {
     const payload = {
-      property_id: bookingInfo.value?.room?.propertyId, // Adjust based on your API
-      resource_type_id: bookingInfo.value?.room?.id,
-      check_in: bookingDates.value.checkIn,
-      check_out: bookingDates.value.checkOut,
-      guest_name: guestDetails.value.fullName,
-      guest_email: guestDetails.value.email,
-      guest_contact: guestDetails.value.contactNo,
-      guest_address: guestDetails.value.contactAddress,
+      propertyId: bookingInfo.value?.room?.propertyId,
+      resourceTypeId: bookingInfo.value?.room?.id,
+      arrivalDateTime: bookingDates.value.checkIn,
+      departureDateTime: bookingDates.value.checkOut,
       adults: guestDetails.value.adults,
       children: guestDetails.value.children,
-      total_price: Number(bookingInfo.value?.room?.price || 0) + 200,
+      resources: 1,
+      guestFullName: guestDetails.value.fullName,
+      guestEmail: guestDetails.value.email,
+      guestPhone: guestDetails.value.contactNo,
+      guestAddress: guestDetails.value.contactAddress,
+
+      // Adding the Price here
+      price: Number(bookingInfo.value?.room?.price || 0) + 200,
+
+      status: "pending",
+      paymentStatus: "unpaid",
     };
     console.log("payload --- ", payload);
 
