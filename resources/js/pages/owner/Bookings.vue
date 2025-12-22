@@ -82,9 +82,9 @@ const bookingIdToDelete = ref(null);
 
 const tableColumns = [
   { label: "ID", key: "id" },
-  { label: "Property", key: "propertyName" },
+  { label: "Property", key: "property.propertyName" },
   { label: "Resource Type", key: "resourceTypeName" },
-  { label: "Guest Name", key: "userName" },
+  { label: "Guest Name", key: () => "userService.firstName" },
   { label: "Check-in", key: "arrivalDateTime" },
   { label: "Check-out", key: "departureDateTime" },
   { label: "Price", key: "price" },
@@ -166,7 +166,7 @@ const handlePerPageChange = (size) => {
 const handleDeleteConfirmation = async () => {
   isConfirmationModalVisible.value = false;
 
-    if (bookingIdToDelete.value !== null) {
+  if (bookingIdToDelete.value !== null) {
     // In a real application, you might use an update to change status to 'Cancelled'
     // rather than a hard delete, but based on the original property logic, we'll use delete.
     await handleDelete(bookingIdToDelete.value);
