@@ -14,6 +14,10 @@ use App\Mail\Booking as BookingMail;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use App\Models\Property;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
+use Stripe\Charge;
+use Illuminate\Support\Str;
 
 class BookingsController extends Controller
 {
@@ -148,6 +152,11 @@ class BookingsController extends Controller
             }
             $resourcePriceTotal=Resource::whereIn('id',$availableResourcesData)->sum('customPrice');
             $resourceType = ResourceType::where('id', $request->resourceTypeId)->first();
+            if ($resourcePriceTotal != null && $resourcePriceTotal > 0) {
+                $resourcePriceTotal = $resourcePriceTotal;
+            } else {
+                $resourcePriceTotal = $resourceType->price * $availableResources;
+            }
             $booking = new BookingOrder;
             $booking->propertyId = $request->propertyId;
             $booking->resourceTypeId = $request->resourceTypeId;
@@ -174,13 +183,14 @@ class BookingsController extends Controller
                 $bookingOrderId = $booking->id;
                 foreach ($availableResourcesData as $key => $resource) {
                     $resourcePrice=Resource::where('id',$resource)->first();
+                    $resourcePriceTotal=$resourcePrice->customPrice ?? $resourceType->price;
                     $booking =new Bookings;
                     $booking->bookingOrderId = $bookingOrderId;
                     $booking->resourceId = $resource;
                     $booking->resourceTypeId = $request->resourceTypeId;
                     $booking->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
                     $booking->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
-                    $booking->price = $resourcePrice->customPrice;
+                    $booking->price = $resourcePriceTotal;
                     $booking->save();
                 }
                 // $propertyOwnerEmail = getPropertyOwnerEmail($request->propertyId);
@@ -256,5 +266,85 @@ class BookingsController extends Controller
         } catch (\Throwable $th) { 
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]); 
         } 
+    }
+    public function createPaymentIntent(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount'   => 'required|integer|min:1',
+            'currency' => 'required|string|size:3',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => $validator->errors()->first(),
+                'data'    => []
+            ]);
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        $intent = PaymentIntent::create([
+            'amount'               => $request->amount * 100, // cents
+            'currency'             => $request->currency,     // use validated currency
+            'payment_method_types' => ['card'],
+            'metadata'             => [
+                'user_id'  => auth()->id(),
+                'order_id' => $request->order_id ?? null,
+            ],
+        ]);
+
+        return response()->json([
+            'status'             => true,
+            'message'            => 'Payment intent created',
+            'clientSecret'       => $intent->client_secret,
+            'payment_intent_id'  => $intent->id,
+            'token'              => (string) Str::uuid(),
+        ]);
+    }
+    public function completePayment(Request $request)
+    {
+            // if (empty($request->payment_intent_id)) {
+            //     return response()->json(['status' => false, 'message' => 'Payment Intent ID is required', 'data' => []]);
+            // }       
+            // $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            // return $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
+            // if ($paymentDetail->status == 'succeeded') {
+            //     return response()->json(['status' => true, 'message' => '', 'data' => $paymentDetail]);
+            // }
+            // return response()->json(['status' => false, 'message' => 'Payment failed', 'data' => []]);
+        if (empty($request->payment_intent_id)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Payment Intent ID is required',
+                'data'    => []
+            ]);
+        }
+
+        try {
+            $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+            $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
+
+            if ($paymentDetail->status === 'succeeded') {
+                // Update your order/payment table here
+                return response()->json([
+                    'status'  => true,
+                    'message' => 'Payment succeeded',
+                    'data'    => $paymentDetail,
+                ]);
+            }
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Payment not completed yet',
+                'data'    => $paymentDetail,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => $e->getMessage(),
+                'data'    => []
+            ]);
+        }
     }
 }
