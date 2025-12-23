@@ -80,7 +80,7 @@ function getResourcesAvailableByProperty($propertyId, $arrivalDateTime, $departu
     $resourceTypes = ResourceType::where('propertyId', $propertyId)->get();
     $result = [];
     foreach ($resourceTypes as $resourceType) {
-        $bookedResourceIdsQuery = Bookings::where('resourceTypeId', $resourceType->id);
+        $bookedResourceIdsQuery = Bookings::where('resourceTypeId', $resourceType->id)->where('status', 'confirmed');
 
         if ($resourceType->slot === 'hourly') {
             $bookedResourceIdsQuery->where('arrivalDateTime', '<=', $departureDateTime)
@@ -115,7 +115,7 @@ function getResourcesTypeAvailableByProperty($propertyId, $arrivalDateTime, $dep
         ->filter(function ($resourceType) use ($arrivalDateTime, $departureDateTime, $totalResourcesNeeded) {
             $availableCount = getResourcesAvailable($resourceType->id, $arrivalDateTime, $departureDateTime)->count();
             return $availableCount >= $totalResourcesNeeded;
-        });
+        })->values();
     return $availableResourceTypes;
 }
 function getPropertyName($propertyId)

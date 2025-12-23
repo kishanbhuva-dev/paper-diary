@@ -119,8 +119,8 @@ class BookingsController extends Controller
             // $bookingOrder->save();
             // return response()->json(['status' => true, 'message' => 'booking status updated', 'data' => '']);
             $validator = Validator::make($request->all(), [
-            'bookingId' => 'required|exists:bookings,id',
-            'status' => 'required|in:pending,cancelled,completed',
+            'bookingId' => 'required|exists:booking_orders,id',
+            'status' => 'required|in:pending,cancelled,confirm',
             ]);
 
             if ($validator->fails()) {
@@ -130,7 +130,13 @@ class BookingsController extends Controller
             $bookingOrder = BookingOrder::where('id',$request->bookingId)->first();
             $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
             foreach ($booking as $key => $value) {
-                $value->status = $request->status;
+                if($request->status=='confirm'){
+                    $value->status = 'confirmed';
+                }elseif($request->status=='cancelled'){  
+                    $value->status = $request->status;
+                }else{
+                    $value->status = 'pending';
+                }
                 $value->save();
             }
             $bookingOrder->status = $request->status;
@@ -158,7 +164,7 @@ class BookingsController extends Controller
                 'departureDateTime' => 'required|date|after:arrivalDateTime',
                 'adults' => 'required|integer',
                 'children' => 'nullable|integer',
-                'status' => 'nullable|in:pending,cancelled,confirmed',
+                'status' => 'nullable|in:pending,cancelled,confirm',
                 'paymentStatus' => 'nullable|in:paid,unpaid,failed,cancelled,confirm',
                 'resources' => 'required|integer',
                 'guestFullName' => 'required|string',
@@ -235,7 +241,7 @@ class BookingsController extends Controller
                 // $data['guestPhone']=Auth::user()->phone;
                 // Mail::to(Auth::user()->email)->send(new BookingMail($data, 'user'));
                 // Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($data, 'owner'));
-                return response()->json(['status' => true, 'message' => 'Booking created successfully', 'data' => ''], 201);
+                return response()->json(['status' => true, 'message' => 'Booking created successfully', 'data' => ['id' => $bookingOrderId]], 201);
             }else {
                 return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
             }
@@ -293,6 +299,36 @@ class BookingsController extends Controller
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]); 
         } 
     }
+    
+    public function bookingCancel(Request $request){
+        try {
+            $validator = Validator::make($request->all(), [
+                'bookingId' => 'required|exists:booking_orders,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
+            }
+            $bookingOrder = BookingOrder::where('id',$request->bookingId)->first();
+            if ($bookingOrder->userId != Auth::user()->id) {
+                return response()->json(['status' => false, 'message' => 'you are not authorized to cancel this booking', 'data' => []]);
+            }
+            $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
+            foreach ($booking as $key => $value) {
+                if ($value->status =='confirmed') {
+                    return response()->json(['status' => false, 'message' => 'you can not cancel confirmed booking', 'data' => []]);
+                }
+                $value->status = 'cancelled';
+                $value->save();
+            }
+            $bookingOrder->status = 'cancelled';
+            $bookingOrder->paymentStatus = 'failed';
+            $bookingOrder->save();
+            return response()->json(['status' => true, 'message' => 'Booking cancelled successfully', 'data' => []]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+        }
+    }
+    
     public function createPaymentIntent(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -355,8 +391,8 @@ class BookingsController extends Controller
                 // Update your order/payment table here
                 return response()->json([
                     'status'  => true,
-                    'message' => 'Payment succeeded',
-                    'data'    => $paymentDetail,
+                    'message' => 'Payment Successfully Complete',
+                    'data'    => [],
                 ]);
             }
 

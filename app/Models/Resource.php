@@ -9,4 +9,8 @@ class Resource extends Model
     {
         return $this->belongsTo(ResourceType::class, 'resourceTypeId', 'id');
     }
+    public function bookings()
+    {
+        return $this->hasMany(Bookings::class, 'resourceId', 'id');
+    }
 }

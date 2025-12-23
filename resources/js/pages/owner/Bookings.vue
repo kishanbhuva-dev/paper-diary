@@ -83,14 +83,17 @@ const bookingIdToDelete = ref(null);
 const tableColumns = [
   { label: "ID", key: "id" },
   { label: "Property", key: "property.propertyName" },
-  { label: "Resource Type", key: "resourceTypeName" },
-  { label: "Guest Name", key: () => "userService.firstName" },
+  { label: "Resource Type", key: "resource_type_name" },
+  {
+    label: "Guest Name",
+    key: "guestName",
+  },
   { label: "Check-in", key: "arrivalDateTime" },
   { label: "Check-out", key: "departureDateTime" },
   { label: "Price", key: "price" },
   { label: "Status", key: "status" },
   { label: "Payment Status", key: "paymentStatus" },
-  { label: "Booked On", key: "from" },
+  { label: "Booked On", key: "bookedOn" },
 ];
 
 // --- 2. DATA FETCHING LOGIC ---
