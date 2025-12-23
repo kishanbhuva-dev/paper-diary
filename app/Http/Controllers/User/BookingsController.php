@@ -18,6 +18,7 @@ use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Charge;
 use Illuminate\Support\Str;
+use App\Models\Payment;
 
 class BookingsController extends Controller
 {
@@ -139,6 +140,7 @@ class BookingsController extends Controller
                 }
                 $value->save();
             }
+            
             $bookingOrder->status = $request->status;
             if ($request->status =='pending') {
                 $bookingOrder->paymentStatus = 'unpaid';
@@ -148,7 +150,15 @@ class BookingsController extends Controller
                 $bookingOrder->paymentStatus = 'paid';
             }
             $bookingOrder->save();
-
+            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
+            if ($paymentDetail->status == 'succeeded') {
+                $payment = new Payment();
+                $payment->transaction_id = $paymentDetail->id;
+                $payment->userId = Auth::user()->id;
+                $payment->bookingOrderId = $request->bookingId;
+                $payment->save();
+            }
             return response()->json(['status' => true, 'message' => 'Booking status updated successfully', 'data' => []]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
