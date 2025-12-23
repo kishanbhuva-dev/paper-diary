@@ -33,13 +33,14 @@
                 :disabled="fetchingResources"
               >
                 <span class="truncate text-center w-full">
-                  {{ fetchingResources ? "..." : "Show Resources" }}
+                  {{ fetchingResources ? "..." : "Show Resource Types" }}
                 </span>
               </button>
             </div>
           </form>
         </div>
       </div>
+
       <div
         v-if="hasSearched && availableResourceTypes.length === 0"
         class="bg-red-500 text-white"
@@ -49,10 +50,10 @@
           class="flex-center gap-x-3 px-4 py-1 max-sm:flex-wrap sm:px-6 lg:px-8"
         >
           <h4 class="font-bold">SOLD OUT</h4>
-          <span class="block sm:inline"
-            >This Property is Sold Out on {{ details.checkIn }} -
-            {{ details.checkOut }}</span
-          >
+          <span class="block sm:inline">
+            This Property is Sold Out on {{ details.checkIn }} -
+            {{ details.checkOut }}
+          </span>
         </div>
       </div>
     </section>
@@ -178,24 +179,9 @@
               <li>Check-in Time: 2 PM, Check-out Time: 12 PM</li>
               <li>Primary Guest should be at least 18 years of age.</li>
               <li>
-                Passport, Aadhaar, Driving License and Govt. ID are accepted as
-                ID proof(s).
+                Passport, Aadhaar, Driving License and Govt. ID are accepted.
               </li>
               <li>Pets are not allowed.</li>
-              <li>
-                Mandatory: Christmas Eve (December 24) Gala Dinner per adult:
-                INR 14750; Christmas Eve (December 24) Gala Dinner per child:
-                INR 7375 (from 6 to 12 years old); New Year's Eve (December 31)
-                Gala Dinner per adult: INR 20000; New Year's Eve (December 31)
-                Gala Dinner per child: INR 10000 (from 6 to 12 years old).
-              </li>
-              <li>
-                Optional: Fee for full breakfast: approximately INR 2100 per
-                person; Fee for in-room wired Internet: INR 1000 per day (rates
-                may vary); Fee for wireless Internet in public areas: INR 1000
-                per day (rates may vary); Airport shuttle fee: INR 4000 per
-                vehicle (one-way).
-              </li>
             </ul>
           </section>
         </div>
@@ -207,171 +193,114 @@
               <div class="flex-center gap-1 text-3xl font-bold">
                 4.6 <Icon icon="mdi:star" class="text-xl" />
               </div>
-              <div class="font-semibold">EXCELLENT</div>
+              <div class="font-semibold uppercase">Excellent</div>
               <div class="text-xs text-gray-500">2640 ratings</div>
             </div>
             <div class="w-full text-sm text-gray-600">
-              <div class="flex items-center gap-2">
-                <span>5</span>
+              <div
+                v-for="i in [5, 4, 3, 2, 1]"
+                :key="i"
+                class="flex items-center gap-2"
+              >
+                <span>{{ i }}</span>
                 <div class="h-1.5 w-full rounded-full bg-gray-200">
                   <div
                     class="h-1.5 rounded-full bg-yellow-400"
-                    style="width: 70%"
+                    :style="{ width: i === 5 ? '70%' : '10%' }"
                   ></div>
                 </div>
-                <span>70%</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span>4</span>
-                <div class="h-1.5 w-full rounded-full bg-gray-200">
-                  <div
-                    class="h-1.5 rounded-full bg-yellow-400"
-                    style="width: 15%"
-                  ></div>
-                </div>
-                <span>15%</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span>3</span>
-                <div class="h-1.5 w-full rounded-full bg-gray-200">
-                  <div
-                    class="h-1.5 rounded-full bg-yellow-400"
-                    style="width: 8%"
-                  ></div>
-                </div>
-                <span>8%</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span>2</span>
-                <div class="h-1.5 w-full rounded-full bg-gray-200">
-                  <div
-                    class="h-1.5 rounded-full bg-yellow-400"
-                    style="width: 4%"
-                  ></div>
-                </div>
-                <span>4%</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span>1</span>
-                <div class="h-1.5 w-full rounded-full bg-gray-200">
-                  <div
-                    class="h-1.5 rounded-full bg-yellow-400"
-                    style="width: 3%"
-                  ></div>
-                </div>
-                <span>3%</span>
+                <span>{{ i === 5 ? "70%" : "10%" }}</span>
               </div>
             </div>
-          </div>
-          <div class="mt-6 border-t border-gray-400 pt-6">
-            <div class="flex-between">
-              <div class="flex gap-3">
-                <img src="/public/user-1.jpg" class="h-10 w-10 rounded-full" />
-                <div>
-                  <p class="font-semibold">Brontosaurus</p>
-                  <div class="flex items-center text-sm">
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                  </div>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <button class="btn-primary p-2">
-                  <Icon icon="mdi:chevron-left" />
-                </button>
-                <button class="btn-primary p-2">
-                  <Icon icon="mdi:chevron-right" />
-                </button>
-              </div>
-            </div>
-            <p class="mt-4 text-gray-600">
-              Every thing is best, no contents to need views Surest I recommend
-              the oberoi properties for holidays
-            </p>
-            <button class="mt-2 font-semibold text-primary">
-              Read More...
-            </button>
           </div>
         </aside>
       </div>
     </section>
+
     <section class="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
       <h5>Location of {{ propertyData.propertyName }}</h5>
       <div class="flex items-center space-x-2 text-lg text-gray-500">
         <Icon icon="mdi:location" />
         <span> {{ propertyData.address }} </span>
       </div>
-      <div class="mt-4 flex-center rounded-lg">
-        <img src="/public/map.png" alt="Map Image" class="h-full w-full" />
+      <div class="mt-4 flex-center rounded-lg overflow-hidden">
+        <img
+          src="/public/map.png"
+          alt="Map Image"
+          class="h-full w-full object-cover"
+        />
       </div>
     </section>
 
-    <div
-      v-if="availableResourceTypes.length > 0"
-      class="bg-stone-100 py-8"
-      ref="resourcesSection"
-    >
-      <section class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h5>Resource Types</h5>
-        <div class="mt-4 space-y-6">
-          <div
-            v-for="roomType in availableResourceTypes"
-            :key="roomType.id"
-            class="grid gap-6 rounded-2xl border border-gray-400 bg-white p-2 md:grid-cols-3"
-          >
-            <img
-              :src="propertyImages[0]?.image || '/placeholder.jpg'"
-              class="aspect-video h-full w-full rounded-lg object-cover"
-            />
+    <div ref="resourcesSection" class="scroll-mt-24">
+      <div v-if="availableResourceTypes.length > 0" class="bg-stone-100 py-12">
+        <section class="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h5 class="mb-6">Available Resource Types</h5>
+          <div class="space-y-6">
             <div
-              class="flex flex-col justify-between sm:flex-row md:col-span-2 p-4"
+              v-for="roomType in availableResourceTypes"
+              :key="roomType.id"
+              class="grid gap-6 rounded-2xl border border-gray-400 bg-white p-3 md:grid-cols-3 hover:shadow-md transition-shadow"
             >
-              <div class="space-y-4">
-                <h6 class="text-primary font-bold">{{ roomType.name }}</h6>
-                <div class="font-semibold">
-                  <p class="text-lg uppercase">
-                    {{ propertyData.propertyName }}
-                  </p>
-                  <span class="text-gray-600 text-sm">{{
-                    propertyData.address
-                  }}</span>
+              <img
+                :src="propertyImages[0]?.image || '/placeholder.jpg'"
+                class="aspect-video h-full w-full rounded-lg object-cover"
+              />
+              <div
+                class="flex flex-col justify-between sm:flex-row md:col-span-2 p-4"
+              >
+                <div class="space-y-4">
+                  <h6 class="text-primary font-bold text-xl">
+                    {{ roomType.name }}
+                  </h6>
+                  <div class="font-semibold">
+                    <p class="text-lg uppercase text-gray-800">
+                      {{ propertyData.propertyName }}
+                    </p>
+                    <span class="text-gray-500 text-sm">{{
+                      propertyData.address
+                    }}</span>
+                  </div>
+                  <div
+                    class="flex flex-wrap gap-4 text-gray-400 uppercase text-[10px] font-bold"
+                  >
+                    <span class="flex items-center gap-1"
+                      ><Icon icon="mdi:parking" /> Parking</span
+                    >
+                    <span class="flex items-center gap-1"
+                      ><Icon icon="mdi:shower" /> Attached Bathroom</span
+                    >
+                    <span class="flex items-center gap-1"
+                      ><Icon icon="mdi:video-closed-circuit" /> CCTV</span
+                    >
+                  </div>
                 </div>
                 <div
-                  class="flex gap-4 text-gray-400 uppercase text-[10px] font-bold"
+                  class="mt-4 flex flex-col items-start justify-between sm:mt-0 sm:items-end"
                 >
-                  <span class="flex items-center gap-1"
-                    ><Icon icon="mdi:parking" /> Parking</span
+                  <div class="text-right">
+                    <span
+                      class="text-xs text-green-600 font-bold px-2 py-1 bg-green-50 rounded"
+                      >20% off</span
+                    >
+                    <h5 class="ml-2 block mt-2 text-2xl font-bold">
+                      £{{ roomType.price }}
+                    </h5>
+                  </div>
+                  <button
+                    @click="goToBooking(roomType)"
+                    class="mt-4 w-full btn-primary px-10 py-3 text-sm sm:w-auto uppercase tracking-wider"
                   >
-                  <span class="flex items-center gap-1"
-                    ><Icon icon="mdi:shower" /> Attached Bathroom</span
-                  >
-                  <span class="flex items-center gap-1"
-                    ><Icon icon="mdi:video-closed-circuit" /> CCTV Camaras</span
-                  >
+                    Book now
+                  </button>
                 </div>
-              </div>
-              <div
-                class="mt-4 flex flex-col items-start justify-between sm:mt-0 sm:items-end"
-              >
-                <div class="text-right">
-                  <span class="text-xs text-green-600 font-bold">20% off</span>
-                  <h5 class="ml-2 inline">£{{ roomType.price }}</h5>
-                </div>
-                <button
-                  @click="goToBooking(roomType)"
-                  class="mt-2 w-full btn-primary px-8 py-2 text-xs sm:w-auto uppercase"
-                >
-                  Book now
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
+
     <Teleport to="body">
       <div
         v-if="isCarouselOpen"
@@ -383,36 +312,39 @@
         >
           <Icon icon="mdi:close" class="text-4xl" />
         </button>
-
         <button
           @click="prevImage"
-          class="absolute left-4 text-white hover:bg-white/10 p-2 rounded-full transition z-[1000]"
+          class="absolute left-4 text-white hover:bg-white/10 p-2 rounded-full z-[1000]"
         >
           <Icon icon="mdi:chevron-left" class="text-5xl" />
         </button>
-
-        <div class="max-w-5xl max-h-[80vh] px-4 select-none">
+        <div class="max-w-5xl max-h-[80vh] px-4 select-none text-center">
           <img
             :src="propertyImages[activeImageIndex].image"
-            class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl transition-all duration-300"
+            class="max-w-full max-h-[80vh] object-contain rounded shadow-2xl"
           />
-          <p class="text-white text-center mt-4 font-semibold">
+          <p class="text-white mt-4 font-semibold">
             Image {{ activeImageIndex + 1 }} of {{ propertyImages.length }}
           </p>
         </div>
-
         <button
           @click="nextImage"
-          class="absolute right-4 text-white hover:bg-white/10 p-2 rounded-full transition z-[1000]"
+          class="absolute right-4 text-white hover:bg-white/10 p-2 rounded-full z-[1000]"
         >
           <Icon icon="mdi:chevron-right" class="text-5xl" />
         </button>
       </div>
     </Teleport>
   </main>
-  <div v-else class="flex-center h-screen">
-    <p v-if="loading">Loading...</p>
-    <p v-else class="text-red-500">Property not found.</p>
+
+  <div v-else class="flex items-center justify-center h-screen">
+    <div v-if="loading" class="flex flex-col items-center gap-4">
+      <Icon icon="line-md:loading-twotone-loop" class="text-5xl text-primary" />
+      <p class="font-medium text-gray-500">Loading property details...</p>
+    </div>
+    <p v-else class="text-red-500 font-bold text-xl uppercase tracking-widest">
+      Property not found.
+    </p>
   </div>
 </template>
 
@@ -425,17 +357,65 @@ import { userService } from "../../services/userService";
 import BaseSelect from "../../components/global/BaseSelect.vue";
 import BaseDatePicker from "../../components/global/BaseDatePicker.vue";
 
+// Router & State
 const route = useRoute();
 const router = useRouter();
 const propertyData = ref(null);
 const loading = ref(true);
 const fetchingResources = ref(false);
 const availableResourceTypes = ref([]);
-const resourcesSection = ref(null);
+const resourcesSection = ref(null); // Reference for scrolling
 const hasSearched = ref(false);
 const isAboutExpanded = ref(false);
 
-// Requirement 3: Redirect with Data
+// Date & Search Details
+const details = ref({
+  location: "",
+  roomGuests: "1room_3adults",
+  checkIn: dayjs().format("YYYY-MM-DD"),
+  checkOut: dayjs().add(1, "day").format("YYYY-MM-DD"),
+});
+
+// Fetch Available Resources & Handle Scroll
+const handleShowResources = async () => {
+  fetchingResources.value = true;
+  hasSearched.value = true;
+
+  try {
+    const params = {
+      slug: route.params.slug,
+      arrivalDateTime: details.value.checkIn,
+      departureDateTime: details.value.checkOut,
+      totalResources: 1,
+    };
+
+    const res = await userService.getAvailableResourcesTypes(params);
+
+    if (res.data.status) {
+      availableResourceTypes.value = res.data.data;
+
+      // STEP 1: Wait for Vue to finish updating the Virtual DOM
+      await nextTick();
+
+      // STEP 2: Use a slight delay to ensure the browser has actually
+      // painted the new HTML and calculated the scroll height.
+      setTimeout(() => {
+        if (resourcesSection.value && availableResourceTypes.value.length > 0) {
+          resourcesSection.value.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 150); // 150ms delay is the sweet spot for browser rendering
+    }
+  } catch (err) {
+    console.error("Error fetching resources:", err);
+  } finally {
+    fetchingResources.value = false;
+  }
+};
+
+// Booking Redirection
 const goToBooking = (roomType) => {
   const bookingData = {
     property: {
@@ -451,86 +431,56 @@ const goToBooking = (roomType) => {
   router.push({ name: "booking-summary" });
 };
 
-// Carousel State
+// Gallery & Carousel Logic
+const propertyImages = computed(() => propertyData.value?.property_image || []);
+const expandedImageId = ref(null);
 const isCarouselOpen = ref(false);
 const activeImageIndex = ref(0);
 
-// Fetch Resources
-const handleShowResources = async () => {
-  fetchingResources.value = true;
-  hasSearched.value = true;
-  try {
-    const params = {
-      slug: route.params.slug,
-      arrivalDateTime: details.value.checkIn,
-      departureDateTime: details.value.checkOut,
-      totalResources: 1,
-    };
+const setExpanded = (id) => (expandedImageId.value = id);
+const resetExpanded = () =>
+  (expandedImageId.value = propertyImages.value[0]?.id);
+const getFlexGrowClass = (id) =>
+  id === expandedImageId.value ? "grow-2" : "grow-1";
 
-    const res = await userService.getAvailableResourcesTypes(params);
-    if (res.data.status) {
-      availableResourceTypes.value = res.data.data;
-
-      await nextTick();
-      if (resourcesSection.value && availableResourceTypes.value.length > 0) {
-        resourcesSection.value.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  } catch (err) {
-    console.error("Error fetching resources:", err);
-  } finally {
-    fetchingResources.value = false;
-  }
-};
-
-// Carousel Functions
 const openCarousel = (index) => {
   activeImageIndex.value = index;
   isCarouselOpen.value = true;
   document.body.style.overflow = "hidden";
 };
-
 const closeCarousel = () => {
   isCarouselOpen.value = false;
   document.body.style.overflow = "auto";
 };
-
 const nextImage = () => {
   activeImageIndex.value =
     (activeImageIndex.value + 1) % propertyImages.value.length;
 };
-
 const prevImage = () => {
   activeImageIndex.value =
     (activeImageIndex.value - 1 + propertyImages.value.length) %
     propertyImages.value.length;
 };
 
+// Property Details Fetching
 const fetchProperty = async () => {
   try {
     const slug = route.params.slug;
     const res = await userService.getPropertyDetails(slug);
     if (res.data.status) {
       propertyData.value = res.data.data;
-      if (propertyImages.value.length > 0)
+      if (propertyImages.value.length > 0) {
         expandedImageId.value = propertyImages.value[0].id;
+      }
     }
   } catch (err) {
+    console.error("Property Fetch Error:", err);
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(fetchProperty);
-
-// Form / Calendar UI Logic
-const details = ref({
-  location: "",
-  roomGuests: "1room_3adults",
-  hotel: "",
-  checkIn: dayjs().format("YYYY-MM-DD"),
-  checkOut: dayjs().add(1, "day").format("YYYY-MM-DD"),
-});
+// Calendar Helper Logic
 const startDate = ref(dayjs().startOf("day"));
 const selectedDate = ref(dayjs().startOf("day"));
 const dateList = computed(() =>
@@ -548,12 +498,33 @@ const navigateBackward = () =>
 const navigateForward = () => (startDate.value = startDate.value.add(7, "day"));
 const selectDate = (dateString) => (selectedDate.value = dayjs(dateString));
 
-// Gallery Logic
-const propertyImages = computed(() => propertyData.value?.property_image || []);
-const expandedImageId = ref(null);
-const setExpanded = (id) => (expandedImageId.value = id);
-const resetExpanded = () =>
-  (expandedImageId.value = propertyImages.value[0]?.id);
-const getFlexGrowClass = (id) =>
-  id === expandedImageId.value ? "grow-2" : "grow-1";
+onMounted(fetchProperty);
 </script>
+
+<style scoped>
+/* Ensures the section doesn't hide behind a sticky header */
+.scroll-mt-24 {
+  scroll-margin-top: 6rem;
+}
+
+/* Gallery Hover Animation */
+.grow-1 {
+  flex: 1;
+  transition: all 0.5s ease;
+}
+.grow-2 {
+  flex: 2.5;
+  transition: all 0.5s ease;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+</style>

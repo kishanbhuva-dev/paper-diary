@@ -25,6 +25,17 @@ export const userService = {
   getBookings(params) {
     return api.get("/user/booking", { params });
   },
+
+  createPaymentIntent(data) {
+    return api.post("/user/create-payment-intent", data);
+  },
+
+  completePayment(data) {
+    return api.post("/user/complete-payment", data);
+  },
+  bookingStatusUpdate(data) {
+    return api.post("/user/booking-status-update", data);
+  },
 };
 
 export default userService;

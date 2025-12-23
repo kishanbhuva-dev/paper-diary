@@ -181,6 +181,23 @@
                 </div>
               </div>
 
+              <div
+                class="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                <h4 class="mb-4 text-sm font-bold text-gray-700 uppercase">
+                  Secure Payment
+                </h4>
+                <div
+                  id="card-element"
+                  class="p-3 bg-white border rounded-md shadow-sm"
+                ></div>
+                <p
+                  id="card-errors"
+                  role="alert"
+                  class="mt-2 text-xs text-red-500"
+                ></p>
+              </div>
+
               <div class="pt-6">
                 <div class="flex items-center mb-4">
                   <input
@@ -202,7 +219,9 @@
                   class="w-full btn-primary sm:w-auto uppercase py-3 px-10"
                   :disabled="isSubmitting"
                 >
-                  {{ isSubmitting ? "Processing..." : "BOOK ROOM" }}
+                  {{
+                    isSubmitting ? "Processing Payment..." : "PAY & BOOK ROOM"
+                  }}
                 </button>
               </div>
             </form>
@@ -264,6 +283,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
+import { loadStripe } from "@stripe/stripe-js";
 import { userService } from "../../services/userService";
 import BaseDatePicker from "../../components/global/BaseDatePicker.vue";
 
@@ -278,11 +298,32 @@ const guestDetails = ref({
   email: "",
   contactNo: "",
   contactAddress: "",
-  adults: 3,
+  adults: 1,
   children: 0,
 });
 
-onMounted(() => {
+const stripe = ref(null);
+const elements = ref(null);
+const card = ref(null);
+
+onMounted(async () => {
+  const publishableKey =
+    "pk_test_51RvEjJ7fYIrC7aOkBuyFRaQM8EH4P3nCf8sW5BEFVufQaLOlM2ZNk8lRDNh7uCtm6sVV2Wa2dhIVbIwI6P2q2xQx00PpDGeuDB";
+
+  stripe.value = await loadStripe(publishableKey);
+  elements.value = stripe.value.elements();
+
+  card.value = elements.value.create("card", {
+    style: {
+      base: {
+        fontSize: "16px",
+        color: "#32325d",
+        fontFamily: "sans-serif",
+      },
+    },
+  });
+  card.value.mount("#card-element");
+
   const data = localStorage.getItem("pending_booking");
   if (data) {
     const parsed = JSON.parse(data);
@@ -302,40 +343,103 @@ const updateGuests = (type, value) => {
 };
 
 const handleBooking = async () => {
-  if (!isAgreed.value) return;
+  if (!isAgreed.value) {
+    alert("Please agree to the terms.");
+    return;
+  }
 
   isSubmitting.value = true;
+  const cardErrors = document.getElementById("card-errors");
+  cardErrors.textContent = "";
+
   try {
-    const payload = {
-      propertyId: bookingInfo.value?.room?.propertyId,
-      resourceTypeId: bookingInfo.value?.room?.id,
-      arrivalDateTime: bookingDates.value.checkIn,
-      departureDateTime: bookingDates.value.checkOut,
-      adults: guestDetails.value.adults,
-      children: guestDetails.value.children,
-      resources: 1,
-      guestFullName: guestDetails.value.fullName,
-      guestEmail: guestDetails.value.email,
-      guestPhone: guestDetails.value.contactNo,
-      guestAddress: guestDetails.value.contactAddress,
+    const totalAmount = Number(bookingInfo.value?.room?.price || 0) + 200;
 
-      // Adding the Price here
-      price: Number(bookingInfo.value?.room?.price || 0) + 200,
+    // 1. Create Payment Intent
+    const intentRes = await userService.createPaymentIntent({
+      amount: totalAmount,
+      currency: "gbp",
+    });
 
-      status: "pending",
-      paymentStatus: "unpaid",
-    };
-    console.log("payload --- ", payload);
+    const clientSecret =
+      intentRes.data.clientSecret || intentRes.data.data?.clientSecret;
 
-    const res = await userService.createBooking(payload);
+    if (!clientSecret) throw new Error("Invalid response from payment server.");
 
-    if (res.data.status) {
-      localStorage.removeItem("pending_booking");
-      router.push({ name: "my-bookings" });
+    // 2. Confirm Card Payment
+    const { paymentIntent, error } = await stripe.value.confirmCardPayment(
+      clientSecret,
+      {
+        payment_method: {
+          card: card.value,
+          billing_details: {
+            name: guestDetails.value.fullName,
+            email: guestDetails.value.email,
+          },
+        },
+      }
+    );
+
+    if (error) {
+      cardErrors.textContent = error.message;
+      isSubmitting.value = false;
+      return;
+    }
+
+    // 3. Create Booking record
+    if (paymentIntent.status === "succeeded") {
+      const roomPrice = Number(bookingInfo.value?.room?.price || 0);
+
+      const payload = {
+        propertyId: bookingInfo.value?.property?.id,
+        resourceTypeId: bookingInfo.value?.room?.id,
+        arrivalDateTime: bookingDates.value.checkIn,
+        departureDateTime: bookingDates.value.checkOut,
+
+        adults: guestDetails.value.adults,
+        children: guestDetails.value.children,
+        resources: 1,
+        guestFullName: guestDetails.value.fullName,
+        guestEmail: guestDetails.value.email,
+        guestPhone: guestDetails.value.contactNo,
+        guestAddress: guestDetails.value.contactAddress,
+
+        status: "confirm",
+        paymentStatus: "paid", // Changed to paid since paymentIntent succeeded
+
+        price: roomPrice,
+        cost: roomPrice,
+        userId: 5,
+        payment_intent_id: paymentIntent.id,
+      };
+      console.log("payload --- ", payload);
+
+      // Call createBooking API
+      const res = await userService.createBooking(payload);
+      // console.log(res.data.data);
+
+      if (res.data.status) {
+        // Extract the new Booking ID from the response (Requires the controller fix mentioned above)
+        const newBookingId = res.data.data?.id;
+
+        if (newBookingId) {
+          // Call booking-status-update API
+          // Validation in controller: 'pending', 'cancelled', 'completed'
+          await userService.bookingStatusUpdate({
+            bookingId: newBookingId,
+            status: "confirm",
+          });
+        }
+
+        localStorage.removeItem("pending_booking");
+        router.push({ name: "my-bookings" });
+      } else {
+        alert("Booking failed: " + res.data.message);
+      }
     }
   } catch (err) {
-    console.error("Booking Error:", err);
-    alert("Something went wrong with the booking. Please try again.");
+    console.error("Payment Error:", err);
+    alert(err.message || "An unexpected error occurred.");
   } finally {
     isSubmitting.value = false;
   }
