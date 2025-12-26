@@ -34,10 +34,10 @@
                 />
                 <div>
                   <p class="text-xs text-gray-500 uppercase font-bold">
-                    Room Type
+                    resource Type
                   </p>
                   <p class="font-semibold text-sm">
-                    {{ bookingInfo?.room?.name || "1 Room" }}
+                    {{ bookingInfo?.resourcetype?.name || "1 Resource" }}
                   </p>
                 </div>
               </div>
@@ -116,12 +116,12 @@
                     >Adult <span class="text-red-500">*</span></label
                   >
                   <div class="flex items-center gap-3">
-                    <input
+                    <!-- <input
                       type="number"
                       v-model="guestDetails.adults"
                       class="w-full rounded-md border border-gray-300 p-2.5 sm:text-sm"
                       readonly
-                    />
+                    /> -->
                     <div
                       class="flex items-center gap-3 rounded-full border border-gray-300 p-1"
                     >
@@ -150,12 +150,12 @@
                     >Children <span class="text-red-500">*</span></label
                   >
                   <div class="flex items-center gap-3">
-                    <input
+                    <!-- <input
                       type="number"
                       v-model="guestDetails.children"
                       class="w-full rounded-md border border-gray-300 p-2.5 sm:text-sm"
                       readonly
-                    />
+                    /> -->
                     <div
                       class="flex items-center gap-3 rounded-full border border-gray-300 p-1"
                     >
@@ -214,15 +214,27 @@
                     Service</label
                   >
                 </div>
-                <button
-                  type="submit"
-                  class="w-full btn-primary sm:w-auto uppercase py-3 px-10"
-                  :disabled="isSubmitting"
-                >
-                  {{
-                    isSubmitting ? "Processing Payment..." : "PAY & BOOK ROOM"
-                  }}
-                </button>
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <button
+                    type="submit"
+                    class="w-full btn-primary sm:w-auto uppercase py-3 px-10"
+                    :disabled="isSubmitting"
+                  >
+                    {{
+                      isSubmitting
+                        ? "Processing Payment..."
+                        : "PAY & BOOK RESOURCE"
+                    }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="cancelAndExit"
+                    class="w-full sm:w-auto border border-gray-300 rounded-md py-3 px-10 text-sm font-bold uppercase hover:bg-gray-50 transition-colors"
+                    :disabled="isSubmitting"
+                  >
+                    Cancel & Exit
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -251,8 +263,8 @@
               <h4 class="mb-4 text-lg font-semibold">Price Details</h4>
               <div class="space-y-2">
                 <div class="flex-between text-sm">
-                  <span>Room Price</span>
-                  <span>£ {{ bookingInfo?.room?.price || "0" }}</span>
+                  <span>Resource Price</span>
+                  <span>£ {{ bookingInfo?.resourcetype?.price || "0" }}</span>
                 </div>
                 <div class="flex-between text-sm">
                   <span>Taxes (10%)</span><span>+ £200</span>
@@ -266,7 +278,7 @@
                   >£
                   {{
                     (
-                      Number(bookingInfo?.room?.price || 0) + 200
+                      Number(bookingInfo?.resourcetype?.price || 0) + 200
                     ).toLocaleString()
                   }}</span
                 >
@@ -324,11 +336,48 @@ onMounted(async () => {
   });
   card.value.mount("#card-element");
 
-  const data = localStorage.getItem("pending_booking");
-  if (data) {
-    const parsed = JSON.parse(data);
-    bookingInfo.value = parsed;
-    bookingDates.value = parsed.dates;
+  const encodedToken = router.currentRoute.value.query.token;
+  const qdata = JSON.parse(atob(encodedToken));
+
+  if (qdata.slug && qdata.r_id && qdata.in && qdata.out) {
+    bookingDates.value = {
+      checkIn: qdata.in,
+      checkOut: qdata.out,
+    };
+    try {
+      const res = await userService.getAvailableResourcesTypes({
+        slug: qdata.slug,
+        arrivalDateTime: qdata.in,
+        departureDateTime: qdata.out,
+        totalResources: 1,
+      });
+      if (res.data.status) {
+        const selectresourceType = res.data.data.find(
+          (r) => r.id === qdata.r_id
+        );
+
+        if (selectresourceType) {
+          const propRes = await userService.getPropertyDetails(qdata.slug);
+
+          bookingInfo.value = {
+            property: {
+              id: propRes.data.data.id,
+              name: propRes.data.data.propertyName,
+              address: propRes.data.data.address,
+              image: propRes.data.data.property_image[0]?.image,
+              slug: propRes.data.data.slug,
+            },
+            resourcetype: selectresourceType,
+          };
+        } else {
+          router.push({ name: "details", params: { slug: qdata.slug } });
+        }
+      }
+    } catch (error) {
+      console.error("Initialization error:", err);
+    }
+  } else {
+    router.push("/");
   }
 });
 
@@ -342,18 +391,26 @@ const updateGuests = (type, value) => {
     );
 };
 
-const handleBooking = async () => {
-  if (!isAgreed.value) {
-    alert("Please agree to the terms.");
-    return;
-  }
+const cancelAndExit = () => {
+  const propertySlug = bookingInfo.value?.property?.slug;
 
+  // 3. Redirect back to the property details page
+  if (propertySlug) {
+    router.push({ name: "details", params: { slug: propertySlug } });
+  } else {
+    // Fallback if no slug is found
+    router.push("/");
+  }
+};
+
+const handleBooking = async () => {
   isSubmitting.value = true;
   const cardErrors = document.getElementById("card-errors");
   cardErrors.textContent = "";
 
   try {
-    const totalAmount = Number(bookingInfo.value?.room?.price || 0) + 200;
+    const totalAmount =
+      Number(bookingInfo.value?.resourcetype?.price || 0) + 200;
 
     // 1. Create Payment Intent
     const intentRes = await userService.createPaymentIntent({
@@ -388,11 +445,13 @@ const handleBooking = async () => {
 
     // 3. Create Booking record
     if (paymentIntent.status === "succeeded") {
-      const roomPrice = Number(bookingInfo.value?.room?.price || 0);
+      const resourcetypePrice = Number(
+        bookingInfo.value?.resourcetype?.price || 0
+      );
 
       const payload = {
         propertyId: bookingInfo.value?.property?.id,
-        resourceTypeId: bookingInfo.value?.room?.id,
+        resourceTypeId: bookingInfo.value?.resourcetype?.id,
         arrivalDateTime: bookingDates.value.checkIn,
         departureDateTime: bookingDates.value.checkOut,
 
@@ -405,14 +464,13 @@ const handleBooking = async () => {
         guestAddress: guestDetails.value.contactAddress,
 
         status: "confirm",
-        paymentStatus: "paid", // Changed to paid since paymentIntent succeeded
+        paymentStatus: "paid",
 
-        price: roomPrice,
-        cost: roomPrice,
+        price: resourcetypePrice,
+        cost: resourcetypePrice,
         userId: 5,
         payment_intent_id: paymentIntent.id,
       };
-      console.log("payload --- ", payload);
 
       // Call createBooking API
       const res = await userService.createBooking(payload);
@@ -424,22 +482,17 @@ const handleBooking = async () => {
 
         if (newBookingId) {
           // Call booking-status-update API
-          // Validation in controller: 'pending', 'cancelled', 'completed'
           await userService.bookingStatusUpdate({
             bookingId: newBookingId,
             status: "confirm",
+            payment_intent_id: paymentIntent.id,
           });
         }
-
-        localStorage.removeItem("pending_booking");
         router.push({ name: "my-bookings" });
-      } else {
-        alert("Booking failed: " + res.data.message);
       }
     }
   } catch (err) {
     console.error("Payment Error:", err);
-    alert(err.message || "An unexpected error occurred.");
   } finally {
     isSubmitting.value = false;
   }

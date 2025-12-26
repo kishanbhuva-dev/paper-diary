@@ -115,7 +115,10 @@
             4.6 <Icon icon="mdi:star" />
           </div>
         </div>
-        <div class="flex h-[400px] w-full gap-2" @mouseleave="resetExpanded">
+        <div
+          class="flex h-[250px] md:h-[400px] w-full gap-2"
+          @mouseleave="resetExpanded"
+        >
           <div
             v-for="(image, index) in propertyImages"
             :key="image.id"
@@ -186,6 +189,7 @@
           </section>
         </div>
 
+        <!-- Ratings and Reviews -->
         <aside class="h-fit rounded-lg border border-gray-400 p-6">
           <h5>Ratings and reviews</h5>
           <div class="mt-4 flex items-center gap-4">
@@ -193,25 +197,93 @@
               <div class="flex-center gap-1 text-3xl font-bold">
                 4.6 <Icon icon="mdi:star" class="text-xl" />
               </div>
-              <div class="font-semibold uppercase">Excellent</div>
+              <div class="font-semibold">EXCELLENT</div>
               <div class="text-xs text-gray-500">2640 ratings</div>
             </div>
             <div class="w-full text-sm text-gray-600">
-              <div
-                v-for="i in [5, 4, 3, 2, 1]"
-                :key="i"
-                class="flex items-center gap-2"
-              >
-                <span>{{ i }}</span>
+              <div class="flex items-center gap-2">
+                <span>5</span>
                 <div class="h-1.5 w-full rounded-full bg-gray-200">
                   <div
                     class="h-1.5 rounded-full bg-yellow-400"
-                    :style="{ width: i === 5 ? '70%' : '10%' }"
+                    style="width: 70%"
                   ></div>
                 </div>
-                <span>{{ i === 5 ? "70%" : "10%" }}</span>
+                <span>70%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>4</span>
+                <div class="h-1.5 w-full rounded-full bg-gray-200">
+                  <div
+                    class="h-1.5 rounded-full bg-yellow-400"
+                    style="width: 15%"
+                  ></div>
+                </div>
+                <span>15%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>3</span>
+                <div class="h-1.5 w-full rounded-full bg-gray-200">
+                  <div
+                    class="h-1.5 rounded-full bg-yellow-400"
+                    style="width: 8%"
+                  ></div>
+                </div>
+                <span>8%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>2</span>
+                <div class="h-1.5 w-full rounded-full bg-gray-200">
+                  <div
+                    class="h-1.5 rounded-full bg-yellow-400"
+                    style="width: 4%"
+                  ></div>
+                </div>
+                <span>4%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span>1</span>
+                <div class="h-1.5 w-full rounded-full bg-gray-200">
+                  <div
+                    class="h-1.5 rounded-full bg-yellow-400"
+                    style="width: 3%"
+                  ></div>
+                </div>
+                <span>3%</span>
               </div>
             </div>
+          </div>
+          <div class="mt-6 border-t border-gray-400 pt-6">
+            <div class="flex-between">
+              <div class="flex gap-3">
+                <img src="/public/user-1.jpg" class="h-10 w-10 rounded-full" />
+                <div>
+                  <p class="font-semibold">Brontosaurus</p>
+                  <div class="flex items-center text-sm">
+                    <Icon icon="mdi:star" class="text-yellow-500" />
+                    <Icon icon="mdi:star" class="text-yellow-500" />
+                    <Icon icon="mdi:star" class="text-yellow-500" />
+                    <Icon icon="mdi:star" class="text-yellow-500" />
+                    <Icon icon="mdi:star" class="text-yellow-500" />
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button class="btn-primary p-2">
+                  <Icon icon="mdi:chevron-left" />
+                </button>
+                <button class="btn-primary p-2">
+                  <Icon icon="mdi:chevron-right" />
+                </button>
+              </div>
+            </div>
+            <p class="mt-4 text-gray-600">
+              Every thing is best, no contents to need views Surest I recommend
+              the oberoi properties for holidays
+            </p>
+            <button class="mt-2 font-semibold text-primary">
+              Read More...
+            </button>
           </div>
         </aside>
       </div>
@@ -416,21 +488,19 @@ const handleShowResources = async () => {
 };
 
 // Booking Redirection
-const goToBooking = (roomType) => {
-  const bookingData = {
-    property: {
-      id: propertyData.value.id,
-      name: propertyData.value.propertyName,
-      address: propertyData.value.address,
-      image: propertyImages.value[0]?.image || "",
-    },
-    room: roomType,
-    dates: { checkIn: details.value.checkIn, checkOut: details.value.checkOut },
+const goToBooking = (resourceType) => {
+  const qtoken = {
+    slug: route.params.slug,
+    r_id: resourceType.id,
+    in: details.value.checkIn,
+    out: details.value.checkOut,
   };
-  localStorage.setItem("pending_booking", JSON.stringify(bookingData));
-  router.push({ name: "booking-summary" });
+  const etoken = btoa(JSON.stringify(qtoken));
+  router.push({
+    name: "booking-summary",
+    query: { token: etoken },
+  });
 };
-
 // Gallery & Carousel Logic
 const propertyImages = computed(() => propertyData.value?.property_image || []);
 const expandedImageId = ref(null);

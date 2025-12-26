@@ -68,21 +68,21 @@ class BookingsController extends Controller
         }
     }
     public function booking(Request $request){
-        $bookingOrder = BookingOrder::selectRaw("id,userId,propertyId,status,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime")->where('userId', Auth::user()->id);
+        $bookingOrder = BookingOrder::selectRaw("id,userId,propertyId,resourceTypeId,status,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime")->where('userId', Auth::user()->id);
         if ($request->type=='past') {   
             $bookingOrder->where('arrivalDateTime','<',date('Y-m-d H:i:s'));
         }else{
             $bookingOrder->where('arrivalDateTime','>',date('Y-m-d H:i:s'));
         }
         if ($request->search) {
-            $bookingOrder->whereHas('property', function ($query) use ($request) {
-                $query->where('propertyName', 'like', '%' . $request->search . '%');
-            })
+            $bookingOrder->where(function ($query) use ($request) { $query->whereHas('property', function ($q) use ($request) { $q->where('propertyName', 'like', '%' . $request->search . '%'); }) ->orWhereHas('resourceType', function ($q) use ($request) { $q->where('name', 'like', '%' . $request->search . '%'); }) ->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%') ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%'); }) ->with([ 'property:id,propertyName', 'resourceType:id,name' ])
             ->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
             ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%');            
         }else{
             $bookingOrder->with(['property' => function($query){
                 $query->select('id','propertyName');
+            },'resourceType' => function($query){
+                $query->select('id','name');
             }]);
         }
         if ($request->status) {
@@ -122,6 +122,7 @@ class BookingsController extends Controller
             $validator = Validator::make($request->all(), [
             'bookingId' => 'required|exists:booking_orders,id',
             'status' => 'required|in:pending,cancelled,confirm',
+            'payment_intent_id' => 'required|string',
             ]);
 
             if ($validator->fails()) {
@@ -152,13 +153,16 @@ class BookingsController extends Controller
             $bookingOrder->save();
             $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
             $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
+            $paymentDetail->status;
             if ($paymentDetail->status == 'succeeded') {
+                // return 123;
                 $payment = new Payment();
                 $payment->transaction_id = $paymentDetail->id;
                 $payment->userId = Auth::user()->id;
                 $payment->bookingOrderId = $request->bookingId;
                 $payment->save();
             }
+            // return 456;
             return response()->json(['status' => true, 'message' => 'Booking status updated successfully', 'data' => []]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
@@ -189,7 +193,7 @@ class BookingsController extends Controller
 
             $availableResources=count($availableResourcesData);
 
-            if ($availableResources != $request->resources) {
+            if ($availableResources < $request->resources) {
                 return response()->json(['status' => false, 'message' => 'resources not available', 'data' => []]);
             }
             $resourcePriceTotal=Resource::whereIn('id',$availableResourcesData)->sum('customPrice');
@@ -324,9 +328,9 @@ class BookingsController extends Controller
             }
             $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
             foreach ($booking as $key => $value) {
-                if ($value->status =='confirmed') {
-                    return response()->json(['status' => false, 'message' => 'you can not cancel confirmed booking', 'data' => []]);
-                }
+                // if ($value->status =='confirmed') {
+                //     return response()->json(['status' => false, 'message' => 'you can not cancel confirmed booking', 'data' => []]);
+                // }
                 $value->status = 'cancelled';
                 $value->save();
             }

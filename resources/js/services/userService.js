@@ -23,7 +23,7 @@ export const userService = {
   },
 
   getBookings(params) {
-    return api.get("/user/booking", { params });
+    return api.get("/user/bookings", { params });
   },
 
   createPaymentIntent(data) {
@@ -35,6 +35,9 @@ export const userService = {
   },
   bookingStatusUpdate(data) {
     return api.post("/user/booking-status-update", data);
+  },
+  cancelBooking(data) {
+    return api.post("/user/booking-cancel", data);
   },
 };
 
