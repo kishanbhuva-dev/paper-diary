@@ -71,7 +71,7 @@ function getResourcesAvailable($resourceTypesId, $arrivalDateTime, $departureDat
     $bookedResourceIds = $bookedResourceIdsQuery->pluck('resourceId')->unique(); 
 
     $availableResourceIds = Resource::where('resourceTypeId', $resourceTypesId)
-        ->whereNotIn('id', $bookedResourceIds)
+        ->whereNotIn('id', $bookedResourceIds)->where('status', 1)
         ->pluck('id');        
     return $availableResourceIds; 
 }

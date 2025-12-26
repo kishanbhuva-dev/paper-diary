@@ -125,6 +125,7 @@
                     <div class="flex justify-between items-start">
                       <p class="text-sm font-bold text-gray-800 truncate">
                         {{ booking.property_name }}
+                        <span class=" text-xs text-gray-600">- {{ booking.rtype }}</span>
                       </p>
                       <span
                         :class="bookingStatusClasses(booking.status)"
@@ -361,10 +362,12 @@ const fetchRecentBookings = async () => {
     });
 
     const bookingsRaw = response?.data || [];
+    console.log(bookingsRaw);
 
     recentBookings.value = bookingsRaw.map((b) => ({
       id: b.id,
-      property_name: b.propertyName || "N/A",
+      property_name: b.property.propertyName || "N/A",
+      rtype: b.resource_type_name || "TYPE",
       start_date: b.arrivalDateTime || b.start_date,
       end_date: b.departureDateTime || b.end_date,
       status: b.status || "Pending",
