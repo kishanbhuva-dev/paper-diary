@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Property;
+use App\Models\ResourceType;
 
 class ResourceController extends Controller
 {
@@ -235,6 +237,27 @@ class ResourceController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'Resource not found', 'data' => []];
             }
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+            return response()->json($response);
+        }
+    }
+    public function resourceWiseList(Request $request)
+    {
+        try {
+
+            $ownerId = auth()->user()->id;
+            $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
+            $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
+            $resources = Resource::whereIn('resourceTypeId', $resourceTypes->pluck('id'))
+                ->withAggregate('resourceType', 'name')
+                ->with(['bookings' => function ($query) {
+                    $query->selectRaw('id,resourceId,date_format(arrivalDateTime, "%Y-%m-%d") as arrivalDateTime, date_format(departureDateTime, "%Y-%m-%d") as departureDateTime')->where('status', '!=', 'cancelled');
+                }])
+                ->get();
+            
+            $response  = ['status' => true, 'message' => 'Resources fetched successfully', 'data' => $resources];
             return response()->json($response);
         } catch (\Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];

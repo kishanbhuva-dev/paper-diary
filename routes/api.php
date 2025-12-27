@@ -46,6 +46,7 @@ Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], f
     Route::post('add-facility-property', [App\Http\Controllers\Owner\FacilityController::class, 'addFacilityProperty']);
     Route::get('facility', [App\Http\Controllers\Owner\FacilityController::class, 'getFacility']);
     Route::apiResource('bookings', App\Http\Controllers\Owner\BookingsController::class);
+    Route::get('resource-wise-list', [App\Http\Controllers\Owner\ResourceController::class, 'resourceWiseList']);
 
 });
 Route::group(['prefix' => 'user', 'middleware' => ['auth:sanctum', 'user']], function () {

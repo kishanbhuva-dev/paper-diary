@@ -5,6 +5,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resource extends Model
 {
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
     public function resourceType()
     {
         return $this->belongsTo(ResourceType::class, 'resourceTypeId', 'id');
