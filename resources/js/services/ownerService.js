@@ -1,5 +1,3 @@
-// 3. ownerService.js
-
 /*
 Owner service: property and owner-related API calls.
 Centralizes all property/facility-related endpoints so the UI layer calls plain
@@ -15,14 +13,10 @@ Methods included:
  - addPropertyImages(propertyId, files)
  - setPropertyFacilities(propertyId, facilityIds)
  - fetchFacilities(params)
- 
- - NEW: fetchBookings(params)
- - NEW: fetchBookingById(id)
- - NEW: updateBooking(id, payload)
- - NEW: deleteBooking(id)
-
-This mirrors the Laravel routes under /api/owner/* observed in the project.
-Note: apiClient already has baseURL='/api', so we use relative paths.
+ - fetchBookings(params)
+ - fetchBookingById(id)
+ - updateBooking(id, payload)
+ - deleteBooking(id)
 */
 
 import apiClient from "./apiClient";
@@ -33,8 +27,6 @@ const ownerService = {
   // Fetch all properties for the owner
   async fetchProperties(params = {}) {
     const res = await apiClient.get("/owner/property", { params });
-    // Backend returns { status, message, data: { current_page, data: [...], total, ... } }
-    // Extract the paginated data object
     return res.data.data;
   },
 
@@ -49,8 +41,6 @@ const ownerService = {
   // Create a new property
   async createProperty(payload) {
     const res = await apiClient.post("/owner/property", payload);
-    // Backend returns { status, message, data: '' }, so response.data.data is empty string
-    // We return the full response to allow caller to handle it
     return res.data;
   },
 
@@ -71,10 +61,6 @@ const ownerService = {
     const res = await apiClient.post("/owner/property-image-delete", { ids });
     return res.data.data;
   },
-
-  // Note: high-level orchestration (cascading deletes, transformations, id
-  // decoding, etc.) should live in the UI layer or a dedicated helper. The
-  // service should only make API calls and return response data.
 
   // Fetch images for a property
   async fetchPropertyImages(propertyId) {

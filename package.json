@@ -22,6 +22,7 @@
         "dayjs": "^1.11.19",
         "sweetalert2": "^11.26.3",
         "vue": "^3.5.22",
+        "vue-hotel-booking-calendar": "^1.0.14",
         "vue-router": "^4.6.3",
         "vue-sonner": "^2.0.9"
     }
