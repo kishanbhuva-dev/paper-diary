@@ -17,7 +17,7 @@ class BookingsController extends Controller
     {
         try {
             $propertyIds = Auth::user()->properties->pluck('id');
-            $bookings = BookingOrder::selectRaw("id,userId,propertyId,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime,status,guestFullName as guestName,paymentStatus,price,guestEmail,guestAddress,date_format(created_at,'%d %b %Y ') as bookedOn")->withAggregate('resourceType','name')->whereIn('propertyId', $propertyIds)->with(['property'=>function($query){
+            $bookings = BookingOrder::selectRaw("id,resourceTypeId,userId,propertyId,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime,status,guestFullName as guestName,paymentStatus,price,guestEmail,guestAddress,date_format(created_at,'%d %b %Y ') as bookedOn")->withAggregate('resourceType','name')->whereIn('propertyId', $propertyIds)->with(['property'=>function($query){
                 $query->select('id','propertyName');
             }]);  
             if ($request->search) {
@@ -48,12 +48,18 @@ class BookingsController extends Controller
             }
             $bookings->with(['user'=>function($query){
                 $query->select('id','firstName','lastName','email');
+            },'resourceType.resources'=>function($query){
+                $query->select('id','resourceTypeId','name');
             }]);
             $perPage = $request->perPage ?? 10;
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'desc';
             $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
-            
+            $bookings->getCollection()->transform(function ($booking) {
+                $booking->resource_names = $booking->resourceType->resources->pluck('name');
+                unset($booking->resourceType);
+                return $booking;
+            });
             return response()->json(['status' => true, 'message' => '', 'data' => $bookings]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);

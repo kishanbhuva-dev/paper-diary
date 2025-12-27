@@ -1,5 +1,6 @@
 <template>
   <div class="p-2 sm:p-3 lg:p-4 bg-gray-50 min-h-max">
+    <!-- details cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div
         class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -93,7 +94,24 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Hotel Dashboard Calendar -->
+    <HotelDashboardCalendar
+      :rooms="rooms"
+      :bookings="bookings"
+      :status-config="customStatuses"
+      :allow-previous-month-navigation="true"
+      :text-labels="{
+        room: 'Resources',
+        available: 'Free',
+        previousMonth: '← Previous',
+        nextMonth: 'Next →',
+      }"
+      theme="light"
+      @booking-click="handleBookingClick"
+    />
+
+    <!-- recent booking -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div class="flex items-center justify-between mb-6">
@@ -108,7 +126,7 @@
             </RouterLink>
           </div>
 
-          <div class="max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+          <div class="h-auto overflow-y-auto pr-2 custom-scrollbar">
             <ul class="divide-y divide-gray-50">
               <li
                 v-for="booking in recentBookings"
@@ -125,7 +143,9 @@
                     <div class="flex justify-between items-start">
                       <p class="text-sm font-bold text-gray-800 truncate">
                         {{ booking.property_name }}
-                        <span class=" text-xs text-gray-600">- {{ booking.rtype }}</span>
+                        <span class="text-xs text-gray-600"
+                          >- {{ booking.rtype }}</span
+                        >
                       </p>
                       <span
                         :class="bookingStatusClasses(booking.status)"
@@ -293,6 +313,44 @@ import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import { RouterLink } from "vue-router";
 import ownerService from "@/services/ownerService";
+// calender component
+import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
+import "vue-hotel-booking-calendar/dist/style.css";
+
+const rooms = ref([]);
+const bookings = ref([]);
+
+const customStatuses = [
+  {
+    key: "available",
+    label: "Available",
+    color: "#1e293b", // Dark Slate
+    backgroundColor: "#1f5f9", // Very Light Gray
+  },
+  {
+    key: "confirm",
+    label: "Confirm",
+    color: "#155e75", // Dark Cyan
+    backgroundColor: "#a7f3d0", // Light Mint
+  },
+  {
+    key: "pending",
+    label: "Pending",
+    color: "#9a3412", // Dark Orange
+    backgroundColor: "#ffedd5", // Light Peach
+  },
+  {
+    key: "cancelled",
+    label: "Cancelled",
+    color: "#991b1b", // Dark Red
+    backgroundColor: "#fee2e2", // Light Rose
+  },
+];
+
+const handleBookingClick = (booking) => {
+  // Show booking details modal
+  // console.log("Booking clicked:", booking);
+};
 
 // --- STATE MANAGEMENT ---
 const isLoadingBookings = ref(false);
@@ -338,6 +396,13 @@ const propertyStats = ref([
   { property: "Luxury Downtown Apt", performance: 85 },
   { property: "Cozy Studio Tech Park", performance: 71 },
 ]);
+const getResources = async () => {
+  const ResourcesData = await ownerService.fetchResources(34);
+  rooms.value = ResourcesData.map((resource) => ({
+    id: resource.id.toString(),
+    number: resource.name,
+  }));
+};
 
 // --- API FETCHING LOGIC ---
 const fetchKpiStats = async () => {
@@ -362,7 +427,16 @@ const fetchRecentBookings = async () => {
     });
 
     const bookingsRaw = response?.data || [];
-    console.log(bookingsRaw);
+    // calander
+    bookings.value = bookingsRaw.map((book) => ({
+      id: book.id.toString(),
+      guestName: book.guestName,
+      roomNumber: book.resource_names,
+      checkIn: book.arrivalDateTime,
+      checkOut: book.departureDateTime,
+      status: book.status,
+    }));
+    // console.log(bookings.value);
 
     recentBookings.value = bookingsRaw.map((b) => ({
       id: b.id,
@@ -400,6 +474,7 @@ const bookingStatusClasses = (status) => {
 onMounted(() => {
   fetchKpiStats();
   fetchRecentBookings();
+  getResources();
 });
 </script>
 
