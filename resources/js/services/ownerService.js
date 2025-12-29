@@ -196,9 +196,7 @@ const ownerService = {
 
   // Fetch all bookings for the owner's properties
   async fetchBookings(params = {}) {
-    // Corresponds to the route: GET /owner/bookings
     const res = await apiClient.get("/owner/bookings", { params });
-    // Backend returns { status, message, data: { current_page, data: [...], total, ... } }
     return res.data.data;
   },
 
