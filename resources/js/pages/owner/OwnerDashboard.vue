@@ -94,6 +94,10 @@
       </div>
     </div>
 
+    <!-- <div
+      class="w-full max-w-full overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white"
+    > -->
+    <!-- <div class="overflow-x-auto"> -->
     <!-- Hotel Dashboard Calendar -->
     <HotelDashboardCalendar
       :rooms="rooms"
@@ -109,6 +113,8 @@
       theme="light"
       @booking-click="handleBookingClick"
     />
+    <!-- </div>
+    </div> -->
 
     <!-- recent booking -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
@@ -325,7 +331,7 @@ const customStatuses = [
     key: "available",
     label: "Available",
     color: "#1e293b", // Dark Slate
-    backgroundColor: "#1f5f9", // Very Light Gray
+    backgroundColor: "#f1f5f9", // Very Light Gray
   },
   {
     key: "confirm",
@@ -397,7 +403,9 @@ const propertyStats = ref([
   { property: "Cozy Studio Tech Park", performance: 71 },
 ]);
 const getResources = async () => {
-  const ResourcesData = await ownerService.fetchResources(34);
+  const ResourcesData = await ownerService.resourceList();
+  // console.log("ResourcesData --- : ", ResourcesData);
+
   rooms.value = ResourcesData.map((resource) => ({
     id: resource.id.toString(),
     number: resource.name,
@@ -427,11 +435,11 @@ const fetchRecentBookings = async () => {
     });
 
     const bookingsRaw = response?.data || [];
-    // calander
+    console.log(bookingsRaw);
     bookings.value = bookingsRaw.map((book) => ({
       id: book.id.toString(),
       guestName: book.guestName,
-      roomNumber: book.resource_names,
+      roomNumber: book.resource_names[0],
       checkIn: book.arrivalDateTime,
       checkOut: book.departureDateTime,
       status: book.status,
