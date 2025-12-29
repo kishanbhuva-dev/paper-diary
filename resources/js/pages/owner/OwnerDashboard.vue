@@ -340,12 +340,6 @@ const customStatuses = [
     backgroundColor: "#a7f3d0", // Light Mint
   },
   {
-    key: "pending",
-    label: "Pending",
-    color: "#9a3412", // Dark Orange
-    backgroundColor: "#ffedd5", // Light Peach
-  },
-  {
     key: "cancelled",
     label: "Cancelled",
     color: "#991b1b", // Dark Red
@@ -402,9 +396,10 @@ const propertyStats = ref([
   { property: "Luxury Downtown Apt", performance: 85 },
   { property: "Cozy Studio Tech Park", performance: 71 },
 ]);
+// --- RESOURCE FETCHING LOGIC ---
 const getResources = async () => {
   const ResourcesData = await ownerService.resourceList();
-  // console.log("ResourcesData --- : ", ResourcesData);
+  console.log("getting ResourcesData --- : ", ResourcesData);
 
   rooms.value = ResourcesData.map((resource) => ({
     id: resource.id.toString(),
@@ -435,7 +430,7 @@ const fetchRecentBookings = async () => {
     });
 
     const bookingsRaw = response?.data || [];
-    console.log(bookingsRaw);
+    // console.log(bookingsRaw);
     bookings.value = bookingsRaw.map((book) => ({
       id: book.id.toString(),
       guestName: book.guestName,
@@ -485,20 +480,3 @@ onMounted(() => {
   getResources();
 });
 </script>
-
-<style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
-}
-</style>
