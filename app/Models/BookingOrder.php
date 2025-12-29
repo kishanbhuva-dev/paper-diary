@@ -18,5 +18,8 @@ class BookingOrder extends Model
     {
         return $this->belongsTo(User::class, 'userId');
     }
-    
+    function resource()
+    {
+        return $this->belongsTo(Resource::class, 'resourceId');
+    }
 }

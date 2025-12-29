@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\BookingOrder;
 use App\Models\Property;
 use App\Models\ResourceType;
 
@@ -247,17 +248,59 @@ class ResourceController extends Controller
     {
         try {
 
-            $ownerId = auth()->user()->id;
+            // $ownerId = auth()->user()->id;
+            // $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
+            // $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
+            // $resources = Resource::select('id', 'name', 'resourceTypeId')
+            //     ->whereIn('resourceTypeId', $resourceTypes->pluck('id'))
+            //     ->withAggregate('resourceType', 'name')->with('resourceType.property')
+            //     ->get();
+            // $resources->map(function ($item) {
+            //     $item->property_name = $item->resourceType->property->propertyName;
+            //     unset($item->resourceType);
+            //     unset($item->resourceTypeId);
+            //     return $item;
+            // });
+            // $data['resource'] = $resources;
+            // $bookings = BookingOrder::select('id', 'resourceTypeId','arrivalDateTime','departureDateTime')
+            //     ->whereHas('resourceType.resources', function ($query) use ($resources) {
+            //         $query->whereIn('id', $resources->pluck('resourceTypeId'));
+            //     })->with('bookingOrder')
+            //     ->get();
+            // $data['booking'] = $bookings;
+            $ownerId = auth()->id();
             $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
             $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
-            $resources = Resource::whereIn('resourceTypeId', $resourceTypes->pluck('id'))
-                ->withAggregate('resourceType', 'name')
-                ->with(['bookings' => function ($query) {
-                    $query->selectRaw('id,resourceId,date_format(arrivalDateTime, "%Y-%m-%d") as arrivalDateTime, date_format(departureDateTime, "%Y-%m-%d") as departureDateTime')->where('status', '!=', 'cancelled');
-                }])
-                ->get();
-            
-            $response  = ['status' => true, 'message' => 'Resources fetched successfully', 'data' => $resources];
+            $resourceTypeIds = $resourceTypes->pluck('id');
+            $resources = Resource::select('id', 'name', 'resourceTypeId')
+            ->whereIn('resourceTypeId', $resourceTypeIds)
+            ->with('resourceType.property')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
+                    'resource_type_name' => $item->resourceType->name ?? 'N/A',
+                ];
+            });
+            $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId, date_format(arrivalDateTime, "%d-%m-%Y ") as arrivalDateTime, date_format(departureDateTime, "%d-%m-%Y") as departureDateTime')
+                ->whereIn('resourceTypeId', $resourceTypeIds) 
+                ->whereHas('resourceType.resources', function ($query) use ($resources) {
+                    $query->whereIn('id', $resources->pluck('id'));
+                })
+                ->with('resourceType.resources')
+                ->get()->map(function ($item) {
+                $item->resource_name = $item->resourceType->name ?? 'Unknown Type';
+                unset($item->resourceType);
+                return $item;
+                });
+                
+            $data = [
+                'resource' => $resources->toArray(),
+                'booking' => $bookings->toArray(),
+            ];
+            $response  = ['status' => true, 'message' => 'Resources fetched successfully', 'data' => $data];
             return response()->json($response);
         } catch (\Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
