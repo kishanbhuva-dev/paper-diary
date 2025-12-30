@@ -253,8 +253,8 @@ const customStatuses = [
   {
     key: "available",
     label: "Available",
-    color: "", // Dark Slate
-    backgroundColor: "", // Very Light Gray
+    color: "#ffffff", // Dark Slate
+    backgroundColor: "#e5e7eb", // Very Light Gray
   },
   {
     key: "confirm",
@@ -321,7 +321,7 @@ const getResources = async () => {
 
   rooms.value = ResourcesData.resource.map((res) => ({
     id: res.id.toString(),
-    number: res.name.toUpperCase(),
+    number: res.name,
   }));
 
   const formatDate = (dateStr) => {
@@ -329,43 +329,14 @@ const getResources = async () => {
     const [d, m, y] = dateStr.trim().split("-");
     return `${y}-${m}-${d}`;
   };
-  // console.log(rooms.value);
-  // bookings.value = ResourcesData.booking.map((book) => ({
-  //   id: book.id.toString(),
-  //   guestName: book.guestFullName,
-  //   roomNumber: book.booking[0].resourceId,
-  //   roomName: book.booking[0].resource.name,
-  //   checkIn: formatDate(book.arrivalDateTime),
-  //   checkOut: formatDate(book.departureDateTime),
-  //   phone: book.guestPhone,
-  //   status: book.status,
-  // }));
-  bookings.value = [
-    {
-      id: "static-1",
-      guestName: "STATIC TEST USER",
-      // We use both styles to see which one your version of the lib likes
-      roomNumber: "6",
-      room_id: "6",
-      // TODAY'S DATE: Dec 30, 2025
-      checkIn: "2025-12-28",
-      checkOut: "2025-12-31",
-      arrival_date: "2025-12-28",
-      departure_date: "2025-12-31",
-      status: "confirm",
-    },
-    {
-      id: "static-2",
-      guestName: "CHILL ROOM BOOKING",
-      roomNumber: "46",
-      room_id: "46",
-      checkIn: "2025-12-29",
-      checkOut: "2025-12-31",
-      arrival_date: "2025-12-29",
-      departure_date: "2025-12-31",
-      status: "confirm",
-    },
-  ];
+  bookings.value = ResourcesData.booking.map((book) => ({
+    id: book.id.toString(),
+    guestName: book.guestFullName,
+    roomNumber: book.booking[0].resource.name,
+    checkIn: formatDate(book.arrivalDateTime),
+    checkOut: formatDate(book.departureDateTime),
+    status: book.status,
+  }));
   console.log("booking data --   ", bookings.value);
 };
 
