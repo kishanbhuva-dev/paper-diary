@@ -253,8 +253,8 @@ const customStatuses = [
   {
     key: "available",
     label: "Available",
-    color: "#ffffff", // Dark Slate
-    backgroundColor: "#e5e7eb", // Very Light Gray
+    color: "", // Dark Slate
+    backgroundColor: "", // Very Light Gray
   },
   {
     key: "confirm",
@@ -332,12 +332,11 @@ const getResources = async () => {
   bookings.value = ResourcesData.booking.map((book) => ({
     id: book.id.toString(),
     guestName: book.guestFullName,
-    roomNumber: book.booking[0].resource.name,
+    roomNumber: book.resource_name,
     checkIn: formatDate(book.arrivalDateTime),
     checkOut: formatDate(book.departureDateTime),
     status: book.status,
   }));
-  console.log("booking data --   ", bookings.value);
 };
 
 // --- API FETCHING LOGIC ---
