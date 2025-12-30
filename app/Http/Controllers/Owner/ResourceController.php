@@ -9,6 +9,7 @@ use App\Models\BookingOrder;
 use App\Models\Property;
 use App\Models\ResourceType;
 use App\Models\Bookings;
+use Carbon\Carbon;
 
 class ResourceController extends Controller
 {
@@ -286,13 +287,27 @@ class ResourceController extends Controller
                 ];
             });
             $resourcesid = $resources->pluck('id');
-            $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId, date_format(arrivalDateTime, "%d-%m-%Y ") as arrivalDateTime, date_format(departureDateTime, "%d-%m-%Y") as departureDateTime,status')->with(['booking'=>function($query) use($resourcesid){
-                $query->select('id','resourceId','bookingOrderId')->whereIn('resourceId', $resourcesid);
-            },'booking.resource'=>function ($query){
-                $query->select('id','name');
-            }])->get();
+            // $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId, date_format(arrivalDateTime, "%d-%m-%Y ") as arrivalDateTime, date_format(departureDateTime, "%d-%m-%Y") as departureDateTime,status')->with(['booking'=>function($query) use($resourcesid){
+            //     $query->select('id','resourceId','bookingOrderId')->whereIn('resourceId', $resourcesid);
+            // },'booking.resource'=>function ($query){
+            //     $query->select('id','name');
+            // }])->get();
                 
-                
+            $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")->with([
+            'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
+            $bookings = $bookings->map(function ($order) {
+                return [
+                    'id'               => $order->id,
+                    'guestFullName'    => $order->guestFullName,
+                    'guestEmail'       => $order->guestEmail,
+                    'guestPhone'       => $order->guestPhone,
+                    'resourceTypeId'   => $order->resourceTypeId,
+                    'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
+                    'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
+                    'status'           => $order->status,
+                    'resource_name'    => optional($order->booking->first()->resource)->name,
+                ];
+            });
             $data = [
                 'resource' => $resources->toArray(),
                 'booking' => $bookings->toArray(),
