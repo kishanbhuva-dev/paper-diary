@@ -22,4 +22,8 @@ class BookingOrder extends Model
     {
         return $this->belongsTo(Resource::class, 'resourceId');
     }
+    function booking()
+    {
+        return $this->HasMany(Bookings::class, 'bookingOrderId', 'id');
+    }
 }

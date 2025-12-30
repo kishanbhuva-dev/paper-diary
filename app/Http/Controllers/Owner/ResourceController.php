@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\BookingOrder;
 use App\Models\Property;
 use App\Models\ResourceType;
+use App\Models\Bookings;
 
 class ResourceController extends Controller
 {
@@ -284,17 +285,13 @@ class ResourceController extends Controller
                     'resource_type_name' => $item->resourceType->name ?? 'N/A',
                 ];
             });
-            $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId, date_format(arrivalDateTime, "%d-%m-%Y ") as arrivalDateTime, date_format(departureDateTime, "%d-%m-%Y") as departureDateTime')
-                ->whereIn('resourceTypeId', $resourceTypeIds) 
-                ->whereHas('resourceType.resources', function ($query) use ($resources) {
-                    $query->whereIn('id', $resources->pluck('id'));
-                })
-                ->with('resourceType.resources')
-                ->get()->map(function ($item) {
-                $item->resource_name = $item->resourceType->name ?? 'Unknown Type';
-                unset($item->resourceType);
-                return $item;
-                });
+            $resourcesid = $resources->pluck('id');
+            $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId, date_format(arrivalDateTime, "%d-%m-%Y ") as arrivalDateTime, date_format(departureDateTime, "%d-%m-%Y") as departureDateTime,status')->with(['booking'=>function($query) use($resourcesid){
+                $query->select('id','resourceId','bookingOrderId')->whereIn('resourceId', $resourcesid);
+            },'booking.resource'=>function ($query){
+                $query->select('id','name');
+            }])->get();
+                
                 
             $data = [
                 'resource' => $resources->toArray(),
