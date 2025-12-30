@@ -317,6 +317,7 @@ const guestDetails = ref({
 const stripe = ref(null);
 const elements = ref(null);
 const card = ref(null);
+const isCardComplete = ref(false);
 
 onMounted(async () => {
   const publishableKey =
@@ -335,6 +336,15 @@ onMounted(async () => {
     },
   });
   card.value.mount("#card-element");
+  card.value.on("change", (event) => {
+    isCardComplete.value = event.complete; // true if all fields are filled
+    const cardErrors = document.getElementById("card-errors");
+    if (event.error) {
+      cardErrors.textContent = event.error.message;
+    } else {
+      cardErrors.textContent = "";
+    }
+  });
 
   const encodedToken = router.currentRoute.value.query.token;
   const qdata = JSON.parse(atob(encodedToken));
@@ -402,8 +412,12 @@ const cancelAndExit = () => {
     router.push("/");
   }
 };
-
 const handleBooking = async () => {
+  if (!isCardComplete.value) {
+    const cardErrors = document.getElementById("card-errors");
+    cardErrors.textContent = "Please enter your card details to proceed.";
+    return;
+  }
   isSubmitting.value = true;
   const cardErrors = document.getElementById("card-errors");
   cardErrors.textContent = "";
