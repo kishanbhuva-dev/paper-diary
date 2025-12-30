@@ -119,7 +119,7 @@
     <!-- recent booking -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
       <div class="lg:col-span-2 space-y-6">
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <!-- <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
               Recent Bookings
@@ -193,7 +193,7 @@
               </li>
             </ul>
           </div>
-        </div>
+        </div> -->
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <h3
@@ -317,7 +317,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
-import { RouterLink } from "vue-router";
 import ownerService from "@/services/ownerService";
 // calender component
 import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
@@ -352,15 +351,10 @@ const handleBookingClick = (booking) => {
   // console.log("Booking clicked:", booking);
 };
 
-// --- STATE MANAGEMENT ---
-const isLoadingBookings = ref(false);
-
 const dashboardStats = ref({
   totalProperties: 0,
   totalBookings: 0,
 });
-
-const recentBookings = ref([]);
 
 const staticReviews = ref([
   {
@@ -405,6 +399,15 @@ const getResources = async () => {
     id: resource.id.toString(),
     number: resource.name,
   }));
+  bookings.value = bookingsRaw.map((book) => ({
+    id: book.id.toString(),
+    guestName: book.guestName,
+    roomNumber: book.resource_names[0],
+    checkIn: book.arrivalDateTime,
+    checkOut: book.departureDateTime,
+    status: book.status,
+  }));
+  // console.log(bookings.value);
 };
 
 // --- API FETCHING LOGIC ---
@@ -420,63 +423,54 @@ const fetchKpiStats = async () => {
   }
 };
 
-const fetchRecentBookings = async () => {
-  isLoadingBookings.value = true;
-  try {
-    const response = await ownerService.fetchBookings({
-      limit: 10,
-      orderBy: "created_at",
-      direction: "desc",
-    });
+// const fetchRecentBookings = async () => {
+//   isLoadingBookings.value = true;
+//   try {
+//     const response = await ownerService.fetchBookings({
+//       limit: 10,
+//       orderBy: "created_at",
+//       direction: "desc",
+//     });
 
-    const bookingsRaw = response?.data || [];
-    // console.log(bookingsRaw);
-    bookings.value = bookingsRaw.map((book) => ({
-      id: book.id.toString(),
-      guestName: book.guestName,
-      roomNumber: book.resource_names[0],
-      checkIn: book.arrivalDateTime,
-      checkOut: book.departureDateTime,
-      status: book.status,
-    }));
-    // console.log(bookings.value);
+//     const bookingsRaw = response?.data || [];
+//     // console.log(bookingsRaw);
 
-    recentBookings.value = bookingsRaw.map((b) => ({
-      id: b.id,
-      property_name: b.property.propertyName || "N/A",
-      rtype: b.resource_type_name || "TYPE",
-      start_date: b.arrivalDateTime || b.start_date,
-      end_date: b.departureDateTime || b.end_date,
-      status: b.status || "Pending",
-    }));
-  } catch (error) {
-    console.error("Error fetching recent bookings:", error);
-    recentBookings.value = [];
-  } finally {
-    isLoadingBookings.value = false;
-  }
-};
+//     recentBookings.value = bookingsRaw.map((b) => ({
+//       id: b.id,
+//       property_name: b.property.propertyName || "N/A",
+//       rtype: b.resource_type_name || "TYPE",
+//       start_date: b.arrivalDateTime || b.start_date,
+//       end_date: b.departureDateTime || b.end_date,
+//       status: b.status || "Pending",
+//     }));
+//   } catch (error) {
+//     console.error("Error fetching recent bookings:", error);
+//     recentBookings.value = [];
+//   } finally {
+//     isLoadingBookings.value = false;
+//   }
+// };
 
 // --- UTILITIES ---
-const bookingStatusClasses = (status) => {
-  switch (status?.toLowerCase()) {
-    case "confirmed":
-    case "completed":
-      return "bg-green-100 text-green-700";
-    case "pending":
-    case "on-hold":
-      return "bg-amber-100 text-amber-700";
-    case "canceled":
-    case "rejected":
-      return "bg-red-50 text-red-600";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
-};
+// const bookingStatusClasses = (status) => {
+//   switch (status?.toLowerCase()) {
+//     case "confirmed":
+//     case "completed":
+//       return "bg-green-100 text-green-700";
+//     case "pending":
+//     case "on-hold":
+//       return "bg-amber-100 text-amber-700";
+//     case "canceled":
+//     case "rejected":
+//       return "bg-red-50 text-red-600";
+//     default:
+//       return "bg-gray-100 text-gray-600";
+//   }
+// };
 
 onMounted(() => {
   fetchKpiStats();
-  fetchRecentBookings();
+  // fetchRecentBookings();
   getResources();
 });
 </script>
