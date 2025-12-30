@@ -8,7 +8,7 @@ class Bookings extends Model
 {
     public function resource()
     {
-        return $this->hasMany(Resource::class, 'id', 'resourceId');
+        return $this->hasOne(Resource::class, 'id', 'resourceId');
     }
     public function bookingOrder()
     {

@@ -120,82 +120,6 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-              Recent Bookings
-            </h2>
-            <RouterLink
-              :to="{ name: 'bookings' }"
-              class="text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              View All
-            </RouterLink>
-          </div>
-
-          <div class="h-auto overflow-y-auto pr-2 custom-scrollbar">
-            <ul class="divide-y divide-gray-50">
-              <li
-                v-for="booking in recentBookings"
-                :key="booking.id"
-                class="py-3 group hover:bg-gray-50/50 rounded-xl transition-colors px-2 -mx-2"
-              >
-                <div class="flex items-center gap-4">
-                  <div
-                    class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"
-                  >
-                    <Icon icon="mdi:key-outline" class="text-lg" />
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-start">
-                      <p class="text-sm font-bold text-gray-800 truncate">
-                        {{ booking.property_name }}
-                        <span class="text-xs text-gray-600"
-                          >- {{ booking.rtype }}</span
-                        >
-                      </p>
-                      <span
-                        :class="bookingStatusClasses(booking.status)"
-                        class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                      >
-                        {{ booking.status }}
-                      </span>
-                    </div>
-                    <div
-                      class="flex items-center gap-3 mt-1 text-xs text-gray-500"
-                    >
-                      <span class="font-medium text-gray-600"
-                        >#{{ booking.id }}</span
-                      >
-                      <span>•</span>
-                      <span
-                        >{{ booking.start_date }} — {{ booking.end_date }}</span
-                      >
-                    </div>
-                  </div>
-                </div>
-              </li>
-
-              <li
-                v-if="recentBookings?.length === 0 && !isLoadingBookings"
-                class="py-8 text-center"
-              >
-                <p class="text-sm text-gray-400">No recent activity found.</p>
-              </li>
-
-              <li
-                v-if="isLoadingBookings"
-                class="py-8 text-center text-blue-600"
-              >
-                <Icon
-                  icon="mdi:loading"
-                  class="animate-spin text-2xl mx-auto"
-                />
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <h3
             class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"
           >
@@ -317,7 +241,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
-import { RouterLink } from "vue-router";
 import ownerService from "@/services/ownerService";
 // calender component
 import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
@@ -330,8 +253,8 @@ const customStatuses = [
   {
     key: "available",
     label: "Available",
-    color: "#1e293b", // Dark Slate
-    backgroundColor: "#f1f5f9", // Very Light Gray
+    color: "", // Dark Slate
+    backgroundColor: "", // Very Light Gray
   },
   {
     key: "confirm",
@@ -349,18 +272,13 @@ const customStatuses = [
 
 const handleBookingClick = (booking) => {
   // Show booking details modal
-  // console.log("Booking clicked:", booking);
+  console.log("Booking clicked:", booking);
 };
-
-// --- STATE MANAGEMENT ---
-const isLoadingBookings = ref(false);
 
 const dashboardStats = ref({
   totalProperties: 0,
   totalBookings: 0,
 });
-
-const recentBookings = ref([]);
 
 const staticReviews = ref([
   {
@@ -396,15 +314,59 @@ const propertyStats = ref([
   { property: "Luxury Downtown Apt", performance: 85 },
   { property: "Cozy Studio Tech Park", performance: 71 },
 ]);
-// --- RESOURCE FETCHING LOGIC ---
+// --- RESOURCE and BOOKING FETCHING LOGIC ---
 const getResources = async () => {
   const ResourcesData = await ownerService.resourceList();
-  console.log("getting ResourcesData --- : ", ResourcesData);
+  console.log(ResourcesData);
 
-  rooms.value = ResourcesData.map((resource) => ({
-    id: resource.id.toString(),
-    number: resource.name,
+  rooms.value = ResourcesData.resource.map((res) => ({
+    id: res.id.toString(),
+    number: res.name.toUpperCase(),
   }));
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const [d, m, y] = dateStr.trim().split("-");
+    return `${y}-${m}-${d}`;
+  };
+  // console.log(rooms.value);
+  // bookings.value = ResourcesData.booking.map((book) => ({
+  //   id: book.id.toString(),
+  //   guestName: book.guestFullName,
+  //   roomNumber: book.booking[0].resourceId,
+  //   roomName: book.booking[0].resource.name,
+  //   checkIn: formatDate(book.arrivalDateTime),
+  //   checkOut: formatDate(book.departureDateTime),
+  //   phone: book.guestPhone,
+  //   status: book.status,
+  // }));
+  bookings.value = [
+    {
+      id: "static-1",
+      guestName: "STATIC TEST USER",
+      // We use both styles to see which one your version of the lib likes
+      roomNumber: "6",
+      room_id: "6",
+      // TODAY'S DATE: Dec 30, 2025
+      checkIn: "2025-12-28",
+      checkOut: "2025-12-31",
+      arrival_date: "2025-12-28",
+      departure_date: "2025-12-31",
+      status: "confirm",
+    },
+    {
+      id: "static-2",
+      guestName: "CHILL ROOM BOOKING",
+      roomNumber: "46",
+      room_id: "46",
+      checkIn: "2025-12-29",
+      checkOut: "2025-12-31",
+      arrival_date: "2025-12-29",
+      departure_date: "2025-12-31",
+      status: "confirm",
+    },
+  ];
+  console.log("booking data --   ", bookings.value);
 };
 
 // --- API FETCHING LOGIC ---
@@ -420,63 +382,8 @@ const fetchKpiStats = async () => {
   }
 };
 
-const fetchRecentBookings = async () => {
-  isLoadingBookings.value = true;
-  try {
-    const response = await ownerService.fetchBookings({
-      limit: 10,
-      orderBy: "created_at",
-      direction: "desc",
-    });
-
-    const bookingsRaw = response?.data || [];
-    // console.log(bookingsRaw);
-    bookings.value = bookingsRaw.map((book) => ({
-      id: book.id.toString(),
-      guestName: book.guestName,
-      roomNumber: book.resource_names[0],
-      checkIn: book.arrivalDateTime,
-      checkOut: book.departureDateTime,
-      status: book.status,
-    }));
-    // console.log(bookings.value);
-
-    recentBookings.value = bookingsRaw.map((b) => ({
-      id: b.id,
-      property_name: b.property.propertyName || "N/A",
-      rtype: b.resource_type_name || "TYPE",
-      start_date: b.arrivalDateTime || b.start_date,
-      end_date: b.departureDateTime || b.end_date,
-      status: b.status || "Pending",
-    }));
-  } catch (error) {
-    console.error("Error fetching recent bookings:", error);
-    recentBookings.value = [];
-  } finally {
-    isLoadingBookings.value = false;
-  }
-};
-
-// --- UTILITIES ---
-const bookingStatusClasses = (status) => {
-  switch (status?.toLowerCase()) {
-    case "confirmed":
-    case "completed":
-      return "bg-green-100 text-green-700";
-    case "pending":
-    case "on-hold":
-      return "bg-amber-100 text-amber-700";
-    case "canceled":
-    case "rejected":
-      return "bg-red-50 text-red-600";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
-};
-
 onMounted(() => {
   fetchKpiStats();
-  fetchRecentBookings();
   getResources();
 });
 </script>
