@@ -125,6 +125,8 @@ class AuthController extends Controller
                 'country'   => 'nullable|string|max:255',
                 'postcode'  => 'nullable|string|max:255',
                 'telephone' => 'nullable|string|max:255',
+                'stripePublicKey' => 'required|string|max:255',
+                'stripeSecretKey' => 'required|string|max:255',
             ]);
 
             if ($validator->fails()) {
@@ -141,7 +143,8 @@ class AuthController extends Controller
                 $user->country   = $request->country;
                 $user->postcode  = $request->postcode;
                 $user->telephone = $request->telephone;
-
+                $user->stripePublicKey = $request->stripePublicKey;
+                $user->stripeSecretKey = $request->stripeSecretKey;
                 if ($user->save()) {
                     $response = ['status' => true, 'message' => 'Profile updated successfully', 'data' => ''];
                 } else {
@@ -204,7 +207,7 @@ class AuthController extends Controller
                 }
 
                 Mail::to($request->email)->send(new SendMail($data));
-                $response = ['status' => true, 'message' => 'Password reset token sent successfully', 'data' => compact('token')];
+                $response = ['status' => true, 'message' => 'We have e-mailed your password reset link!', 'data' => compact('token')];
             } else {
                 $response = ['status' => false, 'message' => 'User not found', 'data' => null];
             }
@@ -254,20 +257,13 @@ class AuthController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'oldPassword'     => 'required|string|min:8|max:255',
                 'password'        => 'required|string|min:8|max:255',
                 'confirmPassword' => 'required|string|min:8|max:255|same:password',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
             }
-            $user = $request->user();
-            if (! Hash::check($request->oldPassword, $user->password)) {
-                return response()->json(['status' => false, 'message' => 'Old password does not match', 'data' => null]);
-            }
-            if (Hash::check($request->password, $user->password)) {
-                return response()->json(['status' => false, 'message' => 'Old password and new password are same', 'data' => null]);
-            }
+            $user = Auth::user();
             $user->password = Hash::make($request->password);
             if ($user->save()) {
                 $response = ['status' => true, 'message' => 'Password changed successfully', 'data' => ''];
