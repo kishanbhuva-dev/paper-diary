@@ -102,25 +102,6 @@ class BookingsController extends Controller
     }
     public function bookingStatusUpdate(Request $request){
         try {
-            // $validator = Validator::make($request->all(), [
-            //     'id' => 'required|exists:booking_orders,id',
-            //     'status' => 'required|in:pending,cancelled,confirmed',
-            // ]);
-            // if ($validator->fails()) {
-            //     return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
-            // }
-            // $bookingOrder = BookingOrder::where('id', $request->id)->first();
-            // if ($bookingOrder->userId != Auth::user()->id) {
-            //     return response()->json(['status' => false, 'message' => 'you are not authorized to update this booking status', 'data' => []]);
-            // }
-            // $booking=Bookings::where('bookingOrderId',$bookingOrder->id)->get();
-            // foreach ($booking as $item) {
-            //     $item->status = $request->status;
-            //     $item->save();
-            // }           
-            // $bookingOrder->status = $request->status;
-            // $bookingOrder->save();
-            // return response()->json(['status' => true, 'message' => 'booking status updated', 'data' => '']);
             $validator = Validator::make($request->all(), [
             'bookingId' => 'required|exists:booking_orders,id',
             'status' => 'required|in:pending,cancelled,confirm',
@@ -153,18 +134,17 @@ class BookingsController extends Controller
                 $bookingOrder->paymentStatus = 'paid';
             }
             $bookingOrder->save();
+
             $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
             $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
             $paymentDetail->status;
             if ($paymentDetail->status == 'succeeded') {
-                // return 123;
                 $payment = new Payment();
                 $payment->transaction_id = $paymentDetail->id;
                 $payment->userId = Auth::user()->id;
                 $payment->bookingOrderId = $request->bookingId;
                 $payment->save();
             }
-            // return 456;
             return response()->json(['status' => true, 'message' => 'Booking status updated successfully', 'data' => []]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
@@ -441,6 +421,7 @@ class BookingsController extends Controller
         $validator = Validator::make($request->all(), [
             'amount'   => 'required|integer|min:1',
             'currency' => 'required|string|size:3',
+            'slug' => 'required|exists:property,slug',
         ]);
 
         if ($validator->fails()) {
@@ -450,8 +431,10 @@ class BookingsController extends Controller
                 'data'    => []
             ]);
         }
+        $property = Property::where('slug', $request->slug)->first();
+        $ownerStripeSecret = User::where('id', $property->ownerId)->value('stripeSecretKey');
 
-        Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey($ownerStripeSecret);
 
         $intent = PaymentIntent::create([
             'amount'               => $request->amount * 100, // cents
