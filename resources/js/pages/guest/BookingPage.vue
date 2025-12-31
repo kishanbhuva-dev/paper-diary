@@ -11,32 +11,47 @@
                 type="button"
                 @click="handleDateEditToggle"
                 class="cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold transition-colors"
-                :class="isEditingDates ? 'bg-green-600 border-green-600 text-white hover:bg-green-700' : 'border-gray-300 hover:bg-gray-100 text-gray-700'"
+                :class="
+                  isEditingDates
+                    ? 'bg-green-600 border-green-600 text-white hover:bg-green-700'
+                    : 'border-gray-300 hover:bg-gray-100 text-gray-700'
+                "
               >
                 <div class="flex items-center gap-1">
                   <Icon :icon="isEditingDates ? 'mdi:check' : 'mdi:pencil'" />
-                  {{ isEditingDates ? 'Save' : 'Edit' }}
+                  {{ isEditingDates ? "Save" : "Edit" }}
                 </div>
               </button>
             </div>
 
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start">
-              
+            <div
+              class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start"
+            >
               <div class="space-y-2">
-                <p class="text-xs text-gray-500 uppercase font-bold">Check-In</p>
-                <div v-if="!isEditingDates" class="flex items-center h-[42px] px-3 bg-gray-50 rounded border border-gray-200 text-sm font-medium">
+                <p class="text-xs text-gray-500 uppercase font-bold">
+                  Check-In
+                </p>
+                <div
+                  v-if="!isEditingDates"
+                  class="flex items-center h-[42px] px-3 bg-gray-50 rounded border border-gray-200 text-sm font-medium"
+                >
                   {{ bookingDates.checkIn }}
                 </div>
                 <BaseDatePicker
                   v-else
-                  label="" 
+                  label=""
                   v-model="bookingDates.checkIn"
                 />
               </div>
 
               <div class="space-y-2">
-                <p class="text-xs text-gray-500 uppercase font-bold">Check-Out</p>
-                <div v-if="!isEditingDates" class="flex items-center h-[42px] px-3 bg-gray-50 rounded border border-gray-200 text-sm font-medium">
+                <p class="text-xs text-gray-500 uppercase font-bold">
+                  Check-Out
+                </p>
+                <div
+                  v-if="!isEditingDates"
+                  class="flex items-center h-[42px] px-3 bg-gray-50 rounded border border-gray-200 text-sm font-medium"
+                >
                   {{ bookingDates.checkOut }}
                 </div>
                 <BaseDatePicker
@@ -47,9 +62,14 @@
               </div>
 
               <div class="space-y-2">
-                <p class="text-xs text-gray-500 uppercase font-bold">Resource Type</p>
+                <p class="text-xs text-gray-500 uppercase font-bold">
+                  Resource Type
+                </p>
                 <div class="flex items-center gap-2 h-[42px]">
-                  <Icon icon="hugeicons:guest-house" class="text-2xl text-gray-400" />
+                  <Icon
+                    icon="hugeicons:guest-house"
+                    class="text-2xl text-gray-400"
+                  />
                   <span class="font-semibold text-sm truncate">
                     {{ bookingInfo?.resourcetype?.name || "1 Resource" }}
                   </span>
@@ -59,13 +79,16 @@
               <div class="space-y-2">
                 <p class="text-xs text-gray-500 uppercase font-bold">Guests</p>
                 <div class="flex items-center gap-2 h-[42px]">
-                  <Icon icon="hugeicons:user-03" class="text-2xl text-gray-400" />
+                  <Icon
+                    icon="hugeicons:user-03"
+                    class="text-2xl text-gray-400"
+                  />
                   <span class="font-semibold text-sm">
-                    {{ guestDetails.adults }} Adults, {{ guestDetails.children }} Child
+                    {{ guestDetails.adults }} Adults,
+                    {{ guestDetails.children }} Child
                   </span>
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -319,7 +342,8 @@ const card = ref(null);
 const isCardComplete = ref(false);
 
 onMounted(async () => {
-  const publishableKey = "pk_test_51RvEjJ7fYIrC7aOkBuyFRaQM8EH4P3nCf8sW5BEFVufQaLOlM2ZNk8lRDNh7uCtm6sVV2Wa2dhIVbIwI6P2q2xQx00PpDGeuDB";
+  const publishableKey =
+    "pk_test_51RvEjJ7fYIrC7aOkBuyFRaQM8EH4P3nCf8sW5BEFVufQaLOlM2ZNk8lRDNh7uCtm6sVV2Wa2dhIVbIwI6P2q2xQx00PpDGeuDB";
 
   stripe.value = await loadStripe(publishableKey);
   elements.value = stripe.value.elements();
@@ -358,44 +382,44 @@ onMounted(async () => {
 });
 
 const fetchInitialData = async (slug, r_id) => {
-    try {
-      const res = await userService.getAvailableResourcesTypes({
-        slug: slug,
-        arrivalDateTime: bookingDates.value.checkIn,
-        departureDateTime: bookingDates.value.checkOut,
-        totalResources: 1,
-      });
-      if (res.data.status) {
-        const selectresourceType = res.data.data.find(
-          (r) => r.id.toString() === r_id.toString()
-        );
+  try {
+    const res = await userService.getAvailableResourcesTypes({
+      slug: slug,
+      arrivalDateTime: bookingDates.value.checkIn,
+      departureDateTime: bookingDates.value.checkOut,
+      totalResources: 1,
+    });
+    if (res.data.status) {
+      const selectresourceType = res.data.data.find(
+        (r) => r.id.toString() === r_id.toString()
+      );
 
-        if (selectresourceType) {
-          const propRes = await userService.getPropertyDetails(slug);
+      if (selectresourceType) {
+        const propRes = await userService.getPropertyDetails(slug);
 
-          bookingInfo.value = {
-            property: {
-              id: propRes.data.data.id,
-              name: propRes.data.data.propertyName,
-              address: propRes.data.data.address,
-              image: propRes.data.data.property_image[0]?.image,
-              slug: propRes.data.data.slug,
-            },
-            resourcetype: selectresourceType,
-          };
-        } else {
-          router.push({ name: "details", params: { slug: slug } });
-        }
+        bookingInfo.value = {
+          property: {
+            id: propRes.data.data.id,
+            name: propRes.data.data.propertyName,
+            address: propRes.data.data.address,
+            image: propRes.data.data.property_image[0]?.image,
+            slug: propRes.data.data.slug,
+          },
+          resourcetype: selectresourceType,
+        };
+      } else {
+        router.push({ name: "details", params: { slug: slug } });
       }
-    } catch (error) {
-      console.error("Initialization error:", error);
     }
-}
+  } catch (error) {
+    console.error("Initialization error:", error);
+  }
+};
 
 const handleDateEditToggle = () => {
   if (isEditingDates.value) {
     const q = router.currentRoute.value.query;
-    fetchInitialData(q.slug, q.r_id); 
+    fetchInitialData(q.slug, q.r_id);
     isEditingDates.value = false;
   } else {
     isEditingDates.value = true;
@@ -406,7 +430,10 @@ const updateGuests = (type, value) => {
   if (type === "adults")
     guestDetails.value.adults = Math.max(1, guestDetails.value.adults + value);
   else if (type === "children")
-    guestDetails.value.children = Math.max(0, guestDetails.value.children + value);
+    guestDetails.value.children = Math.max(
+      0,
+      guestDetails.value.children + value
+    );
 };
 
 const cancelAndExit = () => {
@@ -428,14 +455,18 @@ const handleBooking = async () => {
   const cardErrors = document.getElementById("card-errors");
   cardErrors.textContent = "";
 
+  // console.log("Booking details:", bookingInfo.value);
   try {
-    const totalAmount = Number(bookingInfo.value?.resourcetype?.price || 0) + 200;
+    const totalAmount =
+      Number(bookingInfo.value?.resourcetype?.price || 0) + 200;
     const intentRes = await userService.createPaymentIntent({
+      slug: bookingInfo.value?.property?.slug,
       amount: totalAmount,
       currency: "gbp",
     });
 
-    const clientSecret = intentRes.data.clientSecret || intentRes.data.data?.clientSecret;
+    const clientSecret =
+      intentRes.data.clientSecret || intentRes.data.data?.clientSecret;
 
     if (!clientSecret) throw new Error("Invalid response from payment server.");
 
@@ -459,7 +490,9 @@ const handleBooking = async () => {
     }
 
     if (paymentIntent.status === "succeeded") {
-      const resourcetypePrice = Number(bookingInfo.value?.resourcetype?.price || 0);
+      const resourcetypePrice = Number(
+        bookingInfo.value?.resourcetype?.price || 0
+      );
 
       const payload = {
         propertyId: bookingInfo.value?.property?.id,
