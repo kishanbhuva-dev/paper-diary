@@ -89,8 +89,10 @@ class BookingsController extends Controller
             $bookingOrder->where('status', $request->status);
         }
         if ($request->arrivalDateTime && $request->departureDateTime) {
-            $bookingOrder->where('arrivalDateTime', '<', Carbon::parse($request->departureDateTime)->format('Y-m-d H:i:s'))
-            ->where('departureDateTime', '>', Carbon::parse($request->arrivalDateTime)->format('Y-m-d H:i:s'));
+            $arrivalDate = Carbon::parse($request->arrivalDateTime)->format('Y-m-d');
+            $departureDate = Carbon::parse($request->departureDateTime)->format('Y-m-d');
+            $bookingOrder->where('arrivalDateTime', '>=', $arrivalDate)
+                         ->where('departureDateTime', '<=', $departureDate);
         }
         $pagination = $request->pagination ?? 10;
         $sortBy = $request->sortBy ?? 'id';
