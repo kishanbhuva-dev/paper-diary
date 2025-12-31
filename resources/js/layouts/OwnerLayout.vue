@@ -42,10 +42,8 @@
             :to="item.to"
             class="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200"
             :class="{
-              // Active State (Senior Style)
               'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
                 $route.name === item.name,
-              // Inactive State
               'text-gray-700 hover:bg-blue-50': $route.name !== item.name,
             }"
             @click="closeOnMobile"
@@ -72,31 +70,65 @@
           System
         </div>
 
-        <div v-for="item in systemMenuItems" :key="item.name">
-          <router-link
-            :to="item.to"
-            class="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200"
-            :class="{
-              'bg-blue-600 text-white shadow-lg shadow-blue-500/50':
-                $route.name === item.name,
-              'text-gray-700 hover:bg-blue-50': $route.name !== item.name,
-            }"
-            @click="closeOnMobile"
+        <div
+          v-for="group in systemMenuItems"
+          :key="group.label"
+          class="space-y-1"
+        >
+          <button
+            @click="settingsOpen = !settingsOpen"
+            class="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 text-gray-700 hover:bg-blue-50"
+            :class="{ 'bg-blue-50/50': isSystemRouteActive }"
           >
             <div
-              class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200"
-              :class="$route.name === item.name ? 'bg-white/20' : 'bg-blue-100'"
+              class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+              :class="
+                isSystemRouteActive
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-100 text-blue-600'
+              "
+            >
+              <Icon :icon="group.icon" width="18" />
+            </div>
+            <span
+              class="flex-1 text-left"
+              :class="{ 'text-blue-600': isSystemRouteActive }"
+            >
+              {{ group.label }}
+            </span>
+            <Icon
+              icon="mdi:chevron-down"
+              class="transition-transform duration-200"
+              :class="[
+                { 'rotate-180': settingsOpen },
+                isSystemRouteActive ? 'text-blue-600' : 'text-gray-400',
+              ]"
+            />
+          </button>
+
+          <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
+            <router-link
+              v-for="subItem in group.children"
+              :key="subItem.name"
+              :to="subItem.to"
+              class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
+              :class="{
+                'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
+                  $route.name === subItem.name,
+                'text-gray-700 hover:bg-blue-50': $route.name !== subItem.name,
+              }"
+              @click="closeOnMobile"
             >
               <Icon
-                :icon="item.icon"
-                width="18"
+                :icon="subItem.icon"
+                width="16"
                 :class="
-                  $route.name === item.name ? 'text-white' : 'text-blue-600'
+                  $route.name === subItem.name ? 'text-white' : 'text-blue-600'
                 "
               />
-            </div>
-            {{ item.label }}
-          </router-link>
+              {{ subItem.label }}
+            </router-link>
+          </div>
         </div>
       </nav>
 
@@ -143,22 +175,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
-// Using the path from your old sidebar file
+import { useRoute } from "vue-router";
 import { useAuth } from "../../js/composables/useAuth";
 
 const { logout, user } = useAuth();
+const route = useRoute();
 const sidebarOpen = ref(false);
+const settingsOpen = ref(false);
 
-// Computed property for User Data (Safe access)
 const userData = computed(() => ({
   firstName: user.value?.firstName || "User",
   email: user.value?.email || "",
   initials: user.value?.firstName?.charAt(0) || "U",
 }));
 
-// Main Menu Items (From your old sidebar)
 const mainMenuItems = [
   {
     name: "owner-dashboard",
@@ -180,15 +212,38 @@ const mainMenuItems = [
   },
 ];
 
-// System/Settings Menu Items
 const systemMenuItems = [
   {
-    name: "settings",
     label: "Settings",
     icon: "mdi:cog-outline",
-    to: { name: "properties" }, // Temporarily pointing to properties as requested
+    children: [
+      {
+        name: "owner-profile",
+        label: "Profile",
+        icon: "mdi:account-circle-outline",
+        to: { name: "owner-profile" },
+      },
+      {
+        name: "owner-change-password",
+        label: "Change Password",
+        icon: "mdi:lock-outline",
+        to: { name: "owner-change-password" },
+      },
+    ],
   },
 ];
+
+const isSystemRouteActive = computed(() => {
+  return systemMenuItems.some((group) =>
+    group.children.some((child) => child.name === route.name)
+  );
+});
+
+onMounted(() => {
+  if (isSystemRouteActive.value) {
+    settingsOpen.value = true;
+  }
+});
 
 function closeOnMobile() {
   if (window.innerWidth < 1024) sidebarOpen.value = false;

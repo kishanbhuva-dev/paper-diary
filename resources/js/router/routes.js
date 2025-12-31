@@ -9,7 +9,7 @@ const routes = [
         component: () => import("../../js/pages/guest/HomePage.vue"),
       },
       {
-        path: "/details/:slug",
+        path: "/property/:slug",
         name: "details",
         component: () => import("../../js/pages/guest/DetailsPage.vue"),
       },
@@ -75,6 +75,18 @@ const routes = [
         component: () => import("../../js/pages/owner/Bookings.vue"),
         meta: { pageTitle: "Booking List" },
       },
+      {
+        path: "profile",
+        name: "owner-profile",
+        component: () => import("../../js/pages/auth/Profile.vue"),
+        meta: { pageTitle: "My Profile" },
+      },
+      {
+        path: "change-password",
+        name: "owner-change-password",
+        component: () => import("../../js/pages/auth/ChangePassword.vue"),
+        meta: { pageTitle: "Change Password" },
+      },
     ],
   },
 
@@ -100,6 +112,18 @@ const routes = [
         name: "admin-users",
         component: () => import("../../js/pages/admin/Users.vue"),
         meta: { pageTitle: "User List" },
+      },
+      {
+        path: "profile",
+        name: "admin-profile",
+        component: () => import("../../js/pages/auth/Profile.vue"),
+        meta: { pageTitle: "Admin Profile" },
+      },
+      {
+        path: "change-password",
+        name: "admin-change-password",
+        component: () => import("../../js/pages/auth/ChangePassword.vue"),
+        meta: { pageTitle: "Change Password" },
       },
     ],
   },

@@ -189,7 +189,6 @@
           </section>
         </div>
 
-        <!-- Ratings and Reviews -->
         <aside class="h-fit rounded-lg border border-gray-400 p-6">
           <h5>Ratings and reviews</h5>
           <div class="mt-4 flex items-center gap-4">
@@ -436,7 +435,7 @@ const propertyData = ref(null);
 const loading = ref(true);
 const fetchingResources = ref(false);
 const availableResourceTypes = ref([]);
-const resourcesSection = ref(null); // Reference for scrolling
+const resourcesSection = ref(null);
 const hasSearched = ref(false);
 const isAboutExpanded = ref(false);
 
@@ -466,11 +465,8 @@ const handleShowResources = async () => {
     if (res.data.status) {
       availableResourceTypes.value = res.data.data;
 
-      // STEP 1: Wait for Vue to finish updating the Virtual DOM
       await nextTick();
 
-      // STEP 2: Use a slight delay to ensure the browser has actually
-      // painted the new HTML and calculated the scroll height.
       setTimeout(() => {
         if (resourcesSection.value && availableResourceTypes.value.length > 0) {
           resourcesSection.value.scrollIntoView({
@@ -478,7 +474,7 @@ const handleShowResources = async () => {
             block: "start",
           });
         }
-      }, 150); // 150ms delay is the sweet spot for browser rendering
+      }, 150);
     }
   } catch (err) {
     console.error("Error fetching resources:", err);
@@ -487,20 +483,19 @@ const handleShowResources = async () => {
   }
 };
 
-// Booking Redirection
+// Booking Redirection using simple Query Parameters
 const goToBooking = (resourceType) => {
-  const qtoken = {
-    slug: route.params.slug,
-    r_id: resourceType.id,
-    in: details.value.checkIn,
-    out: details.value.checkOut,
-  };
-  const etoken = btoa(JSON.stringify(qtoken));
   router.push({
     name: "booking-summary",
-    query: { token: etoken },
+    query: {
+      slug: route.params.slug,
+      r_id: resourceType.id,
+      in: details.value.checkIn,
+      out: details.value.checkOut,
+    },
   });
 };
+
 // Gallery & Carousel Logic
 const propertyImages = computed(() => propertyData.value?.property_image || []);
 const expandedImageId = ref(null);
@@ -572,12 +567,10 @@ onMounted(fetchProperty);
 </script>
 
 <style scoped>
-/* Ensures the section doesn't hide behind a sticky header */
 .scroll-mt-24 {
   scroll-margin-top: 6rem;
 }
 
-/* Gallery Hover Animation */
 .grow-1 {
   flex: 1;
   transition: all 0.5s ease;

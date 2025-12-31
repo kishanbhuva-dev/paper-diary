@@ -1,6 +1,5 @@
 <template>
   <div class="p-2 sm:p-3 lg:p-4 bg-gray-50 min-h-max">
-    <!-- details cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div
         class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -94,11 +93,6 @@
       </div>
     </div>
 
-    <!-- <div
-      class="w-full max-w-full overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white"
-    > -->
-    <!-- <div class="overflow-x-auto"> -->
-    <!-- Hotel Dashboard Calendar -->
     <HotelDashboardCalendar
       :rooms="rooms"
       :bookings="bookings"
@@ -113,10 +107,7 @@
       theme="light"
       @booking-click="handleBookingClick"
     />
-    <!-- </div>
-    </div> -->
 
-    <!-- recent booking -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -235,6 +226,14 @@
         </div>
       </div>
     </div>
+
+    <BookingDetailModal
+      :show="showBookingModal"
+      :booking="selectedBooking"
+      :canCancel="isFutureBooking(selectedBooking?.checkIn)"
+      @close="showBookingModal = false"
+      @cancel="handleCancelBooking"
+    />
   </div>
 </template>
 
@@ -242,44 +241,70 @@
 import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import ownerService from "@/services/ownerService";
-// calender component
+import BookingDetailModal from "@/components/modals/BookingDetailModal.vue";
 import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
 import "vue-hotel-booking-calendar/dist/style.css";
 
 const rooms = ref([]);
 const bookings = ref([]);
+const showBookingModal = ref(false);
+const selectedBooking = ref(null);
 
 const customStatuses = [
-  {
-    key: "available",
-    label: "Available",
-    color: "", // Dark Slate
-    backgroundColor: "", // Very Light Gray
-  },
+  { key: "available", label: "Available", color: "", backgroundColor: "" },
   {
     key: "confirm",
     label: "Confirm",
-    color: "#155e75", // Dark Cyan
-    backgroundColor: "#a7f3d0", // Light Mint
+    color: "#155e75",
+    backgroundColor: "#a7f3d0",
   },
   {
     key: "cancelled",
     label: "Cancelled",
-    color: "#991b1b", // Dark Red
-    backgroundColor: "#fee2e2", // Light Rose
+    color: "#991b1b",
+    backgroundColor: "#fee2e2",
   },
 ];
 
-const handleBookingClick = (booking) => {
-  // Show booking details modal
-  console.log("Booking clicked:", booking);
+/**
+ * IMPROVED DATE LOGIC:
+ * Compares only the YYYY-MM-DD parts to avoid timezone/time-of-day issues.
+ */
+const isFutureBooking = (checkInStr) => {
+  if (!checkInStr) return false;
+
+  // Create a clean "Today" date at 00:00:00
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Parse the check-in string (assumes YYYY-MM-DD from the logic below)
+  const bookingDate = new Date(checkInStr);
+  bookingDate.setHours(0, 0, 0, 0);
+
+  // Return true if booking is today or in the future
+  return bookingDate.getTime() >= today.getTime();
 };
 
-const dashboardStats = ref({
-  totalProperties: 0,
-  totalBookings: 0,
-});
+const handleBookingClick = (booking) => {
+  selectedBooking.value = booking;
+  showBookingModal.value = true;
+};
 
+const handleCancelBooking = async (bookingId) => {
+  const confirmCancel = confirm(
+    "Are you sure you want to cancel this booking?"
+  );
+  if (confirmCancel) {
+    try {
+      await getResources();
+      showBookingModal.value = false;
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+    }
+  }
+};
+
+const dashboardStats = ref({ totalProperties: 0, totalBookings: 0 });
 const staticReviews = ref([
   {
     id: 1,
@@ -306,18 +331,15 @@ const staticReviews = ref([
     date: "Dec 12",
   },
 ]);
-
 const operationalStats = ref({ checkIns: 3, checkOuts: 2 });
-
 const propertyStats = ref([
   { property: "Hill View Villa", performance: 92 },
   { property: "Luxury Downtown Apt", performance: 85 },
   { property: "Cozy Studio Tech Park", performance: 71 },
 ]);
-// --- RESOURCE and BOOKING FETCHING LOGIC ---
+
 const getResources = async () => {
   const ResourcesData = await ownerService.resourceList();
-  console.log(ResourcesData);
 
   rooms.value = ResourcesData.resource.map((res) => ({
     id: res.id.toString(),
@@ -327,8 +349,9 @@ const getResources = async () => {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const [d, m, y] = dateStr.trim().split("-");
-    return `${y}-${m}-${d}`;
+    return `${y}-${m}-${d}`; // Result is YYYY-MM-DD
   };
+
   bookings.value = ResourcesData.booking.map((book) => ({
     id: book.id.toString(),
     guestName: book.guestFullName,
@@ -339,12 +362,10 @@ const getResources = async () => {
   }));
 };
 
-// --- API FETCHING LOGIC ---
 const fetchKpiStats = async () => {
   try {
     const propertyData = await ownerService.fetchProperties({ limit: 1 });
     dashboardStats.value.totalProperties = propertyData?.total || 0;
-
     const bookingData = await ownerService.fetchBookings({ limit: 1 });
     dashboardStats.value.totalBookings = bookingData?.total || 0;
   } catch (error) {
