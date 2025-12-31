@@ -19,7 +19,6 @@ class PropertyController extends Controller
     public function index(Request $request)
     {
         try {
-            // return Auth::user()->id;
             $property = Property::selectRaw('id, ownerId, propertyName, address,address2, latitude, longitude, email, country, county, city, postcode, phone, telephone, arrivalTime, departureTime, status, isIcal')->where('ownerId', Auth::id());
             if ($request->search) {
                 $property->where(function ($query) use ($request) {
@@ -88,6 +87,8 @@ class PropertyController extends Controller
                     'isIcal'        => 'nullable|boolean',
                     'description'   => 'nullable',
                     'slug'          => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:property,slug'],
+                    'stripePublicKey' => 'nullable|string',
+                    'stripeSecretKey' => 'nullable|string',
                 ]
             );
             if ($validator->fails()) {
@@ -114,7 +115,15 @@ class PropertyController extends Controller
             $property->status        = $request->status ?? 0;
             $property->isIcal        = $request->isIcal ?? 0;
             $property->slug          = $request->slug ?: Str::slug($request->name);
+            $property->stripePublicKey= Auth::user()->stripePublicKey ?? $request->stripePublicKey;
+            $property->stripeSecretKey= Auth::user()->stripeSecretKey ?? $request->stripeSecretKey;
             if ($property->save()) {
+                if ($request->stripePublicKey && $request->stripeSecretKey && Auth::user()->stripePublicKey==null && Auth::user()->stripeSecretKey==null) {
+                    $user = User::where('id', Auth::id())->first();
+                    $user->stripePublicKey = $request->stripePublicKey;
+                    $user->stripeSecretKey = $request->stripeSecretKey;
+                    $user->save();
+                }
                 $response = ['status' => true, 'message' => 'Property added successfully', 'data' => $property->id];
             } else {
                 $response = ['status' => false, 'message' => 'Property addition failed', 'data' => ''];
@@ -140,18 +149,6 @@ class PropertyController extends Controller
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
         }
     }
-
-/**
- * Show the form for editing the specified resource.
- */
-    public function edit(string $id)
-    {
-        //
-    }
-
-/**
- * Update the specified resource in storage.
- */
     public function update(Request $request, string $id)
     {
         try {
@@ -174,6 +171,8 @@ class PropertyController extends Controller
                     'status'        => 'nullable|boolean',
                     'isIcal'        => 'nullable|boolean',
                     'slug'          => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
+                    'stripePublicKey' => 'nullable|string',
+                    'stripeSecretKey' => 'nullable|string',
                 ]
             );
             if ($validator->fails()) {
@@ -203,7 +202,14 @@ class PropertyController extends Controller
             $property->description   = $request->description;
             $property->isIcal        = $request->isIcal ?? 0;
             $property->slug          = $request->slug ?: Str::slug($request->name);
-
+            $property->stripePublicKey= Auth::user()->stripePublicKey ?? $request->stripePublicKey;
+            $property->stripeSecretKey= Auth::user()->stripeSecretKey ?? $request->stripeSecretKey;
+            if ($request->stripePublicKey && $request->stripeSecretKey && Auth::user()->stripePublicKey==null && Auth::user()->stripeSecretKey==null) {
+                $user = User::where('id', Auth::id())->first();
+                $user->stripePublicKey = $request->stripePublicKey;
+                $user->stripeSecretKey = $request->stripeSecretKey;
+                $user->save();
+            }
             if ($property->save()) {
                 $response = ['status' => true, 'message' => 'Property updated successfully', 'data' => ''];
             } else {

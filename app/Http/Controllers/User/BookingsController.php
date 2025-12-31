@@ -70,9 +70,9 @@ class BookingsController extends Controller
     public function booking(Request $request){
         $bookingOrder = BookingOrder::selectRaw("id,userId,propertyId,resourceTypeId,status,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime")->where('userId', Auth::user()->id);
         if ($request->type=='past') {   
-            $bookingOrder->where('arrivalDateTime','<',date('Y-m-d H:i:s'));
+            $bookingOrder->where('arrivalDateTime','<',date('Y-m-d'));
         }else{
-            $bookingOrder->where('arrivalDateTime','>',date('Y-m-d H:i:s'));
+            $bookingOrder->where('arrivalDateTime','>=',date('Y-m-d'));
         }
         if ($request->search) {
             $bookingOrder->where(function ($query) use ($request) { $query->whereHas('property', function ($q) use ($request) { $q->where('propertyName', 'like', '%' . $request->search . '%'); }) ->orWhereHas('resourceType', function ($q) use ($request) { $q->where('name', 'like', '%' . $request->search . '%'); }) ->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%') ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%'); }) ->with([ 'property:id,propertyName', 'resourceType:id,name' ])
@@ -463,7 +463,7 @@ class BookingsController extends Controller
 
         return response()->json([
             'status'             => true,
-            'message'            => 'Payment intent created',
+            'message'            => '',
             'clientSecret'       => $intent->client_secret,
             'payment_intent_id'  => $intent->id,
             'token'              => (string) Str::uuid(),
