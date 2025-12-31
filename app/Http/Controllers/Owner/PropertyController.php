@@ -115,15 +115,9 @@ class PropertyController extends Controller
             $property->status        = $request->status ?? 0;
             $property->isIcal        = $request->isIcal ?? 0;
             $property->slug          = $request->slug ?: Str::slug($request->name);
-            $property->stripePublicKey= Auth::user()->stripePublicKey ?? $request->stripePublicKey;
-            $property->stripeSecretKey= Auth::user()->stripeSecretKey ?? $request->stripeSecretKey;
+            $property->stripePublicKey= $request->stripePublicKey ?? null;
+            $property->stripeSecretKey= $request->stripeSecretKey ?? null;
             if ($property->save()) {
-                if ($request->stripePublicKey && $request->stripeSecretKey && Auth::user()->stripePublicKey==null && Auth::user()->stripeSecretKey==null) {
-                    $user = User::where('id', Auth::id())->first();
-                    $user->stripePublicKey = $request->stripePublicKey;
-                    $user->stripeSecretKey = $request->stripeSecretKey;
-                    $user->save();
-                }
                 $response = ['status' => true, 'message' => 'Property added successfully', 'data' => $property->id];
             } else {
                 $response = ['status' => false, 'message' => 'Property addition failed', 'data' => ''];
@@ -202,14 +196,8 @@ class PropertyController extends Controller
             $property->description   = $request->description;
             $property->isIcal        = $request->isIcal ?? 0;
             $property->slug          = $request->slug ?: Str::slug($request->name);
-            $property->stripePublicKey= Auth::user()->stripePublicKey ?? $request->stripePublicKey;
-            $property->stripeSecretKey= Auth::user()->stripeSecretKey ?? $request->stripeSecretKey;
-            if ($request->stripePublicKey && $request->stripeSecretKey && Auth::user()->stripePublicKey==null && Auth::user()->stripeSecretKey==null) {
-                $user = User::where('id', Auth::id())->first();
-                $user->stripePublicKey = $request->stripePublicKey;
-                $user->stripeSecretKey = $request->stripeSecretKey;
-                $user->save();
-            }
+            $property->stripePublicKey= $request->stripePublicKey ?? null;
+            $property->stripeSecretKey= $request->stripeSecretKey ?? null;
             if ($property->save()) {
                 $response = ['status' => true, 'message' => 'Property updated successfully', 'data' => ''];
             } else {
