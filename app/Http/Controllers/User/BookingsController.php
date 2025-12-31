@@ -17,6 +17,7 @@ use App\Models\Property;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Charge;
+use App\Models\User;
 use Illuminate\Support\Str;
 use App\Models\Payment;
 
@@ -134,8 +135,10 @@ class BookingsController extends Controller
                 $bookingOrder->paymentStatus = 'paid';
             }
             $bookingOrder->save();
-
-            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $bookingOrderId = $bookingOrder->propertyId;
+            $property = Property::where('id',$bookingOrderId)->first();
+            $ownerStripeSecret = User::where('id', $property->ownerId)->value('stripeSecretKey');
+            $stripe = new \Stripe\StripeClient($ownerStripeSecret);
             $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
             $paymentDetail->status;
             if ($paymentDetail->status == 'succeeded') {
@@ -433,7 +436,13 @@ class BookingsController extends Controller
         }
         $property = Property::where('slug', $request->slug)->first();
         $ownerStripeSecret = User::where('id', $property->ownerId)->value('stripeSecretKey');
-
+        if (!$property->secretSecretKey || !$ownerStripeSecret) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'You can not book this property',
+                'data'    => []
+            ]);
+        }
         Stripe::setApiKey($ownerStripeSecret);
 
         $intent = PaymentIntent::create([
@@ -456,15 +465,6 @@ class BookingsController extends Controller
     }
     public function completePayment(Request $request)
     {
-            // if (empty($request->payment_intent_id)) {
-            //     return response()->json(['status' => false, 'message' => 'Payment Intent ID is required', 'data' => []]);
-            // }       
-            // $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
-            // return $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
-            // if ($paymentDetail->status == 'succeeded') {
-            //     return response()->json(['status' => true, 'message' => '', 'data' => $paymentDetail]);
-            // }
-            // return response()->json(['status' => false, 'message' => 'Payment failed', 'data' => []]);
         if (empty($request->payment_intent_id)) {
             return response()->json([
                 'status'  => false,
@@ -476,16 +476,13 @@ class BookingsController extends Controller
         try {
             $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
             $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
-
             if ($paymentDetail->status === 'succeeded') {
-                // Update your order/payment table here
                 return response()->json([
                     'status'  => true,
                     'message' => 'Payment Successfully Complete',
                     'data'    => [],
                 ]);
             }
-
             return response()->json([
                 'status'  => false,
                 'message' => 'Payment not completed yet',
