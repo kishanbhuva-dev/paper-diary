@@ -274,15 +274,18 @@ const handleUpdateProfile = async () => {
   ];
 
   // 2. Add Stripe inputs if user is owner
-  if (userRole.value === 'owner') {
-    inputsToValidate.push(input_stripePublicKey.value, input_stripeSecretKey.value);
+  if (userRole.value === "owner") {
+    inputsToValidate.push(
+      input_stripePublicKey.value,
+      input_stripeSecretKey.value
+    );
   }
 
   // 3. Run validation on all components and check results
   // We use filter(Boolean) to ignore any refs that might be null (like Stripe keys for non-owners)
   const isFormValid = inputsToValidate
-    .filter(input => input !== null)
-    .every(input => input.validate());
+    .filter((input) => input !== null)
+    .every((input) => input.validate());
 
   if (!isFormValid) {
     return; // Stop submission if any input is invalid
@@ -291,6 +294,13 @@ const handleUpdateProfile = async () => {
   loading.value = true;
 
   try {
+    const payload = { ...form.value };
+
+    // If NOT an owner, remove Stripe keys so the API doesn't try to validate them
+    if (userRole.value !== "owner") {
+      delete payload.stripePublicKey;
+      delete payload.stripeSecretKey;
+    }
     const response = await authService.updateProfile(form.value);
 
     if (response.status) {

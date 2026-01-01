@@ -1,5 +1,7 @@
 <template>
-  <section class="h-screen w-full flex bg-gray-50 relative overflow-hidden">
+  <section
+    class="h-screen w-full flex bg-gray-50 relative overflow-hidden font-sans"
+  >
     <div
       class="lg:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-gray-100 fixed top-0 left-0 right-0 z-40 shadow-sm"
     >
@@ -11,7 +13,7 @@
         />
       </button>
 
-      <img src="/public/main_logo.png" class="h-10" />
+      <img src="/public/main_logo.png" class="h-10" alt="Logo" />
     </div>
 
     <aside
@@ -23,7 +25,7 @@
       <div
         class="flex items-center justify-center py-6 border-b border-gray-100"
       >
-        <img src="/public/main_logo.png" class="h-14" />
+        <img src="/public/main_logo.png" class="h-14" alt="Logo" />
       </div>
 
       <nav
@@ -92,6 +94,63 @@
             {{ mg.label }}
           </router-link>
         </div>
+
+        <div class="space-y-1">
+          <button
+            @click="settingsOpen = !settingsOpen"
+            class="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 text-gray-700 hover:bg-blue-50"
+            :class="{ 'bg-blue-50/50': isSystemRouteActive }"
+          >
+            <div
+              class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+              :class="
+                isSystemRouteActive
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-100 text-blue-600'
+              "
+            >
+              <Icon icon="mdi:cog-outline" width="18" />
+            </div>
+            <span
+              class="flex-1 text-left"
+              :class="{ 'text-blue-600': isSystemRouteActive }"
+            >
+              Settings
+            </span>
+            <Icon
+              icon="mdi:chevron-down"
+              class="transition-transform duration-200"
+              :class="[
+                { 'rotate-180': settingsOpen },
+                isSystemRouteActive ? 'text-blue-600' : 'text-gray-400',
+              ]"
+            />
+          </button>
+
+          <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
+            <router-link
+              v-for="subItem in systemMenuItems"
+              :key="subItem.label"
+              :to="subItem.to"
+              class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
+              :class="{
+                'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
+                  $route.path === subItem.to,
+                'text-gray-700 hover:bg-blue-50': $route.path !== subItem.to,
+              }"
+              @click="closeOnMobile"
+            >
+              <Icon
+                :icon="subItem.icon"
+                width="16"
+                :class="
+                  $route.path === subItem.to ? 'text-white' : 'text-blue-600'
+                "
+              />
+              {{ subItem.label }}
+            </router-link>
+          </div>
+        </div>
       </nav>
 
       <div
@@ -129,7 +188,7 @@
     </aside>
 
     <div
-      class="flex-1 flex flex-col overflow-y-auto lg:ml-0 mt-16 lg:mt-0 p-4 lg:shadow-inner"
+      class="flex-1 flex flex-col overflow-y-auto lg:ml-0 mt-16 lg:mt-0 p-4 lg:shadow-inner scroll-smooth"
     >
       <router-view />
     </div>
@@ -137,11 +196,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
+import { useRoute } from "vue-router";
 import { useAuth } from "../../js/composables/useAuth";
 
 const { logout, user } = useAuth();
+const route = useRoute();
 
 const userData = computed(() => ({
   username: user.value?.firstName + " " + user.value?.lastName ?? "",
@@ -149,6 +210,7 @@ const userData = computed(() => ({
 }));
 
 const sidebarOpen = ref(false);
+const settingsOpen = ref(false);
 
 const menuItems = [
   { label: "Dashboard", to: "/admin", icon: "heroicons:home-modern" },
@@ -163,8 +225,30 @@ const menuItems = [
 const manageMenu = [
   { label: "Users", to: "/admin/users", icon: "heroicons:user-group" },
   { label: "Owners", to: "/admin/owners", icon: "heroicons:user-plus" },
-  { label: "Settings", to: "/admin/settings", icon: "basil:settings-outline" },
 ];
+
+const systemMenuItems = [
+  {
+    label: "Profile",
+    icon: "mdi:account-circle-outline",
+    to: "/admin/profile", // Adjusting path to match your manageMenu original path
+  },
+  {
+    label: "Change Password",
+    icon: "mdi:lock-outline",
+    to: "/admin/change-password", // Change this to your actual admin password route
+  },
+];
+
+const isSystemRouteActive = computed(() => {
+  return systemMenuItems.some((item) => item.to === route.path);
+});
+
+onMounted(() => {
+  if (isSystemRouteActive.value) {
+    settingsOpen.value = true;
+  }
+});
 
 function closeOnMobile() {
   if (window.innerWidth < 1024) sidebarOpen.value = false;
