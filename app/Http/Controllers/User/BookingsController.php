@@ -224,22 +224,22 @@ class BookingsController extends Controller
                     $booking->price = $resourcePrice;
                     $booking->save();
                 }
-                // $propertyOwnerEmail = getPropertyOwnerEmail($request->propertyId);
-                // $data=[];
-                // $data['bookingId']=$bookingOrderId;
-                // $data['userName']=Auth::user()->firstName.' '.Auth::user()->lastName;
-                // $data['arrivalDateTime']=date('d M Y H:i', strtotime($request->arrivalDateTime));
-                // $data['departureDateTime']=date('d M Y H:i', strtotime($request->departureDateTime));
-                // $data['propertyName']= getPropertyName($request->propertyId);
-                // $data['resourceTypeName']= getResourceTypeName($request->resourceTypeId);
-                // $data['totalAdults']=$request->adults;
-                // $data['totalChildren']=$request->children ?? 0;
-                // $data['totalGuests']=$request->adults + ($request->children ?? 0);
-                // $data['totalPrice']=$request->price;
-                // $data['guestEmail']=Auth::user()->email;
-                // $data['guestPhone']=Auth::user()->phone;
-                // Mail::to(Auth::user()->email)->send(new BookingMail($data, 'user'));
-                // Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($data, 'owner'));
+                $propertyOwnerEmail = getPropertyOwnerEmail($request->propertyId);
+                $data=[];
+                $data['bookingId']=$bookingOrderId;
+                $data['userName']=Auth::user()->firstName.' '.Auth::user()->lastName;
+                $data['arrivalDateTime']=date('d M Y H:i', strtotime($request->arrivalDateTime));
+                $data['departureDateTime']=date('d M Y H:i', strtotime($request->departureDateTime));
+                $data['propertyName']= getPropertyName($request->propertyId);
+                $data['resourceTypeName']= getResourceTypeName($request->resourceTypeId);
+                $data['totalAdults']=$request->adults;
+                $data['totalChildren']=$request->children ?? 0;
+                $data['totalGuests']=$request->adults + ($request->children ?? 0);
+                $data['totalPrice']=$request->price;
+                $data['guestEmail']=Auth::user()->email;
+                $data['guestPhone']=Auth::user()->phone;
+                Mail::to(Auth::user()->email)->send(new BookingMail($data, 'user'));
+                Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($data, 'owner'));
                 return response()->json(['status' => true, 'message' => '', 'data' => ['id' => $bookingOrderId]], 201);
             }else {
                 return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
@@ -296,8 +296,7 @@ class BookingsController extends Controller
         } catch (\Throwable $th) { 
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]); 
         } 
-    }
-    
+    }    
     public function bookingCancel(Request $request){
         try {
             $validator = Validator::make($request->all(), [
@@ -312,9 +311,6 @@ class BookingsController extends Controller
             }
             $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
             foreach ($booking as $key => $value) {
-                // if ($value->status =='confirmed') {
-                //     return response()->json(['status' => false, 'message' => 'you can not cancel confirmed booking', 'data' => []]);
-                // }
                 $value->status = 'cancelled';
                 $value->save();
             }
@@ -326,7 +322,6 @@ class BookingsController extends Controller
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
     }
-    
     public function createPaymentIntent(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -334,7 +329,6 @@ class BookingsController extends Controller
             'currency' => 'required|string|size:3',
             'slug' => 'required|exists:property,slug',
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'status'  => false,
@@ -356,17 +350,15 @@ class BookingsController extends Controller
             ]);
         }
         Stripe::setApiKey($ownerStripeSecret);
-
         $intent = PaymentIntent::create([
-            'amount'               => $request->amount * 100, // cents
-            'currency'             => $request->currency,     // use validated currency
+            'amount'               => $request->amount * 100,
+            'currency'             => $request->currency,
             'payment_method_types' => ['card'],
             'metadata'             => [
                 'user_id'  => auth()->id(),
                 'order_id' => $request->order_id ?? null,
             ],
         ]);
-
         return response()->json([
             'status'             => true,
             'message'            => '',
@@ -384,7 +376,6 @@ class BookingsController extends Controller
                 'data'    => []
             ]);
         }
-
         try {
             $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
             $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);

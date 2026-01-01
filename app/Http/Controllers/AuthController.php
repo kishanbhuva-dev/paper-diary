@@ -99,8 +99,8 @@ class AuthController extends Controller
                 'country'   => 'nullable|string|max:255',
                 'postcode'  => 'nullable|string|max:255',
                 'telephone' => 'nullable|string|max:255',
-                'stripePublicKey' => 'required|string|max:255',
-                'stripeSecretKey' => 'required|string|max:255',
+                'stripePublicKey' => 'nullable|string|max:255',
+                'stripeSecretKey' => 'nullable|string|max:255',
             ]);
 
             if ($validator->fails()) {
@@ -117,8 +117,10 @@ class AuthController extends Controller
                 $user->country   = $request->country;
                 $user->postcode  = $request->postcode;
                 $user->telephone = $request->telephone;
-                $user->stripePublicKey = $request->stripePublicKey;
-                $user->stripeSecretKey = $request->stripeSecretKey;
+                if ($user->role=='owner') {
+                    $user->stripePublicKey = $request->stripePublicKey;
+                    $user->stripeSecretKey = $request->stripeSecretKey;
+                }
                 if ($user->save()) {
                     $response = ['status' => true, 'message' => 'Profile updated successfully', 'data' => ''];
                 } else {

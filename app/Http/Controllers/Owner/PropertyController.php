@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\PropertyImage;
 class PropertyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index(Request $request)
     {
         try {
@@ -34,7 +32,6 @@ class PropertyController extends Controller
                         ->orWhere('telephone', 'like', '%' . $request->search . '%')
                         ->orWhere('arrivalTime', 'like', '%' . $request->search . '%')
                         ->orWhere('departureTime', 'like', '%' . $request->search . '%');
-
                 });
             }
             $pagination     = $request->pagination ?? 10;
@@ -50,7 +47,7 @@ class PropertyController extends Controller
     public function propertyDropdown()
     {
         try {
-            $property = Property::selectRaw('id, ownerId, propertyName')->where('ownerId', Auth::id());
+            $property = Property::selectRaw('id, ownerId, propertyName')->where('status', 1)->where('ownerId', Auth::id());
             $property = $property->get()->transform(function ($item) {
                 return [
                     'id'   => $item->id,
@@ -122,7 +119,6 @@ class PropertyController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'Property addition failed', 'data' => ''];
             }
-
             return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
@@ -131,7 +127,6 @@ class PropertyController extends Controller
 
     public function show($id)
     {
-        //
         try {
             $property = Property::where('id',$id)->with('facilities')->first();
             if (empty($property)) {
@@ -285,7 +280,7 @@ class PropertyController extends Controller
             $validator = Validator::make($request->all(),
                 [
                     'imageId' => 'required',
-                    'image'           => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 ]
             );
             if ($validator->fails()) {
