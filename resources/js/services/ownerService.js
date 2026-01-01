@@ -29,6 +29,10 @@ const ownerService = {
     const res = await apiClient.get("/owner/property", { params });
     return res.data.data;
   },
+  async fetchPropertiesdropdown() {
+    const res = await apiClient.get("/owner/property-dropdown");
+    return res;
+  },
 
   // Fetch a single property by ID
   async fetchPropertyById(id) {

@@ -93,6 +93,62 @@
       </div>
     </div>
 
+    <div class="mb-6 relative">
+      <div class="max-w-xs">
+        <label
+          class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1"
+        >
+          Property Filter
+        </label>
+        <div
+          @click="isDropdownOpen = !isDropdownOpen"
+          class="bg-white border border-gray-300 px-3 py-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors select-none"
+        >
+          <span class="text-sm text-gray-600 truncate">
+            {{
+              selectedProperties.length > 0
+                ? selectedProperties.length + " Properties Selected"
+                : "All Properties"
+            }}
+          </span>
+          <Icon
+            icon="mdi:chevron-down"
+            class="text-gray-400 transition-transform"
+            :class="{ 'rotate-180': isDropdownOpen }"
+          />
+        </div>
+
+        <div
+          v-if="isDropdownOpen"
+          class="absolute z-50 mt-2 w-full bg-white border border-gray-100 shadow-xl rounded-xl p-2 max-h-60 overflow-y-auto"
+        >
+          <label
+            v-for="item in propertyDropdown"
+            :key="item.id"
+            class="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors group"
+          >
+            <input
+              type="checkbox"
+              :value="item.id"
+              v-model="selectedProperties"
+              class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            />
+            <span
+              class="text-sm text-gray-700 font-medium group-hover:text-blue-700"
+            >
+              {{ item.name }}
+            </span>
+          </label>
+          <div
+            v-if="propertyDropdown.length === 0"
+            class="p-3 text-center text-xs text-gray-400 italic"
+          >
+            No properties found
+          </div>
+        </div>
+      </div>
+    </div>
+
     <HotelDashboardCalendar
       :rooms="rooms"
       :bookings="bookings"
@@ -156,7 +212,6 @@
               >4.8 Avg</span
             >
           </div>
-
           <div class="space-y-4">
             <div
               v-for="review in staticReviews"
@@ -188,41 +243,6 @@
               </div>
             </div>
           </div>
-          <button
-            class="mt-4 w-full py-2 text-xs font-semibold text-gray-600 hover:text-blue-600 bg-gray-50 rounded-lg transition-colors"
-          >
-            View All Reviews
-          </button>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 class="text-sm font-bold text-gray-800 mb-4">Top Performers</h3>
-          <div class="space-y-5">
-            <div v-for="(stat, index) in propertyStats" :key="stat.property">
-              <div class="flex justify-between text-xs mb-1.5">
-                <span class="font-medium text-gray-700 truncate w-3/4">{{
-                  stat.property
-                }}</span>
-                <span class="font-bold text-gray-900"
-                  >{{ stat.performance }}%</span
-                >
-              </div>
-              <div
-                class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden"
-              >
-                <div
-                  class="h-full rounded-full transition-all duration-500"
-                  :class="index === 0 ? 'bg-blue-600' : 'bg-blue-400'"
-                  :style="{ width: stat.performance + '%' }"
-                ></div>
-              </div>
-            </div>
-          </div>
-          <button
-            class="mt-6 w-full py-2.5 text-xs font-bold text-blue-700 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
-          >
-            View Full Report
-          </button>
         </div>
       </div>
     </div>
@@ -245,6 +265,11 @@ import BookingDetailModal from "@/components/modals/BookingDetailModal.vue";
 import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
 import "vue-hotel-booking-calendar/dist/style.css";
 
+// Dropdown State
+const propertyDropdown = ref([]);
+const selectedProperties = ref([]); // Initialized as empty array
+const isDropdownOpen = ref(false);
+
 const rooms = ref([]);
 const bookings = ref([]);
 const showBookingModal = ref(false);
@@ -266,22 +291,12 @@ const customStatuses = [
   },
 ];
 
-/**
- * IMPROVED DATE LOGIC:
- * Compares only the YYYY-MM-DD parts to avoid timezone/time-of-day issues.
- */
 const isFutureBooking = (checkInStr) => {
   if (!checkInStr) return false;
-
-  // Create a clean "Today" date at 00:00:00
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  // Parse the check-in string (assumes YYYY-MM-DD from the logic below)
   const bookingDate = new Date(checkInStr);
   bookingDate.setHours(0, 0, 0, 0);
-
-  // Return true if booking is today or in the future
   return bookingDate.getTime() >= today.getTime();
 };
 
@@ -291,10 +306,7 @@ const handleBookingClick = (booking) => {
 };
 
 const handleCancelBooking = async (bookingId) => {
-  const confirmCancel = confirm(
-    "Are you sure you want to cancel this booking?"
-  );
-  if (confirmCancel) {
+  if (confirm("Are you sure you want to cancel this booking?")) {
     try {
       await getResources();
       showBookingModal.value = false;
@@ -305,13 +317,14 @@ const handleCancelBooking = async (bookingId) => {
 };
 
 const dashboardStats = ref({ totalProperties: 0, totalBookings: 0 });
+const operationalStats = ref({ checkIns: 3, checkOuts: 2 });
 const staticReviews = ref([
   {
     id: 1,
     propertyName: "Hill View Villa",
     guestName: "Arjun M.",
     rating: 5,
-    comment: "Absolutely stunning view and very clean property.",
+    comment: "Absolutely stunning view.",
     date: "2 days ago",
   },
   {
@@ -319,39 +332,22 @@ const staticReviews = ref([
     propertyName: "Luxury Downtown Apt",
     guestName: "Sarah K.",
     rating: 4,
-    comment: "Great location, close to everything.",
+    comment: "Great location.",
     date: "Dec 15",
   },
-  {
-    id: 3,
-    propertyName: "Hill View Villa",
-    guestName: "Rahul S.",
-    rating: 5,
-    comment: "The host was very accommodating.",
-    date: "Dec 12",
-  },
-]);
-const operationalStats = ref({ checkIns: 3, checkOuts: 2 });
-const propertyStats = ref([
-  { property: "Hill View Villa", performance: 92 },
-  { property: "Luxury Downtown Apt", performance: 85 },
-  { property: "Cozy Studio Tech Park", performance: 71 },
 ]);
 
 const getResources = async () => {
   const ResourcesData = await ownerService.resourceList();
-
   rooms.value = ResourcesData.resource.map((res) => ({
     id: res.id.toString(),
     number: res.name,
   }));
-
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const [d, m, y] = dateStr.trim().split("-");
-    return `${y}-${m}-${d}`; // Result is YYYY-MM-DD
+    return `${y}-${m}-${d}`;
   };
-
   bookings.value = ResourcesData.booking.map((book) => ({
     id: book.id.toString(),
     guestName: book.guestFullName,
@@ -373,7 +369,17 @@ const fetchKpiStats = async () => {
   }
 };
 
+const fetchPropertiesdropdown = async () => {
+  try {
+    const res = await ownerService.fetchPropertiesdropdown();
+    propertyDropdown.value = res.data.data || [];
+  } catch (error) {
+    console.error("Error fetching properties dropdown:", error);
+  }
+};
+
 onMounted(() => {
+  fetchPropertiesdropdown();
   fetchKpiStats();
   getResources();
 });

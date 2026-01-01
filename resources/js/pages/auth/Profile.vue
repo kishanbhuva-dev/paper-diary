@@ -26,6 +26,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <BaseInput
+              ref="input_firstName"
               label="First Name"
               v-model="form.firstName"
               width="full"
@@ -34,6 +35,7 @@
               placeholder="John"
             />
             <BaseInput
+              ref="input_lastName"
               label="Last Name"
               v-model="form.lastName"
               width="full"
@@ -62,6 +64,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BaseInput
+              ref="input_phone"
               label="Phone Number"
               v-model="form.phone"
               width="full"
@@ -69,6 +72,7 @@
               placeholder="+44 123 456 7890"
             />
             <BaseInput
+              ref="input_telephone"
               label="Secondary Telephone"
               v-model="form.telephone"
               width="full"
@@ -88,6 +92,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BaseInput
+              ref="input_address"
               label="Address Line 1"
               v-model="form.address"
               width="full"
@@ -95,6 +100,7 @@
               placeholder="123 Main Street"
             />
             <BaseInput
+              ref="input_address2"
               label="Address Line 2"
               v-model="form.address2"
               width="full"
@@ -105,6 +111,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <BaseInput
+              ref="input_city"
               label="City"
               v-model="form.city"
               width="full"
@@ -112,6 +119,7 @@
               placeholder="London"
             />
             <BaseInput
+              ref="input_postcode"
               label="Postcode"
               v-model="form.postcode"
               width="full"
@@ -119,6 +127,7 @@
               placeholder="E1 6AN"
             />
             <BaseInput
+              ref="input_country"
               label="Country"
               v-model="form.country"
               width="full"
@@ -138,19 +147,27 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BaseInput
+              ref="input_stripePublicKey"
               label="Stripe Public Key"
               v-model="form.stripePublicKey"
               width="full"
               icon="mdi:key"
               placeholder="pk_test_..."
+              :pattern="/^pk_(test|live)_[A-Za-z0-9]{24,}$/"
+              custom-error="Invalid public key"
+              required
             />
             <BaseInput
+              ref="input_stripeSecretKey"
               label="Stripe Secret Key"
               v-model="form.stripeSecretKey"
               width="full"
               icon="mdi:lock-outline"
               type="password"
               placeholder="sk_test_..."
+              :pattern="/^sk_(test|live)_[A-Za-z0-9]{24,}$/"
+              custom-error="Invalid secret key"
+              required
             />
           </div>
         </div>
@@ -191,6 +208,19 @@ const router = useRouter();
 const loading = ref(false);
 const userRole = ref("");
 
+// Input Refs for Validation
+const input_firstName = ref(null);
+const input_lastName = ref(null);
+const input_phone = ref(null);
+const input_telephone = ref(null);
+const input_address = ref(null);
+const input_address2 = ref(null);
+const input_city = ref(null);
+const input_postcode = ref(null);
+const input_country = ref(null);
+const input_stripePublicKey = ref(null);
+const input_stripeSecretKey = ref(null);
+
 const form = ref({
   firstName: "",
   lastName: "",
@@ -212,7 +242,6 @@ onMounted(() => {
     const user = JSON.parse(storedUser);
     userRole.value = user.role;
 
-    // Populate form with stored data
     form.value = {
       firstName: user.firstName || "",
       lastName: user.lastName || "",
@@ -231,18 +260,44 @@ onMounted(() => {
 });
 
 const handleUpdateProfile = async () => {
+  // 1. Collect all input refs into an array
+  const inputsToValidate = [
+    input_firstName.value,
+    input_lastName.value,
+    input_phone.value,
+    input_telephone.value,
+    input_address.value,
+    input_address2.value,
+    input_city.value,
+    input_postcode.value,
+    input_country.value,
+  ];
+
+  // 2. Add Stripe inputs if user is owner
+  if (userRole.value === 'owner') {
+    inputsToValidate.push(input_stripePublicKey.value, input_stripeSecretKey.value);
+  }
+
+  // 3. Run validation on all components and check results
+  // We use filter(Boolean) to ignore any refs that might be null (like Stripe keys for non-owners)
+  const isFormValid = inputsToValidate
+    .filter(input => input !== null)
+    .every(input => input.validate());
+
+  if (!isFormValid) {
+    return; // Stop submission if any input is invalid
+  }
+
   loading.value = true;
 
   try {
     const response = await authService.updateProfile(form.value);
 
     if (response.status) {
-      // Sync Local Storage
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const updatedUser = { ...storedUser, ...form.value };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
-      // Role-based Redirection
       if (userRole.value === "admin") {
         router.push({ name: "admin-dashboard" });
       } else if (userRole.value === "owner") {

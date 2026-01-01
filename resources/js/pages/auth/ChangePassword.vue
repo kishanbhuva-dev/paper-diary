@@ -26,6 +26,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <BaseInput
+              ref="newPasswordRef"
               label="New Password"
               v-model="form.password"
               type="password"
@@ -38,6 +39,7 @@
             />
 
             <BaseInput
+              ref="confirmPasswordRef"
               label="Confirm New Password"
               v-model="form.confirmPassword"
               type="password"
@@ -82,7 +84,7 @@
           >
             <Icon v-if="loading" icon="line-md:loading-twotone-loop" />
             <Icon v-else icon="mdi:update" />
-            {{ loading ? "Updating..." : "Update Password" }}
+            {{ loading ? "Update Password" : "Update Password" }}
           </button>
         </div>
       </form>
@@ -144,9 +146,13 @@ const router = useRouter();
 const loading = ref(false);
 const showModal = ref(false);
 
+// Refs for the components to trigger internal validation
+const newPasswordRef = ref(null);
+const confirmPasswordRef = ref(null);
+
 const form = ref({
   password: "",
-  confirmPassword: "", // Changed to match AuthController requirement
+  confirmPassword: "",
 });
 
 // Validation for matching passwords
@@ -166,8 +172,15 @@ const resetForm = () => {
 };
 
 const openConfirmation = () => {
-  if (form.value.password !== form.value.confirmPassword) return;
-  if (form.value.password.length < 8) return;
+  // Trigger internal validation of BaseInput components
+  const isNewPassValid = newPasswordRef.value?.validate();
+  const isConfirmPassValid = confirmPasswordRef.value?.validate();
+
+  // If internal validation fails OR computed password match fails, don't open modal
+  if (!isNewPassValid || !isConfirmPassValid || passwordError.value) {
+    return;
+  }
+
   showModal.value = true;
 };
 
@@ -181,11 +194,9 @@ const handlePasswordUpdate = async () => {
       showModal.value = false;
       resetForm();
 
-      // Get user role from local storage for redirection
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       const role = storedUser.role;
 
-      // Role-based Redirection
       if (role === "admin") {
         router.push({ name: "admin-dashboard" });
       } else if (role === "owner") {
