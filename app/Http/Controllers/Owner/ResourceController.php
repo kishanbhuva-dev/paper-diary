@@ -246,53 +246,89 @@ class ResourceController extends Controller
             return response()->json($response);
         }
     }
+    // public function resourceWiseList(Request $request)
+    // {
+    //     try {
+    //         $ownerId = auth()->id();
+    //         $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
+    //         $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
+    //         $resourceTypeIds = $resourceTypes->pluck('id');
+    //         $resources = Resource::select('id', 'name', 'resourceTypeId')
+    //         ->whereIn('resourceTypeId', $resourceTypeIds)
+    //         ->with('resourceType.property')
+    //         ->get()
+    //         ->map(function ($item) {
+    //             return [
+    //                 'id' => $item->id,
+    //                 'name' => $item->name,
+    //                 'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
+    //                 'resource_type_name' => $item->resourceType->name ?? 'N/A',
+    //             ];
+    //         });
+    //         $resourcesid = $resources->pluck('id');    
+    //         $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")->with([
+    //         'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
+    //         $bookings = $bookings->map(function ($order) {
+    //             return [
+    //                 'id'               => $order->id,
+    //                 'guestFullName'    => $order->guestFullName,
+    //                 'guestEmail'       => $order->guestEmail,
+    //                 'guestPhone'       => $order->guestPhone,
+    //                 'resourceTypeId'   => $order->resourceTypeId,
+    //                 'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
+    //                 'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
+    //                 'status'           => $order->status,
+    //                 'resource_name'    => optional($order->booking->first()->resource)->name,
+    //             ];
+    //         });
+    //         $data = [
+    //             'resource' => $resources->toArray(),
+    //             'booking' => $bookings->toArray(),
+    //         ];
+    //         $response  = ['status' => true, 'message' => 'Resources fetched successfully', 'data' => $data];
+    //         return response()->json($response);
+    //     } catch (\Throwable $th) {
+    //         $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+    //         return response()->json($response);
+    //     }
+    // }
     public function resourceWiseList(Request $request)
     {
         try {
-
-            // $ownerId = auth()->user()->id;
-            // $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
-            // $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
-            // $resources = Resource::select('id', 'name', 'resourceTypeId')
-            //     ->whereIn('resourceTypeId', $resourceTypes->pluck('id'))
-            //     ->withAggregate('resourceType', 'name')->with('resourceType.property')
-            //     ->get();
-            // $resources->map(function ($item) {
-            //     $item->property_name = $item->resourceType->property->propertyName;
-            //     unset($item->resourceType);
-            //     unset($item->resourceTypeId);
-            //     return $item;
-            // });
-            // $data['resource'] = $resources;
-            // $bookings = BookingOrder::select('id', 'resourceTypeId','arrivalDateTime','departureDateTime')
-            //     ->whereHas('resourceType.resources', function ($query) use ($resources) {
-            //         $query->whereIn('id', $resources->pluck('resourceTypeId'));
-            //     })->with('bookingOrder')
-            //     ->get();
-            // $data['booking'] = $bookings;
-            $ownerId = auth()->id();
-            $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
-            $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
-            $resourceTypeIds = $resourceTypes->pluck('id');
-            $resources = Resource::select('id', 'name', 'resourceTypeId')
-            ->whereIn('resourceTypeId', $resourceTypeIds)
-            ->with('resourceType.property')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
-                    'resource_type_name' => $item->resourceType->name ?? 'N/A',
-                ];
-            });
-            $resourcesid = $resources->pluck('id');
-            // $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId, date_format(arrivalDateTime, "%d-%m-%Y ") as arrivalDateTime, date_format(departureDateTime, "%d-%m-%Y") as departureDateTime,status')->with(['booking'=>function($query) use($resourcesid){
-            //     $query->select('id','resourceId','bookingOrderId')->whereIn('resourceId', $resourcesid);
-            // },'booking.resource'=>function ($query){
-            //     $query->select('id','name');
-            // }])->get();
-                
+            $propertyIds = $request->propertyIds;
+            
+            if (!empty($propertyIds)) {
+                // When property IDs exist in request, filter by those properties
+                $propertyIds = is_array($propertyIds) ? $propertyIds : [$propertyIds];
+                $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
+                $resourceTypeIds = $resourceTypes->pluck('id');
+                $resources = Resource::select('id', 'name', 'resourceTypeId')
+                ->whereIn('resourceTypeId', $resourceTypeIds)
+                ->with('resourceType.property')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
+                        'resource_type_name' => $item->resourceType->name ?? 'N/A',
+                    ];
+                });
+            } else {
+                // When no property IDs in request, get all resources
+                $resources = Resource::select('id', 'name', 'resourceTypeId')
+                ->with('resourceType.property')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
+                        'resource_type_name' => $item->resourceType->name ?? 'N/A',
+                    ];
+                });
+            }
+            $resourcesid = $resources->pluck('id');    
             $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")->with([
             'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
             $bookings = $bookings->map(function ($order) {
@@ -305,7 +341,7 @@ class ResourceController extends Controller
                     'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
                     'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
                     'status'           => $order->status,
-                    'resource_name'    => optional($order->booking->first()->resource)->name,
+                    'resource_name'    => optional(optional($order->booking->first())->resource)->name ?? 'N/A',
                 ];
             });
             $data = [
