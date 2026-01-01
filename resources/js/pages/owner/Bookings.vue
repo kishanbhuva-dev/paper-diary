@@ -38,11 +38,11 @@
       @per-page-change="handlePerPageChange"
       @open-edit-modal="navigateToViewEdit"
       @delete="confirmDelete"
-      :showDelete="true"
+      :showDelete="false"
       :show-search="true"
       :showAdd="false"
       :showDownload="true"
-      :showEdit="true"
+      :showEdit="false"
     />
   </div>
 

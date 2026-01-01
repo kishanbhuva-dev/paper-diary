@@ -120,7 +120,7 @@
 
         <div
           v-if="isDropdownOpen"
-          class="absolute z-50 mt-2 w-full bg-white border border-gray-100 shadow-xl rounded-xl p-2 max-h-60 overflow-y-auto"
+          class="absolute z-50 mt-2 w-xs bg-white border border-gray-100 shadow-xl rounded-xl p-2 max-h-60 overflow-y-auto"
         >
           <label
             v-for="item in propertyDropdown"
