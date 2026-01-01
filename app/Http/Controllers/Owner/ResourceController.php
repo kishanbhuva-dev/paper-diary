@@ -329,6 +329,50 @@ class ResourceController extends Controller
                 });
             }
             $resourcesid = $resources->pluck('id');    
+
+            // $ownerId = auth()->user()->id;
+            // $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
+            // $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
+            // $resources = Resource::select('id', 'name', 'resourceTypeId')
+            //     ->whereIn('resourceTypeId', $resourceTypes->pluck('id'))
+            //     ->withAggregate('resourceType', 'name')->with('resourceType.property')
+            //     ->get();
+            // $resources->map(function ($item) {
+            //     $item->property_name = $item->resourceType->property->propertyName;
+            //     unset($item->resourceType);
+            //     unset($item->resourceTypeId);
+            //     return $item;
+            // });
+            // $data['resource'] = $resources;
+            // $bookings = BookingOrder::select('id', 'resourceTypeId','arrivalDateTime','departureDateTime')
+            //     ->whereHas('resourceType.resources', function ($query) use ($resources) {
+            //         $query->whereIn('id', $resources->pluck('resourceTypeId'));
+            //     })->with('bookingOrder')
+            //     ->get();
+            // $data['booking'] = $bookings;
+            $ownerId = auth()->id();
+            $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
+            $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
+            $resourceTypeIds = $resourceTypes->pluck('id');
+            $resources = Resource::select('id', 'name', 'resourceTypeId')
+            ->whereIn('resourceTypeId', $resourceTypeIds)
+            ->with('resourceType.property')
+            ->get()
+            ->map(function ($item) {
+                 return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
+                    'resource_type_name' => $item->resourceType->name ?? 'N/A',
+                ];
+            });
+            $resourcesid = $resources->pluck('id');
+            // $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId, date_format(arrivalDateTime, "%d-%m-%Y ") as arrivalDateTime, date_format(departureDateTime, "%d-%m-%Y") as departureDateTime,status')->with(['booking'=>function($query) use($resourcesid){
+            //     $query->select('id','resourceId','bookingOrderId')->whereIn('resourceId', $resourcesid);
+            // },'booking.resource'=>function ($query){
+            //     $query->select('id','name');
+            // }])->get();
+                
             $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")->with([
             'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
             $bookings = $bookings->map(function ($order) {

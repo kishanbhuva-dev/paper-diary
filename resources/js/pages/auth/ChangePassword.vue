@@ -15,10 +15,7 @@
         </p>
       </div>
 
-      <form
-        @submit.prevent="handlePasswordUpdate"
-        class="p-6 md:p-10 space-y-8"
-      >
+      <form @submit.prevent="openConfirmation" class="p-6 md:p-10 space-y-8">
         <div class="space-y-2">
           <div
             class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
@@ -42,7 +39,7 @@
 
             <BaseInput
               label="Confirm New Password"
-              v-model="form.password_confirmation"
+              v-model="form.confirmPassword"
               type="password"
               width="full"
               required
@@ -90,26 +87,73 @@
         </div>
       </form>
     </div>
+
+    <div
+      v-if="showModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl border border-gray-100"
+      >
+        <div class="text-center">
+          <div
+            class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <Icon
+              icon="mdi:help-circle-outline"
+              class="text-3xl text-blue-600"
+            />
+          </div>
+          <h4 class="text-lg font-bold text-gray-800">
+            Confirm Password Change
+          </h4>
+          <p class="text-gray-500 mt-2 text-sm leading-relaxed">
+            Are you sure you want to update your password? You will need to use
+            this new password for your next login.
+          </p>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+          <button
+            @click="showModal = false"
+            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            @click="handlePasswordUpdate"
+            :disabled="loading"
+            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow-md transition-all disabled:opacity-50"
+          >
+            {{ loading ? "Updating..." : "Yes, Update" }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
-import BaseInput from "../../components/global/BaseInput.vue"; // Adjust path based on your folder structure
+import BaseInput from "../../components/global/BaseInput.vue";
+import authService from "../../services/authService";
 
+const router = useRouter();
 const loading = ref(false);
+const showModal = ref(false);
 
 const form = ref({
   password: "",
-  password_confirmation: "",
+  confirmPassword: "", // Changed to match AuthController requirement
 });
 
 // Validation for matching passwords
 const passwordError = computed(() => {
   if (
-    form.value.password_confirmation &&
-    form.value.password !== form.value.password_confirmation
+    form.value.confirmPassword &&
+    form.value.password !== form.value.confirmPassword
   ) {
     return "Passwords do not match";
   }
@@ -118,41 +162,44 @@ const passwordError = computed(() => {
 
 const resetForm = () => {
   form.value.password = "";
-  form.value.password_confirmation = "";
+  form.value.confirmPassword = "";
+};
+
+const openConfirmation = () => {
+  if (form.value.password !== form.value.confirmPassword) return;
+  if (form.value.password.length < 8) return;
+  showModal.value = true;
 };
 
 const handlePasswordUpdate = async () => {
-  // Final check before submission
-  if (form.value.password !== form.value.password_confirmation) return;
-  if (form.value.password.length < 8) return;
-
   loading.value = true;
 
   try {
-    console.log("Submitting Password Update:", {
-      password: form.value.password,
-    });
+    const response = await authService.changePassword(form.value);
 
-    /* API CALL START
-    const response = await axios.post('/api/auth/change-password', {
-        password: form.value.password,
-        password_confirmation: form.value.password_confirmation
-    });
-    
-    if(response.status === 200) {
-       // handle success (e.g., notify user, redirect, or clear form)
-       resetForm();
+    if (response.status) {
+      showModal.value = false;
+      resetForm();
+
+      // Get user role from local storage for redirection
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const role = storedUser.role;
+
+      // Role-based Redirection
+      if (role === "admin") {
+        router.push({ name: "admin-dashboard" });
+      } else if (role === "owner") {
+        router.push({ name: "owner-dashboard" });
+      } else {
+        router.push({ name: "home" });
+      }
+    } else {
+      console.error(response.message || "Failed to update password");
+      showModal.value = false;
     }
-    API CALL END
-    */
-
-    // Simulating API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    alert("Password updated successfully!");
-    resetForm();
   } catch (error) {
     console.error("Password update failed", error);
-    // alert(error.response?.data?.message || "An error occurred");
+    showModal.value = false;
   } finally {
     loading.value = false;
   }
