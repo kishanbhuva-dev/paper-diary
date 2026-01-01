@@ -4,7 +4,7 @@ use App\Models\Bookings;
 use App\Models\Resource;
 use App\Models\ResourceType;
 use App\Models\Property;
-
+use App\Models\User;
 // function getResourcesAvailable($resourceTypesId, $arrivalDateTime, $departureDateTime)
 // {
 //     $resourceType = ResourceType::where('id', $resourceTypesId)->first();
@@ -131,5 +131,6 @@ function getResourceTypeName($resourceTypeId)
 function getPropertyOwnerEmail($propertyId)
 {
     $property = Property::where('id', $propertyId)->first();
-    return $property ? $property->email : '';
+    $owner = User::where('id', $property->ownerId)->first();
+    return $owner ? $owner->email : '';
 }
