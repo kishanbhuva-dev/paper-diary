@@ -24,6 +24,14 @@
             <span>Change Password</span>
           </div>
 
+          <div
+            v-if="passwordError && form.confirmPassword"
+            class="bg-red-50 border border-red-100 text-red-600 px-4 py-2 rounded-lg text-sm flex items-center gap-2 mb-4"
+          >
+            <Icon icon="mdi:alert-circle-outline" />
+            <span>{{ passwordError }}</span>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <BaseInput
               ref="newPasswordRef"
@@ -36,6 +44,7 @@
               icon="mdi:lock-outline"
               placeholder="••••••••"
               helperText="Minimum 8 characters required"
+              :customError="passwordError"
             />
 
             <BaseInput
@@ -146,7 +155,6 @@ const router = useRouter();
 const loading = ref(false);
 const showModal = ref(false);
 
-// Refs for the components to trigger internal validation
 const newPasswordRef = ref(null);
 const confirmPasswordRef = ref(null);
 
@@ -155,7 +163,6 @@ const form = ref({
   confirmPassword: "",
 });
 
-// Validation for matching passwords
 const passwordError = computed(() => {
   if (
     form.value.confirmPassword &&
@@ -172,11 +179,9 @@ const resetForm = () => {
 };
 
 const openConfirmation = () => {
-  // Trigger internal validation of BaseInput components
   const isNewPassValid = newPasswordRef.value?.validate();
   const isConfirmPassValid = confirmPasswordRef.value?.validate();
 
-  // If internal validation fails OR computed password match fails, don't open modal
   if (!isNewPassValid || !isConfirmPassValid || passwordError.value) {
     return;
   }
