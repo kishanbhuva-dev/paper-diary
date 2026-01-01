@@ -279,8 +279,21 @@ class BookingsController extends Controller
                 
                 $ownerData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
                 
-                // Mail::to(Auth::user()->email)->send(new BookingMail($userData, 'user'));
-                // Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($ownerData, 'owner'));
+                // Send emails only if mail is configured and emails are valid
+                if (config('mail.default') && config('mail.mailers.' . config('mail.default'))) {
+                    $userEmail = Auth::user()->email;
+                    $ownerEmail = getPropertyOwnerEmail($request->propertyId);
+                    
+                    // Validate user email
+                    if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+                        Mail::to($userEmail)->send(new BookingMail($userData, 'user'));
+                    }
+                    
+                    // Validate owner email
+                    if ($ownerEmail && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
+                        Mail::to($ownerEmail)->send(new BookingMail($ownerData, 'owner'));
+                    }
+                }
                 return response()->json(['status' => true, 'message' => '', 'data' => ['id' => $bookingOrderId]], 201);
             }else {
                 return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
