@@ -332,27 +332,45 @@ class ResourceController extends Controller
                 });
             }
             
-            $resourcesid = $resources->pluck('id');    
-            $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")->with([
-            'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
-            $bookings = $bookings->map(function ($order) {
-                return [
-                    'id'               => $order->id,
-                    'guestFullName'    => $order->guestFullName,
-                    'guestEmail'       => $order->guestEmail,
-                    'guestPhone'       => $order->guestPhone,
-                    'resourceTypeId'   => $order->resourceTypeId,
-                    'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
-                    'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
-                    'status'           => $order->status,
-                    'resource_name'    => optional(optional($order->booking->first())->resource)->name ?? 'N/A',
-                ];
-            });
+            $resourcesid = $resources->pluck('id');
+            
+            // Only get bookings if resources exist
+            $bookings = collect();
+            if ($resourcesid->isNotEmpty()) {
+                // Get resource type IDs for the selected properties
+                $selectedResourceTypeIds = collect();
+                if (!empty($request->propertyIds)) {
+                    $requestPropertyIds = is_array($request->propertyIds) ? $request->propertyIds : [$request->propertyIds];
+                    $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $requestPropertyIds)->pluck('id');
+                } else {
+                    $ownerId = auth()->id();
+                    $ownerPropertyIds = Property::where('ownerId', $ownerId)->pluck('id');
+                    $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $ownerPropertyIds)->pluck('id');
+                }
+                
+                $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")
+                ->whereIn('resourceTypeId', $selectedResourceTypeIds)
+                ->with([
+                'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
+                $bookings = $bookings->map(function ($order) {
+                    return [
+                        'id'               => $order->id,
+                        'guestFullName'    => $order->guestFullName,
+                        'guestEmail'       => $order->guestEmail,
+                        'guestPhone'       => $order->guestPhone,
+                        'resourceTypeId'   => $order->resourceTypeId,
+                        'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
+                        'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
+                        'status'           => $order->status,
+                        'resource_name'    => optional(optional($order->booking->first())->resource)->name ?? 'N/A',
+                    ];
+                });
+            }
             $data = [
                 'resource' => $resources->toArray(),
                 'booking' => $bookings->toArray(),
             ];
-            $response  = ['status' => true, 'message' => 'Resources fetched successfully', 'data' => $data];
+            $response  = ['status' => true, 'message' => '', 'data' => $data];
             return response()->json($response);
         } catch (\Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
