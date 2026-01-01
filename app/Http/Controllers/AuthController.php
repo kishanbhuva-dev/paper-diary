@@ -75,17 +75,6 @@ class AuthController extends Controller
             $user->phone     = $request->phone;
             $user->telephone = $request->telephone;
             if ($user->save()) {
-                // if ($user->role === 'owner') {
-                //     $validator = Validator::make($request->all(), [
-                //         'propertyName'    => 'required',
-                //         'propertyAddress' => 'required',
-                //     ]);
-
-                //     if ($validator->fails()) {
-                //         return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
-                //     }
-                //     $this->createProperty($request, $user->id);
-                // }
                 $token    = $user->createToken('api-token')->plainTextToken;
                 $response = ['status' => true, 'message' => 'User registered successfully', 'data' => compact('user', 'token')];
             } else {
@@ -97,21 +86,6 @@ class AuthController extends Controller
         }
     }
 
-    // private function createProperty($request, $userId)
-    // {
-    //     $property               = new Property();
-    //     $property->ownerId      = $userId;
-    //     $property->title        = $request->title;
-    //     $property->propertyName = $request->propertyName;
-    //     $property->email        = $request->email;
-    //     $property->address      = $request->propertyAddress;
-    //     $property->address2     = $request->propertyAddress2;
-    //     $property->description  = $request->description;
-    //     $property->status       = 0;
-    //     $property->latitude     = 0;
-    //     $property->longitude    = 0;
-    //     $property->save();
-    // }
     public function profileUpdate(Request $request)
     {
         try {
@@ -264,6 +238,9 @@ class AuthController extends Controller
                 return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
             }
             $user = Auth::user(); 
+            if (Hash::check($request->password, $user->password)) {
+                return response()->json(['status' => false, 'message' => 'New password should be different from old password', 'data' => null]);
+            }
             $user->password = Hash::make($request->password);
             if ($user->save()) {
                 $response = ['status' => true, 'message' => 'Password changed successfully', 'data' => ''];
