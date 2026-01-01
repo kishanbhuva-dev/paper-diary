@@ -94,32 +94,6 @@ class ResourceController extends Controller
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
             return response()->json($response);
         }
-        // try {
-        //     $validator = Validator::make($request->all(), [
-        //         'data'                  => 'required|array',
-        //         'data.name'             => 'required|string',
-        //         'data.status'           => 'nullable|boolean',
-        //         'data.resourceTypeId.*' => 'required|exists:resource_types,id',
-        //     ]);
-        //     if ($validator->fails()) {
-        //         $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
-        //         return response()->json($response);
-        //     }
-        //     foreach ($request->data as $key => $value) {
-        //         $resources       = new Resource;
-        //         $resources->name = $value['name'];
-        //         if (isset($value['status'])) {
-        //             $resources->status = $value['status'];
-        //         }
-        //         $resources->resourceTypeId = $value['resourceTypeId'];
-        //         $resources->save();
-        //     }
-        //     $response = ['status' => true, 'message' => 'Resources created successfully', 'data' => []];
-        //     return response()->json($response);
-        // } catch (\Throwable $th) {
-        //     $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
-        //     return response()->json($response);
-        // }
     }
     public function show(string $id)
     {
@@ -162,7 +136,8 @@ class ResourceController extends Controller
             }
             return response()->json($response);
         } catch (\Throwable $th) {
-
+            $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+            return response()->json($response);
         }
     }
     public function multipleUpdate(Request $request)
@@ -198,34 +173,6 @@ class ResourceController extends Controller
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
             return response()->json($response);
         }
-        // try {
-        //     $validator = Validator::make($request->all(), [
-        //         'data'                  => 'required|array',
-
-        //         'data.*.id'             => 'required|exists:resources,id',
-        //         'data.*.name'           => 'required|string',
-        //         'data.*.status'         => 'nullable|boolean',
-        //         'data.*.resourceTypeId' => 'required|exists:resource_types,id',
-        //     ]);
-        //     if ($validator->fails()) {
-        //         $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
-        //         return response()->json($response);
-        //     }
-        //     foreach ($request->data as $key => $value) {
-        //         $resources       = Resource::where('id', $value['id'])->first();
-        //         $resources->name = $value['name'];
-        //         if (isset($value['status'])) {
-        //             $resources->status = $value['status'];
-        //         }
-        //         $resources->resourceTypeId = $value['resourceTypeId'];
-        //         $resources->save();
-        //     }
-        //     $response = ['status' => true, 'message' => 'Resources updated successfully', 'data' => []];
-        //     return response()->json($response);
-        // } catch (\Throwable $th) {
-        //     $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
-        //     return response()->json($response);
-        // }
     }
     public function destroy(string $id)
     {
@@ -298,7 +245,6 @@ class ResourceController extends Controller
             $propertyIds = $request->propertyIds;
             
             if (!empty($propertyIds)) {
-                // When property IDs provided in request, filter by those properties
                 $propertyIds = is_array($propertyIds) ? $propertyIds : [$propertyIds];
                 $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
                 $resourceTypeIds = $resourceTypes->pluck('id');
@@ -314,7 +260,6 @@ class ResourceController extends Controller
                     ];
                 });
             } else {
-                // When no property IDs in request, get resources for authenticated user
                 $ownerId = auth()->id();
                 $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
                 $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
@@ -333,11 +278,8 @@ class ResourceController extends Controller
             }
             
             $resourcesid = $resources->pluck('id');
-            
-            // Only get bookings if resources exist
             $bookings = collect();
             if ($resourcesid->isNotEmpty()) {
-                // Get resource type IDs for the selected properties
                 $selectedResourceTypeIds = collect();
                 if (!empty($request->propertyIds)) {
                     $requestPropertyIds = is_array($request->propertyIds) ? $request->propertyIds : [$request->propertyIds];
@@ -347,7 +289,6 @@ class ResourceController extends Controller
                     $ownerPropertyIds = Property::where('ownerId', $ownerId)->pluck('id');
                     $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $ownerPropertyIds)->pluck('id');
                 }
-                
                 $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")
                 ->whereIn('resourceTypeId', $selectedResourceTypeIds)
                 ->with([

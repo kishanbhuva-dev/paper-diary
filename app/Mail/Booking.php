@@ -42,8 +42,8 @@ class Booking extends Mailable
     {
         
         $view = ($this->recipientType === 'owner')
-            ? 'emails.owner_booking'
-            : 'emails.user_booking';
+            ? 'emails.owner.booking'
+            : 'emails.user.booking';
 
         return new Content(
             view: $view,
