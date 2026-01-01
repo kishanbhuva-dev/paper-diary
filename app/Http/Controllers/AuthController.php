@@ -263,11 +263,8 @@ class AuthController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
             }
-            $user = Auth::user();
+            $user = Auth::user(); 
             $user->password = Hash::make($request->password);
-            if ($user->password =Hash::make($request->password)) {
-                return response()->json(['status' => true, 'message' => 'Your Old Password is not same as New Password', 'data' => '']);
-            } 
             if ($user->save()) {
                 $response = ['status' => true, 'message' => 'Password changed successfully', 'data' => ''];
             } else {

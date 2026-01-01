@@ -128,11 +128,39 @@
           </div>
         </div>
 
+        <div v-if="userRole === 'owner'" class="space-y-2">
+          <div
+            class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
+          >
+            <Icon icon="mdi:shield-key-outline" />
+            <span>Stripe Configuration</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <BaseInput
+              label="Stripe Public Key"
+              v-model="form.stripePublicKey"
+              width="full"
+              icon="mdi:key"
+              placeholder="pk_test_..."
+            />
+            <BaseInput
+              label="Stripe Secret Key"
+              v-model="form.stripeSecretKey"
+              width="full"
+              icon="mdi:lock-outline"
+              type="password"
+              placeholder="sk_test_..."
+            />
+          </div>
+        </div>
+
         <div
           class="flex flex-col sm:flex-row justify-end gap-4 pt-10 border-t border-gray-100"
         >
           <button
             type="button"
+            @click="$router.back()"
             class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
           >
             Cancel
@@ -154,12 +182,14 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
-import BaseInput from "../../components/global/BaseInput.vue"; // Adjust path based on your folder structure
+import BaseInput from "../../components/global/BaseInput.vue";
+import authService from "../../services/authService";
 
-// API Endpoint placeholder: const PROFILE_API = '/api/v1/profile';
-
+const router = useRouter();
 const loading = ref(false);
+const userRole = ref("");
 
 const form = ref({
   firstName: "",
@@ -172,32 +202,31 @@ const form = ref({
   postcode: "",
   phone: "",
   telephone: "",
+  stripePublicKey: "",
+  stripeSecretKey: "",
 });
 
-// Load User Data
-onMounted(async () => {
-  try {
-    /* API CALL START
-    const response = await axios.get('/api/profile');
-    form.value = response.data;
-    API CALL END
-    */
+onMounted(() => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    const user = JSON.parse(storedUser);
+    userRole.value = user.role;
 
-    // Mock data for display based on your DB columns
+    // Populate form with stored data
     form.value = {
-      firstName: "Sachin",
-      lastName: "",
-      email: "sachin@eviontech.com",
-      address: "123 Tech Lane",
-      address2: "",
-      country: "United Kingdom",
-      city: "London",
-      postcode: "NW1 4NP",
-      phone: "07123456789",
-      telephone: "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      address: user.address || "",
+      address2: user.address2 || "",
+      country: user.country || "",
+      city: user.city || "",
+      postcode: user.postcode || "",
+      phone: user.phone || "",
+      telephone: user.telephone || "",
+      stripePublicKey: user.stripePublicKey || "",
+      stripeSecretKey: user.stripeSecretKey || "",
     };
-  } catch (error) {
-    console.error("Failed to load profile", error);
   }
 });
 
@@ -205,19 +234,23 @@ const handleUpdateProfile = async () => {
   loading.value = true;
 
   try {
-    console.log("Submitting Data:", form.value);
+    const response = await authService.updateProfile(form.value);
 
-    /* API CALL START
-    const response = await axios.put('/api/profile/update', form.value);
-    if(response.status === 200) {
-       toast.success("Profile updated successfully");
+    if (response.status) {
+      // Sync Local Storage
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const updatedUser = { ...storedUser, ...form.value };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Role-based Redirection
+      if (userRole.value === "admin") {
+        router.push({ name: "admin-dashboard" });
+      } else if (userRole.value === "owner") {
+        router.push({ name: "owner-dashboard" });
+      } else {
+        router.push({ name: "home" });
+      }
     }
-    API CALL END
-    */
-
-    // Simulating API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Profile updated successfully!");
   } catch (error) {
     console.error("Update failed", error);
   } finally {

@@ -26,8 +26,14 @@ const authService = {
     return response.data;
   },
 
-  async refreshToken() {
-    const response = await apiClient.post("/refresh-token");
+  async updateProfile(payload) {
+    const response = await apiClient.post("/profile", payload);
+    return response.data;
+  },
+
+  // Added/Verified for Change Password
+  async changePassword(payload) {
+    const response = await apiClient.post("/change-password", payload);
     return response.data;
   },
 
