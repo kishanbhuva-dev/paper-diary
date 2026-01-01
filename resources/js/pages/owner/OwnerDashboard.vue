@@ -107,7 +107,7 @@
           <span class="text-sm text-gray-600 truncate">
             {{
               selectedProperties.length > 0
-                ? selectedProperties.length + " Properties Selected"
+                ? selectedProperties.length + " Selected"
                 : "All Properties"
             }}
           </span>
@@ -139,12 +139,6 @@
               {{ item.name }}
             </span>
           </label>
-          <div
-            v-if="propertyDropdown.length === 0"
-            class="p-3 text-center text-xs text-gray-400 italic"
-          >
-            No properties found
-          </div>
         </div>
       </div>
     </div>
@@ -164,88 +158,7 @@
       @booking-click="handleBookingClick"
     />
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
-      <div class="lg:col-span-2 space-y-6">
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3
-            class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"
-          >
-            <Icon icon="mdi:list-status" class="text-gray-400" />
-            Inventory Status Summary
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div
-              class="flex justify-between items-center p-4 rounded-xl bg-green-50/50 border border-green-100/50"
-            >
-              <span class="text-xs font-medium text-gray-600"
-                >Available Now</span
-              >
-              <span class="text-lg font-bold text-green-600">8</span>
-            </div>
-            <div
-              class="flex justify-between items-center p-4 rounded-xl bg-amber-50/50 border border-amber-100/50"
-            >
-              <span class="text-xs font-medium text-gray-600"
-                >Booked (48h)</span
-              >
-              <span class="text-lg font-bold text-amber-600">5</span>
-            </div>
-            <div
-              class="flex justify-between items-center p-4 rounded-xl bg-red-50/50 border border-red-100/50"
-            >
-              <span class="text-xs font-medium text-gray-600">Blocked</span>
-              <span class="text-lg font-bold text-red-600">2</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="lg:col-span-1 space-y-6">
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
-              <Icon icon="mdi:star-outline" class="text-amber-500" />
-              Latest Reviews
-            </h3>
-            <span
-              class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full"
-              >4.8 Avg</span
-            >
-          </div>
-          <div class="space-y-4">
-            <div
-              v-for="review in staticReviews"
-              :key="review.id"
-              class="border-b border-gray-50 last:border-0 pb-3 last:pb-0"
-            >
-              <div class="flex justify-between items-start mb-1">
-                <span
-                  class="text-[11px] font-bold text-gray-700 truncate w-2/3"
-                  >{{ review.propertyName }}</span
-                >
-                <div class="flex text-amber-400">
-                  <Icon
-                    icon="mdi:star"
-                    v-for="i in review.rating"
-                    :key="i"
-                    class="text-[10px]"
-                  />
-                </div>
-              </div>
-              <p class="text-[11px] text-gray-500 line-clamp-2 italic">
-                "{{ review.comment }}"
-              </p>
-              <div class="flex justify-between items-center mt-2">
-                <span class="text-[10px] text-gray-400">{{
-                  review.guestName
-                }}</span>
-                <span class="text-[10px] text-gray-400">{{ review.date }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6"></div>
 
     <BookingDetailModal
       :show="showBookingModal"
@@ -258,7 +171,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue"; // Added watch
 import { Icon } from "@iconify/vue";
 import ownerService from "@/services/ownerService";
 import BookingDetailModal from "@/components/modals/BookingDetailModal.vue";
@@ -267,7 +180,7 @@ import "vue-hotel-booking-calendar/dist/style.css";
 
 // Dropdown State
 const propertyDropdown = ref([]);
-const selectedProperties = ref([]); // Initialized as empty array
+const selectedProperties = ref([]);
 const isDropdownOpen = ref(false);
 
 const rooms = ref([]);
@@ -290,6 +203,13 @@ const customStatuses = [
     backgroundColor: "#fee2e2",
   },
 ];
+
+/**
+ * WATCHER: Automatically triggers getResources when selection changes
+ */
+watch(selectedProperties, () => {
+  getResources();
+});
 
 const isFutureBooking = (checkInStr) => {
   if (!checkInStr) return false;
@@ -337,25 +257,38 @@ const staticReviews = ref([
   },
 ]);
 
+/**
+ * UPDATED GET RESOURCES: Now sends selected IDs
+ */
 const getResources = async () => {
-  const ResourcesData = await ownerService.resourceList();
-  rooms.value = ResourcesData.resource.map((res) => ({
-    id: res.id.toString(),
-    number: res.name,
-  }));
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const [d, m, y] = dateStr.trim().split("-");
-    return `${y}-${m}-${d}`;
-  };
-  bookings.value = ResourcesData.booking.map((book) => ({
-    id: book.id.toString(),
-    guestName: book.guestFullName,
-    roomNumber: book.resource_name,
-    checkIn: formatDate(book.arrivalDateTime),
-    checkOut: formatDate(book.departureDateTime),
-    status: book.status,
-  }));
+  try {
+    // We send an object containing the array of IDs
+    const ResourcesData = await ownerService.resourceList({
+      propertyIds: selectedProperties.value,
+    });
+
+    rooms.value = ResourcesData.resource.map((res) => ({
+      id: res.id.toString(),
+      number: res.name,
+    }));
+
+    const formatDate = (dateStr) => {
+      if (!dateStr) return "";
+      const [d, m, y] = dateStr.trim().split("-");
+      return `${y}-${m}-${d}`;
+    };
+
+    bookings.value = ResourcesData.booking.map((book) => ({
+      id: book.id.toString(),
+      guestName: book.guestFullName,
+      roomNumber: book.resource_name,
+      checkIn: formatDate(book.arrivalDateTime),
+      checkOut: formatDate(book.departureDateTime),
+      status: book.status,
+    }));
+  } catch (error) {
+    console.error("Error loading resources:", error);
+  }
 };
 
 const fetchKpiStats = async () => {

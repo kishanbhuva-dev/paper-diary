@@ -162,8 +162,8 @@ const ownerService = {
   // --- RESOURCE METHODS ---
 
   // Create multiple resources (rooms) in bulk
-  async resourceList() {
-    const res = await apiClient.get("/owner/resource-wise-list");
+  async resourceList(payload) {
+    const res = await apiClient.get("/owner/resource-wise-list", { params: payload });
     return res.data.data;
   },
 
