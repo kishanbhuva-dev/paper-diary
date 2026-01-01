@@ -224,7 +224,6 @@ class BookingsController extends Controller
                     $booking->price = $resourcePrice;
                     $booking->save();
                 }
-                // Prepare data for user email
                 $userData = [];
                 $userData['bookingId'] = $bookingOrderId;
                 $userData['userName'] = Auth::user()->firstName.' '.Auth::user()->lastName;
@@ -240,21 +239,17 @@ class BookingsController extends Controller
                 $userData['guestPhone'] = $request->guestPhone;
                 $userData['guestAddress'] = $request->guestAddress;
                 
-                // Calculate total nights
                 $arrival = Carbon::parse($request->arrivalDateTime);
                 $departure = Carbon::parse($request->departureDateTime);
                 $interval = $arrival->diffInDays($departure);
                 $userData['totalNights'] = $interval;
                 
-                // Get resource names
                 $resourceNames = $resourcesToBook->pluck('name')->implode(', ');
                 $userData['resourceNames'] = $resourceNames;
                 
-                // Get owner name
                 $property = Property::where('id', $request->propertyId)->with('owner')->first();
                 $userData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
                 
-                // Prepare data for owner email
                 $ownerData = [];
                 $ownerData['bookingId'] = $bookingOrderId;
                 $ownerData['userName'] = $request->guestFullName;
@@ -271,28 +266,21 @@ class BookingsController extends Controller
                 $ownerData['bookingUser'] = Auth::user()->firstName.' '.Auth::user()->lastName;
                 $ownerData['bookingUserEmail'] = Auth::user()->email;
                 
-                // Calculate total nights for owner
                 $ownerData['totalNights'] = $interval;
                 
-                // Get resource names for owner
                 $ownerData['resourceNames'] = $resourceNames;
                 
                 $ownerData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
                 
-                // Send emails only if mail is configured and emails are valid
+                // Send emails only if mail is configured
                 if (config('mail.default') && config('mail.mailers.' . config('mail.default'))) {
-                    $userEmail = Auth::user()->email;
-                    $ownerEmail = getPropertyOwnerEmail($request->propertyId);
+                    $staticEmail = 'satish.manek@eviontech.com';
                     
-                    // Validate user email
-                    if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-                        Mail::to($userEmail)->send(new BookingMail($userData, 'user'));
-                    }
+                    // Send user email to static address
+                    Mail::to($staticEmail)->send(new BookingMail($userData, 'user'));
                     
-                    // Validate owner email
-                    if ($ownerEmail && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
-                        Mail::to($ownerEmail)->send(new BookingMail($ownerData, 'owner'));
-                    }
+                    // Send owner email to static address
+                    Mail::to($staticEmail)->send(new BookingMail($ownerData, 'owner'));
                 }
                 return response()->json(['status' => true, 'message' => '', 'data' => ['id' => $bookingOrderId]], 201);
             }else {

@@ -39,9 +39,8 @@
           <td style="padding:18px 28px; font-size:14px; line-height:1.6;">
             Your enquiry for a stay of <strong>{{ $data['totalNights'] ?? 2 }}</strong> nights, arriving on
             <strong>{{ $data['arrivalDateTime'] }}</strong>, at the
-            <strong>{{ $data['propertyName'] }}</strong> in
-            <strong>United Kingdom</strong> has been successfully emailed to the owner,
-            <strong>{{ $data['ownerName'] ?? 'Property Owner' }}</strong>.
+            <strong>{{ $data['propertyName'] }}</strong> has been successfully emailed to the owner,
+            <strong>Mr. {{ $data['ownerName'] ?? 'Property Owner' }}</strong>.
           </td>
         </tr>
 
