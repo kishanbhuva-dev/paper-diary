@@ -149,6 +149,37 @@
               />
             </div>
           </div>
+          <!-- payment gateway  -->
+          <div class="p-6 md:p-8 border-b border-gray-100">
+            <h3
+              class="text-xl font-bold text-blue-700 mb-6 flex items-center gap-2"
+            >
+              <Icon icon="mdi:shield-key-outline" class="text-2xl" /> Stripe
+              Configuration
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.stripePublicKey"
+                label="Stripe Public Key"
+                width="full"
+                placeholder="pk_test_..."
+                :pattern="/^pk_(test|live)_[A-Za-z0-9]{24,}$/"
+                custom-error="Invalid public key"
+              />
+              <BaseInput
+                :ref="setInputRef"
+                v-model="formData.stripeSecretKey"
+                label="Stripe Secret Key"
+                width="full"
+                type="password"
+                placeholder="sk_test_..."
+                :pattern="/^sk_(test|live)_[A-Za-z0-9]{24,}$/"
+                custom-error="Invalid secret key"
+              />
+            </div>
+          </div>
 
           <div class="p-6 md:p-8 border-b border-gray-100">
             <h3
@@ -280,6 +311,8 @@ const defaultFormData = {
   country: "",
   latitude: "",
   longitude: "",
+  stripePublicKey: "",
+  stripeSecretKey: "",
   postcode: "",
   telephone: "",
   images: [],
