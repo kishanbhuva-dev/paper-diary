@@ -224,22 +224,63 @@ class BookingsController extends Controller
                     $booking->price = $resourcePrice;
                     $booking->save();
                 }
-                $propertyOwnerEmail = getPropertyOwnerEmail($request->propertyId);
-                $data=[];
-                $data['bookingId']=$bookingOrderId;
-                $data['userName']=Auth::user()->firstName.' '.Auth::user()->lastName;
-                $data['arrivalDateTime']=date('d M Y H:i', strtotime($request->arrivalDateTime));
-                $data['departureDateTime']=date('d M Y H:i', strtotime($request->departureDateTime));
-                $data['propertyName']= getPropertyName($request->propertyId);
-                $data['resourceTypeName']= getResourceTypeName($request->resourceTypeId);
-                $data['totalAdults']=$request->adults;
-                $data['totalChildren']=$request->children ?? 0;
-                $data['totalGuests']=$request->adults + ($request->children ?? 0);
-                $data['totalPrice']=$request->price;
-                $data['guestEmail']=Auth::user()->email;
-                $data['guestPhone']=Auth::user()->phone;
-                Mail::to(Auth::user()->email)->send(new BookingMail($data, 'user'));
-                Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($data, 'owner'));
+                // Prepare data for user email
+                $userData = [];
+                $userData['bookingId'] = $bookingOrderId;
+                $userData['userName'] = Auth::user()->firstName.' '.Auth::user()->lastName;
+                $userData['arrivalDateTime'] = date('d M Y', strtotime($request->arrivalDateTime));
+                $userData['departureDateTime'] = date('d M Y', strtotime($request->departureDateTime));
+                $userData['propertyName'] = getPropertyName($request->propertyId);
+                $userData['resourceTypeName'] = getResourceTypeName($request->resourceTypeId);
+                $userData['totalAdults'] = $request->adults;
+                $userData['totalChildren'] = $request->children ?? 0;
+                $userData['totalGuests'] = $request->adults + ($request->children ?? 0);
+                $userData['totalPrice'] = $resourcePriceTotal;
+                $userData['guestEmail'] = $request->guestEmail;
+                $userData['guestPhone'] = $request->guestPhone;
+                $userData['guestAddress'] = $request->guestAddress;
+                
+                // Calculate total nights
+                $arrival = Carbon::parse($request->arrivalDateTime);
+                $departure = Carbon::parse($request->departureDateTime);
+                $interval = $arrival->diffInDays($departure);
+                $userData['totalNights'] = $interval;
+                
+                // Get resource names
+                $resourceNames = $resourcesToBook->pluck('name')->implode(', ');
+                $userData['resourceNames'] = $resourceNames;
+                
+                // Get owner name
+                $property = Property::where('id', $request->propertyId)->with('owner')->first();
+                $userData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
+                
+                // Prepare data for owner email
+                $ownerData = [];
+                $ownerData['bookingId'] = $bookingOrderId;
+                $ownerData['userName'] = $request->guestFullName;
+                $ownerData['guestEmail'] = $request->guestEmail;
+                $ownerData['guestPhone'] = $request->guestPhone;
+                $ownerData['arrivalDateTime'] = date('d M Y', strtotime($request->arrivalDateTime));
+                $ownerData['departureDateTime'] = date('d M Y', strtotime($request->departureDateTime));
+                $ownerData['propertyName'] = getPropertyName($request->propertyId);
+                $ownerData['resourceTypeName'] = getResourceTypeName($request->resourceTypeId);
+                $ownerData['totalAdults'] = $request->adults;
+                $ownerData['totalChildren'] = $request->children ?? 0;
+                $ownerData['totalGuests'] = $request->adults + ($request->children ?? 0);
+                $ownerData['totalPrice'] = $resourcePriceTotal;
+                $ownerData['bookingUser'] = Auth::user()->firstName.' '.Auth::user()->lastName;
+                $ownerData['bookingUserEmail'] = Auth::user()->email;
+                
+                // Calculate total nights for owner
+                $ownerData['totalNights'] = $interval;
+                
+                // Get resource names for owner
+                $ownerData['resourceNames'] = $resourceNames;
+                
+                $ownerData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
+                
+                // Mail::to(Auth::user()->email)->send(new BookingMail($userData, 'user'));
+                // Mail::to(getPropertyOwnerEmail($request->propertyId))->send(new BookingMail($ownerData, 'owner'));
                 return response()->json(['status' => true, 'message' => '', 'data' => ['id' => $bookingOrderId]], 201);
             }else {
                 return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
