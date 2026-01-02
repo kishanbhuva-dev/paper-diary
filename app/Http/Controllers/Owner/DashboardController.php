@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Property;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -14,6 +15,15 @@ class DashboardController extends Controller
             $propertyId        = Property::where('ownerId', Auth::id())->pluck('id')->toArray();
             $totalBookingCount = Booking::whereIn('propertyId', $propertyId)->count();
             $response          = ['status' => true, 'message' => '', 'data' => compact('totalBookingCount')];
+            return response()->json($response);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+        }
+    }
+    public function ownerDetails(){
+        try {
+            $owner = User::where('id', Auth::id())->first();
+            $response = ['status' => true, 'message' => '', 'data' => $owner];
             return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);

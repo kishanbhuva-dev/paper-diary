@@ -265,22 +265,19 @@ class BookingsController extends Controller
                 $ownerData['totalPrice'] = $resourcePriceTotal;
                 $ownerData['bookingUser'] = Auth::user()->firstName.' '.Auth::user()->lastName;
                 $ownerData['bookingUserEmail'] = Auth::user()->email;
-                
                 $ownerData['totalNights'] = $interval;
-                
                 $ownerData['resourceNames'] = $resourceNames;
-                
                 $ownerData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
-                
-                // Send emails only if mail is configured
                 if (config('mail.default') && config('mail.mailers.' . config('mail.default'))) {
-                    $staticEmail = 'satish.manek@eviontech.com';
+                    $userEmail = Auth::user()->email;
+                    $ownerEmail = getPropertyOwnerEmail($request->propertyId);
                     
-                    // Send user email to static address
-                    Mail::to($staticEmail)->send(new BookingMail($userData, 'user'));
-                    
-                    // Send owner email to static address
-                    Mail::to($staticEmail)->send(new BookingMail($ownerData, 'owner'));
+                    if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+                        Mail::to($userEmail)->send(new BookingMail($userData, 'user'));
+                    }                    
+                    if ($ownerEmail && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
+                        Mail::to($ownerEmail)->send(new BookingMail($ownerData, 'owner'));
+                    }
                 }
                 return response()->json(['status' => true, 'message' => '', 'data' => ['id' => $bookingOrderId]], 201);
             }else {
@@ -292,7 +289,7 @@ class BookingsController extends Controller
     }
     public function propertyDetails(Request $request)
     {
-        $property = Property::where('slug', $request->slug)->with(['owner','resourceTypes','facilities','propertyImage'=>function($query) {
+        $property = Property::selectRaw("id,ownerId,propertyName,address,address2,city,country,postcode,telephone,phone,latitude,longitude,description,slug,county")->where('slug', $request->slug)->with(['owner','resourceTypes','facilities','propertyImage'=>function($query) {
             $query->orderBy('position','asc');
         },'resourceTypes.resources'=>function($query){
             $query->select('id','name','customPrice','status')->where('status',1);

@@ -29,6 +29,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:sanctum', 'admin']], f
 });
 Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], function () {
     Route::get('/', [App\Http\Controllers\Owner\DashboardController::class, 'index']);
+    Route::get('owner-details', [App\Http\Controllers\Owner\DashboardController::class, 'ownerDetails']);
     Route::apiResource('property', App\Http\Controllers\Owner\PropertyController::class);
     Route::get('property-dropdown', [App\Http\Controllers\Owner\PropertyController::class, 'propertyDropdown']);
     Route::apiResource('resource-type', App\Http\Controllers\Owner\ResourceTypeController::class);

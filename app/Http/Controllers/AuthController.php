@@ -44,7 +44,6 @@ class AuthController extends Controller
             ]);
         }
     }
-
     public function register(Request $request)
     {
         try {
@@ -56,6 +55,12 @@ class AuthController extends Controller
                 'confirm_password' => 'required_with:password|same:password|min:8',
                 'role'             => 'nullable|in:user,owner',
                 'address'          => 'required|string',
+                'address2'=>'nullable|string',
+                'city'=>'required|string',
+                'country'=>'required|string',
+                'postcode'=>'required|string',
+                'telephone'=>'required|string',
+                'phone'=>'required|string'
             ]);
 
             if ($validator->fails()) {
