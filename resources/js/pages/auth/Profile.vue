@@ -203,6 +203,7 @@ import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
 import BaseInput from "../../components/global/BaseInput.vue";
 import authService from "../../services/authService";
+import ownerService from "../../services/ownerService";
 
 const router = useRouter();
 const loading = ref(false);
@@ -235,32 +236,44 @@ const form = ref({
   stripePublicKey: "",
   stripeSecretKey: "",
 });
-
-onMounted(() => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
+const fetchProfileDetails = async () => {
+  try {
+    const storedUser = localStorage.getItem("user");
     const user = JSON.parse(storedUser);
     userRole.value = user.role;
 
-    form.value = {
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      email: user.email || "",
-      address: user.address || "",
-      address2: user.address2 || "",
-      country: user.country || "",
-      city: user.city || "",
-      postcode: user.postcode || "",
-      phone: user.phone || "",
-      telephone: user.telephone || "",
-      stripePublicKey: user.stripePublicKey || "",
-      stripeSecretKey: user.stripeSecretKey || "",
-    };
+    if (storedUser) {
+      let ownerData = null;
+      if (userRole.value === "owner") {
+        const res = await ownerService.getOwnerDetails();
+        ownerData = res.data.data;
+      }
+      form.value = {
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        address: user.address || "",
+        address2: user.address2 || "",
+        country: user.country || "",
+        city: user.city || "",
+        postcode: user.postcode || "",
+        phone: user.phone || "",
+        telephone: user.telephone || "",
+
+        stripePublicKey: ownerData?.stripePublicKey || "",
+        stripeSecretKey: ownerData?.stripeSecretKey || "",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching owner details:", error);
   }
+};
+
+onMounted(() => {
+  fetchProfileDetails();
 });
 
 const handleUpdateProfile = async () => {
-  // 1. Collect all input refs into an array
   const inputsToValidate = [
     input_firstName.value,
     input_lastName.value,
@@ -273,7 +286,6 @@ const handleUpdateProfile = async () => {
     input_country.value,
   ];
 
-  // 2. Add Stripe inputs if user is owner
   if (userRole.value === "owner") {
     inputsToValidate.push(
       input_stripePublicKey.value,
@@ -281,14 +293,12 @@ const handleUpdateProfile = async () => {
     );
   }
 
-  // 3. Run validation on all components and check results
-  // We use filter(Boolean) to ignore any refs that might be null (like Stripe keys for non-owners)
   const isFormValid = inputsToValidate
     .filter((input) => input !== null)
     .every((input) => input.validate());
 
   if (!isFormValid) {
-    return; // Stop submission if any input is invalid
+    return;
   }
 
   loading.value = true;
@@ -296,16 +306,16 @@ const handleUpdateProfile = async () => {
   try {
     const payload = { ...form.value };
 
-    // If NOT an owner, remove Stripe keys so the API doesn't try to validate them
     if (userRole.value !== "owner") {
       delete payload.stripePublicKey;
       delete payload.stripeSecretKey;
     }
-    const response = await authService.updateProfile(form.value);
+    const response = await authService.updateProfile(payload);
 
     if (response.status) {
       const storedUser = JSON.parse(localStorage.getItem("user"));
-      const updatedUser = { ...storedUser, ...form.value };
+      const { stripePublicKey, stripeSecretKey, ...safeUserData } = form.value;
+      const updatedUser = { ...storedUser, ...safeUserData };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       if (userRole.value === "admin") {

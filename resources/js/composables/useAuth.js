@@ -37,7 +37,8 @@ function persistAuth(newToken, newUser) {
 
   if (newUser) {
     try {
-      localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+      const { stripePublicKey, stripeSecretKey, ...safeUser } = newUser;
+      localStorage.setItem(USER_KEY, JSON.stringify(safeUser));
       user.value = newUser;
     } catch (e) {
       console.error("[useAuth] Failed to save user:", e);

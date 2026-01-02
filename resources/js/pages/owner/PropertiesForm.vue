@@ -381,6 +381,15 @@ const loadPropertyForEdit = async (id) => {
     const loadedData = JSON.parse(JSON.stringify(item));
     loadedData.images = loadedImages;
     loadedData.facilities = loadedFacilityIds;
+    if (
+      loadedData.stripePublicKey === null &&
+      loadedData.stripeSecretKey === null
+    ) {
+      const res = await ownerService.getOwnerDetails();
+      const ownerData = res.data.data;
+      loadedData.stripePublicKey = ownerData?.stripePublicKey || "";
+      loadedData.stripeSecretKey = ownerData?.stripeSecretKey || "";
+    }
 
     initialImageIds.value = loadedImages.map((i) => i.id).filter(Boolean);
     formData.value = loadedData;
