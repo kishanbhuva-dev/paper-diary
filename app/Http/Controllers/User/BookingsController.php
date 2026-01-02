@@ -224,7 +224,6 @@ class BookingsController extends Controller
                     $booking->price = $resourcePrice;
                     $booking->save();
                 }
-                // Prepare data for user email
                 $userData = [];
                 $userData['bookingId'] = $bookingOrderId;
                 $userData['userName'] = Auth::user()->firstName.' '.Auth::user()->lastName;
@@ -240,21 +239,17 @@ class BookingsController extends Controller
                 $userData['guestPhone'] = $request->guestPhone;
                 $userData['guestAddress'] = $request->guestAddress;
                 
-                // Calculate total nights
                 $arrival = Carbon::parse($request->arrivalDateTime);
                 $departure = Carbon::parse($request->departureDateTime);
                 $interval = $arrival->diffInDays($departure);
                 $userData['totalNights'] = $interval;
                 
-                // Get resource names
                 $resourceNames = $resourcesToBook->pluck('name')->implode(', ');
                 $userData['resourceNames'] = $resourceNames;
                 
-                // Get owner name
                 $property = Property::where('id', $request->propertyId)->with('owner')->first();
                 $userData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
                 
-                // Prepare data for owner email
                 $ownerData = [];
                 $ownerData['bookingId'] = $bookingOrderId;
                 $ownerData['userName'] = $request->guestFullName;
@@ -270,26 +265,16 @@ class BookingsController extends Controller
                 $ownerData['totalPrice'] = $resourcePriceTotal;
                 $ownerData['bookingUser'] = Auth::user()->firstName.' '.Auth::user()->lastName;
                 $ownerData['bookingUserEmail'] = Auth::user()->email;
-                
-                // Calculate total nights for owner
                 $ownerData['totalNights'] = $interval;
-                
-                // Get resource names for owner
                 $ownerData['resourceNames'] = $resourceNames;
-                
                 $ownerData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
-                
-                // Send emails only if mail is configured and emails are valid
                 if (config('mail.default') && config('mail.mailers.' . config('mail.default'))) {
                     $userEmail = Auth::user()->email;
                     $ownerEmail = getPropertyOwnerEmail($request->propertyId);
                     
-                    // Validate user email
                     if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
                         Mail::to($userEmail)->send(new BookingMail($userData, 'user'));
-                    }
-                    
-                    // Validate owner email
+                    }                    
                     if ($ownerEmail && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
                         Mail::to($ownerEmail)->send(new BookingMail($ownerData, 'owner'));
                     }
@@ -304,7 +289,7 @@ class BookingsController extends Controller
     }
     public function propertyDetails(Request $request)
     {
-        $property = Property::where('slug', $request->slug)->with(['owner','resourceTypes','facilities','propertyImage'=>function($query) {
+        $property = Property::selectRaw("id,ownerId,propertyName,address,address2,city,country,postcode,telephone,phone,latitude,longitude,description,slug,county")->where('slug', $request->slug)->with(['owner','resourceTypes','facilities','propertyImage'=>function($query) {
             $query->orderBy('position','asc');
         },'resourceTypes.resources'=>function($query){
             $query->select('id','name','customPrice','status')->where('status',1);

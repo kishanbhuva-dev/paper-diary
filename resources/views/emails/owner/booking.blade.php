@@ -90,7 +90,7 @@
               </tr>
               <tr>
                 <td>
-                  <div style="font-size:12px; color:#777;">REQUESTED PITCH</div>
+                  <div style="font-size:12px; color:#777;">RESOURCES TYPE</div>
                   <strong>{{ $data['resourceTypeName'] }}</strong>
                 </td>
                 <td>
