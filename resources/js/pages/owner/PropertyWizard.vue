@@ -96,8 +96,8 @@ const router = useRouter();
 // --- STATE ---
 const currentStep = ref(1);
 const loading = ref(false);
-const propertyId = ref(null); // Key piece of state carried through steps
-const resourceTypes = ref([]); // State from step 2 needed for step 3
+const propertyId = ref(null);
+const resourceTypes = ref([]);
 const createdInWizard = ref(false);
 const pendingChanges = ref({
   property: null,
@@ -111,11 +111,7 @@ const step2Ref = ref(null);
 const step3Ref = ref(null);
 
 const route = useRoute();
-// --- COMPUTED ---
 onMounted(() => {
-  // If wizard opened with an id (edit-mode), remember that so we don't
-  // treat subsequent saves as 'created in wizard' and we avoid deleting
-  // the property on Cancel.
   if (route.params && route.params.id) {
     startedWithId.value = true;
     propertyId.value = route.params.id;
@@ -279,17 +275,12 @@ const loadResourceTypes = async (id) => {
 };
 
 const handleStep1Success = async (data) => {
-  // Property was created/updated, store the ID
-  // If the wizard was opened without an existing id, then this creation
-  // happened in this wizard and should be deleted on Cancel.
   if (!startedWithId.value) {
     if (!propertyId.value) createdInWizard.value = true;
   }
   propertyId.value = data.id;
 
-  // FIX: Load resource types if we are in Edit Mode
   if (startedWithId.value) {
-    // Resolve ID in case it's base64
     let id = data.id;
     try {
       const maybe = atob(String(id));
@@ -302,15 +293,12 @@ const handleStep1Success = async (data) => {
 };
 
 const handleStep2Success = (data) => {
-  // Resource types were created, store their IDs
   resourceTypes.value = data.resourceTypes;
   nextStep();
 };
 
 const handleStep3Success = () => {
-  // Final step complete, navigate to properties list
   if (startedWithId.value) {
-    // If editing, apply the pending changes (property/resource types/resources)
     applyEdits();
     return;
   }
@@ -321,10 +309,8 @@ const applyEdits = async () => {
   loading.value = true;
   try {
     const id = propertyId.value;
-    // Ensure numeric id if base64 was used in route
     let numericId = id;
     try {
-      // attempt base64 decode
       const maybe = atob(String(id));
       if (!isNaN(Number(maybe))) numericId = Number(maybe);
     } catch (e) {}
@@ -350,8 +336,6 @@ const applyEdits = async () => {
         uploadedNewIds = (uploaded || []).map((u) => u.id).filter(Boolean);
       }
 
-      // Apply ordering: prefer explicit order sent from the child (p.orderedImageIds).
-      // If child provided an order for existing images, append newly uploaded ids at the end.
       if (p.orderedImageIds && p.orderedImageIds.length) {
         const finalOrder = [...p.orderedImageIds];
         if (uploadedNewIds.length) finalOrder.push(...uploadedNewIds);

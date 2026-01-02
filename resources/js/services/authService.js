@@ -36,11 +36,6 @@ const authService = {
     const response = await apiClient.post("/change-password", payload);
     return response.data;
   },
-
-  async getCurrentUser() {
-    const response = await apiClient.get("/user");
-    return response.data;
-  },
 };
 
 export default authService;

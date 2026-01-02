@@ -22,6 +22,12 @@ Methods included:
 import apiClient from "./apiClient";
 
 const ownerService = {
+  // ------ Owner DETAILS ------
+  async getOwnerDetails() {
+    const response = await apiClient.get("/owner/owner-details");
+    return response;
+  },
+
   // --- PROPERTY METHODS ---
 
   // Fetch all properties for the owner
@@ -163,7 +169,9 @@ const ownerService = {
 
   // Create multiple resources (rooms) in bulk
   async resourceList(payload) {
-    const res = await apiClient.get("/owner/resource-wise-list", { params: payload });
+    const res = await apiClient.get("/owner/resource-wise-list", {
+      params: payload,
+    });
     return res.data.data;
   },
 
