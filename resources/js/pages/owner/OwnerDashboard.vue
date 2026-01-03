@@ -90,7 +90,7 @@
       @booking-click="handleBookingClick"
     />
 
-    <div class="mt-8">
+    <div v-if="false" class="mt-8">
       <div class="flex items-center justify-between mb-4 px-1">
         <h3 class="text-lg font-bold text-gray-800">Recent Bookings</h3>
       </div>
@@ -305,7 +305,6 @@ const isFutureBooking = (checkInStr) => {
 
 const handleBookingClick = (booking) => {
   selectedBooking.value = booking;
-  console.log("booking details ", selectedBooking.value);
 
   showBookingModal.value = true;
 };
