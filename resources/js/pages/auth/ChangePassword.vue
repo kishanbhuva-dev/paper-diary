@@ -24,40 +24,110 @@
             <span>Change Password</span>
           </div>
 
-          <div
-            v-if="passwordError && form.confirmPassword"
-            class="bg-red-50 border border-red-100 text-red-600 px-4 py-2 rounded-lg text-sm flex items-center gap-2 mb-4"
-          >
-            <Icon icon="mdi:alert-circle-outline" />
-            <span>{{ passwordError }}</span>
-          </div>
-
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <BaseInput
-              ref="newPasswordRef"
-              label="New Password"
-              v-model="form.password"
-              type="password"
-              width="full"
-              required
-              :minLength="8"
-              icon="mdi:lock-outline"
-              placeholder="••••••••"
-              helperText="Minimum 8 characters required"
-              :customError="passwordError"
-            />
+            <div class="max-w-6xl w-full">
+              <label class="block text-sm font-semibold mb-1 text-slate-400">
+                New Password <span class="text-red-500">*</span>
+              </label>
 
-            <BaseInput
-              ref="confirmPasswordRef"
-              label="Confirm New Password"
-              v-model="form.confirmPassword"
-              type="password"
-              width="full"
-              required
-              icon="mdi:lock-check-outline"
-              placeholder="••••••••"
-              :customError="passwordError"
-            />
+              <div
+                :class="[
+                  'flex gap-2 border px-3 py-2 transition-all duration-200 rounded-xl items-center bg-white',
+                  touched.password && errors.password
+                    ? 'border-red-500 ring-1 ring-red-100'
+                    : 'border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100',
+                ]"
+              >
+                <Icon
+                  icon="mdi:lock-outline"
+                  class="text-md shrink-0 text-slate-400"
+                />
+                <input
+                  v-model="form.password"
+                  :type="showPass1 ? 'text' : 'password'"
+                  placeholder="••••••••"
+                  class="flex-1 min-w-0 outline-none border-none bg-transparent placeholder:text-slate-400 text-sm text-gray-900"
+                  @blur="touched.password = true"
+                />
+                <button
+                  type="button"
+                  @click="showPass1 = !showPass1"
+                  class="focus:outline-none text-slate-400 hover:text-slate-600"
+                >
+                  <Icon
+                    :icon="
+                      showPass1 ? 'mdi:eye-off-outline' : 'mdi:eye-outline'
+                    "
+                    class="text-lg"
+                  />
+                </button>
+              </div>
+
+              <div class="flex justify-between items-start mt-1">
+                <span
+                  class="text-xs font-medium"
+                  :class="
+                    touched.password && errors.password
+                      ? 'text-red-500'
+                      : 'text-slate-500'
+                  "
+                >
+                  {{
+                    touched.password && errors.password
+                      ? errors.password
+                      : "Minimum 8 characters required"
+                  }}
+                </span>
+              </div>
+            </div>
+
+            <div class="max-w-6xl w-full">
+              <label class="block text-sm font-semibold mb-1 text-slate-400">
+                Confirm New Password <span class="text-red-500">*</span>
+              </label>
+
+              <div
+                :class="[
+                  'flex gap-2 border px-3 py-2 transition-all duration-200 rounded-xl items-center bg-white',
+                  touched.confirmPassword && errors.confirmPassword
+                    ? 'border-red-500 ring-1 ring-red-100'
+                    : 'border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100',
+                ]"
+              >
+                <Icon
+                  icon="mdi:lock-check-outline"
+                  class="text-md shrink-0 text-slate-400"
+                />
+                <input
+                  v-model="form.confirmPassword"
+                  :type="showPass2 ? 'text' : 'password'"
+                  placeholder="••••••••"
+                  class="flex-1 min-w-0 outline-none border-none bg-transparent placeholder:text-slate-400 text-sm text-gray-900"
+                  @blur="touched.confirmPassword = true"
+                />
+                <button
+                  type="button"
+                  @click="showPass2 = !showPass2"
+                  class="focus:outline-none text-slate-400 hover:text-slate-600"
+                >
+                  <Icon
+                    :icon="
+                      showPass2 ? 'mdi:eye-off-outline' : 'mdi:eye-outline'
+                    "
+                    class="text-lg"
+                  />
+                </button>
+              </div>
+
+              <div class="flex justify-between items-start mt-1">
+                <span
+                  v-if="touched.confirmPassword && errors.confirmPassword"
+                  class="text-xs font-medium text-red-500"
+                >
+                  {{ errors.confirmPassword }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -148,41 +218,58 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Icon } from "@iconify/vue";
-import BaseInput from "../../components/global/BaseInput.vue";
 import authService from "../../services/authService";
 
 const router = useRouter();
 const loading = ref(false);
 const showModal = ref(false);
 
-const newPasswordRef = ref(null);
-const confirmPasswordRef = ref(null);
+const showPass1 = ref(false);
+const showPass2 = ref(false);
 
 const form = ref({
   password: "",
   confirmPassword: "",
 });
 
-const passwordError = computed(() => {
-  if (
-    form.value.confirmPassword &&
-    form.value.password !== form.value.confirmPassword
-  ) {
-    return "Passwords do not match";
+const touched = ref({
+  password: false,
+  confirmPassword: false,
+});
+
+// Logic to replace BaseInput validation
+const errors = computed(() => {
+  const errs = { password: "", confirmPassword: "" };
+
+  // New Password Validation
+  if (!form.value.password) {
+    errs.password = "This field is required";
+  } else if (form.value.password.length < 8) {
+    errs.password = "Minimum 8 characters required";
   }
-  return "";
+
+  // Confirm Password & Mismatch Validation
+  if (!form.value.confirmPassword) {
+    errs.confirmPassword = "This field is required";
+  } else if (form.value.password !== form.value.confirmPassword) {
+    errs.confirmPassword = "Passwords do not match";
+  }
+
+  return errs;
 });
 
 const resetForm = () => {
   form.value.password = "";
   form.value.confirmPassword = "";
+  touched.value.password = false;
+  touched.value.confirmPassword = false;
 };
 
 const openConfirmation = () => {
-  const isNewPassValid = newPasswordRef.value?.validate();
-  const isConfirmPassValid = confirmPasswordRef.value?.validate();
+  touched.value.password = true;
+  touched.value.confirmPassword = true;
 
-  if (!isNewPassValid || !isConfirmPassValid || passwordError.value) {
+  if (errors.value.password || errors.value.confirmPassword) {
     return;
   }
 
@@ -210,11 +297,9 @@ const handlePasswordUpdate = async () => {
         router.push({ name: "home" });
       }
     } else {
-      console.error(response.message || "Failed to update password");
       showModal.value = false;
     }
   } catch (error) {
-    console.error("Password update failed", error);
     showModal.value = false;
   } finally {
     loading.value = false;
