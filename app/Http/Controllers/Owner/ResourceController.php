@@ -263,9 +263,19 @@ class ResourceController extends Controller
                     ];
                 });
             }
+
+            $ownerProperty = Property::where('ownerId', auth()->id());
+            
+            $totalBooking = BookingOrder::whereIn('propertyId', $ownerProperty->pluck('id'))->count();
+            $todayBooking = BookingOrder::whereIn('propertyId', $ownerProperty->pluck('id'))->whereDate('arrivalDateTime', Carbon::today())->count();
+            $cancelledBooking = BookingOrder::whereIn('propertyId', $ownerProperty->pluck('id'))->where('status', 'cancelled')->count();
             $data = [
                 'resource' => $resources->toArray(),
                 'booking' => $bookings->toArray(),
+                'totalProperty' => $ownerProperty->count(),
+                'totalBooking' => $totalBooking,
+                'todayBooking' => $todayBooking,
+                'cancelledBooking' => $cancelledBooking,
             ];
             $response  = ['status' => true, 'message' => '', 'data' => $data];
             return response()->json($response);
