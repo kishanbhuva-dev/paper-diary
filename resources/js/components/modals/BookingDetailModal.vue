@@ -23,6 +23,11 @@
 
       <div class="p-6 overflow-y-auto modal-inner-content">
         <div v-if="booking" class="space-y-6">
+          <div class="border-b border-gray-100">
+            <p class="text-md text-gray-400">
+              Booking Reference ID: #{{ booking.id }}
+            </p>
+          </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
               <label
@@ -36,10 +41,10 @@
             <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
               <label
                 class="text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >Resource/Room</label
+                >Adult / Child</label
               >
               <p class="text-indigo-900 font-semibold mt-1">
-                {{ booking.roomNumber }}
+                {{ booking.adult }} Adult(s) / {{ booking.child }} Child(ren)
               </p>
             </div>
           </div>
@@ -52,7 +57,7 @@
                 <Icon icon="mdi:login" /> Check-In
               </label>
               <p class="text-gray-800 font-medium mt-1">
-                {{ booking.checkIn }}
+                {{ booking.modalcheckIn }}
               </p>
             </div>
             <div class="p-3 bg-amber-50/50 rounded-lg border border-amber-100">
@@ -62,12 +67,32 @@
                 <Icon icon="mdi:logout" /> Check-Out
               </label>
               <p class="text-gray-800 font-medium mt-1">
-                {{ booking.checkOut }}
+                {{ booking.modalcheckOut }}
+              </p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <label
+                class="text-xs font-bold text-gray-400 uppercase tracking-wider"
+                >Resource</label
+              >
+              <p class="text-indigo-900 font-semibold mt-1">
+                {{ booking.roomNumber }}
+              </p>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <label
+                class="text-xs font-bold text-gray-400 uppercase tracking-wider"
+                >Booking Status</label
+              >
+              <p class="text-indigo-900 font-semibold mt-1">
+                {{ booking.status }}
               </p>
             </div>
           </div>
 
-          <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+          <!-- <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
             <label
               class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2"
               >Booking Status</label
@@ -78,13 +103,7 @@
             >
               {{ booking.status }}
             </span>
-          </div>
-
-          <div class="pt-4 border-t border-gray-100">
-            <p class="text-[10px] text-gray-400">
-              Booking Reference ID: #{{ booking.id }}
-            </p>
-          </div>
+          </div> -->
         </div>
       </div>
 
