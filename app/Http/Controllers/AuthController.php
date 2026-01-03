@@ -259,4 +259,21 @@ class AuthController extends Controller
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => null]);
         }
     }
+    public function checkEmail(Request $request){
+        try {
+            $validator = Validator::make($request->all(), [
+                'email'        => 'required|string|min:8|max:255|email',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
+            }
+            $user = User::where('email', $request->email)->first();
+            if (! empty($user)) {
+                return response()->json(['status' => false, 'message' => '', 'data' => null]);
+            }
+            return response()->json(['status' => true, 'message' => 'Please Login to your account', 'data' => '']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => null]);
+        }
+    }
 }
