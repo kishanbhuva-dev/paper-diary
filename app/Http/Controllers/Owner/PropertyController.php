@@ -387,7 +387,7 @@ class PropertyController extends Controller
                 $propertyImage->position = $key+1;
                 $propertyImage->save();
             }
-            $response = ['status' => true, 'message' => 'Property image position updated successfully', 'data' => ''];
+            $response = ['status' => true, 'message' => '', 'data' => ''];
                 return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
@@ -408,7 +408,7 @@ class PropertyController extends Controller
             if (empty($propertyImages)) {
                 return response()->json(['status' => false, 'message' => 'Property images not found', 'data' => '']);
             }
-            $response = ['status' => true, 'message' => 'Property images fetched successfully', 'data' => $propertyImages];
+            $response = ['status' => true, 'message' => '', 'data' => $propertyImages];
                 return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);

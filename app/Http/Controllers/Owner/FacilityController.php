@@ -16,7 +16,7 @@ class FacilityController extends Controller
             if (empty($facilities)) {
                 return response()->json(['status' => false, 'message' => 'No facility found']);
             }
-            return response()->json(['status' => true, 'message' => 'Facility found', 'data' => $facilities]);
+            return response()->json(['status' => true, 'message' => '', 'data' => $facilities]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
