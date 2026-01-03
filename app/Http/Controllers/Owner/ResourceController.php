@@ -193,52 +193,6 @@ class ResourceController extends Controller
             return response()->json($response);
         }
     }
-    // public function resourceWiseList(Request $request)
-    // {
-    //     try {
-    //         $ownerId = auth()->id();
-    //         $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
-    //         $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
-    //         $resourceTypeIds = $resourceTypes->pluck('id');
-    //         $resources = Resource::select('id', 'name', 'resourceTypeId')
-    //         ->whereIn('resourceTypeId', $resourceTypeIds)
-    //         ->with('resourceType.property')
-    //         ->get()
-    //         ->map(function ($item) {
-    //             return [
-    //                 'id' => $item->id,
-    //                 'name' => $item->name,
-    //                 'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
-    //                 'resource_type_name' => $item->resourceType->name ?? 'N/A',
-    //             ];
-    //         });
-    //         $resourcesid = $resources->pluck('id');    
-    //         $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")->with([
-    //         'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
-    //         $bookings = $bookings->map(function ($order) {
-    //             return [
-    //                 'id'               => $order->id,
-    //                 'guestFullName'    => $order->guestFullName,
-    //                 'guestEmail'       => $order->guestEmail,
-    //                 'guestPhone'       => $order->guestPhone,
-    //                 'resourceTypeId'   => $order->resourceTypeId,
-    //                 'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
-    //                 'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
-    //                 'status'           => $order->status,
-    //                 'resource_name'    => optional($order->booking->first()->resource)->name,
-    //             ];
-    //         });
-    //         $data = [
-    //             'resource' => $resources->toArray(),
-    //             'booking' => $bookings->toArray(),
-    //         ];
-    //         $response  = ['status' => true, 'message' => 'Resources fetched successfully', 'data' => $data];
-    //         return response()->json($response);
-    //     } catch (\Throwable $th) {
-    //         $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
-    //         return response()->json($response);
-    //     }
-    // }
     public function resourceWiseList(Request $request)
     {
         try {
@@ -289,7 +243,7 @@ class ResourceController extends Controller
                     $ownerPropertyIds = Property::where('ownerId', $ownerId)->pluck('id');
                     $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $ownerPropertyIds)->pluck('id');
                 }
-                $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status")
+                $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status,adult,children")
                 ->whereIn('resourceTypeId', $selectedResourceTypeIds)
                 ->with([
                 'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
@@ -303,6 +257,8 @@ class ResourceController extends Controller
                         'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
                         'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
                         'status'           => $order->status,
+                        'adult'            => $order->adult,
+                        'children'         => $order->children,
                         'resource_name'    => optional(optional($order->booking->first())->resource)->name ?? 'N/A',
                     ];
                 });
