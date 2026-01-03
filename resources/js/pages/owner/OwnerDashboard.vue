@@ -2,92 +2,24 @@
   <div class="p-2 sm:p-3 lg:p-4 bg-gray-50 min-h-max">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div
+        v-for="stat in statsList"
+        :key="stat.key"
         class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
       >
         <div class="flex justify-between items-start">
           <div>
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              Total Inventory
+              {{ stat.label }}
             </p>
             <div class="mt-2 flex items-baseline gap-2">
-              <span class="text-xl text-gray-800">{{
-                dashboardStats.totalProperties
-              }}</span>
-              <span class="text-sm text-gray-500 font-medium">Units</span>
+              <span class="text-xl font-bold" :class="stat.textClass">
+                {{ stat.value }}
+              </span>
+              <span class="text-xs text-gray-400 font-medium">Units</span>
             </div>
           </div>
-          <div class="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-            <Icon icon="mdi:office-building-marker-outline" class="text-xl" />
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              Total Bookings
-            </p>
-            <div class="mt-2 flex items-baseline gap-2">
-              <span class="text-xl text-gray-800">{{
-                dashboardStats.totalBookings
-              }}</span>
-              <span class="text-sm text-gray-500 font-medium">Lifetime</span>
-            </div>
-          </div>
-          <div class="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
-            <Icon icon="mdi:calendar-check" class="text-xl" />
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              Today's Ops
-            </p>
-            <div class="mt-2 flex items-baseline gap-4">
-              <div class="flex items-baseline gap-1">
-                <span class="text-xl text-green-600">{{
-                  operationalStats.checkIns
-                }}</span>
-                <span class="text-sm text-gray-500 font-medium">In</span>
-              </div>
-              <span class="text-gray-200">|</span>
-              <div class="flex items-baseline gap-1">
-                <span class="text-xl text-amber-600">{{
-                  operationalStats.checkOuts
-                }}</span>
-                <span class="text-sm text-gray-500 font-medium">Out</span>
-              </div>
-            </div>
-          </div>
-          <div class="p-2.5 rounded-xl bg-gray-100 text-gray-600">
-            <Icon icon="mdi:timeline-check-outline" class="text-xl" />
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
-      >
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              Next Payout
-            </p>
-            <div class="mt-2 flex items-baseline gap-2">
-              <span class="text-xl text-gray-800">₹85.5k</span>
-              <span class="text-sm text-blue-600 font-medium">Dec 20</span>
-            </div>
-          </div>
-          <div class="p-2.5 rounded-xl bg-amber-50 text-amber-600">
-            <Icon icon="mdi:currency-usd" class="text-xl" />
+          <div class="p-2.5 rounded-xl" :class="stat.bgClass">
+            <Icon :icon="stat.icon" class="text-xl" />
           </div>
         </div>
       </div>
@@ -290,9 +222,12 @@ const isDropdownOpen = ref(false);
 
 const rooms = ref([]);
 const bookings = ref([]);
-const recentBookings = ref([]); // New ref for the table
+const recentBookings = ref([]);
 const showBookingModal = ref(false);
 const selectedBooking = ref(null);
+
+// New ref to hold dynamic stats
+const statsList = ref([]);
 
 const customStatuses = [
   { key: "available", label: "Available", color: "", backgroundColor: "" },
@@ -310,9 +245,44 @@ const customStatuses = [
   },
 ];
 
-/**
- * WATCHER: Automatically triggers when selection changes
- */
+const formatLabel = (key) => {
+  return key
+    .replace(/([A-Z])/g, " $1") // Add space before capital letters
+    .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
+};
+
+const getStatConfig = (key) => {
+  const configs = {
+    totalProperty: {
+      icon: "mdi:office-building-marker-outline",
+      bg: "bg-blue-50 text-blue-600",
+      text: "text-gray-800",
+    },
+    totalBooking: {
+      icon: "mdi:calendar-check",
+      bg: "bg-indigo-50 text-indigo-600",
+      text: "text-gray-800",
+    },
+    todayBooking: {
+      icon: "mdi:calendar-today",
+      bg: "bg-green-50 text-green-600",
+      text: "text-green-600",
+    },
+    cancelledBooking: {
+      icon: "mdi:calendar-remove",
+      bg: "bg-red-50 text-red-600",
+      text: "text-red-600",
+    },
+  };
+  return (
+    configs[key] || {
+      icon: "mdi:chart-bar",
+      bg: "bg-gray-50 text-gray-600",
+      text: "text-gray-800",
+    }
+  );
+};
+
 watch(selectedProperties, () => {
   getResources();
   getRecentBookings();
@@ -322,8 +292,6 @@ const isFutureBooking = (checkInStr) => {
   if (!checkInStr) return false;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  // Handle both YYYY-MM-DD and DD-MM-YYYY
   let dateParts = checkInStr.includes("-") ? checkInStr.split("-") : [];
   let bookingDate;
   if (dateParts[0].length === 4) {
@@ -331,13 +299,14 @@ const isFutureBooking = (checkInStr) => {
   } else {
     bookingDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
   }
-
   bookingDate.setHours(0, 0, 0, 0);
   return bookingDate.getTime() >= today.getTime();
 };
 
 const handleBookingClick = (booking) => {
   selectedBooking.value = booking;
+  console.log("booking details ", selectedBooking.value);
+
   showBookingModal.value = true;
 };
 
@@ -353,12 +322,6 @@ const handleCancelBooking = async (bookingId) => {
   }
 };
 
-const dashboardStats = ref({ totalProperties: 0, totalBookings: 0 });
-const operationalStats = ref({ checkIns: 3, checkOuts: 2 });
-
-/**
- * FETCH RECENT BOOKINGS (API Integration)
- */
 const getRecentBookings = async () => {
   try {
     const params = {
@@ -368,22 +331,34 @@ const getRecentBookings = async () => {
         : undefined,
     };
     const res = await ownerService.fetchBookings(params);
-    console.log(res);
-
-    // Assuming the API returns a list in 'data' or the array directly based on ownerService structure
     recentBookings.value = res.data || res;
   } catch (error) {
     console.error("Error fetching recent bookings:", error);
   }
 };
 
-/**
- * GET RESOURCES (For Calendar)
- */
 const getResources = async () => {
   try {
     const ResourcesData = await ownerService.resourceList({
       propertyIds: selectedProperties.value,
+    });
+
+    const keysToDisplay = [
+      "totalProperty",
+      "totalBooking",
+      "todayBooking",
+      "cancelledBooking",
+    ];
+    statsList.value = keysToDisplay.map((key) => {
+      const config = getStatConfig(key);
+      return {
+        key: key,
+        label: formatLabel(key), // Heading is generated from API key name
+        value: ResourcesData[key] || 0,
+        icon: config.icon,
+        bgClass: config.bg,
+        textClass: config.text,
+      };
     });
 
     rooms.value = ResourcesData.resource.map((res) => ({
@@ -403,21 +378,14 @@ const getResources = async () => {
       roomNumber: book.resource_name,
       checkIn: formatDate(book.arrivalDateTime),
       checkOut: formatDate(book.departureDateTime),
+      modalcheckIn: book.arrivalDateTime,
+      modalcheckOut: book.departureDateTime,
+      adult: book.adult,
+      child: book.child ?? 0,
       status: book.status,
     }));
   } catch (error) {
     console.error("Error loading resources:", error);
-  }
-};
-
-const fetchKpiStats = async () => {
-  try {
-    const propertyData = await ownerService.fetchProperties({ limit: 1 });
-    dashboardStats.value.totalProperties = propertyData?.total || 0;
-    const bookingData = await ownerService.fetchBookings({ limit: 1 });
-    dashboardStats.value.totalBookings = bookingData?.total || 0;
-  } catch (error) {
-    console.error("Error fetching stats:", error);
   }
 };
 
@@ -432,7 +400,6 @@ const fetchPropertiesdropdown = async () => {
 
 onMounted(() => {
   fetchPropertiesdropdown();
-  fetchKpiStats();
   getResources();
   getRecentBookings();
 });
