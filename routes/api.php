@@ -5,7 +5,7 @@ Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
 Route::post('register', [App\Http\Controllers\AuthController::class, 'register']);
 Route::post('forget-password', [App\Http\Controllers\AuthController::class, 'forgetPassword']);
 Route::post('reset-password', [App\Http\Controllers\AuthController::class, 'resetPassword']);
-// Route::get('property-details', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);
+Route::get('property-detail', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);
 // Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
 Route::get('check-email', [App\Http\Controllers\AuthController::class, 'checkEmail']);
 
