@@ -1,81 +1,160 @@
 <template>
-  <div class="property-wizard">
-    <div class="stepper-header">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <button
-            @click="handleBackButton"
-            class="px-3 py-1 cursor-pointer text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50 mr-3"
+  <div class="min-h-screen bg-gray-50/50 p-4 md:p-8">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <button
+          @click="handleBackButton"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-blue-600 transition-all shadow-sm group"
+        >
+          <Icon
+            icon="mdi:arrow-left"
+            class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+          />
+          Back
+        </button>
+
+        <div class="flex items-center gap-3">
+          <span
+            class="hidden md:block text-sm font-medium text-gray-400 uppercase tracking-widest"
+            >Property Wizard</span
           >
-            <Icon icon="mdi:arrow-left" class="w-4 h-4 inline-block mr-2" />
-            Back
-          </button>
+          <div class="h-4 w-px bg-gray-300 hidden md:block"></div>
+          <h2 class="text-xl font-bold text-gray-800">
+            {{ stepTitle }}
+          </h2>
         </div>
-        <h2 class="text-2xl font-semibold text-blue-700">
-          Step {{ currentStep }} / 3: {{ stepTitle }}
-        </h2>
-        <div></div>
+
+        <button
+          @click="cancelWizard"
+          class="text-sm font-bold text-gray-400 hover:text-red-500 uppercase tracking-wider transition-colors"
+        >
+          Exit Wizard
+        </button>
       </div>
-    </div>
 
-    <div class="form-container">
-      <PropertiesForm
-        v-if="currentStep === 1"
-        ref="step1Ref"
-        :id="propertyId"
-        :in-wizard="true"
-        @success="handleStep1Success"
-      />
+      <div class="mb-10 relative">
+        <div class="flex items-center justify-between relative z-10">
+          <div v-for="step in 3" :key="step" class="flex flex-col items-center">
+            <div
+              :class="[
+                'w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 border-4',
+                currentStep >= step
+                  ? 'bg-blue-600 border-blue-100 text-white shadow-lg shadow-blue-200'
+                  : 'bg-white border-gray-100 text-gray-300',
+              ]"
+            >
+              <Icon
+                v-if="currentStep > step"
+                icon="mdi:check"
+                class="w-6 h-6"
+              />
+              <span v-else>{{ step }}</span>
+            </div>
+            <span
+              :class="[
+                'mt-2 text-[11px] font-bold uppercase tracking-tighter',
+                currentStep >= step ? 'text-blue-600' : 'text-gray-400',
+              ]"
+            >
+              {{ step === 1 ? "Details" : step === 2 ? "Types" : "Setup" }}
+            </span>
+          </div>
+        </div>
 
-      <ResourceTypeForm
-        v-if="currentStep === 2"
-        ref="step2Ref"
-        :property-id="propertyId"
-        :in-wizard="true"
-        @success="handleStep2Success"
-      />
+        <div
+          class="absolute top-5 left-0 w-full h-1 bg-gray-200 -z-0 rounded-full"
+        ></div>
+        <div
+          class="absolute top-5 left-0 h-1 bg-blue-600 transition-all duration-500 ease-in-out rounded-full -z-0"
+          :style="{ width: ((currentStep - 1) / 2) * 100 + '%' }"
+        ></div>
+      </div>
 
-      <ResourceForm
-        v-if="currentStep === 3"
-        ref="step3Ref"
-        :property-id="propertyId"
-        :resource-types="resourceTypes"
-        :in-wizard="true"
-        @success="handleStep3Success"
-      />
-    </div>
-
-    <div class="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
-      <button
-        v-if="currentStep > 0"
-        @click="cancelWizard"
-        class="px-5 py-2 cursor-pointer mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
+      <div
+        class="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden transition-all duration-300"
       >
-        Cancel
-      </button>
+        <div class="p-6 md:p-10">
+          <div class="form-container">
+            <transition name="fade-slide" mode="out-in">
+              <div :key="currentStep">
+                <PropertiesForm
+                  v-if="currentStep === 1"
+                  ref="step1Ref"
+                  :id="propertyId"
+                  :in-wizard="true"
+                  @success="handleStep1Success"
+                />
 
-      <button
-        @click="submitCurrentStep"
-        :disabled="loading"
-        class="px-5 py-2 cursor-pointer text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition flex items-center shadow-md"
-      >
-        <Icon
-          v-if="loading"
-          icon="eos-icons:loading"
-          class="w-5 h-5 mr-3 animate-spin"
-        />
-        {{ currentStep < 3 ? "Save & Continue" : "Complete Setup" }}
-        <Icon
-          v-if="!loading && currentStep < 3"
-          icon="mdi:arrow-right"
-          class="w-5 h-5 ml-2"
-        />
-        <Icon
-          v-else-if="!loading && currentStep === 3"
-          icon="mdi:check-bold"
-          class="w-5 h-5 ml-2"
-        />
-      </button>
+                <ResourceTypeForm
+                  v-if="currentStep === 2"
+                  ref="step2Ref"
+                  :property-id="propertyId"
+                  :in-wizard="true"
+                  @success="handleStep2Success"
+                />
+
+                <ResourceForm
+                  v-if="currentStep === 3"
+                  ref="step3Ref"
+                  :property-id="propertyId"
+                  :resource-types="resourceTypes"
+                  :in-wizard="true"
+                  @success="handleStep3Success"
+                />
+              </div>
+            </transition>
+          </div>
+        </div>
+
+        <div
+          class="bg-gray-50/80 backdrop-blur-sm border-t border-gray-100 p-6 flex items-center justify-between"
+        >
+          <div class="flex flex-col">
+            <p
+              class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1"
+            >
+              Current Progress
+            </p>
+            <p class="text-sm font-bold text-blue-600">
+              {{ Math.round((currentStep / 3) * 100) }}% Completed
+            </p>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <button
+              v-if="currentStep > 1"
+              @click="prevStep"
+              class="px-6 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Previous
+            </button>
+
+            <button
+              @click="submitCurrentStep"
+              :disabled="loading"
+              class="relative px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center group overflow-hidden"
+            >
+              <div v-if="loading" class="mr-3">
+                <Icon icon="eos-icons:loading" class="w-5 h-5 animate-spin" />
+              </div>
+
+              <span class="relative z-10 flex items-center">
+                {{ currentStep < 3 ? "Save & Continue" : "Complete Setup" }}
+                <Icon
+                  v-if="!loading && currentStep < 3"
+                  icon="mdi:arrow-right"
+                  class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
+                />
+                <Icon
+                  v-else-if="!loading && currentStep === 3"
+                  icon="mdi:check-circle"
+                  class="w-5 h-5 ml-2"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -147,14 +226,10 @@ const stepTitle = computed(() => {
 
 // --- NAVIGATION ---
 const submitCurrentStep = async () => {
-  // Call the handleSubmit method exposed by the current child component
   if (currentStepRef.value && currentStepRef.value.handleSubmit) {
     loading.value = true;
     try {
-      // The child form will call its API and emit 'success'
       const result = await currentStepRef.value.handleSubmit();
-      // If we're editing an existing property (edit-mode), children return
-      // a payload describing pending changes instead of performing API calls.
       if (startedWithId.value && result) {
         if (currentStep.value === 1) pendingChanges.value.property = result;
         if (currentStep.value === 2)
@@ -172,10 +247,8 @@ const submitCurrentStep = async () => {
 };
 
 const cancelWizard = async () => {
-  // If a property was created during this wizard, delete cascade it
   try {
     if (!startedWithId.value && createdInWizard.value && propertyId.value) {
-      // Resolve potential base64 id
       let id = propertyId.value;
       try {
         const maybe = atob(String(id));
@@ -203,7 +276,7 @@ const cancelWizard = async () => {
 const nextStep = () => {
   if (currentStep.value < 3) {
     currentStep.value++;
-    window.scrollTo(0, 0); // Scroll to top on new step
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 };
 
@@ -214,19 +287,12 @@ const prevStep = () => {
 };
 
 const handleBackButton = async () => {
-  // If we're not on the first step, behave like previous.
   if (currentStep.value > 1) {
     prevStep();
     return;
   }
 
-  // We're on the first step. Behavior should mirror Cancel but with
-  // a distinction: when creating a new property (createdInWizard) we must
-  // delete any partial data stored during the wizard. When editing an
-  // existing property (startedWithId) we should only discard pending
-  // changes and NOT delete the property.
   try {
-    // If creation happened in this wizard, remove created data.
     if (!startedWithId.value && createdInWizard.value && propertyId.value) {
       let id = propertyId.value;
       try {
@@ -244,10 +310,8 @@ const handleBackButton = async () => {
         console.debug("[PropertyWizard] cleanup images failed:", err);
       }
 
-      // delete property which should cascade on backend
       await ownerService.deleteProperty(id);
     } else if (startedWithId.value) {
-      // Editing: discard any pending changes collected during the wizard.
       pendingChanges.value = {
         property: null,
         resourceTypes: null,
@@ -261,9 +325,7 @@ const handleBackButton = async () => {
   router.push({ name: "properties" });
 };
 
-// --- HANDLERS (Receiving success/data from children) ---
-
-// HELPER: Fetch resource types so Step 3 has data in edit mode
+// --- HANDLERS ---
 const loadResourceTypes = async (id) => {
   try {
     const types = await ownerService.fetchResourceTypes(id);
@@ -315,7 +377,6 @@ const applyEdits = async () => {
       if (!isNaN(Number(maybe))) numericId = Number(maybe);
     } catch (e) {}
 
-    // 1) Property update + images + facilities
     if (pendingChanges.value.property) {
       const p = pendingChanges.value.property;
       if (p.propertyPayload) {
@@ -326,7 +387,6 @@ const applyEdits = async () => {
         await ownerService.deletePropertyImages(p.removedImageIds);
       }
 
-      // Upload any new files first to obtain their IDs
       let uploadedNewIds = [];
       if (p.newFiles && p.newFiles.length) {
         const uploaded = await ownerService.addPropertyImages(
@@ -350,7 +410,6 @@ const applyEdits = async () => {
             });
         }
       } else {
-        // Fallback: fetch server order and leave as-is
         const remoteImages = await ownerService.fetchPropertyImages(numericId);
         const orderedIds = (remoteImages || [])
           .map((i) => i.id)
@@ -375,16 +434,13 @@ const applyEdits = async () => {
       }
     }
 
-    // 2) Resource types changes
     if (pendingChanges.value.resourceTypes) {
       const rt = pendingChanges.value.resourceTypes;
-      // deletes
       if (rt.deleted && rt.deleted.length) {
         for (const id of rt.deleted) {
           await ownerService.deleteResourceType(id);
         }
       }
-      // updates
       if (rt.toUpdate && rt.toUpdate.length) {
         const payload = {
           propertyId: numericId,
@@ -396,7 +452,6 @@ const applyEdits = async () => {
         };
         await ownerService.resourceTypeMultipleUpdate(payload);
       }
-      // creates
       if (rt.toCreate && rt.toCreate.length) {
         const payload = {
           propertyId: numericId,
@@ -409,7 +464,6 @@ const applyEdits = async () => {
       }
     }
 
-    // 3) Resources (rooms)
     if (pendingChanges.value.resources) {
       const rs = pendingChanges.value.resources;
       if (rs.deleted && rs.deleted.length) {
@@ -444,3 +498,20 @@ const applyEdits = async () => {
   }
 };
 </script>
+
+<style scoped>
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+</style>

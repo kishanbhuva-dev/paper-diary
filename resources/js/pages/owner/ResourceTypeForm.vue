@@ -1,89 +1,115 @@
 <template>
   <div
-    class="p-6 mb-4 bg-white rounded-2xl shadow-inner border border-blue-100"
+    :class="[
+      !inWizard
+        ? 'p-8 bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50'
+        : '',
+    ]"
   >
-    <h3 class="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
-      <Icon icon="mdi:bed-empty-outline" class="text-2xl" /> Resource Types
-    </h3>
-
-    <div class="space-y-4">
-      <div
-        v-for="(type, idx) in types"
-        :key="idx"
-        class="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200 items-start"
-      >
-        <div class="md:col-span-2 self-stretch">
-          <BaseInput
-            v-model="type.name"
-            label="Name"
-            width="full"
-            placeholder="e.g. Deluxe"
-            :ref="setInputRef"
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 bg-blue-50 rounded-xl">
+          <Icon
+            icon="mdi:office-building-cog-outline"
+            class="text-2xl text-blue-600"
           />
         </div>
-
-        <div class="self-stretch">
-          <BaseInput
-            v-model.number="type.price"
-            label="Price"
-            type="number"
-            width="full"
-            placeholder="Base price"
-            :min="0"
-            :ref="setInputRef"
-          />
-        </div>
-
-        <div class="self-stretch">
-          <BaseInput
-            v-model.number="type.capacity"
-            label="Capacity"
-            type="number"
-            width="full"
-            placeholder="Guests"
-            :min="1"
-            :ref="setInputRef"
-          />
-        </div>
-
-        <div class="flex items-start self-stretch mt-6">
-          <button
-            type="button"
-            @click="openRemoveTypeModal(idx)"
-            class="px-2 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
-            title="Delete type"
+        <div>
+          <h3 class="text-xl font-bold text-slate-800">Resource Categories</h3>
+          <p
+            class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
           >
-            <Icon icon="mdi:delete-forever" class="w-6 h-6" />
-          </button>
+            Define room types or service levels
+          </p>
         </div>
       </div>
 
-      <div class="pt-2">
-        <button
-          type="button"
-          @click="addType"
-          class="px-4 py-2 cursor-pointer text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700"
-        >
-          Add Type
-        </button>
-      </div>
+      <button
+        type="button"
+        @click="addType"
+        class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors group"
+      >
+        <Icon
+          icon="mdi:plus-circle"
+          class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
+        />
+        Add New Category
+      </button>
     </div>
 
-    <div class="flex justify-end mt-6">
-      <div v-if="!props.inWizard">
+    <div class="space-y-4">
+      <transition-group name="list-complete">
+        <div
+          v-for="(type, idx) in types"
+          :key="idx"
+          class="relative bg-white p-5 rounded-2xl border border-slate-100 hover:border-blue-200 transition-all duration-300"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            <div class="md:col-span-5">
+              <BaseInput
+                v-model="type.name"
+                label="Category Name"
+                width="full"
+                placeholder="e.g. Deluxe Suite"
+                :ref="setInputRef"
+              />
+            </div>
+
+            <div class="md:col-span-3">
+              <BaseInput
+                v-model.number="type.price"
+                label="Base Price"
+                type="number"
+                width="full"
+                placeholder="0.00"
+                :min="0"
+                :ref="setInputRef"
+                prefix="$"
+              />
+            </div>
+
+            <div class="md:col-span-3">
+              <BaseInput
+                v-model.number="type.capacity"
+                label="Max Occupancy"
+                type="number"
+                width="full"
+                placeholder="Guests"
+                :min="1"
+                :ref="setInputRef"
+              />
+            </div>
+
+            <div class="md:col-span-1 flex justify-end mt-[28px]">
+              <button
+                type="button"
+                @click="openRemoveTypeModal(idx)"
+                class="w-11 h-11 cursor-pointer text-slate-400 bg-slate-50 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center border border-transparent hover:border-red-100"
+                title="Delete type"
+              >
+                <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition-group>
+    </div>
+
+    <div class="flex justify-end mt-10">
+      <div v-if="!props.inWizard" class="flex items-center gap-4">
         <button
           type="button"
           @click="cancel"
-          class="px-5 py-2 mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
+          class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
         >
           Cancel
         </button>
         <button
           type="button"
           @click="handleSubmit"
-          class="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700"
+          class="px-10 py-3 text-sm font-bold text-white bg-blue-600 rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95"
         >
-          Next
+          {{ submitting ? "Processing..." : "Save & Continue" }}
         </button>
       </div>
     </div>
@@ -91,12 +117,12 @@
 
   <DeleteModal
     v-model="isConfirmationModalVisible"
-    :title="'Remove Resource Type'"
-    :message="`Are you sure you want to remove the resource type: ${typeNameToRemove}?`"
+    :title="'Remove Category'"
+    :message="`Are you sure you want to remove the '${typeNameToRemove}' category?`"
     :warning="
       typeIndexToRemove !== null && types[typeIndexToRemove]?.id
-        ? 'This type will be permanently deleted from the server upon submission.'
-        : 'This is a local change and will be removed from the list.'
+        ? 'This will permanently delete this category from the server.'
+        : 'This will remove the category from your local list.'
     "
     @confirm="confirmRemoval"
   />
@@ -129,7 +155,6 @@ const types = ref([
   },
 ]);
 const deletedTypeIds = ref([]);
-
 const isConfirmationModalVisible = ref(false);
 const typeIndexToRemove = ref(null);
 const typeNameToRemove = computed(() => {
@@ -140,19 +165,16 @@ const typeNameToRemove = computed(() => {
 });
 
 const initialSnapshot = ref(null);
-
 const inputRefs = ref([]);
 const setInputRef = (el) => {
-  if (el) {
-    inputRefs.value.push(el);
-  }
+  if (el) inputRefs.value.push(el);
 };
 onBeforeUpdate(() => {
   inputRefs.value = [];
 });
 
-const makeSnapshot = (list) => {
-  return JSON.stringify(
+const makeSnapshot = (list) =>
+  JSON.stringify(
     (list || []).map((t) => ({
       name: t.name || "",
       price: Number(t.price) || 0,
@@ -160,7 +182,6 @@ const makeSnapshot = (list) => {
       slot: t.slot || null,
     }))
   );
-};
 
 const loadExistingTypes = async () => {
   if (!props.propertyId) return;
@@ -202,7 +223,6 @@ const loadExistingTypes = async () => {
 onMounted(() => {
   loadExistingTypes();
 });
-
 watch(
   () => props.propertyId,
   (val) => {
@@ -223,26 +243,14 @@ const addType = () => {
 };
 
 const openRemoveTypeModal = (idx) => {
-  // We remove the length check here to allow removing the last one if it's a dummy/blank row.
-  // The logic inside confirmRemoval prevents the list from becoming completely empty, if needed.
-
   const type = types.value[idx];
-
-  // Checks if the row is new (no id) AND if the name field is empty/blank
   const isDummyOrBlank =
     !type.id && (!type.name || type.name.toString().trim() === "");
-
-  if (types.value.length === 1 && !isDummyOrBlank) {
-    // If only one remains AND it has content/ID, we prevent deletion.
-    return;
-  }
-
+  if (types.value.length === 1 && !isDummyOrBlank) return;
   if (isDummyOrBlank) {
-    // If it's a dummy/blank row, skip the modal and proceed straight to removal
     typeIndexToRemove.value = idx;
     confirmRemoval();
   } else {
-    // If it has an ID or a name (user has started filling it out), show the modal
     typeIndexToRemove.value = idx;
     isConfirmationModalVisible.value = true;
   }
@@ -254,12 +262,8 @@ const confirmRemoval = () => {
     isConfirmationModalVisible.value = false;
     return;
   }
-
   const t = types.value[idx];
-
   if (types.value.length === 1) {
-    // If only one item remains, reset it instead of deleting the array item
-    // This is safer than having an empty array of resource types
     types.value[0] = {
       name: "",
       price: null,
@@ -273,21 +277,18 @@ const confirmRemoval = () => {
     typeIndexToRemove.value = null;
     return;
   }
-
   if (t && t.id) {
     deletedTypeIds.value.push(t.id);
     types.value.splice(idx, 1);
   } else {
     types.value.splice(idx, 1);
   }
-
   isConfirmationModalVisible.value = false;
   typeIndexToRemove.value = null;
 };
 
 const validate = () => {
   if (!props.propertyId) return false;
-
   let isInputsValid = true;
   inputRefs.value.forEach((inputComponent) => {
     if (inputComponent && typeof inputComponent.validate === "function") {
@@ -295,16 +296,13 @@ const validate = () => {
       if (!isValid) isInputsValid = false;
     }
   });
-
   const filled = (types.value || []).filter(
     (t) => t.name && t.name.toString().trim() !== ""
   );
-
   if (filled.length === 0) {
     toast.error("At least one resource type must be filled.");
     return false;
   }
-
   for (const t of filled) {
     if (
       isNaN(t.price) ||
@@ -316,9 +314,9 @@ const validate = () => {
       return false;
     }
   }
-
   return isInputsValid;
 };
+
 const submitting = ref(false);
 
 const handleSubmit = async () => {
@@ -326,26 +324,21 @@ const handleSubmit = async () => {
     toast.error("Please ensure all required fields are correctly filled.");
     return;
   }
-
   if (submitting.value) return;
   submitting.value = true;
-
   try {
     const serverList = await ownerService.fetchResourceTypes(props.propertyId);
     const serverById = (serverList || []).reduce((acc, r) => {
       acc[r.id] = r;
       return acc;
     }, {});
-
     const serverByName = (serverList || []).reduce((acc, r) => {
       const key = (r.name || "").toString().trim().toLowerCase();
       if (key) acc[key] = r;
       return acc;
     }, {});
-
     const toCreate = [];
     const toUpdate = [];
-
     for (const t of types.value) {
       const normalized = {
         name: (t.name || "").toString().trim(),
@@ -353,9 +346,7 @@ const handleSubmit = async () => {
         capacity: Number(t.capacity) || 0,
         slot: t.slot || null,
       };
-
       if (!normalized.name) continue;
-
       if (t.id) {
         const server = serverById[t.id];
         if (!server) {
@@ -393,22 +384,15 @@ const handleSubmit = async () => {
             serverNorm.slot !== normalized.slot
           ) {
             toUpdate.push({ id: existingMatch.id, ...normalized });
-          } else {
           }
         } else {
           toCreate.push(normalized);
         }
       }
     }
-
     if (props.inWizard && props.editMode) {
-      return {
-        toCreate,
-        toUpdate,
-        deleted: deletedTypeIds.value.slice(),
-      };
+      return { toCreate, toUpdate, deleted: deletedTypeIds.value.slice() };
     }
-
     if (deletedTypeIds.value && deletedTypeIds.value.length) {
       for (const id of deletedTypeIds.value) {
         try {
@@ -417,7 +401,6 @@ const handleSubmit = async () => {
       }
       deletedTypeIds.value = [];
     }
-
     if (toUpdate.length > 0) {
       const payload = {
         propertyId: parseInt(props.propertyId, 10),
@@ -429,7 +412,6 @@ const handleSubmit = async () => {
       };
       await ownerService.resourceTypeMultipleUpdate(payload);
     }
-
     if (toCreate.length > 0) {
       const payload = {
         propertyId: parseInt(props.propertyId, 10),
@@ -440,7 +422,6 @@ const handleSubmit = async () => {
       };
       await ownerService.resourceTypeMultipleStore(payload);
     }
-
     const created = await ownerService.fetchResourceTypes(props.propertyId);
     const ids = (created || []).map((r) => r.id);
     initialSnapshot.value = makeSnapshot(types.value);
@@ -452,13 +433,19 @@ const handleSubmit = async () => {
   }
 };
 
-const hasChanges = () => {
-  return initialSnapshot.value !== makeSnapshot(types.value);
-};
-
-const cancel = () => {
-  emits("cancel");
-};
-
+const hasChanges = () => initialSnapshot.value !== makeSnapshot(types.value);
+const cancel = () => emits("cancel");
 defineExpose({ handleSubmit, hasChanges });
 </script>
+
+<style scoped>
+.list-complete-enter-from,
+.list-complete-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.list-complete-leave-active {
+  position: absolute;
+  width: 100%;
+}
+</style>

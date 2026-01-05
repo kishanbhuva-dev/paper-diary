@@ -1,81 +1,109 @@
 <template>
   <div
-    class="p-6 mb-4 bg-white rounded-2xl shadow-inner border border-blue-100"
+    :class="[
+      !inWizard
+        ? 'p-8 bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50'
+        : '',
+    ]"
   >
-    <h3 class="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
-      <Icon icon="mdi:door-open" class="text-2xl" /> Resources
-    </h3>
-
-    <div class="space-y-4">
-      <div
-        v-for="(resourceItem, idx) in resourceItems"
-        :key="idx"
-        class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end p-4 bg-blue-50 rounded-lg border border-blue-200"
-      >
-        <div>
-          <BaseInput
-            v-model="resourceItem.name"
-            label="Name"
-            width="full"
-            placeholder="e.g. Room 101"
-          />
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 bg-indigo-50 rounded-xl">
+          <Icon icon="mdi:door-open" class="text-2xl text-indigo-600" />
         </div>
-
         <div>
-          <BaseSelect
-            v-model="resourceItem.resourceTypeId"
-            :label="'Resources Type'"
-            :placeholder="'Select type'"
-            :options="availableTypeOptions"
-          />
-        </div>
-
-        <div>
-          <BaseSelect
-            v-model="resourceItem.status"
-            :label="'Status'"
-            :options="statusOptions"
-          />
-        </div>
-
-        <div class="flex items-start self-stretch mt-6">
-          <button
-            type="button"
-            @click="openRemoveResourceItemModal(idx)"
-            class="px-2 py-2 cursor-pointer text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 flex items-center justify-center"
-            title="Delete resource"
+          <h3 class="text-xl font-bold text-slate-800">Individual Units</h3>
+          <p
+            class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
           >
-            <Icon icon="mdi:delete-forever" class="w-6 h-6" />
-          </button>
+            Inventory & Specific Resources
+          </p>
         </div>
       </div>
 
-      <div class="pt-2">
-        <button
-          type="button"
-          @click="addResourceItem"
-          class="px-4 py-2 cursor-pointer text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700"
-        >
-          Add Resource
-        </button>
-      </div>
+      <button
+        type="button"
+        @click="addResourceItem"
+        class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-all group active:scale-95"
+      >
+        <Icon
+          icon="mdi:plus"
+          class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
+        />
+        Add Resource
+      </button>
     </div>
 
-    <div class="flex justify-end mt-6">
-      <div v-if="!props.inWizard" class="flex gap-2">
+    <div class="space-y-3 relative">
+      <transition-group name="resource-list">
+        <div
+          v-for="(resourceItem, idx) in resourceItems"
+          :key="idx"
+          class="group bg-white p-5 rounded-2xl border border-slate-100 hover:border-indigo-200 transition-all duration-300"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+            <div class="md:col-span-4">
+              <BaseInput
+                v-model="resourceItem.name"
+                label="Resource Name / ID"
+                width="full"
+                placeholder="e.g. Room 101"
+              />
+            </div>
+
+            <div class="md:col-span-4">
+              <BaseSelect
+                v-model="resourceItem.resourceTypeId"
+                label="Assigned Category"
+                placeholder="Select category..."
+                :options="availableTypeOptions"
+              />
+            </div>
+
+            <div class="md:col-span-3">
+              <BaseSelect
+                v-model="resourceItem.status"
+                label="Availability Status"
+                :options="statusOptions"
+              />
+            </div>
+
+            <div class="md:col-span-1 flex justify-end mt-[28px]">
+              <button
+                type="button"
+                @click="openRemoveResourceItemModal(idx)"
+                class="w-11 h-11 cursor-pointer text-slate-300 bg-slate-50 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center border border-transparent hover:border-red-100"
+                title="Remove resource"
+              >
+                <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition-group>
+    </div>
+
+    <div class="flex justify-end mt-10">
+      <div v-if="!props.inWizard" class="flex items-center gap-3">
         <button
           type="button"
           @click="cancel"
-          class="px-5 py-2 mr-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
+          class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
         >
           Cancel
         </button>
         <button
           type="button"
           @click="handleSubmit"
-          class="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700"
+          :disabled="submitting"
+          class="px-10 py-3 text-sm font-bold text-white bg-indigo-600 rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95 flex items-center gap-2"
         >
-          Submit
+          <Icon
+            v-if="submitting"
+            icon="eos-icons:loading"
+            class="w-5 h-5 animate-spin"
+          />
+          {{ submitting ? "Saving..." : "Finalize & Submit" }}
         </button>
       </div>
     </div>
@@ -83,13 +111,13 @@
 
   <DeleteModal
     v-model="isConfirmationModalVisible"
-    :title="'Remove Resource'"
-    :message="`Are you sure you want to remove the resource: ${resourceItemNameToRemove}?`"
+    :title="'Remove Individual Unit'"
+    :message="`Are you sure you want to remove '${resourceItemNameToRemove}'?`"
     :warning="
       resourceItemIndexToRemove !== null &&
       resourceItems[resourceItemIndexToRemove]?.id
-        ? 'This resource will be permanently deleted from the server upon submission.'
-        : 'This is a local change and will be removed from the list.'
+        ? 'This unit will be permanently removed from the server.'
+        : 'This will remove the draft unit from your list.'
     "
     @confirm="confirmRemoval"
   />
@@ -114,25 +142,16 @@ const emits = defineEmits(["success", "cancel"]);
 
 const availableTypes = ref([]);
 const resourceItems = ref([{ name: "", resourceTypeId: "", status: 1 }]);
-// track deletions locally and perform deletes on submit
 const deletedResourceItemIds = ref([]);
 const submitting = ref(false);
-
-// --- CONVERTED OPTIONS FOR BASESELECT ---
 const statusOptions = ref([
   { label: "Active", value: 1 },
   { label: "Inactive", value: 0 },
 ]);
+const availableTypeOptions = computed(() =>
+  availableTypes.value.map((rt) => ({ label: rt.name, value: rt.id }))
+);
 
-const availableTypeOptions = computed(() => {
-  return availableTypes.value.map((rt) => ({
-    label: rt.name,
-    value: rt.id,
-  }));
-});
-// --- END OPTIONS ---
-
-// --- CONFIRMATION MODAL STATE ---
 const isConfirmationModalVisible = ref(false);
 const resourceItemIndexToRemove = ref(null);
 const resourceItemNameToRemove = computed(() => {
@@ -141,16 +160,12 @@ const resourceItemNameToRemove = computed(() => {
     ? resourceItems.value[idx].name
     : "this resource";
 });
-// --------------------------------
 
 const loadData = async () => {
   try {
     const fetched = await ownerService.fetchResourceTypes(props.propertyId);
     availableTypes.value = fetched || [];
-  } catch (err) {
-    console.warn("[ResourceForm] failed to fetch resource types", err);
-  }
-
+  } catch (err) {}
   try {
     const existing = await ownerService.fetchResources(props.propertyId);
     if (Array.isArray(existing) && existing.length) {
@@ -160,20 +175,16 @@ const loadData = async () => {
         resourceTypeId: r.resourceTypeId,
         status: typeof r.status !== "undefined" ? Number(r.status) : 1,
       }));
-      // Always keep one empty row to allow quick adding
       resourceItems.value.push({ name: "", resourceTypeId: "", status: 1 });
     } else {
       resourceItems.value = [{ name: "", resourceTypeId: "", status: 1 }];
     }
-  } catch (err) {
-    console.warn("[ResourceForm] failed to fetch existing resources", err);
-  }
+  } catch (err) {}
 };
 
 onMounted(() => {
   loadData();
 });
-
 watch(
   () => props.propertyId,
   (val) => {
@@ -185,26 +196,16 @@ const addResourceItem = () => {
   resourceItems.value.push({ name: "", resourceTypeId: "", status: 1 });
 };
 
-// --- MODAL HANDLERS (UPDATED) ---
 const openRemoveResourceItemModal = (idx) => {
   const resourceItem = resourceItems.value[idx];
-
-  // Checks if the row is new (no id) AND if the name field is empty/blank
   const isDummyOrBlank =
     !resourceItem.id &&
     (!resourceItem.name || resourceItem.name.toString().trim() === "");
-
-  // Prevent deletion if it's the only remaining item AND it has content/ID
-  if (resourceItems.value.length === 1 && !isDummyOrBlank) {
-    return;
-  }
-
+  if (resourceItems.value.length === 1 && !isDummyOrBlank) return;
   if (isDummyOrBlank) {
-    // If it's a dummy/blank row, skip the modal and proceed straight to removal
     resourceItemIndexToRemove.value = idx;
     confirmRemoval();
   } else {
-    // If it has an ID or a name (user has started filling it out), show the modal
     resourceItemIndexToRemove.value = idx;
     isConfirmationModalVisible.value = true;
   }
@@ -216,40 +217,25 @@ const confirmRemoval = () => {
     isConfirmationModalVisible.value = false;
     return;
   }
-
   const r = resourceItems.value[idx];
-
-  // If only one item remains, reset it instead of deleting the array item
   if (resourceItems.value.length === 1) {
-    resourceItems.value[0] = {
-      name: "",
-      resourceTypeId: "",
-      status: 1,
-    };
+    resourceItems.value[0] = { name: "", resourceTypeId: "", status: 1 };
     isConfirmationModalVisible.value = false;
     resourceItemIndexToRemove.value = null;
     return;
   }
-
-  // Mark for deletion if it has an ID
   if (r && r.id) {
     deletedResourceItemIds.value.push(r.id);
     resourceItems.value.splice(idx, 1);
   } else {
-    // Local-only row, just remove
     resourceItems.value.splice(idx, 1);
   }
-
-  // Reset state after deletion
   isConfirmationModalVisible.value = false;
   resourceItemIndexToRemove.value = null;
 };
-// --- END MODAL HANDLERS ---
 
 const validate = () => {
   if (!props.propertyId) return false;
-
-  // Ignore empty placeholder rows (no name). Require at least one filled resourceItem.
   const filled = (resourceItems.value || []).filter(
     (r) => r.name && r.name.toString().trim() !== ""
   );
@@ -257,8 +243,6 @@ const validate = () => {
     toast.error("At least one resource must be filled.");
     return false;
   }
-
-  // Ensure all filled rows have a selected resource type
   for (const r of filled) {
     if (!r.resourceTypeId) {
       toast.error(`Resource "${r.name}" requires a Resource Type.`);
@@ -269,13 +253,9 @@ const validate = () => {
 };
 
 const handleSubmit = async () => {
-  if (!validate()) {
-    return;
-  }
-
+  if (!validate()) return;
   if (submitting.value) return;
   submitting.value = true;
-
   try {
     const serverList = await ownerService.fetchResources(props.propertyId);
     const serverById = (serverList || []).reduce((acc, r) => {
@@ -287,17 +267,14 @@ const handleSubmit = async () => {
       if (key) acc[key] = r;
       return acc;
     }, {});
-
     const toCreate = [];
     const toUpdate = [];
-
     for (const rm of resourceItems.value) {
       const normalized = {
         name: (rm.name || "").toString().trim(),
         status: typeof rm.status !== "undefined" ? Number(rm.status) : 1,
         resourceTypeId: parseInt(rm.resourceTypeId, 10) || null,
       };
-      // ignore empty placeholder rows
       if (!normalized.name) continue;
       if (rm.id) {
         const server = serverById[rm.id];
@@ -336,16 +313,12 @@ const handleSubmit = async () => {
             serverNorm.resourceTypeId !== normalized.resourceTypeId
           ) {
             toUpdate.push({ id: existingMatch.id, ...normalized });
-          } else {
-            // unchanged duplicate, skip
           }
         } else {
           toCreate.push(normalized);
         }
       }
     }
-
-    // If editing in the wizard, return diffs and deletions to parent
     if (props.inWizard && props.editMode) {
       return {
         toCreate,
@@ -353,19 +326,14 @@ const handleSubmit = async () => {
         deleted: deletedResourceItemIds.value.slice(),
       };
     }
-
-    // Perform deletes first for any resources the user removed in the UI
     if (deletedResourceItemIds.value && deletedResourceItemIds.value.length) {
       for (const id of deletedResourceItemIds.value) {
         try {
           await ownerService.deleteResource(id);
-        } catch (err) {
-          console.debug("[ResourceForm] failed to delete resource", id, err);
-        }
+        } catch (err) {}
       }
       deletedResourceItemIds.value = [];
     }
-
     if (toUpdate.length > 0) {
       const payload = {
         ids: toUpdate.map((r) => r.id),
@@ -375,7 +343,6 @@ const handleSubmit = async () => {
       };
       await ownerService.resourceMultipleUpdate(payload);
     }
-
     if (toCreate.length > 0) {
       const payload = {
         name: toCreate.map((r) => r.name),
@@ -384,7 +351,6 @@ const handleSubmit = async () => {
       };
       await ownerService.resourceMultipleStore(payload);
     }
-
     emits("success");
   } catch (err) {
     toast.error("An error occurred during submission.");
@@ -394,6 +360,17 @@ const handleSubmit = async () => {
 };
 
 defineExpose({ handleSubmit });
-
 const cancel = () => emits("cancel");
 </script>
+
+<style scoped>
+.resource-list-enter-from,
+.resource-list-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+.resource-list-leave-active {
+  position: absolute;
+  width: 100%;
+}
+</style>

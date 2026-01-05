@@ -44,7 +44,10 @@
                 >Adult / Child</label
               >
               <p class="text-indigo-900 font-semibold mt-1">
-                {{ booking.adult }} Adult(s) / {{ booking.child }} Child(ren)
+                {{ booking.adult }} Adults
+                <span v-if="booking.child">
+                  / {{ booking.child }} Children</span
+                >
               </p>
             </div>
           </div>
@@ -94,19 +97,6 @@
               </span>
             </div>
           </div>
-
-          <!-- <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-            <label
-              class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2"
-              >Booking Status</label
-            >
-            <span
-              :class="getStatusClasses(booking.status)"
-              class="px-3 py-1 rounded-full text-xs font-bold uppercase"
-            >
-              {{ booking.status }}
-            </span>
-          </div> -->
         </div>
       </div>
 
