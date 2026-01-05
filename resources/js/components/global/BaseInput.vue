@@ -2,9 +2,8 @@
   <div :class="[widthClass]">
     <label
       v-if="label"
-      :for="label"
-      class="block text-sm font-semibold mb-1"
-      :class="[theme.txt]"
+      :for="uniqueId"
+      class="block text-sm font-semibold mb-1 text-slate-700"
     >
       {{ label }} <span v-if="required" class="text-red-500">*</span>
     </label>
@@ -25,7 +24,7 @@
 
       <textarea
         v-if="multiline"
-        :id="label"
+        :id="uniqueId"
         ref="inputRef"
         v-model="innerValue"
         :placeholder="placeholder"
@@ -39,7 +38,7 @@
 
       <input
         v-else
-        :id="label"
+        :id="uniqueId"
         ref="inputRef"
         v-model="innerValue"
         :type="computedType"
@@ -71,7 +70,7 @@
     </div>
 
     <div
-      class="flex justify-between items-start"
+      class="flex justify-between items-start min-h-[20px]"
       :class="{
         'mt-1': !isValid && touched,
       }"
@@ -91,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import clsx from "clsx";
 
@@ -103,27 +102,17 @@ const props = defineProps({
   icon: String,
   prefix: String,
   suffix: String,
-
-  // States
   required: Boolean,
   disabled: { type: Boolean, default: false },
-
-  // Styling
   variant: { type: String, default: "light" },
   width: { type: String, default: "md" },
-
-  // Inputs
-  type: { type: String, default: "text" }, // Added handling for 'number'
-
-  // Validation & Constraints
+  type: { type: String, default: "text" },
   pattern: { type: RegExp, default: null },
   customError: { type: String, default: "" },
   minLength: { type: Number },
   maxLength: { type: Number, default: null },
-  min: { type: Number }, // New: used for number type
-  max: { type: Number }, // New: used for number type
-
-  // UX Options
+  min: { type: Number },
+  max: { type: Number },
   showCount: { type: Boolean, default: false },
   multiline: { type: Boolean, default: false },
   rows: { type: Number, default: 3 },
@@ -131,7 +120,12 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"]);
 
-// --- THEME CONFIGURATION (Unchanged) ---
+// Generate a unique ID to prevent label focus conflicts
+const uniqueId = `input-${Math.random()
+  .toString(36)
+  .toLowerCase()
+  .substring(2, 10)}`;
+
 const themes = {
   light: {
     bg: "bg-white",
@@ -164,7 +158,6 @@ const themes = {
 };
 const theme = computed(() => themes[props.variant] || themes.light);
 
-// --- WIDTH CLASSES (Unchanged) ---
 const widthClass = computed(() => {
   const widths = {
     full: "w-full",
@@ -177,20 +170,17 @@ const widthClass = computed(() => {
   return widths[props.width] || "max-w-sm";
 });
 
-// --- STATE MANAGEMENT ---
 const innerValue = ref(props.modelValue ?? "");
 const touched = ref(false);
 const showPassword = ref(false);
 const isPasswordType = computed(() => props.type === "password");
 
-// Determines the native input type (hides password if needed)
 const computedType = computed(() => {
   if (isPasswordType.value && !showPassword.value) return "password";
   if (props.type === "number") return "number";
   return "text";
 });
 
-// Sync local value with prop
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -198,12 +188,9 @@ watch(
   }
 );
 
-// --- INPUT HANDLER FOR NUMBER TYPE ---
 const handleInput = (event) => {
   let val = event.target.value;
-  // Handle number type to ensure proper numeric value is emitted
   if (props.type === "number") {
-    // Convert to number, but allow empty string if not required
     if (val === "") {
       innerValue.value = null;
       emit("update:modelValue", null);
@@ -213,26 +200,18 @@ const handleInput = (event) => {
         innerValue.value = numVal;
         emit("update:modelValue", numVal);
       } else {
-        // Prevent non-numeric characters in number input field
         event.target.value = props.modelValue;
         innerValue.value = props.modelValue;
       }
     }
   } else {
-    // For text/other types
     innerValue.value = val;
     emit("update:modelValue", val);
   }
-
-  if (touched.value) validateInput(); // Re-validate on typing if already touched
+  if (touched.value) validateInput();
 };
 
-// --- VALIDATION LOGIC (Enhanced for Min/Max number) ---
-const patterns = {
-  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  // ... (Other patterns)
-};
-
+const patterns = { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ };
 const errorMessage = ref("");
 const isValid = ref(true);
 
@@ -246,7 +225,6 @@ const validateInput = () => {
         : Number(innerValue.value)
       : NaN;
 
-  // 1. Required Check
   if (
     props.required &&
     (!val || (props.type === "number" && numericVal === null))
@@ -255,8 +233,6 @@ const validateInput = () => {
     errorMessage.value = "This field is required";
     return false;
   }
-
-  // 2. Empty non-required fields are valid
   if (
     !props.required &&
     !val &&
@@ -266,8 +242,6 @@ const validateInput = () => {
     errorMessage.value = "";
     return true;
   }
-
-  // 3. Number Type Checks
   if (props.type === "number" && !isNaN(numericVal)) {
     if (props.min !== undefined && numericVal < props.min) {
       isValid.value = false;
@@ -280,42 +254,31 @@ const validateInput = () => {
       return false;
     }
   }
-
-  // 4. Custom Pattern (Prop) - Strict check (only for non-number types if number is controlled by min/max)
   if (props.pattern && !props.pattern.test(val)) {
     isValid.value = false;
     errorMessage.value = props.customError || "Invalid format";
     return false;
   }
-
-  // 5. Type-based patterns (e.g., email)
   if (props.type === "email" && !patterns.email.test(val)) {
     isValid.value = false;
     errorMessage.value = "Invalid email address";
     return false;
   }
-
-  // 6. Min Length (for strings)
   if (props.minLength && val.length < props.minLength) {
     isValid.value = false;
     errorMessage.value = `Minimum ${props.minLength} characters required`;
     return false;
   }
-
   isValid.value = true;
   errorMessage.value = "";
   return true;
 };
 
 const onBlur = () => validateInput();
-
-// --- FOCUS LOGIC ---
 const inputRef = ref(null);
 const focus = () => {
   if (inputRef.value) {
-    // Focus the native element
     inputRef.value.focus();
-    // For text/number inputs, select all content for easier editing
     if (
       ["text", "email", "number", "password"].includes(props.type) &&
       inputRef.value.select
@@ -325,19 +288,13 @@ const focus = () => {
   }
 };
 
-// --- EXPOSE TO PARENT ---
-defineExpose({
-  validate: validateInput,
-  focus,
-});
+defineExpose({ validate: validateInput, focus });
 
-// --- CLASSES (Unchanged) ---
 const containerClasses = computed(() =>
   clsx(
-    "flex gap-2 border px-3 py-2 transition-all duration-200 rounded-xl", // Changed 'lg' to 'xl' to match resource forms
+    "flex gap-2 border px-3 py-2 transition-all duration-200 rounded-xl",
     props.multiline ? "items-start" : "items-center",
     theme.value.bg,
-    // Conditional Border Color
     !isValid.value && touched.value
       ? "border-red-500 ring-1 ring-red-100"
       : `${theme.value.border} focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100`

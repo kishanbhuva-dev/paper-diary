@@ -25,56 +25,85 @@
       </div>
     </div>
 
-    <div class="mb-6 relative">
-      <div class="max-w-xs">
-        <label
-          class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1"
-        >
-          Property Filter
-        </label>
-        <div
-          @click="isDropdownOpen = !isDropdownOpen"
-          class="bg-white border border-gray-300 px-3 py-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors select-none"
-        >
-          <span class="text-sm text-gray-600 truncate">
-            {{
-              selectedProperties.length > 0
-                ? selectedProperties.length + " Selected"
-                : "All Properties"
-            }}
-          </span>
-          <Icon
-            icon="mdi:chevron-down"
-            class="text-gray-400 transition-transform"
-            :class="{ 'rotate-180': isDropdownOpen }"
-          />
+    <!-- Property Filter -->
+    <div class="mb-6">
+      <label
+        class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1"
+      >
+        Property Filter
+      </label>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative w-full sm:w-64">
+          <div
+            @click="isDropdownOpen = !isDropdownOpen"
+            class="bg-white border border-gray-300 px-3 py-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors select-none"
+          >
+            <span class="text-sm text-gray-600 truncate">
+              {{
+                selectedProperties.length > 0
+                  ? selectedProperties.length + " Selected"
+                  : "All Properties"
+              }}
+            </span>
+            <Icon
+              icon="mdi:chevron-down"
+              class="text-gray-400 transition-transform"
+              :class="{ 'rotate-180': isDropdownOpen }"
+            />
+          </div>
+
+          <div
+            v-if="isDropdownOpen"
+            class="absolute z-50 mt-2 w-full bg-white border border-gray-100 shadow-xl rounded-xl p-2 max-h-60 overflow-y-auto"
+          >
+            <label
+              v-for="item in propertyDropdown"
+              :key="item.id"
+              class="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors group"
+            >
+              <input
+                type="checkbox"
+                :value="item.id"
+                v-model="selectedProperties"
+                class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <span
+                class="text-sm text-gray-700 font-medium group-hover:text-blue-700"
+              >
+                {{ item.name }}
+              </span>
+            </label>
+          </div>
         </div>
 
-        <div
-          v-if="isDropdownOpen"
-          class="absolute z-50 mt-2 w-xs bg-white border border-gray-100 shadow-xl rounded-xl p-2 max-h-60 overflow-y-auto"
-        >
-          <label
-            v-for="item in propertyDropdown"
-            :key="item.id"
-            class="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors group"
+        <div class="flex flex-wrap gap-2 items-center">
+          <div
+            v-for="id in selectedProperties"
+            :key="id"
+            class="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100 animate-in fade-in zoom-in duration-200"
           >
-            <input
-              type="checkbox"
-              :value="item.id"
-              v-model="selectedProperties"
-              class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            <span
-              class="text-sm text-gray-700 font-medium group-hover:text-blue-700"
-            >
-              {{ item.name }}
+            <span class="text-xs font-bold whitespace-nowrap">
+              {{ propertyDropdown.find((p) => p.id === id)?.name }}
             </span>
-          </label>
+            <button
+              @click="removeProperty(id)"
+              class="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+            >
+              <Icon icon="mdi:close" class="text-sm" />
+            </button>
+          </div>
+
+          <button
+            v-if="selectedProperties.length > 0"
+            @click="selectedProperties = []"
+            class="text-[10px] font-bold text-gray-400 hover:text-red-500 uppercase tracking-tighter ml-1"
+          >
+            Clear All
+          </button>
         </div>
       </div>
     </div>
-
+    <!-- booking calendar -->
     <HotelDashboardCalendar
       :rooms="rooms"
       :bookings="bookings"
@@ -89,109 +118,122 @@
       theme="light"
       @booking-click="handleBookingClick"
     />
-
-    <div v-if="false" class="mt-8">
-      <div class="flex items-center justify-between mb-4 px-1">
-        <h3 class="text-lg font-bold text-gray-800">Recent Bookings</h3>
+    <!-- recent booking -->
+    <div class="mt-10">
+      <div class="flex items-center justify-between mb-5 px-1">
+        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+          <Icon icon="mdi:history" class="text-blue-600" />
+          Recent Bookings
+        </h3>
+        <div class="flex items-center gap-4">
+          <span class="text-xs font-semibold text-gray-400 uppercase">
+            Top {{ recentBookings.length }} Latest Bookings
+          </span>
+          <button
+            @click="viewAllBookings"
+            class="relative px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center group overflow-hidden"
+          >
+            <span class="relative z-10">View All</span>
+            <span
+              class="absolute left-0 top-0 w-full h-full bg-blue-700 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"
+            ></span>
+          </button>
+        </div>
       </div>
 
-      <div
-        class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
-      >
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-gray-50/50 border-b border-gray-100">
-                <th
-                  class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >
-                  Guest
-                </th>
-                <th
-                  class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >
-                  Stay Dates
-                </th>
-                <th
-                  class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >
-                  Total
-                </th>
-                <th
-                  class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >
-                  Status
-                </th>
-                <th
-                  class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right"
-                >
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50">
-              <tr
-                v-for="booking in recentBookings"
-                :key="booking.id"
-                class="hover:bg-gray-50/50 transition-colors"
+      <div class="space-y-3">
+        <div
+          v-for="(booking, index) in recentBookings"
+          :key="booking.id"
+          class="group bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all flex flex-wrap items-center gap-4 lg:gap-8"
+        >
+          <div class="flex items-center gap-4 min-w-[180px]">
+            <div
+              class="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-gray-50 rounded-lg text-xs font-bold text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all"
+            >
+              {{ index + 1 }}
+            </div>
+            <div class="min-w-0">
+              <h4
+                class="text-sm font-bold text-gray-800 truncate group-hover:text-blue-700 transition-colors"
               >
-                <td class="px-6 py-4">
-                  <div class="flex flex-col">
-                    <span class="text-sm font-semibold text-gray-700">{{
-                      booking.guestFullName
-                    }}</span>
-                    <span class="text-xs text-gray-400">{{
-                      booking.bookingNumber
-                    }}</span>
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="text-sm text-gray-600 italic">
-                    {{ booking.arrivalDateTime }} to
-                    {{ booking.departureDateTime }}
-                  </div>
-                </td>
-                <td class="px-6 py-4">
-                  <span class="text-sm font-medium text-gray-700"
-                    >₹{{ booking.grandTotal }}</span
-                  >
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    :class="[
-                      'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider',
-                      booking.status === 'confirm'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-amber-100 text-amber-700',
-                    ]"
-                  >
-                    {{ booking.status }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <button
-                    @click="handleBookingClick(booking)"
-                    class="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                  >
-                    <Icon icon="mdi:eye-outline" class="text-xl" />
-                  </button>
-                </td>
-              </tr>
-              <tr v-if="recentBookings.length === 0">
-                <td
-                  colspan="5"
-                  class="px-6 py-10 text-center text-gray-400 text-sm"
-                >
-                  No bookings found.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                {{ booking.guestName || "Guest" }}
+              </h4>
+              <p
+                class="text-[10px] font-bold text-blue-500 uppercase tracking-tight"
+              >
+                Ref #{{ booking.id }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex-grow min-w-[280px]">
+            <div class="flex items-center gap-2 mb-1.5">
+              <Icon icon="mdi:email-outline" class="text-gray-400 text-xs" />
+              <span class="text-[11px] text-gray-500 truncate font-medium">
+                {{ booking.guestEmail || "no-email-provided@mail.com" }}
+              </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span class="text-[11px] text-gray-600 flex items-center gap-1">
+                <Icon icon="mdi:office-building" class="text-blue-400" />
+                {{ booking.property?.propertyName || "Main Property" }}
+              </span>
+              <span class="text-[11px] text-gray-600 flex items-center gap-1">
+                <Icon icon="mdi:door-open" class="text-green-500" />
+                {{ booking.resource_type_name }}
+              </span>
+              <span class="text-[11px] text-gray-600 flex items-center gap-1">
+                <Icon icon="mdi:clock-check-outline" class="text-orange-400" />
+                Booked: {{ booking.bookedOn || "N/A" }}
+              </span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-5 px-6 border-l border-gray-100">
+            <div class="text-center">
+              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">
+                Check-In
+              </p>
+              <p class="text-xs font-bold text-gray-700 whitespace-nowrap">
+                {{ booking.arrivalDateTime }}
+              </p>
+            </div>
+            <div class="h-6 w-px bg-gray-100 rotate-[20deg]"></div>
+            <div class="text-center">
+              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">
+                Check-Out
+              </p>
+              <p class="text-xs font-bold text-gray-700 whitespace-nowrap">
+                {{ booking.departureDateTime }}
+              </p>
+            </div>
+          </div>
+
+          <div class="ml-auto flex items-center">
+            <span
+              class="px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider min-w-[90px] text-center border"
+              :class="getStatusBadgeClass(booking.status)"
+            >
+              {{ booking.status }}
+            </span>
+          </div>
+        </div>
+
+        <div
+          v-if="recentBookings.length === 0"
+          class="py-12 bg-white rounded-xl border border-dashed border-gray-200 text-center"
+        >
+          <Icon
+            icon="mdi:calendar-blank-outline"
+            class="text-4xl text-gray-200 mx-auto mb-2"
+          />
+          <p class="text-gray-400 text-sm">
+            No activity recorded for the selected filter.
+          </p>
         </div>
       </div>
     </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6"></div>
 
     <BookingDetailModal
       :show="showBookingModal"
@@ -210,12 +252,12 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { Icon } from "@iconify/vue";
+import { useRouter } from "vue-router";
 import ownerService from "@/services/ownerService";
 import BookingDetailModal from "@/components/modals/BookingDetailModal.vue";
 import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
 import "vue-hotel-booking-calendar/dist/style.css";
 
-// Dropdown State
 const propertyDropdown = ref([]);
 const selectedProperties = ref([]);
 const isDropdownOpen = ref(false);
@@ -225,9 +267,19 @@ const bookings = ref([]);
 const recentBookings = ref([]);
 const showBookingModal = ref(false);
 const selectedBooking = ref(null);
-
-// New ref to hold dynamic stats
 const statsList = ref([]);
+const router = useRouter();
+
+const viewAllBookings = () => {
+  router.push({ name: "bookings" });
+};
+
+// New helper function to remove a single property
+const removeProperty = (id) => {
+  selectedProperties.value = selectedProperties.value.filter(
+    (item) => item !== id
+  );
+};
 
 const customStatuses = [
   { key: "available", label: "Available", color: "", backgroundColor: "" },
@@ -245,11 +297,16 @@ const customStatuses = [
   },
 ];
 
-const formatLabel = (key) => {
-  return key
-    .replace(/([A-Z])/g, " $1") // Add space before capital letters
-    .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
+const getStatusBadgeClass = (status) => {
+  const s = status?.toLowerCase();
+  if (s === "confirm" || s === "confirmed")
+    return "bg-emerald-50 text-emerald-700 border-emerald-100";
+  if (s === "cancelled") return "bg-rose-50 text-rose-700 border-rose-100";
+  return "bg-amber-50 text-amber-700 border-amber-100";
 };
+
+const formatLabel = (key) =>
+  key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
 
 const getStatConfig = (key) => {
   const configs = {
@@ -293,19 +350,20 @@ const isFutureBooking = (checkInStr) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   let dateParts = checkInStr.includes("-") ? checkInStr.split("-") : [];
-  let bookingDate;
-  if (dateParts[0].length === 4) {
-    bookingDate = new Date(checkInStr);
-  } else {
-    bookingDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-  }
+  let bookingDate =
+    dateParts[0].length === 4
+      ? new Date(checkInStr)
+      : new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
   bookingDate.setHours(0, 0, 0, 0);
   return bookingDate.getTime() >= today.getTime();
 };
 
 const handleBookingClick = (booking) => {
-  selectedBooking.value = booking;
-
+  selectedBooking.value = {
+    ...booking,
+    checkIn: booking.checkIn || booking.arrivalDateTime,
+    checkOut: booking.checkOut || booking.departureDateTime,
+  };
   showBookingModal.value = true;
 };
 
@@ -330,7 +388,7 @@ const getRecentBookings = async () => {
         : undefined,
     };
     const res = await ownerService.fetchBookings(params);
-    recentBookings.value = res.data || res;
+    recentBookings.value = (res.data || res).slice(0, 10);
   } catch (error) {
     console.error("Error fetching recent bookings:", error);
   }
@@ -341,7 +399,6 @@ const getResources = async () => {
     const ResourcesData = await ownerService.resourceList({
       propertyIds: selectedProperties.value,
     });
-
     const keysToDisplay = [
       "totalProperty",
       "totalBooking",
@@ -351,26 +408,23 @@ const getResources = async () => {
     statsList.value = keysToDisplay.map((key) => {
       const config = getStatConfig(key);
       return {
-        key: key,
-        label: formatLabel(key), // Heading is generated from API key name
+        key,
+        label: formatLabel(key),
         value: ResourcesData[key] || 0,
         icon: config.icon,
         bgClass: config.bg,
         textClass: config.text,
       };
     });
-
     rooms.value = ResourcesData.resource.map((res) => ({
       id: res.id.toString(),
       number: res.name,
     }));
-
     const formatDate = (dateStr) => {
       if (!dateStr) return "";
       const [d, m, y] = dateStr.trim().split("-");
       return `${y}-${m}-${d}`;
     };
-
     bookings.value = ResourcesData.booking.map((book) => ({
       id: book.id.toString(),
       guestName: book.guestFullName,
@@ -380,7 +434,7 @@ const getResources = async () => {
       modalcheckIn: book.arrivalDateTime,
       modalcheckOut: book.departureDateTime,
       adult: book.adult,
-      child: book.child ?? 0,
+      child: book.children ?? 0,
       status: book.status,
     }));
   } catch (error) {
