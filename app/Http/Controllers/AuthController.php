@@ -262,16 +262,21 @@ class AuthController extends Controller
     public function checkEmail(Request $request){
         try {
             $validator = Validator::make($request->all(), [
-                'email'        => 'required|string|min:8|max:255|email',
+                'email' => 'required|string|exists:users,email|max:255',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
+            }            
+            if (Auth::check()) {
+                if (Auth::user()->email === $request->email) {
+                    return response()->json(['status' => true, 'message' => '', 'data' => '']);
+                }
             }
             $user = User::where('email', $request->email)->first();
-            if (! empty($user)) {
-                return response()->json(['status' => false, 'message' => '', 'data' => null]);
+            if (!empty($user)) {
+                return response()->json(['status' => false, 'message' => 'Email already exists', 'data' => null]);
             }
-            return response()->json(['status' => true, 'message' => 'Please Login to your account', 'data' => '']);
+            return response()->json(['status' => true, 'message' => 'Email is available for registration', 'data' => '']);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => null]);
         }

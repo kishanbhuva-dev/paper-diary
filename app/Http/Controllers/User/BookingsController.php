@@ -292,7 +292,7 @@ class BookingsController extends Controller
         $property = Property::selectRaw("id,ownerId,propertyName,address,address2,city,country,postcode,telephone,phone,latitude,longitude,description,slug,county")->where('slug', $request->slug)->with(['owner','resourceTypes','facilities','propertyImage'=>function($query) {
             $query->orderBy('position','asc');
         },'resourceTypes.resources'=>function($query){
-            $query->select('id','name','customPrice','status')->where('status',1);
+            $query->select('id','resourceTypeId','name','customPrice','status')->where('status',1);
         }])->first();
         if ($property) {
             $property->propertyImage->transform(function ($item) {
