@@ -28,7 +28,9 @@ class UserAndOwnerController extends Controller
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => '']);
             }
             $user = User::where('email', $request->email)->first();
-
+            if (!empty($user)) {
+                $user->makeHidden(['stripePublicKey', 'stripeSecretKey']);
+            }
             if (empty($user)) {
                 return response()->json(['status' => false, 'message' => 'User not found', 'data' => '']);
             }
