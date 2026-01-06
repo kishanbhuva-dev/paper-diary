@@ -253,7 +253,7 @@
               <div>
                 <label
                   class="block text-sm font-bold text-slate-700 mb-3 tracking-tight"
-                  >Operating Status</label
+                  >Property Status</label
                 >
                 <div class="relative max-w-xs">
                   <select

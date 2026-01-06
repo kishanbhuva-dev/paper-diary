@@ -14,21 +14,15 @@
         </button>
 
         <div class="flex items-center gap-3">
-          <span
-            class="hidden md:block text-sm font-medium text-gray-400 uppercase tracking-widest"
-            >Property Wizard</span
-          >
-          <div class="h-4 w-px bg-gray-300 hidden md:block"></div>
           <h2 class="text-xl font-bold text-gray-800">
             {{ stepTitle }}
           </h2>
         </div>
-
         <button
           @click="cancelWizard"
           class="text-sm font-bold text-gray-400 hover:text-red-500 uppercase tracking-wider transition-colors"
         >
-          Exit Wizard
+          Exit
         </button>
       </div>
 
@@ -36,11 +30,15 @@
         <div class="flex items-center justify-between relative z-10">
           <div v-for="step in 3" :key="step" class="flex flex-col items-center">
             <div
+              @click="handleStepClick(step)"
               :class="[
                 'w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 border-4',
                 currentStep >= step
                   ? 'bg-blue-600 border-blue-100 text-white shadow-lg shadow-blue-200'
                   : 'bg-white border-gray-100 text-gray-300',
+                startedWithId
+                  ? 'cursor-pointer hover:scale-105'
+                  : 'cursor-default',
               ]"
             >
               <Icon
@@ -56,7 +54,7 @@
                 currentStep >= step ? 'text-blue-600' : 'text-gray-400',
               ]"
             >
-              {{ step === 1 ? "Details" : step === 2 ? "Types" : "Setup" }}
+              {{ step === 1 ? "Property Details" : step === 2 ? "Resource Types" : "Resources" }}
             </span>
           </div>
         </div>
@@ -80,25 +78,28 @@
                 <PropertiesForm
                   v-if="currentStep === 1"
                   ref="step1Ref"
-                  :id="propertyId"
+                  :id="normalizedPropertyId"
                   :in-wizard="true"
+                  :edit-mode="startedWithId"
                   @success="handleStep1Success"
                 />
 
                 <ResourceTypeForm
                   v-if="currentStep === 2"
                   ref="step2Ref"
-                  :property-id="propertyId"
+                  :property-id="normalizedPropertyId"
                   :in-wizard="true"
+                  :edit-mode="startedWithId"
                   @success="handleStep2Success"
                 />
 
                 <ResourceForm
                   v-if="currentStep === 3"
                   ref="step3Ref"
-                  :property-id="propertyId"
+                  :property-id="normalizedPropertyId"
                   :resource-types="resourceTypes"
                   :in-wizard="true"
+                  :edit-mode="startedWithId"
                   @success="handleStep3Success"
                 />
               </div>
@@ -164,13 +165,13 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Icon } from "@iconify/vue";
 
-// Import your step components
 import PropertiesForm from "./PropertiesForm.vue";
 import ResourceTypeForm from "./ResourceTypeForm.vue";
 import ResourceForm from "./ResourceForm.vue";
 import ownerService from "../../services/ownerService";
 
 const router = useRouter();
+const route = useRoute();
 
 // --- STATE ---
 const currentStep = ref(1);
@@ -178,18 +179,19 @@ const loading = ref(false);
 const propertyId = ref(null);
 const resourceTypes = ref([]);
 const createdInWizard = ref(false);
+const startedWithId = ref(false);
+
 const pendingChanges = ref({
   property: null,
   resourceTypes: null,
   resources: null,
 });
-// Refs to call child component methods
-const startedWithId = ref(false);
+
+// Component Refs
 const step1Ref = ref(null);
 const step2Ref = ref(null);
 const step3Ref = ref(null);
 
-const route = useRoute();
 onMounted(() => {
   if (route.params && route.params.id) {
     startedWithId.value = true;
@@ -198,79 +200,56 @@ onMounted(() => {
 });
 
 // --- COMPUTED ---
-const currentStepRef = computed(() => {
-  switch (currentStep.value) {
-    case 1:
-      return step1Ref.value;
-    case 2:
-      return step2Ref.value;
-    case 3:
-      return step3Ref.value;
-    default:
-      return null;
+
+const normalizedPropertyId = computed(() => {
+  if (!propertyId.value) return null;
+  try {
+    const decoded = atob(String(propertyId.value));
+    return !isNaN(Number(decoded)) ? Number(decoded) : propertyId.value;
+  } catch (e) {
+    return propertyId.value;
   }
 });
 
+const currentStepRef = computed(() => {
+  if (currentStep.value === 1) return step1Ref.value;
+  if (currentStep.value === 2) return step2Ref.value;
+  if (currentStep.value === 3) return step3Ref.value;
+  return null;
+});
+
 const stepTitle = computed(() => {
-  switch (currentStep.value) {
-    case 1:
-      return "Property Details";
-    case 2:
-      return "Resource Types";
-    case 3:
-      return "Resource Setup";
-    default:
-      return "Wizard";
-  }
+  const titles = ["Property Details", "Resource Categories", "Resource Setup"];
+  return titles[currentStep.value - 1] || "Wizard";
 });
 
 // --- NAVIGATION ---
 const submitCurrentStep = async () => {
-  if (currentStepRef.value && currentStepRef.value.handleSubmit) {
-    loading.value = true;
-    try {
-      const result = await currentStepRef.value.handleSubmit();
-      if (startedWithId.value && result) {
-        if (currentStep.value === 1) pendingChanges.value.property = result;
-        if (currentStep.value === 2)
-          pendingChanges.value.resourceTypes = result;
-        if (currentStep.value === 3) pendingChanges.value.resources = result;
-        nextStep();
-        return;
-      }
-    } catch (e) {
-      console.error("Step submission failed:", e);
-    } finally {
-      loading.value = false;
-    }
-  }
-};
-
-const cancelWizard = async () => {
+  if (!currentStepRef.value?.handleSubmit) return;
+  
+  loading.value = true;
   try {
-    if (!startedWithId.value && createdInWizard.value && propertyId.value) {
-      let id = propertyId.value;
-      try {
-        const maybe = atob(String(id));
-        if (!isNaN(Number(maybe))) id = Number(maybe);
-      } catch (e) {}
-
-      try {
-        const images = await ownerService.fetchPropertyImages(id);
-        const imageIds = (images || []).map((i) => i.id).filter(Boolean);
-        if (imageIds.length) {
-          await ownerService.deletePropertyImages(imageIds);
-        }
-      } catch (err) {
-        console.debug("[PropertyWizard] cleanup images failed:", err);
+    const result = await currentStepRef.value.handleSubmit();
+    
+    // If in Edit mode, we collect the returned payload for final batch update
+    if (startedWithId.value) {
+      if (currentStep.value === 1) pendingChanges.value.property = result;
+      if (currentStep.value === 2) pendingChanges.value.resourceTypes = result;
+      if (currentStep.value === 3) pendingChanges.value.resources = result;
+      
+      if (currentStep.value === 3) {
+        await applyEdits();
+      } else {
+        nextStep();
       }
-
-      await ownerService.deleteProperty(id);
+    } else {
+      // Create mode: Success is handled by child success emits
     }
-  } catch (err) {
-    console.error("Failed to cleanup property on cancel:", err);
+  } catch (e) {
+    console.error("Step submission failed:", e);
+  } finally {
+    loading.value = false;
   }
-  router.push({ name: "properties" });
 };
 
 const nextStep = () => {
@@ -286,207 +265,151 @@ const prevStep = () => {
   }
 };
 
-const handleBackButton = async () => {
-  if (currentStep.value > 1) {
-    prevStep();
-    return;
-  }
-
-  try {
-    if (!startedWithId.value && createdInWizard.value && propertyId.value) {
-      let id = propertyId.value;
-      try {
-        const maybe = atob(String(id));
-        if (!isNaN(Number(maybe))) id = Number(maybe);
-      } catch (e) {}
-
-      try {
-        const images = await ownerService.fetchPropertyImages(id);
-        const imageIds = (images || []).map((i) => i.id).filter(Boolean);
-        if (imageIds.length) {
-          await ownerService.deletePropertyImages(imageIds);
-        }
-      } catch (err) {
-        console.debug("[PropertyWizard] cleanup images failed:", err);
-      }
-
-      await ownerService.deleteProperty(id);
-    } else if (startedWithId.value) {
-      pendingChanges.value = {
-        property: null,
-        resourceTypes: null,
-        resources: null,
-      };
-    }
-  } catch (err) {
-    console.error("Failed to perform back-from-first-step cleanup:", err);
-  }
-
-  router.push({ name: "properties" });
+const handleStepClick = async (step) => {
+  if (!startedWithId.value) return;
+  await ensureStepDataLoaded(step);
+  currentStep.value = step;
+  window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// --- HANDLERS ---
+const ensureStepDataLoaded = async (step) => {
+  if (!normalizedPropertyId.value) return;
+  if ((step === 2 || step === 3) && resourceTypes.value.length === 0) {
+    await loadResourceTypes(normalizedPropertyId.value);
+  }
+};
+
 const loadResourceTypes = async (id) => {
   try {
     const types = await ownerService.fetchResourceTypes(id);
     resourceTypes.value = (types || []).map((t) => t.id);
   } catch (e) {
     console.error("Failed to load resource types:", e);
-    resourceTypes.value = [];
   }
 };
 
+// --- HANDLERS ---
 const handleStep1Success = async (data) => {
   if (!startedWithId.value) {
     if (!propertyId.value) createdInWizard.value = true;
+    propertyId.value = data.id;
   }
-  propertyId.value = data.id;
-
-  if (startedWithId.value) {
-    let id = data.id;
-    try {
-      const maybe = atob(String(id));
-      if (!isNaN(Number(maybe))) id = Number(maybe);
-    } catch (e) {}
-    await loadResourceTypes(id);
-  }
-
   nextStep();
 };
 
 const handleStep2Success = (data) => {
-  resourceTypes.value = data.resourceTypes;
+  if (data?.resourceTypes) {
+    resourceTypes.value = data.resourceTypes;
+  }
   nextStep();
 };
 
-const handleStep3Success = () => {
+const handleStep3Success = async (data) => {
   if (startedWithId.value) {
-    applyEdits();
-    return;
+    pendingChanges.value.resources = data;
+    await applyEdits();
+  } else {
+    router.push({ name: "properties" });
+  }
+};
+
+const cancelWizard = async () => {
+  if (!startedWithId.value && createdInWizard.value && normalizedPropertyId.value) {
+    try {
+      const images = await ownerService.fetchPropertyImages(normalizedPropertyId.value);
+      const imageIds = (images || []).map((i) => i.id).filter(Boolean);
+      if (imageIds.length) await ownerService.deletePropertyImages(imageIds);
+      await ownerService.deleteProperty(normalizedPropertyId.value);
+    } catch (err) {
+      console.debug("Cleanup failed", err);
+    }
   }
   router.push({ name: "properties" });
+};
+
+const handleBackButton = async () => {
+  if (currentStep.value > 1) {
+    prevStep();
+  } else {
+    await cancelWizard();
+  }
 };
 
 const applyEdits = async () => {
   loading.value = true;
   try {
-    const id = propertyId.value;
-    let numericId = id;
-    try {
-      const maybe = atob(String(id));
-      if (!isNaN(Number(maybe))) numericId = Number(maybe);
-    } catch (e) {}
+    const numericId = normalizedPropertyId.value;
 
+    // 1. Process Property Changes
     if (pendingChanges.value.property) {
       const p = pendingChanges.value.property;
-      if (p.propertyPayload) {
-        await ownerService.updateProperty(numericId, p.propertyPayload);
-      }
-
-      if (p.removedImageIds && p.removedImageIds.length) {
-        await ownerService.deletePropertyImages(p.removedImageIds);
-      }
-
+      if (p.propertyPayload) await ownerService.updateProperty(numericId, p.propertyPayload);
+      if (p.removedImageIds?.length) await ownerService.deletePropertyImages(p.removedImageIds);
+      
       let uploadedNewIds = [];
-      if (p.newFiles && p.newFiles.length) {
-        const uploaded = await ownerService.addPropertyImages(
-          numericId,
-          p.newFiles
-        );
+      if (p.newFiles?.length) {
+        const uploaded = await ownerService.addPropertyImages(numericId, p.newFiles);
         uploadedNewIds = (uploaded || []).map((u) => u.id).filter(Boolean);
       }
 
-      if (p.orderedImageIds && p.orderedImageIds.length) {
-        const finalOrder = [...p.orderedImageIds];
-        if (uploadedNewIds.length) finalOrder.push(...uploadedNewIds);
-        if (finalOrder.length > 1) {
-          await ownerService
-            .changePropertyImagePosition(numericId, finalOrder)
-            .catch((err) => {
-              console.debug(
-                "[PropertyWizard] Failed to update image order:",
-                err
-              );
-            });
-        }
-      } else {
-        const remoteImages = await ownerService.fetchPropertyImages(numericId);
-        const orderedIds = (remoteImages || [])
-          .map((i) => i.id)
-          .filter(Boolean);
-        if (orderedIds.length > 1) {
-          await ownerService
-            .changePropertyImagePosition(numericId, orderedIds)
-            .catch((err) => {
-              console.debug(
-                "[PropertyWizard] Failed to update image order:",
-                err
-              );
-            });
-        }
+      const finalOrder = [...(p.orderedImageIds || [])];
+      if (uploadedNewIds.length) finalOrder.push(...uploadedNewIds);
+      if (finalOrder.length > 0) {
+        await ownerService.changePropertyImagePosition(numericId, finalOrder).catch(() => {});
       }
 
-      if (Array.isArray(p.facilityIds) && p.facilityIds.length >= 0) {
-        await ownerService.setPropertyFacilities({
+      if (Array.isArray(p.facilityIds)) {
+        await ownerService.setPropertyFacilities({ propertyId: numericId, facilityId: p.facilityIds });
+      }
+    }
+
+    // 2. Process Resource Types
+    if (pendingChanges.value.resourceTypes) {
+      const rt = pendingChanges.value.resourceTypes;
+      if (rt.deleted?.length) {
+        for (const id of rt.deleted) await ownerService.deleteResourceType(id);
+      }
+      if (rt.toUpdate?.length) {
+        await ownerService.resourceTypeMultipleUpdate({
           propertyId: numericId,
-          facilityId: p.facilityIds,
+          ids: rt.toUpdate.map(r => r.id),
+          name: rt.toUpdate.map(r => r.name),
+          price: rt.toUpdate.map(r => r.price),
+          capacity: rt.toUpdate.map(r => r.capacity),
+          slot: rt.toUpdate.map(r => r.slot),
+        });
+      }
+      if (rt.toCreate?.length) {
+        await ownerService.resourceTypeMultipleStore({
+          propertyId: numericId,
+          name: rt.toCreate.map(r => r.name),
+          price: rt.toCreate.map(r => r.price),
+          capacity: rt.toCreate.map(r => r.capacity),
+          slot: rt.toCreate.map(r => r.slot),
         });
       }
     }
 
-    if (pendingChanges.value.resourceTypes) {
-      const rt = pendingChanges.value.resourceTypes;
-      if (rt.deleted && rt.deleted.length) {
-        for (const id of rt.deleted) {
-          await ownerService.deleteResourceType(id);
-        }
-      }
-      if (rt.toUpdate && rt.toUpdate.length) {
-        const payload = {
-          propertyId: numericId,
-          ids: rt.toUpdate.map((r) => r.id),
-          name: rt.toUpdate.map((r) => r.name),
-          price: rt.toUpdate.map((r) => r.price),
-          capacity: rt.toUpdate.map((r) => r.capacity),
-          slot: rt.toUpdate.map((r) => r.slot),
-        };
-        await ownerService.resourceTypeMultipleUpdate(payload);
-      }
-      if (rt.toCreate && rt.toCreate.length) {
-        const payload = {
-          propertyId: numericId,
-          name: rt.toCreate.map((r) => r.name),
-          price: rt.toCreate.map((r) => r.price),
-          capacity: rt.toCreate.map((r) => r.capacity),
-          slot: rt.toCreate.map((r) => r.slot),
-        };
-        await ownerService.resourceTypeMultipleStore(payload);
-      }
-    }
-
+    // 3. Process Resources
     if (pendingChanges.value.resources) {
       const rs = pendingChanges.value.resources;
-      if (rs.deleted && rs.deleted.length) {
-        for (const id of rs.deleted) {
-          await ownerService.deleteResource(id);
-        }
+      if (rs.deleted?.length) {
+        for (const id of rs.deleted) await ownerService.deleteResource(id);
       }
-      if (rs.toUpdate && rs.toUpdate.length) {
-        const payload = {
-          ids: rs.toUpdate.map((r) => r.id),
-          name: rs.toUpdate.map((r) => r.name),
-          status: rs.toUpdate.map((r) => r.status),
-          resourceTypeId: rs.toUpdate.map((r) => r.resourceTypeId),
-        };
-        await ownerService.resourceMultipleUpdate(payload);
+      if (rs.toUpdate?.length) {
+        await ownerService.resourceMultipleUpdate({
+          ids: rs.toUpdate.map(r => r.id),
+          name: rs.toUpdate.map(r => r.name),
+          status: rs.toUpdate.map(r => r.status),
+          resourceTypeId: rs.toUpdate.map(r => r.resourceTypeId),
+        });
       }
-      if (rs.toCreate && rs.toCreate.length) {
-        const payload = {
-          name: rs.toCreate.map((r) => r.name),
-          status: rs.toCreate.map((r) => r.status),
-          resourceTypeId: rs.toCreate.map((r) => r.resourceTypeId),
-        };
-        await ownerService.resourceMultipleStore(payload);
+      if (rs.toCreate?.length) {
+        await ownerService.resourceMultipleStore({
+          name: rs.toCreate.map(r => r.name),
+          status: rs.toCreate.map(r => r.status),
+          resourceTypeId: rs.toCreate.map(r => r.resourceTypeId),
+        });
       }
     }
 
@@ -504,14 +427,6 @@ const applyEdits = async () => {
 .fade-slide-leave-active {
   transition: all 0.3s ease;
 }
-
-.fade-slide-enter-from {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateX(-20px);
-}
+.fade-slide-enter-from { opacity: 0; transform: translateX(20px); }
+.fade-slide-leave-to { opacity: 0; transform: translateX(-20px); }
 </style>
