@@ -125,6 +125,18 @@ const routes = [
         component: () => import("../../js/pages/auth/ChangePassword.vue"),
         meta: { pageTitle: "Change Password" },
       },
+      {
+        path: "/admin/listings",
+        name: "listings",
+        component: () => import("../pages/admin/Property/Listing.vue"),
+        meta: { pageTitle: "Poperty Listings"}
+      },
+      {
+        path: "/admin/facilities",
+        name: "facilities",
+        component: () => import("../pages/admin/Property/Facilities.vue"),
+        meta: { pageTitle: "Poperty Facilities"}
+      }
     ],
   },
 

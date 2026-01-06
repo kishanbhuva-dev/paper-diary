@@ -80,13 +80,41 @@
             :key="item.id"
             class="hover:bg-blue-50 transition duration-150"
           >
-            <td
+            <!-- <td
               v-for="col in columns"
               :key="col.key"
               class="px-6 py-3 whitespace-nowrap text-sm text-gray-700"
             >
               {{ getCellValue(item, col) }}
-            </td>
+            </td> -->
+
+
+            <td
+                v-for="col in columns"
+                :key="col.key"
+                class="px-6 py-3 whitespace-nowrap text-sm text-gray-700"
+              >
+                <template v-if="col.key === 'icon'">
+                  <div class="w-9 h-9 flex items-center justify-center bg-blue-50 rounded-xl border border-blue-100">
+                    <Icon :icon="item[col.key]" class="w-5 h-5 text-blue-600" />
+                  </div>
+                </template>
+
+                <template v-else-if="col.key === 'status'">
+                  <span 
+                    class="px-3 py-1 rounded-full text-xs font-bold border"
+                    :class="item.status == 1 
+                      ? 'bg-green-50 text-green-700 border-green-200' 
+                      : 'bg-red-50 text-red-700 border-red-200'"
+                  >
+                    {{ item.status == 1 ? 'Active' : 'Inactive' }}
+                  </span>
+                </template>
+
+                <template v-else>
+                  {{ getCellValue(item, col) }}
+                </template>
+              </td>
 
             <td
               v-if="showEdit || showDelete"
