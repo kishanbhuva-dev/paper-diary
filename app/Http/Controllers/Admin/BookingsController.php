@@ -16,39 +16,79 @@ class BookingsController extends Controller
     public function index(Request $request)
     {
         try {
-            $bookings = BookingOrder::selectRaw("id,propertyId,resourceTypeId,userId,status,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime");  
-            if ($request->search) { 
-                $bookings->whereHas('property', function ($query) use ($request) { 
-                    $query->where('propertyName', 'like', '%' . $request->search . '%'); 
-                }) 
-                ->orWhereHas('property.owner', function ($query) use ($request) { 
-                    $query->where('firstName', 'like', '%' . $request->search . '%') 
-                        ->orWhere('lastName', 'like', '%' . $request->search . '%') 
-                        ->orWhere('email', 'like', '%' . $request->search . '%'); 
-                }) 
-                ->orWhere('status', 'like', '%' . $request->search . '%');
-                if (strtotime($request->search)) {
-                    $bookings->orWhere('arrivalDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%')
-                        ->orWhere('departureDateTime', 'like', '%' . date('Y-m-d', strtotime($request->search)) . '%');
-                }
-    
-                $bookings->orWhereHas('user', function ($query) use ($request) { 
-                    $query->where('firstName', 'like', '%' . $request->search . '%') 
-                        ->orWhere('lastName', 'like', '%' . $request->search . '%') 
-                        ->orWhere('email', 'like', '%' . $request->search . '%'); 
-                }); 
+            $bookings = BookingOrder::selectRaw("
+                booking_orders.id, 
+                booking_orders.propertyId, 
+                booking_orders.resourceTypeId, 
+                booking_orders.userId, 
+                booking_orders.status, 
+                DATE_FORMAT(booking_orders.arrivalDateTime, '%d-%m-%Y') as arrivalDateTime, 
+                DATE_FORMAT(booking_orders.departureDateTime, '%d-%m-%Y') as departureDateTime, 
+                COALESCE(property.propertyName, 'N/A') as propertyName, 
+                COALESCE(CONCAT(users.firstName, ' ', users.lastName), 'N/A') as ownerName, 
+                COALESCE(users.email, 'N/A') as ownerEmail
+            ")
+            ->leftJoin('property', 'booking_orders.propertyId', '=', 'property.id')
+            ->leftJoin('users', 'property.ownerId', '=', 'users.id');
+
+            // Search Logic
+            if ($request->filled('search')) {
+                $searchTerm = '%' . $request->search . '%';
+                $rawSearch = $request->search;
+
+                $bookings->where(function ($query) use ($searchTerm, $rawSearch) {
+                    $query->where('property.propertyName', 'like', $searchTerm)
+                        ->orWhere('users.firstName', 'like', $searchTerm)
+                        ->orWhere('users.lastName', 'like', $searchTerm)
+                        ->orWhere('users.email', 'like', $searchTerm)
+                        ->orWhere('booking_orders.status', 'like', $searchTerm)
+                        ->orWhere('booking_orders.id', 'like', $searchTerm)
+                        ->orWhere('booking_orders.arrivalDateTime', 'like', $searchTerm)
+                        ->orWhere('booking_orders.departureDateTime', 'like', $searchTerm)
+                        ->orWhereDate('booking_orders.arrivalDateTime', '=', $rawSearch)
+                        ->orWhereDate('booking_orders.departureDateTime', '=', $rawSearch);
+                });
             }
-            $bookings->with(['property'=>function($query){
-                $query->select('id','ownerId','propertyName');
-            },'property.owner'=>function($query){
-                $query->select('id','firstName','lastName','email');
-            }]);  
+
+            // Sorting Logic
             $perPage = $request->perPage ?? 10;
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'desc';
-            $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
+
+            $sortMapping = [
+                'id'                => 'booking_orders.id',
+                'propertyName'      => 'property.propertyName',
+                'ownerName'         => 'users.firstName',
+                'ownerEmail'        => 'users.email',
+                'arrivalDateTime'   => 'booking_orders.arrivalDateTime',
+                'departureDateTime' => 'booking_orders.departureDateTime',
+                'status'            => 'booking_orders.status'
+            ];
+
+            $finalSort = $sortMapping[$sortBy] ?? 'booking_orders.id';
+            $bookings->orderBy($finalSort, $sortOrder);
+
+            // Pagination and Transformation
+            $paginatedData = $bookings->paginate($perPage);
             
-            return response()->json(['status' => true, 'message' => '', 'data' => $bookings]);
+            $paginatedData->through(function ($booking) {
+                return [
+                    'id'                => $booking->id,
+                    'propertyId'        => $booking->propertyId,
+                    'propertyName'      => $booking->propertyName,
+                    'ownerEmail'        => $booking->ownerEmail,
+                    'ownerName'         => $booking->ownerName,
+                    'arrivalDateTime'   => $booking->arrivalDateTime,
+                    'departureDateTime' => $booking->departureDateTime,
+                    'status'            => $booking->status,
+                ];
+            });
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Bookings retrieved successfully',
+                'data'    => $paginatedData
+            ]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
