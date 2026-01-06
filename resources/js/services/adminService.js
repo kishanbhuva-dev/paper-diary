@@ -44,6 +44,34 @@ const authService = {
     const response = await apiClient.post("/admin/delete-user", id);
     return response.data;
   },
+
+  async fetchPropertLisings() {
+    const response = await apiClient.get("admin/")
+  },
+
+  async addFacility(payload) {
+    const response = await apiClient.post("/admin/facility", payload);
+    return response.data;
+  },
+
+  async fetchFacilites(query) {
+    const response = await apiClient.get("admin/facility", {
+      params: query,
+    });
+
+    return response.data;
+  },
+
+  async updateFacility(payload) {
+    const response = await apiClient.put(`/admin/facility/${payload.id}`, payload);
+    return response.data;
+  },
+
+
+  async deleteFacility(id) {
+    const response = await apiClient.delete(`/admin/facility/${id}`);
+    return response.data;
+  },
 };
 
 export default authService;

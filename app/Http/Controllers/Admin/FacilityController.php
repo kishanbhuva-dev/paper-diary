@@ -37,7 +37,7 @@ class FacilityController extends Controller
             $facilities = $facility->orderBy($order, $sort)->paginate($pagination);
 
             if (! empty($facilities)) {
-                $response = ['status' => true, 'message' => 'Facilities retrieved successfully', 'data' => $facilities];
+                $response = ['status' => true, 'message' => '', 'data' => $facilities];
             } else {
                 $response = ['status' => false, 'message' => 'No facilities found', 'data' => []];
             }
@@ -92,7 +92,7 @@ class FacilityController extends Controller
                 'name'        => 'required|string|max:255',
                 'icon'        => 'nullable|string|max:255',
                 'description' => 'nullable|string|max:255',
-                'status'      => 'nullable|boolean',
+                'status'      => 'nullable|in:0,1',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
@@ -104,8 +104,9 @@ class FacilityController extends Controller
             $facility->name        = $request->name;
             $facility->icon        = $request->icon;
             $facility->description = $request->description;
+
             if (isset($request->status)) {
-                $facility->status = true;
+                $facility->status = $request->status;
             }
             if ($facility->save()) {
                 $response = ['status' => true, 'message' => 'Facility updated successfully', 'data' => $facility];
