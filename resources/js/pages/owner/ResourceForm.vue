@@ -30,7 +30,7 @@
           icon="mdi:plus"
           class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
         />
-        Add Resource
+        Add Resources
       </button>
     </div>
 
@@ -45,7 +45,7 @@
             <div class="md:col-span-4">
               <BaseInput
                 v-model="resourceItem.name"
-                label="Resource Name / ID"
+                label="Resource Name"
                 width="full"
                 placeholder="e.g. Room 101"
               />
@@ -54,8 +54,8 @@
             <div class="md:col-span-4">
               <BaseSelect
                 v-model="resourceItem.resourceTypeId"
-                label="Assigned Category"
-                placeholder="Select category..."
+                label="Assign Resource Type"
+                placeholder="Select Resource Type..."
                 :options="availableTypeOptions"
               />
             </div>

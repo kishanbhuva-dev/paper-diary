@@ -19,7 +19,7 @@
           <p
             class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
           >
-            Define room types or service levels
+            Define Resource Types
           </p>
         </div>
       </div>
@@ -33,7 +33,7 @@
           icon="mdi:plus-circle"
           class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
         />
-        Add New Category
+        Add New Resource Type
       </button>
     </div>
 
@@ -48,7 +48,7 @@
             <div class="md:col-span-5">
               <BaseInput
                 v-model="type.name"
-                label="Category Name"
+                label="Resource Type Name"
                 width="full"
                 placeholder="e.g. Deluxe Suite"
                 :ref="setInputRef"
