@@ -13,11 +13,13 @@
       @open-add-modal="handleAdd"
       @open-edit-modal="handleEdit"
       @delete="handleDelete"
+      @admin-login="handleLoginAsUser"
       :showDelete="true"
       :show-search="true"
       :showAdd="true"
       :showDownload="true"
       :showEdit="true"
+      :adminLogin="true"
     />
     <BaseModal
       :title="form?.id ? 'Edit User' : 'Add User'"
@@ -144,12 +146,16 @@ import BaseModal from "../../components/global/BaseModal.vue";
 import BaseInput from "../../components/global/BaseInput.vue";
 import adminService from "../../services/adminService";
 import DeleteModal from "../../components/global/DeleteModal.vue";
+import { useRouter } from "vue-router";
 
 const isOpen = ref(false);
 const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 const total = ref(0);
+const users = ref([]);
+const router = useRouter();
+
 
 const form = ref({
   firstName: "",
@@ -247,7 +253,6 @@ const handlePerPageChange = (size) => {
   fetchAllUsers();
 };
 
-const users = ref([]);
 
 const tableColumns = [
   { label: "ID", key: "id" },
@@ -257,6 +262,35 @@ const tableColumns = [
   { label: "Phone", key: "phone" },
   { label: "Role", key: "role" },
 ];
+
+const handleLoginAsUser = async (id) => {
+      const email = users.value.find(p => p.id === id)?.email;
+
+      if (!email) {
+          console.warn("Admin login attempted without email");
+          return;
+      }
+
+      const adminToken = localStorage.getItem('authToken');
+      const adminUser = localStorage.getItem('user');
+
+      const response = await adminService.loginAsOwner({ email });
+
+      if (!response?.data?.status) {
+      console.warn("Login as user failed", response);
+      return;
+      }
+      
+      const { token, user } = response.data.data;
+      
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('adminToken', adminToken);
+      localStorage.setItem('adminUser', adminUser);
+
+      router.push({ name: 'home' });
+      setTimeout(() => location.reload(), 1000);
+  };
 
 onMounted(() => {
   fetchAllUsers();

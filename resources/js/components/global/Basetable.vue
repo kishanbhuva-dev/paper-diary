@@ -151,7 +151,7 @@
 
               <button
                 v-if="adminLogin"
-                @click="emit('admin-login', item.ownerEmail)"
+                @click="emit('admin-login', item.id)"
                 class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-full font-bold hover:bg-green-500 transition duration-150"
                 title="Admin Login"
               >
