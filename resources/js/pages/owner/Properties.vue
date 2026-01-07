@@ -34,6 +34,7 @@
       @search="handleSearch"
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
+      @sort="handleSort"
       @open-add-modal="navigateToAdd"
       @open-edit-modal="navigateToEdit"
       @delete="confirmDelete"
@@ -62,11 +63,7 @@ import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
 import ownerService from "../../services/ownerService";
 
-// --- 1. STATE MANAGEMENT & INITIALIZATION ---
-// Initialize Router
 const router = useRouter();
-
-// Reactive State
 const loading = ref(false);
 const error = ref(null);
 const properties = ref([]);
@@ -75,108 +72,73 @@ const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 
-// Delete Modal State
+// Sorting state (default to backend defaults)
+const orderBy = ref("id");
+const orderDirection = ref("asc");
+
 const isConfirmationModalVisible = ref(false);
 const propertyIdToDelete = ref(null);
-const propertyNameToDelete = ref(""); // NEW: State to hold the property name
+const propertyNameToDelete = ref("");
 
-// --- ADDRESS TRUNCATION HELPER ---
-
-/**
- * Truncates a string if it exceeds a maximum length.
- * @param {string} str - The input string.
- * @param {number} maxLen - The maximum length before truncation.
- * @returns {string} The truncated string followed by '...' or the original string.
- */
 const truncateString = (str, maxLen = 15) => {
   if (!str) return "";
   const s = String(str);
   return s.length > maxLen ? s.substring(0, maxLen) + "..." : s;
 };
 
-// Table Configuration
+// Table Configuration with sortable flag
 const tableColumns = [
-  { label: "ID", key: "id" },
-  { label: "Name", key: "propertyName" },
-  {
-    label: "Address",
-    key: (item) => truncateString(item.address, 15),
-  },
-  { label: "City", key: "city" },
-  { label: "Country", key: "country" },
-  { label: "Postcode", key: "postcode" },
-  { label: "Telephone", key: "telephone" },
-  { label: "Email", key: "email" },
-  { label: "Status", key: "status" },
+  { label: "ID", key: "id", sortable: true },
+  { label: "Name", key: "propertyName", sortable: true },
+  { label: "Address", key: (item) => truncateString(item.address, 15), sortable: false },
+  { label: "City", key: "city", sortable: true },
+  { label: "Country", key: "country", sortable: true },
+  { label: "Postcode", key: "postcode", sortable: true },
+  { label: "Telephone", key: "telephone", sortable: true },
+  { label: "Email", key: "email", sortable: true },
+  { label: "Status", key: "status", sortable: true },
 ];
 
-// --- 2. DATA FETCHING LOGIC ---
-
-/**
- * Maps the status value from the API response to a human-readable string.
- * @param {object} property - The property object from the API.
- * @returns {string} 'Active' or 'Inactive'.
- */
 const formatStatus = (property) => {
-  // Assuming 1 or 'Active' means Active, otherwise Inactive
-  return property.status === 1 || property.status === "Active"
-    ? "Active"
-    : "Inactive";
+  return property.status === 1 || property.status === "Active" ? "Active" : "Inactive";
 };
 
-/** Fetches the property data from the API based on current pagination/search state.
- */
 const loadData = async () => {
   error.value = null;
   loading.value = true;
   try {
+    // Calling service with your existing backend parameter names
     const data = await ownerService.fetchProperties({
       page: currentPage.value,
       pagination: perPage.value,
       search: currentSearch.value,
+      orderBy: orderBy.value,          // Existing backend param
+      orderDirection: orderDirection.value // Existing backend param
     });
 
-    properties.value =
-      data.data.map((property) => ({
-        ...property,
-        status: formatStatus(property),
-      })) || [];
+    properties.value = data.data.map((property) => ({
+      ...property,
+      status: formatStatus(property),
+    })) || [];
 
     total.value = data.total || 0;
   } catch (err) {
-    // Standardized error message handling
-    const errorMessage =
-      err.response?.status === 401
-        ? "Unauthorized. Please log in again."
-        : err.message || "Failed to load properties";
-
-    error.value = errorMessage;
+    error.value = err.response?.status === 401 ? "Unauthorized. Please log in again." : err.message || "Failed to load properties";
   } finally {
     loading.value = false;
   }
 };
 
-// --- 3. NAVIGATION HANDLERS ---
-
-/* Navigates to the property creation form.*/
-const navigateToAdd = () => {
-  router.push({ name: "property-wizard" });
-};
-
-/*Navigates to the property edit form.
- * @param {object} item - The property object to edit.*/
+const navigateToAdd = () => router.push({ name: "property-wizard" });
 const navigateToEdit = (item) => {
   if (item && item.id) {
-    // Encodes ID before passing as a URL parameter (using btoa for simple base64 encoding)
     router.push({ name: "property-wizard", params: { id: btoa(item.id) } });
   }
 };
 
-// --- 4. TABLE EVENT HANDLERS ---
-
 const handleSearch = (term) => {
   currentSearch.value = term;
-  currentPage.value = 1; // Reset to first page on search
+  currentPage.value = 1;
   loadData();
 };
 
@@ -187,84 +149,48 @@ const handlePageChange = (page) => {
 
 const handlePerPageChange = (size) => {
   perPage.value = size;
-  currentPage.value = 1; // Reset to first page when changing page size
+  currentPage.value = 1;
   loadData();
 };
 
-// --- 5. DELETION LOGIC ---
+const handleSort = (sortData) => {
+  orderBy.value = sortData.key;
+  orderDirection.value = sortData.order;
+  loadData();
+};
 
-/**
- * Executes when the custom modal's confirmation button is clicked.
- */
 const handleDeleteConfirmation = async () => {
   isConfirmationModalVisible.value = false;
-
   if (propertyIdToDelete.value !== null) {
     await handleDelete(propertyIdToDelete.value);
     propertyIdToDelete.value = null;
-    propertyNameToDelete.value = ""; // Clear name state
+    propertyNameToDelete.value = "";
   }
 };
 
-/**
- * Performs the actual property deletion via the service and updates the view.
- * @param {number} id - The ID of the property to delete.
- */
 const handleDelete = async (id) => {
   error.value = null;
-
   try {
-    // Perform cascade delete orchestration here (service is thin)
     try {
       const images = await ownerService.fetchPropertyImages(id);
       const imageIds = (images || []).map((i) => i.id).filter(Boolean);
-      if (imageIds.length) {
-        await ownerService.deletePropertyImages(imageIds);
-      }
-    } catch (err) {
-      console.debug("[Properties] delete images failed:", err);
-      // continue to attempt to delete property even if image cleanup fails
-    }
+      if (imageIds.length) await ownerService.deletePropertyImages(imageIds);
+    } catch (err) { console.debug("delete images failed:", err); }
 
     await ownerService.deleteProperty(id);
-
-    // Logic to prevent an empty page after deletion
-    if (properties.value.length === 1 && currentPage.value > 1) {
-      currentPage.value--;
-    }
-    await loadData(); // Reload data to show updated list
-
-    // Success notification (using console log as SweetAlert was removed)
+    if (properties.value.length === 1 && currentPage.value > 1) currentPage.value--;
+    await loadData();
   } catch (err) {
-    const errorMessage =
-      err.response?.status === 401
-        ? "Unauthorized: Deletion failed."
-        : err.message || "Deletion failed";
-
-    error.value = errorMessage;
-
-    // Error notification (using console log as SweetAlert was removed)
-    console.error("Deletion failed:", errorMessage);
+    error.value = err.response?.status === 401 ? "Unauthorized" : err.message;
   }
 };
 
-/**
- * Shows the custom confirmation dialog before attempting deletion.
- * @param {number} id - The ID of the property to delete.
- */
 const confirmDelete = (id) => {
   const property = properties.value.find((p) => p.id === id);
-
   propertyIdToDelete.value = id;
-  propertyNameToDelete.value = property
-    ? property.propertyName
-    : "this property";
+  propertyNameToDelete.value = property ? property.propertyName : "this property";
   isConfirmationModalVisible.value = true;
 };
 
-// --- 6. SETUP HOOKS ---
-
-onMounted(() => {
-  loadData(); // Initial data load when component mounts
-});
+onMounted(() => { loadData(); });
 </script>
