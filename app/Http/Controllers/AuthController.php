@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    public function checkSubscription()
+    {
+        $user = Auth::user();
+        return hasActiveSubscription($user);
+    }
     public function login(Request $request)
     {
         try {
@@ -24,18 +29,20 @@ class AuthController extends Controller
                 return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
             }
 
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->where('role','owner')->first();
 
             if (! $user || ! Hash::check($request->password, $user->password)) {
                 return response()->json(['status' => false, 'message' => 'The provided credentials are incorrect.']);
             }
+            
+            // $subscription = hasActiveSubscription($user);
             $subscription=true;
             $token = $user->createToken('api-token')->plainTextToken;
 
             return response()->json([
                 'status'  => true,
                 'message' => 'Login successful',
-                'data'    => compact('user', 'token','subscription'),
+                'data'    => compact('user', 'token', 'subscription'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
