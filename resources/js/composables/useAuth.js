@@ -95,6 +95,8 @@ export function useAuth() {
       await authService.logout();
     } catch (e) {
       console.warn("[logout] API failed:", e);
+    } finally {
+      localStorage.clear();
     }
 
     persistAuth(null, null);

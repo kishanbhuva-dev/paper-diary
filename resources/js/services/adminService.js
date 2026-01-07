@@ -45,8 +45,22 @@ const authService = {
     return response.data;
   },
 
-  async fetchPropertLisings() {
-    const response = await apiClient.get("admin/")
+  async fetchPropertLisings(query) {
+    const response = await apiClient.get("admin/property", {
+      params: query
+    });
+
+    return response.data;
+  },
+
+  async ChangePropertyStatus(payload) {
+    const response = await apiClient.put(`/admin/property/${payload.id}`,
+      {
+        id: payload.id,
+        status: payload.status
+      }
+    );
+    return response.data;
   },
 
   async addFacility(payload) {
@@ -72,6 +86,11 @@ const authService = {
     const response = await apiClient.delete(`/admin/facility/${id}`);
     return response.data;
   },
+
+  async loginAsOwner (email) {
+    return apiClient.post('/admin/email-login', email);
+    
+  }
 };
 
 export default authService;

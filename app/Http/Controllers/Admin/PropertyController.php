@@ -78,7 +78,7 @@ class PropertyController extends Controller
             return response()->json($response);
         }
     }
-    public function propertyStatusChange(Request $request){
+    public function update(Request $request,$id){
         try {
             $validator = Validator::make($request->all(), [
                 'id' => 'required|exists:property,id',
@@ -88,7 +88,7 @@ class PropertyController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors(), 'data' => null]);
             }
-            $property = Property::where('id', $request->id)->first();
+            $property = Property::where('id', $id)->first();
             $property->status = $request->status;
             $property->save();
             return response()->json(['status' => true, 'message' => 'Property status changed successfully', 'data' => $property]);

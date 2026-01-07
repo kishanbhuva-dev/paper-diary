@@ -1,7 +1,171 @@
 <template>
-    this is property listing page
+    <div>
+        <Basetable
+            title="Lisings"
+            :columns="tableColumns"
+            :rows="propertLisings"
+            :server-side="true"
+            :total-items="total"
+            :per-page="perPage"
+            @search="handleSearch"
+            @page-change="handlePageChange"
+            @per-page-change="handlePerPageChange"
+            @open-add-modal="handleAdd"
+            @delete="handleDelete"
+            @admin-login="handleLoginAsUser"
+            :show-search="true"
+            :showAdd="false"
+            :showDownload="true"
+            :showEdit="false"
+            :showDelete="false"
+            :adminLogin="true"
+        >
+            <template #toggle-status="{ row }">
+                <div class="flex items-center">
+                    <label class="relative inline-flex items-center cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            class="sr-only peer"
+                            v-model="row.status"
+                            :true-value="1"
+                            :false-value="0"
+                            @change="ChangeStatus(row.id, row.status)"
+                        />
+                        <div class="w-16 h-5 bg-red-500 rounded-full transition-colors peer-checked:bg-green-500"></div>
+                        <span
+                            class="absolute right-2 text-white text-[0.75em] font-bold pointer-events-none peer-checked:hidden"
+                        >
+                            Offline
+                        </span>
+                        <span
+                            class="absolute left-2 text-white text-[0.75em] font-bold pointer-events-none hidden peer-checked:inline"
+                        >
+                            Online
+                        </span>
+                        <div
+                            class="absolute left-0.5 top-0.5 size-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-11"
+                        ></div>
+                    </label>
+                </div>
+            </template>
+        </Basetable>
+    </div>
 </template>
 
 <script setup>
-    
+    import { onMounted, ref } from 'vue';
+    import adminService from '../../../services/adminService'
+    import Basetable from '../../../components/global/Basetable.vue';
+    import { useRouter } from 'vue-router';
+
+    const isOpen = ref(false);
+    const total = ref(0);
+    const perPage = ref(10);
+    const currentPage = ref(1);
+    const currentSearch = ref("");
+    const propertLisings = ref([]);
+    const router = useRouter();
+
+    const tableColumns = [
+        { label: "S.N", key: "id"},
+        { label: "propertyName", key: "propertyName"},
+        { label: "ownerName", key: "ownerName"},
+        { label: "ownerEmail", key: "ownerEmail"},
+        { label: "ownerPhone", key: "ownerPhone"},
+        { label: "ownerTelephone", key: "ownerTelephone"},
+        { label: "totalRevenue", key: "totalRevenue"},
+        { label: "lostAmount", key: "lostAmount"},
+        { label: "status", key: "status"},
+        {
+            label: 'CHANGE STATUS',
+            key: 'toggle-status',
+        }
+    ]
+
+    const form = ref({
+    })
+
+    const ChangeStatus = async (propertyId, status) => {
+        const payload = {
+            id: propertyId,
+            status: status
+        }
+        const res = await adminService.ChangePropertyStatus(payload);
+        console.log('res', res);
+    }
+
+
+    const fetchPropertLisings = async () => {
+        const res = await adminService.fetchPropertLisings({
+            page: currentPage.value,
+            per_page: perPage.value,
+            search: currentSearch.value,
+        });
+
+        if (res.status) {
+            propertLisings.value = res.data.data;
+            total.value = res.data.total || 0;
+        }
+    }
+
+    const handleSearch = (term) => {
+        currentSearch.value = term;
+        currentPage.value = 1;
+        fetchPropertLisings();
+    };
+
+    const handlePageChange = (page) => {
+        currentPage.value = page;
+        fetchPropertLisings();
+    };
+
+    const handlePerPageChange = (size) => {
+        perPage.value = size;
+        currentPage.value = 1;
+        fetchPropertLisings();
+    };
+
+    const handleAdd = () => {
+        isOpen.value = true;
+        form.value = {};
+    }
+
+    const isOpenDelete = ref(false)
+    const deleteFacility = ref(null)
+
+    const handleDelete = async (facility) => {
+        deleteFacility.value = facility;
+        isOpenDelete.value = true;
+    };
+
+    const handleLoginAsUser = async (email) => {
+        if (!email) {
+            console.warn("Admin login attempted without email");
+            return;
+        }
+        const adminToken = localStorage.getItem('authToken');
+        const adminUser = localStorage.getItem('user');
+
+        const response = await adminService.loginAsOwner({ email });
+
+        if (!response?.data?.status) {
+        console.warn("Login as user failed", response);
+        return;
+        }
+        
+        const { token, user } = response.data.data;
+        
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('adminToken', adminToken);
+        localStorage.setItem('adminUser', adminUser);
+
+        router.push({ name: 'owner-dashboard' });
+
+        setTimeout(() => location.reload(), 1000);
+    };
+
+    onMounted(() => {
+        fetchPropertLisings();
+    })
 </script>

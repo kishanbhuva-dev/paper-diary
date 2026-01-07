@@ -66,9 +66,10 @@
               {{ col.label }}
             </th>
             <th
-              v-if="showEdit || showDelete"
+              v-if="showEdit || showDelete || adminLogin"
               class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"
             >
+
               Actions
             </th>
           </tr>
@@ -80,21 +81,17 @@
             :key="item.id"
             class="hover:bg-blue-50 transition duration-150"
           >
-            <!-- <td
-              v-for="col in columns"
-              :key="col.key"
-              class="px-6 py-3 whitespace-nowrap text-sm text-gray-700"
-            >
-              {{ getCellValue(item, col) }}
-            </td> -->
-
-
             <td
                 v-for="col in columns"
                 :key="col.key"
                 class="px-6 py-3 whitespace-nowrap text-sm text-gray-700"
               >
-                <template v-if="col.key === 'icon'">
+
+              <template v-if="$slots[col.key]">
+                <slot :name="col.key" :row="item" />
+              </template>
+
+                <template v-else-if="col.key === 'icon'">
                   <div class="w-9 h-9 flex items-center justify-center bg-blue-50 rounded-xl border border-blue-100">
                     <Icon :icon="item[col.key]" class="w-5 h-5 text-blue-600" />
                   </div>
@@ -117,7 +114,7 @@
               </td>
 
             <td
-              v-if="showEdit || showDelete"
+              v-if="showEdit || showDelete || adminLogin"
               class="actions px-6 py-3 whitespace-nowrap text-center text-sm font-medium"
             >
               <button
@@ -137,12 +134,21 @@
               >
                 <Icon icon="mdi:delete-forever" class="w-5 h-5" />
               </button>
+
+              <button
+                v-if="adminLogin"
+                @click="emit('admin-login', item.ownerEmail)"
+                class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-full font-bold hover:bg-green-500 transition duration-150"
+                title="Admin Login"
+              >
+                <Icon icon="lucide:user-pen" class="w-5 h-5" />
+              </button>
             </td>
           </tr>
 
           <tr v-if="!paginatedData.length">
             <td
-              :colspan="columns.length + (showEdit || showDelete ? 1 : 0)"
+              :colspan="columns.length + (showEdit || showDelete || adminLogin ? 1 : 0)"
               class="no-data px-6 py-8 text-center text-gray-500 italic"
             >
               <Icon
@@ -275,6 +281,7 @@ const emit = defineEmits([
   "search",
   "page-change",
   "per-page-change",
+  "admin-login"
 ]);
 
 // 2. PROPS
@@ -293,6 +300,7 @@ const props = defineProps({
   // Visibility
   showAdd: { type: Boolean, default: true },
   showEdit: { type: Boolean, default: true },
+  adminLogin: { type: Boolean, default: true },
   showDelete: { type: Boolean, default: true },
   showDownload: { type: Boolean, default: true },
   showSearch: { type: Boolean, default: true },
