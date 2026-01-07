@@ -42,7 +42,7 @@
 
           <button
             v-if="showDownload"
-            @click="emit('download')"
+            @click="exportToExcel"
             class="flex items-center justify-center p-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200 cursor-pointer transition duration-150 h-10 w-10"
             title="Download"
           >
@@ -61,9 +61,23 @@
             <th
               v-for="col in columns"
               :key="col.key"
-              class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap"
+              @click="col.sortable !== false ? handleSort(col) : null"
+              :class="[
+                'px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap',
+                col.sortable !== false ? 'cursor-pointer hover:bg-blue-100 transition duration-150' : ''
+              ]"
             >
-              {{ col.label }}
+              <div class="flex items-center gap-1">
+                {{ col.label }}
+                <template v-if="col.sortable !== false">
+                  <Icon 
+                    v-if="sortKey === (typeof col.key === 'function' ? col.label : col.key)" 
+                    :icon="sortOrder === 'asc' ? 'mdi:sort-ascending' : 'mdi:sort-descending'" 
+                    class="w-4 h-4 text-blue-600"
+                  />
+                  <Icon v-else icon="mdi:unfold-more-horizontal" class="w-4 h-4 text-gray-400 opacity-40" />
+                </template>
+              </div>
             </th>
             <th
               v-if="showEdit || showDelete || adminLogin"
@@ -100,11 +114,11 @@
                 <template v-else-if="col.key === 'status'">
                   <span 
                     class="px-3 py-1 rounded-full text-xs font-bold border"
-                    :class="item.status == 1 
+                    :class="(item.status == 1 || item.status === 'Active') 
                       ? 'bg-green-50 text-green-700 border-green-200' 
                       : 'bg-red-50 text-red-700 border-red-200'"
                   >
-                    {{ item.status == 1 ? 'Active' : 'Inactive' }}
+                    {{ (item.status == 1 || item.status === 'Active') ? 'Active' : 'Inactive' }}
                   </span>
                 </template>
 
@@ -231,7 +245,6 @@
                 @click="changePage(page)"
                 :class="[
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border',
-                  // Use sm:inline-flex to hide most buttons on mobile screens
                   {
                     'hidden sm:inline-flex':
                       page !== currentPage && Math.abs(page - currentPage) > 1,
@@ -271,8 +284,8 @@
 <script setup>
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { Icon } from "@iconify/vue";
+import * as XLSX from "xlsx";
 
-// 1. DEFINE EMITS
 const emit = defineEmits([
   "open-add-modal",
   "download",
@@ -281,23 +294,17 @@ const emit = defineEmits([
   "search",
   "page-change",
   "per-page-change",
-  "admin-login"
+  "admin-login",
+  "sort"
 ]);
 
-// 2. PROPS
 const props = defineProps({
   title: { type: String, default: "Data Table" },
   columns: { type: Array, required: true },
   rows: { type: Array, required: true, default: () => [] },
-
-  // Configuration
   perPage: { type: Number, default: 10 },
-
-  // Server Side specific
   serverSide: { type: Boolean, default: false },
   totalItems: { type: Number, default: 0 },
-
-  // Visibility
   showAdd: { type: Boolean, default: true },
   showEdit: { type: Boolean, default: true },
   adminLogin: { type: Boolean, default: true },
@@ -306,13 +313,25 @@ const props = defineProps({
   showSearch: { type: Boolean, default: true },
 });
 
+// --- SORTING ---
+const sortKey = ref("");
+const sortOrder = ref("asc");
+
+const handleSort = (col) => {
+  const key = typeof col.key === 'function' ? col.label : col.key;
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+  } else {
+    sortKey.value = key;
+    sortOrder.value = "asc";
+  }
+  emit("sort", { key: sortKey.value, order: sortOrder.value });
+};
+
 // --- HELPERS ---
-// Solves the 'owner.name' issue by traversing objects safely
 const getNestedValue = (obj, path) => {
   if (!obj || !path) return "";
-
   if (typeof path !== "string") return "";
-
   return path.split(".").reduce((acc, part) => acc && acc[part], obj);
 };
 
@@ -324,106 +343,88 @@ const getCellValue = (item, col) => {
   return getNestedValue(item, col.key);
 };
 
-// --- SEARCH & DEBOUNCE ---
+// --- EXPORT ---
+const exportToExcel = () => {
+  const exportData = props.rows.map(item => {
+    const row = {};
+    props.columns.forEach(col => {
+      if (col.key !== 'icon') {
+        row[col.label] = getCellValue(item, col);
+      }
+    });
+    return row;
+  });
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+  XLSX.writeFile(workbook, `${props.title.replace(/\s+/g, '_')}.xlsx`);
+  emit("download");
+};
+
+// --- SEARCH ---
 const localSearchTerm = ref("");
 const debouncedSearchTerm = ref("");
 let debounceTimeout = null;
 
 watch(localSearchTerm, (newVal) => {
   if (debounceTimeout) clearTimeout(debounceTimeout);
-
   debounceTimeout = setTimeout(() => {
     debouncedSearchTerm.value = newVal;
-    currentPage.value = 1; // Always reset to page 1 on search
-
-    // If Server Side, emit search event to parent
-    if (props.serverSide) {
-      emit("search", newVal);
-    }
-  }, 300); // 300ms delay for performance
+    currentPage.value = 1;
+    if (props.serverSide) emit("search", newVal);
+  }, 300);
 });
 
-onBeforeUnmount(() => {
-  if (debounceTimeout) clearTimeout(debounceTimeout);
-});
+onBeforeUnmount(() => { if (debounceTimeout) clearTimeout(debounceTimeout); });
 
-// --- PAGINATION STATE ---
+// --- PAGINATION ---
 const perPageRef = ref(props.perPage || 10);
 const perPageOptions = [10, 20, 50, 100];
+const currentPage = ref(1);
 
 watch(perPageRef, (newVal) => {
   currentPage.value = 1;
-  if (props.serverSide) {
-    emit("per-page-change", newVal);
-  }
+  if (props.serverSide) emit("per-page-change", newVal);
 });
 
-// --- DATA PROCESSING (HYBRID LOGIC) ---
 const processedData = computed(() => {
-  // IF SERVER SIDE: The API has already filtered data. Return rows as is.
-  if (props.serverSide) {
-    return props.rows;
+  if (props.serverSide) return props.rows;
+  let data = [...props.rows];
+  if (debouncedSearchTerm.value) {
+    const term = debouncedSearchTerm.value.toLowerCase().trim();
+    data = data.filter(item => props.columns.some(col => String(getCellValue(item, col)).toLowerCase().includes(term)));
   }
-
-  // IF CLIENT SIDE: Filter locally
-  if (!debouncedSearchTerm.value) {
-    return props.rows;
-  }
-  const term = debouncedSearchTerm.value.toLowerCase().trim();
-  return props.rows.filter((item) => {
-    return props.columns.some((col) => {
-      // --- THIS IS THE CRITICAL CHANGE ---
-      let rawValue;
-
-      if (typeof col.key === "function") {
-        rawValue = col.key(item);
-      } else {
-        rawValue = getNestedValue(item, col.key);
-      }
-
-      if (rawValue === null || rawValue === undefined) return false;
-      return String(rawValue).toLowerCase().includes(term);
+  if (sortKey.value) {
+    data.sort((a, b) => {
+      const col = props.columns.find(c => (typeof c.key === 'function' ? c.label : c.key) === sortKey.value);
+      let vA = getCellValue(a, col);
+      let vB = getCellValue(b, col);
+      if (vA < vB) return sortOrder.value === "asc" ? -1 : 1;
+      if (vA > vB) return sortOrder.value === "asc" ? 1 : -1;
+      return 0;
     });
-  });
+  }
+  return data;
 });
-
-// --- PAGINATION CALCULATIONS ---
-const currentPage = ref(1);
 
 const totalPages = computed(() => {
-  // IF SERVER SIDE: Use totalItems from DB
-  if (props.serverSide) {
-    return Math.ceil(props.totalItems / perPageRef.value);
-  }
-  // IF CLIENT SIDE: Use local array length
-  if (processedData.value.length === 0) return 0;
+  if (props.serverSide) return Math.ceil(props.totalItems / perPageRef.value);
   return Math.ceil(processedData.value.length / perPageRef.value);
 });
 
 const paginatedData = computed(() => {
-  // IF SERVER SIDE: Return all rows (since it's already a slice)
-  if (props.serverSide) {
-    return props.rows;
-  }
-
-  // IF CLIENT SIDE: Slice the local array
-  if (processedData.value.length === 0) return [];
+  if (props.serverSide) return props.rows;
   const start = (currentPage.value - 1) * perPageRef.value;
-  const end = start + perPageRef.value;
-  return processedData.value.slice(start, end);
+  return processedData.value.slice(start, start + perPageRef.value);
 });
 
-// --- NAVIGATION HANDLER ---
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
-    if (props.serverSide) {
-      emit("page-change", page);
-    }
+    if (props.serverSide) emit("page-change", page);
   }
 };
 
-// --- VISIBLE PAGES LOGIC (Standard 1 ... 5 6 7 ... 10) ---
 const visiblePages = computed(() => {
   const total = totalPages.value;
   const current = currentPage.value;
@@ -431,23 +432,13 @@ const visiblePages = computed(() => {
   const range = [];
   const rangeWithDots = [];
   let l;
-
   for (let i = 1; i <= total; i++) {
-    if (
-      i === 1 ||
-      i === total ||
-      (i >= current - delta && i <= current + delta)
-    ) {
-      range.push(i);
-    }
+    if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) range.push(i);
   }
   range.forEach((i) => {
     if (l) {
-      if (i - l === 2) {
-        rangeWithDots.push(l + 1);
-      } else if (i - l !== 1) {
-        rangeWithDots.push("...");
-      }
+      if (i - l === 2) rangeWithDots.push(l + 1);
+      else if (i - l !== 1) rangeWithDots.push("...");
     }
     rangeWithDots.push(i);
     l = i;
@@ -455,29 +446,9 @@ const visiblePages = computed(() => {
   return rangeWithDots;
 });
 
-// --- FIX FOR PAGINATION DISPLAY GLITCH ---
-// When deleting the last item on the last page in server-side mode,
-// totalItems decreases, causing totalPages to decrease.
-// We must watch totalPages and auto-correct currentPage if it falls out of bounds.
 watch(totalPages, (newTotal) => {
-  if (newTotal > 0 && currentPage.value > newTotal) {
-    currentPage.value = newTotal;
-  }
+  if (newTotal > 0 && currentPage.value > newTotal) currentPage.value = newTotal;
 });
-
-// Watch for external row updates to fix potential empty page issues
-watch(
-  () => props.rows,
-  () => {
-    if (!props.serverSide) {
-      const newTotal = Math.ceil(props.rows.length / perPageRef.value);
-      if (currentPage.value > newTotal && newTotal > 0) {
-        currentPage.value = newTotal;
-      }
-    }
-  },
-  { deep: true }
-);
 </script>
 
 <style scoped>
