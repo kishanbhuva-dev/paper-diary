@@ -36,6 +36,7 @@
       @search="handleSearch"
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
+      @sort="handleSort"
       @open-edit-modal="navigateToViewEdit"
       @delete="confirmDelete"
       :showDelete="false"
@@ -43,6 +44,7 @@
       :showAdd="false"
       :showDownload="true"
       :showEdit="false"
+      :admin-login="false"
     />
   </div>
 
@@ -66,6 +68,9 @@ import ownerService from "../../services/ownerService";
 // --- 1. STATE MANAGEMENT & INITIALIZATION ---
 // Initialize Router
 const router = useRouter();
+const sortBy = ref("id");
+const sortOrder = ref("asc");
+
 
 // Reactive State
 const loading = ref(false);
@@ -81,19 +86,19 @@ const isConfirmationModalVisible = ref(false);
 const bookingIdToDelete = ref(null);
 
 const tableColumns = [
-  { label: "ID", key: "id" },
-  { label: "Property", key: "property.propertyName" },
-  { label: "Resource Type", key: "resource_type_name" },
+  { label: "ID", key: "id", sortable: true },
+  { label: "Property", key: "property.propertyName" , sortable: true},
+  { label: "Resource Type", key: "resource_type_name" , sortable: true},
   {
     label: "Guest Name",
-    key: "guestName",
+    key: "guestName", sortable: true
   },
-  { label: "Check-in", key: "arrivalDateTime" },
-  { label: "Check-out", key: "departureDateTime" },
-  { label: "Price", key: "price" },
-  { label: "Status", key: "status" },
-  { label: "Payment Status", key: "paymentStatus" },
-  { label: "Booked On", key: "bookedOn" },
+  { label: "Check-in", key: "arrivalDateTime" , sortable: true},
+  { label: "Check-out", key: "departureDateTime" , sortable: true},
+  { label: "Price", key: "price" , sortable: true},
+  { label: "Status", key: "status" , sortable: true},
+  { label: "Payment Status", key: "paymentStatus" , sortable: true},
+  { label: "Booked On", key: "bookedOn" , sortable: true},
 ];
 
 // --- 2. DATA FETCHING LOGIC ---
@@ -107,7 +112,8 @@ const loadData = async () => {
       page: currentPage.value,
       perPage: perPage.value,
       search: currentSearch.value,
-      // We can also pass sortBy/sortOrder if Basetable supports it
+      sortBy:sortBy.value,
+      sortOrder:sortOrder.value
     });
 
     bookings.value = data.data || [];
@@ -123,6 +129,11 @@ const loadData = async () => {
   } finally {
     loading.value = false;
   }
+};
+const handleSort = (sortData) => {
+  sortBy.value = sortData.key;
+  sortOrder.value = sortData.order;
+  loadData();
 };
 
 // --- 3. NAVIGATION HANDLERS ---
