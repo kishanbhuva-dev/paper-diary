@@ -43,6 +43,7 @@
       :showAdd="true"
       :showDownload="true"
       :showEdit="true"
+      :admin-login="false"
     />
   </div>
 
@@ -112,8 +113,8 @@ const loadData = async () => {
       page: currentPage.value,
       pagination: perPage.value,
       search: currentSearch.value,
-      orderBy: orderBy.value,          // Existing backend param
-      orderDirection: orderDirection.value // Existing backend param
+      orderBy: orderBy.value,          
+      orderDirection: orderDirection.value
     });
 
     properties.value = data.data.map((property) => ({

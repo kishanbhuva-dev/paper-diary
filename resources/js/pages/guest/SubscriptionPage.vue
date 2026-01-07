@@ -100,21 +100,31 @@
       <div v-if="selectedPlanDetails" class="mt-4 sm:mt-8 max-w-4xl mx-auto">
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
           
-          <div class="border-b border-gray-200 px-4 py-4 sm:px-8 sm:py-6 flex flex-col sm:flex-row sm:items-center">
-            <div class="mb-4 sm:mb-0 sm:mr-8 lg:mr-16">
+          <div class="border-b border-gray-200 px-4 py-4 sm:px-8 sm:py-6 grid grid-cols-3 items-center">
+            <div class="flex justify-start">
               <button
                 @click="clearSelection"
-                class="flex items-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer font-medium text-sm sm:text-base"
+                class="flex items-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer font-medium text-sm sm:text-base whitespace-nowrap"
               >
                 <Icon icon="mdi:arrow-left" class="h-5 w-5 mr-1" />
-                Back
+                <span class="hidden sm:inline">Back</span>
+                <span class="sm:hidden">Back</span>
               </button>
             </div>
-            <div class="text-left sm:text-center flex-grow">
-              <h2 class="text-xl sm:text-2xl font-bold text-gray-900">
+
+            <div class="text-center">
+              <h2 class="text-lg sm:text-2xl font-bold text-gray-900 whitespace-nowrap">
                 Complete Subscription
               </h2>
-              <p class="text-gray-500 text-xs sm:text-sm mt-0.5">Secure payment via Stripe</p>
+              <p class="text-gray-500 text-[10px] sm:text-sm mt-0.5 hidden sm:block">Secure payment via Stripe</p>
+            </div>
+
+            <div class="flex justify-end invisible pointer-events-none">
+                <div class="flex items-center text-sm sm:text-base">
+                    <Icon icon="mdi:arrow-left" class="h-5 w-5 mr-1" />
+                    <span class="hidden sm:inline">Back to Plans</span>
+                    <span class="sm:hidden">Back</span>
+                </div>
             </div>
           </div>
 
@@ -152,7 +162,7 @@
                   v-model="guestDetails.fullName"
                   type="text"
                   required
-                  class="w-full pl-10 pr-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  class="w-full pl-10 pr-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all shadow-sm"
                   placeholder="Enter full name"
                 />
               </div>
@@ -170,7 +180,7 @@
                   v-model="guestDetails.email"
                   type="email"
                   required
-                  class="w-full pl-10 pr-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  class="w-full pl-10 pr-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all shadow-sm"
                   placeholder="your@email.com"
                 />
               </div>
