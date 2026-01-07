@@ -7,6 +7,7 @@ Route::post('forget-password', [App\Http\Controllers\AuthController::class, 'for
 Route::post('reset-password', [App\Http\Controllers\AuthController::class, 'resetPassword']);
 Route::get('property-detail', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);
 // Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
+Route::get('products', [App\Http\Controllers\StripeController::class, 'getProducts']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [App\Http\Controllers\AuthController::class, 'logOut']);

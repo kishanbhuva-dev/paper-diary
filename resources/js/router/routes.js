@@ -43,6 +43,11 @@ const routes = [
         name: "reset-password",
         component: () => import("../../js/pages/auth/ResetPassword.vue"),
       },
+      {
+        path: "/subscription",
+        name: "subscription",
+        component: () => import("../../js/pages/guest/SubscriptionPage.vue"),
+      },
     ],
   },
 

@@ -75,12 +75,17 @@ export function useAuth() {
     persistAuth(res.data.token, res.data.user);
 
     const role = res.data.user.role?.toLowerCase();
-    const roleRoutes = {
-      owner: "owner-dashboard",
-      admin: "admin-dashboard",
-    };
+    let routeName;
+    
+    if (role === "owner") {
+      routeName = res.data.subscription ? "owner-dashboard" : "subscription";
+    } else if (role === "admin") {
+      routeName = "admin-dashboard";
+    } else {
+      routeName = "home";
+    }
 
-    routerInstance.push({ name: roleRoutes[role] || "home" });
+    routerInstance.push({ name: routeName });
 
     return { success: true, data: res.data };
   }

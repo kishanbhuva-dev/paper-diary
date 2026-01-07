@@ -29,13 +29,13 @@ class AuthController extends Controller
             if (! $user || ! Hash::check($request->password, $user->password)) {
                 return response()->json(['status' => false, 'message' => 'The provided credentials are incorrect.']);
             }
-
+            $subscription=true;
             $token = $user->createToken('api-token')->plainTextToken;
 
             return response()->json([
                 'status'  => true,
                 'message' => 'Login successful',
-                'data'    => compact('user', 'token'),
+                'data'    => compact('user', 'token','subscription'),
             ]);
         } catch (\Exception $e) {
             return response()->json([
