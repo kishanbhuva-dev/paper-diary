@@ -10,7 +10,6 @@
             @search="handleSearch"
             @page-change="handlePageChange"
             @per-page-change="handlePerPageChange"
-            @open-add-modal="handleAdd"
             @delete="handleDelete"
             @admin-login="handleLoginAsUser"
             :show-search="true"
@@ -76,14 +75,8 @@
         { label: "totalRevenue", key: "totalRevenue"},
         { label: "lostAmount", key: "lostAmount"},
         { label: "status", key: "status"},
-        {
-            label: 'CHANGE STATUS',
-            key: 'toggle-status',
-        }
+        { label: 'CHANGE STATUS', key: 'toggle-status'}
     ]
-
-    const form = ref({
-    })
 
     const ChangeStatus = async (propertyId, status) => {
         const payload = {
@@ -125,11 +118,6 @@
         fetchPropertLisings();
     };
 
-    const handleAdd = () => {
-        isOpen.value = true;
-        form.value = {};
-    }
-
     const isOpenDelete = ref(false)
     const deleteFacility = ref(null)
 
@@ -138,7 +126,9 @@
         isOpenDelete.value = true;
     };
 
-    const handleLoginAsUser = async (email) => {
+    const handleLoginAsUser = async (id) => {
+        const email = propertLisings.value.find(p => p.id === id)?.ownerEmail;
+
         if (!email) {
             console.warn("Admin login attempted without email");
             return;

@@ -73,6 +73,8 @@
                     v-model="form.description"
                     width="full"
                     required
+                    multiline=""
+                    :rows="3"
                     class="col-span-2"
                     placeholder="Description"
                 />
