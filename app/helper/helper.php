@@ -134,3 +134,19 @@ function getPropertyOwnerEmail($propertyId)
     $owner = User::where('id', $property->ownerId)->first();
     return $owner ? $owner->email : '';
 }
+function hasActiveSubscription($user)
+    {
+        if ($user->role !== 'owner') {
+            return false;
+        }
+
+        $subscription = $user->subscriptions()
+            ->where('stripe_status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                      ->orWhere('ends_at', '>', now());
+            })
+            ->first();
+
+        return $subscription !== null;
+    }

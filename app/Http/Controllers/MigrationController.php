@@ -11,7 +11,6 @@ class MigrationController extends Controller
     public function runMigrations(Request $request)
     {
         try {
-            // Run migrations
             Artisan::call('migrate', ['--force' => true]);
             
             return response()->json([
