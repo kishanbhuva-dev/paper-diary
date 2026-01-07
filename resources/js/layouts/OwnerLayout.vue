@@ -128,6 +128,15 @@
               />
               {{ subItem.label }}
             </router-link>
+
+            <button
+                v-if="showBackButton"
+                @click="backToAdmin"
+                class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+            >
+                <Icon icon="lucide:step-back" class="w-4 h-4 mr-3 text-gray-400" />
+                Back To Admin
+            </button>
           </div>
         </div>
       </nav>
@@ -184,6 +193,7 @@ const { logout, user } = useAuth();
 const route = useRoute();
 const sidebarOpen = ref(false);
 const settingsOpen = ref(false);
+const showBackButton = ref(false);
 
 const userData = computed(() => ({
   firstName: user.value?.firstName || "User",
@@ -239,10 +249,32 @@ const isSystemRouteActive = computed(() => {
   );
 });
 
+
+function backToAdmin() {
+    const adminToken = localStorage.getItem('adminToken');
+    const adminUser = localStorage.getItem('adminUser');
+
+    if (adminToken && adminUser) {
+        localStorage.clear();
+        localStorage.setItem('authToken', adminToken);
+        localStorage.setItem('user', adminUser);
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        setTimeout(() => {
+            window.location.href = '/admin';
+        }, 500);
+    } else {
+        alert('Admin session not found.');
+    }
+}
+
 onMounted(() => {
   if (isSystemRouteActive.value) {
     settingsOpen.value = true;
   }
+
+  const adminToken = localStorage.getItem('adminToken');
+  showBackButton.value = !!adminToken;
 });
 
 function closeOnMobile() {
