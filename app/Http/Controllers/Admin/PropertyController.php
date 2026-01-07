@@ -23,13 +23,17 @@ class PropertyController extends Controller
                 }]);
             
             if($search) {
-                $property->whereHas('owner', function($query) use ($search) {
-                    $query->where('firstName', 'LIKE', "%{$search}%")
-                          ->orWhere('lastName', 'LIKE', "%{$search}%")
-                          ->orWhere('email', 'LIKE', "%{$search}%")
-                          ->orWhere('phone', 'LIKE', "%{$search}%")
-                          ->orWhere('telephone', 'LIKE', "%{$search}%");
-                })->orWhere('propertyName', 'LIKE', "%{$search}%");
+                $property->where(function($query) use ($search) {
+                    $query->whereHas('owner', function($ownerQuery) use ($search) {
+                        $ownerQuery->where('firstName', 'LIKE', "%{$search}%")
+                              ->orWhere('lastName', 'LIKE', "%{$search}%")
+                              ->orWhere('email', 'LIKE', "%{$search}%")
+                              ->orWhere('phone', 'LIKE', "%{$search}%")
+                              ->orWhere('telephone', 'LIKE', "%{$search}%");
+                    })->orWhere('propertyName', 'LIKE', "%{$search}%")
+                          ->orWhereRaw('(SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status = "confirm") LIKE ?', ["%{$search}%"])
+                          ->orWhereRaw('(SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status != "confirm") LIKE ?', ["%{$search}%"]);
+                });
             }
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'asc';
