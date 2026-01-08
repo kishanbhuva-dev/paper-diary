@@ -14,11 +14,13 @@
       @open-edit-modal="handleEdit"
       @delete="handleDelete"
       @admin-login="handleLoginAsUser"
+      @sort="handleSort"
       :showDelete="true"
       :show-search="true"
       :showAdd="true"
       :showDownload="true"
       :showEdit="true"
+      adminLoginTitle="Login as Owner"
     />
     <BaseModal
       :title="form?.id ? 'Edit Owner' : 'Add Owner'"
@@ -153,6 +155,8 @@ const currentPage = ref(1);
 const currentSearch = ref("");
 const total = ref(0);
 const router = useRouter();
+const orderBy = ref("id");
+const orderDirection = ref("asc");
 
 const form = ref({
   firstName: "",
@@ -173,12 +177,20 @@ const fetchAllOwners = async () => {
     page: currentPage.value,
     per_page: perPage.value,
     search: currentSearch.value,
+    descending: orderDirection.value,       
+    sortBy: orderBy.value
   });
   if (res.status) {
     owners.value = res.data.data;
     total.value = res.data.total || 0;
   }
 };
+
+const handleSort = (sortData) => {
+  orderBy.value = sortData.key;
+  orderDirection.value = sortData.order;
+  fetchAllOwners();
+}
 
 const handleAdd = () => {
   isOpen.value = true;
@@ -286,7 +298,7 @@ const handleLoginAsUser = async (id) => {
   localStorage.setItem('adminToken', adminToken);
   localStorage.setItem('adminUser', adminUser);
 
-  router.push({ name: 'home' });
+  router.push({ name: 'owner-dashboard' });
   setTimeout(() => location.reload(), 1000);
 };
 

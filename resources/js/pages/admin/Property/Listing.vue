@@ -12,12 +12,14 @@
             @per-page-change="handlePerPageChange"
             @delete="handleDelete"
             @admin-login="handleLoginAsUser"
+            @sort="handleSort"
             :show-search="true"
             :showAdd="false"
             :showDownload="true"
             :showEdit="false"
             :showDelete="false"
             :adminLogin="true"
+            adminLoginTitle="Login as User"
         >
             <template #toggle-status="{ row }">
                 <div class="flex items-center">
@@ -64,17 +66,19 @@
     const currentSearch = ref("");
     const propertLisings = ref([]);
     const router = useRouter();
+    const orderBy = ref("id");
+    const orderDirection = ref("asc");
 
     const tableColumns = [
-        { label: "S.N", key: "id"},
-        { label: "propertyName", key: "propertyName"},
-        { label: "ownerName", key: "ownerName"},
-        { label: "ownerEmail", key: "ownerEmail"},
-        { label: "ownerPhone", key: "ownerPhone"},
-        { label: "ownerTelephone", key: "ownerTelephone"},
-        { label: "totalRevenue", key: "totalRevenue"},
-        { label: "lostAmount", key: "lostAmount"},
-        { label: "status", key: "status"},
+        { label: "S.N", key: "id", sortable: true},
+        { label: "propertyName", key: "propertyName", sortable: true},
+        { label: "ownerName", key: "ownerName", sortable: true},
+        { label: "ownerEmail", key: "ownerEmail", sortable: true},
+        { label: "ownerPhone", key: "ownerPhone", sortable: true},
+        { label: "ownerTelephone", key: "ownerTelephone", sortable: true},
+        { label: "totalRevenue", key: "totalRevenue", sortable: true},
+        { label: "lostAmount", key: "lostAmount", sortable: true},
+        { label: "status", key: "status", sortable: true},
         { label: 'CHANGE STATUS', key: 'toggle-status'}
     ]
 
@@ -93,6 +97,8 @@
             page: currentPage.value,
             per_page: perPage.value,
             search: currentSearch.value,
+            sortBy: orderBy.value,       
+            sortOrder: orderDirection.value
         });
 
         if (res.status) {
@@ -100,6 +106,13 @@
             total.value = res.data.total || 0;
         }
     }
+
+    const handleSort = (sortData) => {
+        console.log('sortData', sortData);
+        orderBy.value = sortData.key;
+        orderDirection.value = sortData.order;
+        fetchPropertLisings();
+    };
 
     const handleSearch = (term) => {
         currentSearch.value = term;

@@ -106,7 +106,7 @@
             />
           </button>
 
-          <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
+          <!-- <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
             <router-link
               v-for="subItem in group.children"
               :key="subItem.name"
@@ -132,12 +132,40 @@
             <button
                 v-if="showBackButton"
                 @click="backToAdmin"
-                class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
             >
-                <Icon icon="lucide:step-back" class="w-4 h-4 mr-3 text-gray-400" />
+                <Icon icon="lucide:step-back" class="w-4 h-4 mr-3 text-blue-600" />
                 Back To Admin
             </button>
+          </div> -->
+
+
+          <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
+            <component
+              v-for="subItem in group.children"
+              :key="subItem.name"
+              :is="subItem.to ? 'router-link' : 'button'"
+              v-show="!subItem.show || subItem.show.value"
+              :to="subItem.to"
+              @click="subItem.onClick && subItem.onClick()"
+              class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
+              :class="{
+                'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
+                  $route.name === subItem.name,
+                'text-gray-700 hover:bg-blue-50':
+                  $route.name !== subItem.name,
+              }"
+            >
+              <Icon
+                :icon="subItem.icon"
+                width="16"
+                :class="$route.name === subItem.name ? 'text-white' : 'text-blue-600'"
+              />
+              {{ subItem.label }}
+            </component>
           </div>
+
+
         </div>
       </nav>
 
@@ -238,6 +266,13 @@ const systemMenuItems = [
         label: "Change Password",
         icon: "mdi:lock-outline",
         to: { name: "owner-change-password" },
+      },
+      {
+        name: "back-to-admin",
+        label: "Back To Admin",
+        icon: "lucide:step-back",
+        onClick: backToAdmin,
+        show: showBackButton,
       },
     ],
   },

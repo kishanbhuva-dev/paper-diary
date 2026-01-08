@@ -153,7 +153,7 @@
                 v-if="adminLogin"
                 @click="emit('admin-login', item.id)"
                 class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-full font-bold hover:bg-green-500 transition duration-150"
-                title="Admin Login"
+                :title="adminLoginTitle"
               >
                 <Icon icon="lucide:user-pen" class="w-5 h-5" />
               </button>
@@ -308,6 +308,7 @@ const props = defineProps({
   showAdd: { type: Boolean, default: true },
   showEdit: { type: Boolean, default: true },
   adminLogin: { type: Boolean, default: true },
+  adminLoginTitle: { type: String, default: "Login as User" },
   showDelete: { type: Boolean, default: true },
   showDownload: { type: Boolean, default: true },
   showSearch: { type: Boolean, default: true },
