@@ -87,9 +87,14 @@ const authService = {
     return response.data;
   },
 
-  async loginAsOwner (email) {
+  async loginAsOwner(email) {
     return apiClient.post('/admin/email-login', email);
-    
+
+  },
+
+  // admin dashboard
+  async adminDashboard() {
+    return await apiClient.get('/admin');
   }
 };
 
