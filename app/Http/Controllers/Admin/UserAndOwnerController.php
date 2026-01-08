@@ -237,7 +237,7 @@ class UserAndOwnerController extends Controller
             }
         }
 
-        $orderby = $request->descending == 'true' ? 'DESC' : 'ASC';
+        $orderby = $request->descending ?? 'asc';
         $column = $request->sortBy ?? 'id';
 
         if (! empty($column)) {

@@ -14,12 +14,14 @@
       @open-edit-modal="handleEdit"
       @delete="handleDelete"
       @admin-login="handleLoginAsUser"
+      @sort="handleSort"
       :showDelete="true"
       :show-search="true"
       :showAdd="true"
       :showDownload="true"
       :showEdit="true"
       :adminLogin="true"
+      adminLoginTitle="Login as User"
     />
     <BaseModal
       :title="form?.id ? 'Edit User' : 'Add User'"
@@ -155,6 +157,8 @@ const currentSearch = ref("");
 const total = ref(0);
 const users = ref([]);
 const router = useRouter();
+const orderBy = ref("id");
+const orderDirection = ref("asc");
 
 
 const form = ref({
@@ -176,12 +180,20 @@ const fetchAllUsers = async () => {
     page: currentPage.value,
     per_page: perPage.value,
     search: currentSearch.value,
+    descending: orderDirection.value,       
+    sortBy: orderBy.value
   });
   if (res.status) {
     users.value = res.data.data;
     total.value = res.data.total || 0;
   }
 };
+
+const handleSort = (sortData) => {
+  orderBy.value = sortData.key;
+  orderDirection.value = sortData.order;
+  fetchAllUsers();
+}
 
 const handleAdd = () => {
   isOpen.value = true;
@@ -255,12 +267,12 @@ const handlePerPageChange = (size) => {
 
 
 const tableColumns = [
-  { label: "ID", key: "id" },
-  { label: "Name", key: (row) => row?.firstName + " " + row?.lastName },
-  { label: "Email", key: "email" },
-  { label: "Address", key: "address" },
-  { label: "Phone", key: "phone" },
-  { label: "Role", key: "role" },
+  { label: "ID", key: "id", sortable: true },
+  { label: "Name", key: (row) => row?.firstName + " " + row?.lastName, sortable: true },
+  { label: "Email", key: "email", ssortable: true },
+  { label: "Address", key: "address", sortable: true },
+  { label: "Phone", key: "phone", sortable: true },
+  { label: "Role", key: "role", sortable: true },
 ];
 
 const handleLoginAsUser = async (id) => {
