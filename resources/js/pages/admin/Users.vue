@@ -13,11 +13,15 @@
       @open-add-modal="handleAdd"
       @open-edit-modal="handleEdit"
       @delete="handleDelete"
+      @admin-login="handleLoginAsUser"
+      @sort="handleSort"
       :showDelete="true"
       :show-search="true"
       :showAdd="true"
       :showDownload="true"
       :showEdit="true"
+      :adminLogin="true"
+      adminLoginTitle="Login as User"
     />
     <BaseModal
       :title="form?.id ? 'Edit User' : 'Add User'"
@@ -144,12 +148,18 @@ import BaseModal from "../../components/global/BaseModal.vue";
 import BaseInput from "../../components/global/BaseInput.vue";
 import adminService from "../../services/adminService";
 import DeleteModal from "../../components/global/DeleteModal.vue";
+import { useRouter } from "vue-router";
 
 const isOpen = ref(false);
 const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 const total = ref(0);
+const users = ref([]);
+const router = useRouter();
+const orderBy = ref("id");
+const orderDirection = ref("asc");
+
 
 const form = ref({
   firstName: "",
@@ -170,12 +180,20 @@ const fetchAllUsers = async () => {
     page: currentPage.value,
     per_page: perPage.value,
     search: currentSearch.value,
+    descending: orderDirection.value,       
+    sortBy: orderBy.value
   });
   if (res.status) {
     users.value = res.data.data;
     total.value = res.data.total || 0;
   }
 };
+
+const handleSort = (sortData) => {
+  orderBy.value = sortData.key;
+  orderDirection.value = sortData.order;
+  fetchAllUsers();
+}
 
 const handleAdd = () => {
   isOpen.value = true;
@@ -247,16 +265,44 @@ const handlePerPageChange = (size) => {
   fetchAllUsers();
 };
 
-const users = ref([]);
 
 const tableColumns = [
-  { label: "ID", key: "id" },
-  { label: "Name", key: (row) => row?.firstName + " " + row?.lastName },
-  { label: "Email", key: "email" },
-  { label: "Address", key: "address" },
-  { label: "Phone", key: "phone" },
-  { label: "Role", key: "role" },
+  { label: "ID", key: "id", sortable: true },
+  { label: "Name", key: (row) => row?.firstName + " " + row?.lastName, sortable: true },
+  { label: "Email", key: "email", ssortable: true },
+  { label: "Address", key: "address", sortable: true },
+  { label: "Phone", key: "phone", sortable: true },
+  { label: "Role", key: "role", sortable: true },
 ];
+
+const handleLoginAsUser = async (id) => {
+      const email = users.value.find(p => p.id === id)?.email;
+
+      if (!email) {
+          console.warn("Admin login attempted without email");
+          return;
+      }
+
+      const adminToken = localStorage.getItem('authToken');
+      const adminUser = localStorage.getItem('user');
+
+      const response = await adminService.loginAsOwner({ email });
+
+      if (!response?.data?.status) {
+      console.warn("Login as user failed", response);
+      return;
+      }
+      
+      const { token, user } = response.data.data;
+      
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('adminToken', adminToken);
+      localStorage.setItem('adminUser', adminUser);
+
+      router.push({ name: 'home' });
+      setTimeout(() => location.reload(), 1000);
+  };
 
 onMounted(() => {
   fetchAllUsers();

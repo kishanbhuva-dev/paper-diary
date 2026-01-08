@@ -13,11 +13,14 @@
       @open-add-modal="handleAdd"
       @open-edit-modal="handleEdit"
       @delete="handleDelete"
+      @admin-login="handleLoginAsUser"
+      @sort="handleSort"
       :showDelete="true"
       :show-search="true"
       :showAdd="true"
       :showDownload="true"
       :showEdit="true"
+      adminLoginTitle="Login as Owner"
     />
     <BaseModal
       :title="form?.id ? 'Edit Owner' : 'Add Owner'"
@@ -144,12 +147,16 @@ import BaseModal from "../../components/global/BaseModal.vue";
 import BaseInput from "../../components/global/BaseInput.vue";
 import adminService from "../../services/adminService";
 import DeleteModal from "../../components/global/DeleteModal.vue";
+import { useRouter } from "vue-router";
 
 const isOpen = ref(false);
 const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 const total = ref(0);
+const router = useRouter();
+const orderBy = ref("id");
+const orderDirection = ref("asc");
 
 const form = ref({
   firstName: "",
@@ -170,12 +177,20 @@ const fetchAllOwners = async () => {
     page: currentPage.value,
     per_page: perPage.value,
     search: currentSearch.value,
+    descending: orderDirection.value,       
+    sortBy: orderBy.value
   });
   if (res.status) {
     owners.value = res.data.data;
     total.value = res.data.total || 0;
   }
 };
+
+const handleSort = (sortData) => {
+  orderBy.value = sortData.key;
+  orderDirection.value = sortData.order;
+  fetchAllOwners();
+}
 
 const handleAdd = () => {
   isOpen.value = true;
@@ -257,6 +272,35 @@ const tableColumns = [
   { label: "Phone", key: "phone" },
   { label: "Role", key: "role" },
 ];
+
+const handleLoginAsUser = async (id) => {
+  const email = owners.value.find(p => p.id === id)?.email;
+
+  if (!email) {
+      console.warn("Admin login attempted without email");
+      return;
+  }
+
+  const adminToken = localStorage.getItem('authToken');
+  const adminUser = localStorage.getItem('user');
+
+  const response = await adminService.loginAsOwner({ email });
+
+  if (!response?.data?.status) {
+  console.warn("Login as user failed", response);
+  return;
+  }
+  
+  const { token, user } = response.data.data;
+  
+  localStorage.setItem('authToken', token);
+  localStorage.setItem('user', JSON.stringify(user));
+  localStorage.setItem('adminToken', adminToken);
+  localStorage.setItem('adminUser', adminUser);
+
+  router.push({ name: 'owner-dashboard' });
+  setTimeout(() => location.reload(), 1000);
+};
 
 onMounted(() => {
   fetchAllOwners();

@@ -106,7 +106,7 @@
             />
           </button>
 
-          <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
+          <!-- <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
             <router-link
               v-for="subItem in group.children"
               :key="subItem.name"
@@ -128,7 +128,44 @@
               />
               {{ subItem.label }}
             </router-link>
+
+            <button
+                v-if="showBackButton"
+                @click="backToAdmin"
+                class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
+            >
+                <Icon icon="lucide:step-back" class="w-4 h-4 mr-3 text-blue-600" />
+                Back To Admin
+            </button>
+          </div> -->
+
+
+          <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
+            <component
+              v-for="subItem in group.children"
+              :key="subItem.name"
+              :is="subItem.to ? 'router-link' : 'button'"
+              v-show="!subItem.show || subItem.show.value"
+              :to="subItem.to"
+              @click="subItem.onClick && subItem.onClick()"
+              class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
+              :class="{
+                'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
+                  $route.name === subItem.name,
+                'text-gray-700 hover:bg-blue-50':
+                  $route.name !== subItem.name,
+              }"
+            >
+              <Icon
+                :icon="subItem.icon"
+                width="16"
+                :class="$route.name === subItem.name ? 'text-white' : 'text-blue-600'"
+              />
+              {{ subItem.label }}
+            </component>
           </div>
+
+
         </div>
       </nav>
 
@@ -184,6 +221,7 @@ const { logout, user } = useAuth();
 const route = useRoute();
 const sidebarOpen = ref(false);
 const settingsOpen = ref(false);
+const showBackButton = ref(false);
 
 const userData = computed(() => ({
   firstName: user.value?.firstName || "User",
@@ -229,6 +267,13 @@ const systemMenuItems = [
         icon: "mdi:lock-outline",
         to: { name: "owner-change-password" },
       },
+      {
+        name: "back-to-admin",
+        label: "Back To Admin",
+        icon: "lucide:step-back",
+        onClick: backToAdmin,
+        show: showBackButton,
+      },
     ],
   },
 ];
@@ -239,10 +284,32 @@ const isSystemRouteActive = computed(() => {
   );
 });
 
+
+function backToAdmin() {
+    const adminToken = localStorage.getItem('adminToken');
+    const adminUser = localStorage.getItem('adminUser');
+
+    if (adminToken && adminUser) {
+        localStorage.clear();
+        localStorage.setItem('authToken', adminToken);
+        localStorage.setItem('user', adminUser);
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        setTimeout(() => {
+            window.location.href = '/admin';
+        }, 500);
+    } else {
+        alert('Admin session not found.');
+    }
+}
+
 onMounted(() => {
   if (isSystemRouteActive.value) {
     settingsOpen.value = true;
   }
+
+  const adminToken = localStorage.getItem('adminToken');
+  showBackButton.value = !!adminToken;
 });
 
 function closeOnMobile() {

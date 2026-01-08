@@ -13,11 +13,13 @@
             @open-add-modal="handleAdd"
             @open-edit-modal="handleEdit"
             @delete="handleDelete"
+            @sort="handleSort"
             :showDelete="true"
             :show-search="true"
             :showAdd="true"
             :showDownload="true"
             :showEdit="true"
+            :adminLogin="false"
         />
 
         <BaseModal
@@ -73,6 +75,8 @@
                     v-model="form.description"
                     width="full"
                     required
+                    multiline=""
+                    :rows="3"
                     class="col-span-2"
                     placeholder="Description"
                 />
@@ -122,13 +126,15 @@
     const editingWidget = ref({});
     const errors = ref({})
     const showMenu = ref(false);
+    const orderBy = ref("id");
+    const orderDirection = ref("asc");
 
     const tableColumns = [
-        { label: "ID", key: "id" },
-        { label: "name", key: (row) => row?.name },
-        { label: "icon", key: "icon" },
-        { label: "description", key: "description" },
-        { label: "status", key: "status" }
+        { label: "ID", key: "id", sortable: true  },
+        { label: "name", key: (row) => row?.name, sortable: true  },
+        { label: "icon", key: "icon", sortable: true  },
+        { label: "description", key: "description", sortable: true  },
+        { label: "status", key: "status", sortable: true  }
     ];
 
     const fetchFacilites = async () => {
@@ -136,12 +142,20 @@
             page: currentPage.value,
             per_page: perPage.value,
             search: currentSearch.value,
+            orderBy: orderBy.value,       
+            sort: orderDirection.value
         });
         if (res.status) {
             facilites.value = res.data.data;
             total.value = res.data.total || 0;
         }
     }
+
+    const handleSort = (sortData) => {
+        orderBy.value = sortData.key;
+        orderDirection.value = sortData.order;
+        fetchFacilites();
+    };
 
     const handleSearch = (term) => {
         currentSearch.value = term;

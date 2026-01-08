@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\BookingOrder;
+use App\Models\Bookings;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 class BookingsController extends Controller
@@ -169,5 +171,32 @@ class BookingsController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function bookingCancel(Request $request){
+        try {
+            $validator = Validator::make($request->all(), [
+                'bookingId' => 'required|exists:booking_orders,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
+            }
+            $bookingOrder = BookingOrder::where('id',$request->bookingId)->first();            
+            $propertyIds = Auth::user()->properties->pluck('id');
+            if (!$propertyIds->contains($bookingOrder->propertyId)) {
+                return response()->json(['status' => false, 'message' => 'you are not authorized to cancel this booking', 'data' => []]);
+            }
+            $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
+            foreach ($booking as $key => $value) {
+                $value->status = 'cancelled';
+                $value->save();
+            }
+            $bookingOrder->status = 'cancelled';
+            $bookingOrder->paymentStatus = 'failed';
+            $bookingOrder->save();
+            return response()->json(['status' => true, 'message' => 'Booking cancelled successfully', 'data' => []]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+        }
     }
 }
