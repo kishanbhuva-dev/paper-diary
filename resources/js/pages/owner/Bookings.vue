@@ -33,6 +33,8 @@
       :server-side="true"
       :total-items="total"
       :per-page="perPage"
+      :available-filters="filterConfig"
+      @filter-change="handleFilterChange"
       @search="handleSearch"
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
@@ -70,7 +72,7 @@ import ownerService from "../../services/ownerService";
 const router = useRouter();
 const sortBy = ref("id");
 const sortOrder = ref("asc");
-
+const actieFilters = ref({});
 
 // Reactive State
 const loading = ref(false);
@@ -84,21 +86,54 @@ const currentSearch = ref("");
 // Delete Modal State (adapted for bookings)
 const isConfirmationModalVisible = ref(false);
 const bookingIdToDelete = ref(null);
+const filterConfig = [
+  {
+    label: "Status",
+    key: "status",
+    type: "select",
+    options: [
+      {
+        label: "Confirmed",
+        value: "Confirmed",
+      },
+      {
+        label: "Cancelled",
+        value: "Cancelled",
+      },
+    ],
+  },
+  {
+    label: "Payment",
+    key: "paymentStatus",
+    type: "select",
+    options: [
+      {
+        label: "Paid",
+        value: "paid",
+      },
+      { label: "Unpaid", value: "unpaid" },
+    ],
+  },
+  { label: "Guest Name", key: "guestName", type: "text" },
+  { label: "Check-in Date", key: "arrivalDateTime", type: "date" },
+  { label: "Check-out Date", key: "departureDateTime", type: "date" },
+];
 
 const tableColumns = [
   { label: "ID", key: "id", sortable: true },
-  { label: "Property", key: "property.propertyName" , sortable: true},
-  { label: "Resource Type", key: "resource_type_name" , sortable: true},
+  { label: "Property", key: "property.propertyName", sortable: true },
+  { label: "Resource Type", key: "resource_type_name", sortable: true },
   {
     label: "Guest Name",
-    key: "guestName", sortable: true
+    key: "guestName",
+    sortable: true,
   },
-  { label: "Check-in", key: "arrivalDateTime" , sortable: true},
-  { label: "Check-out", key: "departureDateTime" , sortable: true},
-  { label: "Price", key: "price" , sortable: true},
-  { label: "Status", key: "status" , sortable: true},
-  { label: "Payment Status", key: "paymentStatus" , sortable: true},
-  { label: "Booked On", key: "bookedOn" , sortable: true},
+  { label: "Check-in", key: "arrivalDateTime", sortable: true },
+  { label: "Check-out", key: "departureDateTime", sortable: true },
+  { label: "Price", key: "price", sortable: true },
+  { label: "Status", key: "status", sortable: true },
+  { label: "Payment Status", key: "paymentStatus", sortable: true },
+  { label: "Booked On", key: "bookedOn", sortable: true },
 ];
 
 // --- 2. DATA FETCHING LOGIC ---
@@ -112,8 +147,9 @@ const loadData = async () => {
       page: currentPage.value,
       perPage: perPage.value,
       search: currentSearch.value,
-      sortBy:sortBy.value,
-      sortOrder:sortOrder.value
+      sortBy: sortBy.value,
+      sortOrder: sortOrder.value,
+      ...actieFilters.value,
     });
 
     bookings.value = data.data || [];
@@ -130,6 +166,12 @@ const loadData = async () => {
     loading.value = false;
   }
 };
+
+const handleFilterChange = (filters) => {
+  actieFilters.value = filters;
+  currentPage.value = 1;
+  loadData();
+};
 const handleSort = (sortData) => {
   sortBy.value = sortData.key;
   sortOrder.value = sortData.order;
@@ -138,14 +180,8 @@ const handleSort = (sortData) => {
 
 // --- 3. NAVIGATION HANDLERS ---
 
-/* Navigates to the booking view/edit form.
- * @param {object} item - The booking object to edit/view.
- * Note: Assuming you have a route set up for a single booking detail/edit.
- */
 const navigateToViewEdit = (item) => {
   if (item && item.id) {
-    // Encodes ID before passing as a URL parameter (using btoa for simple base64 encoding)
-    // You will need a route named 'owner-booking-detail' or similar
     router.push({
       name: "owner-booking-detail",
       params: { id: btoa(item.id) },

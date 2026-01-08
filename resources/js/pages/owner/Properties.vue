@@ -31,6 +31,8 @@
       :server-side="true"
       :total-items="total"
       :per-page="perPage"
+      :available-filters="filterConfig"
+      @filter-change="handleFilterChange"
       @search="handleSearch"
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
@@ -73,6 +75,8 @@ const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 
+const currentFilters = ref({});
+
 // Sorting state (default to backend defaults)
 const orderBy = ref("id");
 const orderDirection = ref("asc");
@@ -91,7 +95,11 @@ const truncateString = (str, maxLen = 15) => {
 const tableColumns = [
   { label: "ID", key: "id", sortable: true },
   { label: "Name", key: "propertyName", sortable: true },
-  { label: "Address", key: (item) => truncateString(item.address, 15), sortable: false },
+  {
+    label: "Address",
+    key: (item) => truncateString(item.address, 15),
+    sortable: false,
+  },
   { label: "City", key: "city", sortable: true },
   { label: "Country", key: "country", sortable: true },
   { label: "Postcode", key: "postcode", sortable: true },
@@ -100,8 +108,46 @@ const tableColumns = [
   { label: "Status", key: "status", sortable: true },
 ];
 
+const filterConfig = [
+  {
+    label: "Status",
+    key: "status",
+    type: "select",
+    options: [
+      {
+        label: "Active",
+        value: "1",
+      },
+      {
+        label: "Inactive",
+        value: "0",
+      },
+    ],
+  },
+  {
+    label: "Country",
+    key: "country",
+    type: "select",
+    options: [
+      {
+        label: "India",
+        value: "India",
+      },
+      { label: "USA", value: "USA" },
+    ],
+  },
+];
+
+const handleFilterChange = (filters) => {
+  currentFilters.value = filters;
+  currentPage.value = 1;
+  loadData();
+};
+
 const formatStatus = (property) => {
-  return property.status === 1 || property.status === "Active" ? "Active" : "Inactive";
+  return property.status === 1 || property.status === "Active"
+    ? "Active"
+    : "Inactive";
 };
 
 const loadData = async () => {
@@ -113,18 +159,18 @@ const loadData = async () => {
       page: currentPage.value,
       pagination: perPage.value,
       search: currentSearch.value,
-      orderBy: orderBy.value,          
-      orderDirection: orderDirection.value
+      orderBy: orderBy.value,
+      orderDirection: orderDirection.value,
+      ...currentFilters.value,
     });
 
-    properties.value = data.data.map((property) => ({
-      ...property,
-      status: formatStatus(property),
-    })) || [];
-
+    properties.value = data.data || [];
     total.value = data.total || 0;
   } catch (err) {
-    error.value = err.response?.status === 401 ? "Unauthorized. Please log in again." : err.message || "Failed to load properties";
+    error.value =
+      err.response?.status === 401
+        ? "Unauthorized. Please log in again."
+        : err.message || "Failed to load properties";
   } finally {
     loading.value = false;
   }
@@ -176,10 +222,13 @@ const handleDelete = async (id) => {
       const images = await ownerService.fetchPropertyImages(id);
       const imageIds = (images || []).map((i) => i.id).filter(Boolean);
       if (imageIds.length) await ownerService.deletePropertyImages(imageIds);
-    } catch (err) { console.debug("delete images failed:", err); }
+    } catch (err) {
+      console.debug("delete images failed:", err);
+    }
 
     await ownerService.deleteProperty(id);
-    if (properties.value.length === 1 && currentPage.value > 1) currentPage.value--;
+    if (properties.value.length === 1 && currentPage.value > 1)
+      currentPage.value--;
     await loadData();
   } catch (err) {
     error.value = err.response?.status === 401 ? "Unauthorized" : err.message;
@@ -189,9 +238,13 @@ const handleDelete = async (id) => {
 const confirmDelete = (id) => {
   const property = properties.value.find((p) => p.id === id);
   propertyIdToDelete.value = id;
-  propertyNameToDelete.value = property ? property.propertyName : "this property";
+  propertyNameToDelete.value = property
+    ? property.propertyName
+    : "this property";
   isConfirmationModalVisible.value = true;
 };
 
-onMounted(() => { loadData(); });
+onMounted(() => {
+  loadData();
+});
 </script>
