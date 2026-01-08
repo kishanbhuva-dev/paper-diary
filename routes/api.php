@@ -10,6 +10,11 @@ Route::get('migrations/run', [App\Http\Controllers\MigrationController::class, '
 Route::get('migrations/status', [App\Http\Controllers\MigrationController::class, 'checkMigrationStatus']);
 // Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
 Route::get('products', [App\Http\Controllers\StripeController::class, 'getProducts']);
+Route::get('stripe/config', [App\Http\Controllers\StripeController::class, 'getStripeConfig']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('stripe/subscription', [App\Http\Controllers\StripeController::class, 'createSubscription']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [App\Http\Controllers\AuthController::class, 'logOut']);
@@ -54,7 +59,7 @@ Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], f
     Route::get('facility', [App\Http\Controllers\Owner\FacilityController::class, 'getFacility']);
     Route::apiResource('bookings', App\Http\Controllers\Owner\BookingsController::class);
     Route::get('resource-wise-list', [App\Http\Controllers\Owner\ResourceController::class, 'resourceWiseList']);
-
+    Route::post('booking-cancel', [App\Http\Controllers\Owner\BookingsController::class, 'bookingCancel']);
 });
 Route::group(['prefix' => 'user', 'middleware' => ['auth:sanctum', 'user']], function () {
     Route::apiResource('booking', App\Http\Controllers\User\BookingsController::class);
