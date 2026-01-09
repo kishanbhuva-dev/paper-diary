@@ -44,25 +44,25 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function fetchAllUser(Request $request)
-    {
-        try {
-            return $this->fetchAll($request, 'user');
-        } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+        public function fetchAllUser(Request $request)
+        {  
+            try {
+                return $this->fetchAll($request, 'user');
+            } catch (\Throwable $th) {
+                return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => '']);
+            }
         }
-    }
 
-    public function fetchAllOwner(Request $request)
-    {
-        try {
-            return $this->fetchAll($request, 'owner');
-        } catch (\Throwable $th) {
-            $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+        public function fetchAllOwner(Request $request)
+        {
+            try {
+                return $this->fetchAll($request, 'owner');
+            } catch (\Throwable $th) {
+                $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
 
-            return response()->json($response);
+                return response()->json($response);
+            }
         }
-    }
 
     public function createUser(Request $request)
     {
@@ -238,12 +238,11 @@ class UserAndOwnerController extends Controller
         }
 
         $orderby = $request->descending ?? 'asc';
-        $column = $request->sortBy ?? 'id';
-
+        $column = $request->sortBy=='Name' ? 'FirstName' : $request->sortBy ;
         if (! empty($column)) {
             $data->orderBy($column, $orderby);
         }
-        $perPage = $request->input('per_page', 15);
+        $perPage = $request->per_page?? 10;
         $data = $data->paginate($perPage);
         $response = ['status' => true, 'message' => '', 'data' => $data];
 
