@@ -94,15 +94,31 @@ class BookingsController extends Controller
             }, 'resourceType.resources' => function ($query) {
                 $query->select('id', 'resourceTypeId', 'name');
             }]);
+            $perPage = $request->perPage ?? 10; 
+            $sortBy = $request->sortBy ?? 'id';
+            $sortOrder = $request->sortOrder ?? 'desc';
             $perPage = $request->perPage ?? 10;
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'desc';
+
+
+            if ($sortBy === 'propertyName') {
+                $bookings->join('property', 'property.id', '=', 'booking_orders.propertyId')
+                    ->orderBy('property.propertyName', $sortOrder)
+                    ->select('booking_orders.*');
+            } else {
+                $bookings->orderBy($sortBy, $sortOrder);
+            }
+
+
             $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
             $bookings->getCollection()->transform(function ($booking) {
 
 
                 return $booking;
             });
+
+
             return response()->json(['status' => true, 'message' => '', 'data' => $bookings]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
@@ -116,12 +132,13 @@ class BookingsController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()]);
         }
-        $bookingOrder = BookingOrder::where('id',$id)->first();
+        $bookingOrder = BookingOrder::where('id', $id)->first();
         $bookingOrder->ownerNotes = $request->ownerNotes;
         $bookingOrder->save();
         return response()->json(['status' => true, 'message' => 'Booking updated successfully', 'data' => []]);
     }
-    public function bookingCancel(Request $request){
+    public function bookingCancel(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'bookingId' => 'required|exists:booking_orders,id',
@@ -129,12 +146,12 @@ class BookingsController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
             }
-            $bookingOrder = BookingOrder::where('id',$request->bookingId)->first();            
+            $bookingOrder = BookingOrder::where('id', $request->bookingId)->first();
             $propertyIds = Auth::user()->properties->pluck('id');
             if (!$propertyIds->contains($bookingOrder->propertyId)) {
                 return response()->json(['status' => false, 'message' => 'you are not authorized to cancel this booking', 'data' => []]);
             }
-            $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
+            $booking = Bookings::where('bookingOrderId', $request->bookingId)->get();
             foreach ($booking as $key => $value) {
                 $value->status = 'cancelled';
                 $value->save();
@@ -144,15 +161,7 @@ class BookingsController extends Controller
             $bookingOrder->save();
             return response()->json(['status' => true, 'message' => 'Booking cancelled successfully', 'data' => []]);
         } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+            return response()->json(['status' => false, 'message'    => $th->getMessage(), 'data' => []]);
         }
     }
 }
-
-
-
-
-
-
-
-
