@@ -174,14 +174,14 @@ class BookingsController extends Controller
                 'guestEmail' => 'required|email',
                 'guestPhone' => 'required|string',
                 'guestAddress' => 'required|string',
-                'additionalInformation' => 'required|string',
+                'additionalInformation' => 'nullable|string',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
             }
             $availableResourcesData = getResourcesAvailable($request->resourceTypeId, $request->arrivalDateTime, $request->departureDateTime);
             if ($availableResourcesData->count() < $request->resources) {
-                return response()->json(['status' => false, 'message' => 'resources not available', 'data' => []]);
+                return response()->json(['status' => false, 'message' => 'Resources not available for the selected dates and quantity', 'data' => []]);
             }
             $resourcesToBookIds = $availableResourcesData->take((int)$request->resources);
             $resourcesToBook = Resource::whereIn('id', $resourcesToBookIds)->get();
