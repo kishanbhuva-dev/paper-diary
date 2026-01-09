@@ -38,7 +38,7 @@
       @view="showbookingdata"
       @delete="confirmDelete"
       :showDelete="false"
-      :show-edit="true"
+      :show-edit="false"
       :show-search="true"
       :showAdd="false"
       :showDownload="true"
@@ -172,6 +172,7 @@ import Basemodal from "../../components/global/BaseModal.vue";
 import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import ownerService from "../../services/ownerService";
+import { useRouter } from "vue-router";
 
 // --- 1. STATE MANAGEMENT ---
 const router = useRouter();
@@ -215,8 +216,7 @@ const filterConfig = [
 ];
 
 const tableColumns = [
-  { label: "ID", key: "id", sortable: true },
-  { label: "Property", key: "property.PropertyName", sortable: true },
+  { label: "Property", key: "property.propertyName", sortable: true },
   { label: "Resource Type", key: "resource_type_name", sortable: true },
   { label: "Guest Name", key: "guestName", sortable: true },
   { label: "Check-in", key: "arrivalDateTime", sortable: true },
@@ -245,6 +245,8 @@ const loadData = async () => {
       ...actieFilters.value,
     });
     bookings.value = data.data || [];
+    console.log(bookings.value);
+    
     total.value = data.total || 0;
   } catch (err) {
     const errorMessage = err.response?.status === 401
