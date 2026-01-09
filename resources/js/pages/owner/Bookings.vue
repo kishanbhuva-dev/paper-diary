@@ -1,5 +1,3 @@
-// 4. Booking.vue (Refactored for Bookings Management)
-
 <template>
   <div class="px-2 sm:px-3 py-4 bg-gray-50 min-h-screen">
     <div
@@ -67,39 +65,31 @@ import { Icon } from "@iconify/vue";
 import { useRouter } from "vue-router";
 import ownerService from "../../services/ownerService";
 
-// --- 1. STATE MANAGEMENT & INITIALIZATION ---
-// Initialize Router
+// --- 1. STATE MANAGEMENT ---
 const router = useRouter();
 const sortBy = ref("id");
 const sortOrder = ref("asc");
 const actieFilters = ref({});
 
-// Reactive State
 const loading = ref(false);
 const error = ref(null);
-const bookings = ref([]); // Changed from 'properties' to 'bookings'
+const bookings = ref([]);
 const total = ref(0);
 const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 
-// Delete Modal State (adapted for bookings)
 const isConfirmationModalVisible = ref(false);
 const bookingIdToDelete = ref(null);
+
 const filterConfig = [
   {
     label: "Status",
     key: "status",
     type: "select",
     options: [
-      {
-        label: "Confirmed",
-        value: "Confirmed",
-      },
-      {
-        label: "Cancelled",
-        value: "Cancelled",
-      },
+      { label: "Confirmed", value: "Confirmed" },
+      { label: "Cancelled", value: "Cancelled" },
     ],
   },
   {
@@ -107,10 +97,7 @@ const filterConfig = [
     key: "paymentStatus",
     type: "select",
     options: [
-      {
-        label: "Paid",
-        value: "paid",
-      },
+      { label: "Paid", value: "paid" },
       { label: "Unpaid", value: "unpaid" },
     ],
   },
@@ -121,13 +108,9 @@ const filterConfig = [
 
 const tableColumns = [
   { label: "ID", key: "id", sortable: true },
-  { label: "Property", key: "property.propertyName", sortable: true },
+  { label: "Property", key: "property.PropertyName", sortable: true },
   { label: "Resource Type", key: "resource_type_name", sortable: true },
-  {
-    label: "Guest Name",
-    key: "guestName",
-    sortable: true,
-  },
+  { label: "Guest Name", key: "guestName", sortable: true },
   { label: "Check-in", key: "arrivalDateTime", sortable: true },
   { label: "Check-out", key: "departureDateTime", sortable: true },
   { label: "Price", key: "price", sortable: true },
@@ -137,17 +120,21 @@ const tableColumns = [
 ];
 
 // --- 2. DATA FETCHING LOGIC ---
-/** Fetches the booking data from the API based on current pagination/search state.
- */
 const loadData = async () => {
   error.value = null;
   loading.value = true;
+  
+  // CLEANING LOGIC: Strip "property." from the sortBy key if it exists
+  const cleanSortBy = sortBy.value.includes(".") 
+    ? sortBy.value.split(".").pop() 
+    : sortBy.value;
+
   try {
     const data = await ownerService.fetchBookings({
       page: currentPage.value,
       perPage: perPage.value,
       search: currentSearch.value,
-      sortBy: sortBy.value,
+      sortBy: cleanSortBy, // Send the flattened key to API
       sortOrder: sortOrder.value,
       ...actieFilters.value,
     });
@@ -155,16 +142,20 @@ const loadData = async () => {
     bookings.value = data.data || [];
     total.value = data.total || 0;
   } catch (err) {
-    // Standardized error message handling
-    const errorMessage =
-      err.response?.status === 401
+    const errorMessage = err.response?.status === 401
         ? "Unauthorized. Please log in again."
         : err.message || "Failed to load bookings";
-
     error.value = errorMessage;
   } finally {
     loading.value = false;
   }
+};
+
+const handleSort = (sortData) => {
+  // Capture the key exactly as it comes from Basetable
+  sortBy.value = sortData.key;
+  sortOrder.value = sortData.order;
+  loadData();
 };
 
 const handleFilterChange = (filters) => {
@@ -172,28 +163,10 @@ const handleFilterChange = (filters) => {
   currentPage.value = 1;
   loadData();
 };
-const handleSort = (sortData) => {
-  sortBy.value = sortData.key;
-  sortOrder.value = sortData.order;
-  loadData();
-};
-
-// --- 3. NAVIGATION HANDLERS ---
-
-const navigateToViewEdit = (item) => {
-  if (item && item.id) {
-    router.push({
-      name: "owner-booking-detail",
-      params: { id: btoa(item.id) },
-    });
-  }
-};
-
-// --- 4. TABLE EVENT HANDLERS ---
 
 const handleSearch = (term) => {
   currentSearch.value = term;
-  currentPage.value = 1; // Reset to first page on search
+  currentPage.value = 1;
   loadData();
 };
 
@@ -204,64 +177,44 @@ const handlePageChange = (page) => {
 
 const handlePerPageChange = (size) => {
   perPage.value = size;
-  currentPage.value = 1; // Reset to first page when changing page size
+  currentPage.value = 1;
   loadData();
 };
 
-// --- 5. DELETION (Cancellation) LOGIC ---
-
-/**
- * Executes when the custom modal's confirmation button is clicked.
- */
-const handleDeleteConfirmation = async () => {
-  isConfirmationModalVisible.value = false;
-
-  if (bookingIdToDelete.value !== null) {
-    // In a real application, you might use an update to change status to 'Cancelled'
-    // rather than a hard delete, but based on the original property logic, we'll use delete.
-    await handleDelete(bookingIdToDelete.value);
-    bookingIdToDelete.value = null; // Clear ID state
+// --- 3. NAVIGATION & DELETION ---
+const navigateToViewEdit = (item) => {
+  if (item && item.id) {
+    router.push({ name: "owner-booking-detail", params: { id: btoa(item.id) } });
   }
 };
 
-/**
- * Performs the actual booking deletion/cancellation via the service and updates the view.
- * @param {number} id - The ID of the booking to delete.
- */
+const handleDeleteConfirmation = async () => {
+  isConfirmationModalVisible.value = false;
+  if (bookingIdToDelete.value !== null) {
+    await handleDelete(bookingIdToDelete.value);
+    bookingIdToDelete.value = null;
+  }
+};
+
 const handleDelete = async (id) => {
   error.value = null;
-
   try {
     await ownerService.deleteBooking(id);
-
-    // prevent an empty page after deletion
     if (bookings.value.length === 1 && currentPage.value > 1) {
       currentPage.value--;
     }
     await loadData();
   } catch (err) {
-    const errorMessage =
-      err.response?.status === 401
-        ? "Unauthorized: Cancellation failed."
-        : err.message || "Cancellation failed";
-
-    error.value = errorMessage;
-    console.error("Cancellation failed:", errorMessage);
+    error.value = err.message || "Cancellation failed";
   }
 };
 
-/**
- * Shows the custom confirmation dialog before attempting deletion.
- * @param {number} id - The ID of the booking to delete.
- */
 const confirmDelete = (id) => {
   bookingIdToDelete.value = id;
   isConfirmationModalVisible.value = true;
 };
 
-// --- 6. SETUP HOOKS ---
-
 onMounted(() => {
-  loadData(); // Initial data load when component mounts
+  loadData();
 });
 </script>
