@@ -78,7 +78,7 @@ export function useAuth() {
     let routeName;
     
     if (role === "owner") {
-      routeName = res.data.subscription ? "owner-dashboard" : "subscription";
+      routeName = res.data.subscription.is_active ? "owner-dashboard" : "subscription";
     } else if (role === "admin") {
       routeName = "admin-dashboard";
     } else {

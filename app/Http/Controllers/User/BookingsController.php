@@ -174,6 +174,7 @@ class BookingsController extends Controller
                 'guestEmail' => 'required|email',
                 'guestPhone' => 'required|string',
                 'guestAddress' => 'required|string',
+                'additionalInformation' => 'required|string',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
@@ -199,6 +200,7 @@ class BookingsController extends Controller
             $booking->guestEmail = $request->guestEmail;
             $booking->guestPhone = $request->guestPhone;
             $booking->guestAddress = $request->guestAddress;
+            $booking->additionalInformation = $request->additionalInformation;            
             if (isset($request->children)) {
                 $booking->children = $request->children;
             }
@@ -238,7 +240,7 @@ class BookingsController extends Controller
                 $userData['guestEmail'] = $request->guestEmail;
                 $userData['guestPhone'] = $request->guestPhone;
                 $userData['guestAddress'] = $request->guestAddress;
-                
+                $userData['additionalInformation'] = $request->additionalInformation;              
                 $arrival = Carbon::parse($request->arrivalDateTime);
                 $departure = Carbon::parse($request->departureDateTime);
                 $interval = $arrival->diffInDays($departure);

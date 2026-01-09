@@ -148,31 +148,19 @@ class BookingsController extends Controller
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
     }
-    public function create()
-    {
-        //
-    }
-    public function store(Request $request)
-    {
-        //
-    }
-    public function show(string $id)
-    {
-        //
-    }
-    public function edit(string $id)
-    {
-        //
-    }
     public function update(Request $request, string $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'ownerNotes' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()]);
+        }
+        $bookingOrder = BookingOrder::where('id',$id)->first();
+        $bookingOrder->ownerNotes = $request->ownerNotes;
+        $bookingOrder->save();
+        return response()->json(['status' => true, 'message' => 'Booking updated successfully', 'data' => []]);
     }
-    public function destroy(string $id)
-    {
-        //
-    }
-
     public function bookingCancel(Request $request){
         try {
             $validator = Validator::make($request->all(), [

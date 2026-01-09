@@ -15,7 +15,22 @@ class AuthController extends Controller
     public function checkSubscription()
     {
         $user = Auth::user();
-        return hasActiveSubscription($user);
+        
+        if (!$user) {
+            return response()->json([
+                'status' => true,
+                'hasSubscription' => false,
+                'details' => null
+            ]);
+        }
+
+        $subscriptionDetails = getSubscriptionDetails($user);
+        
+        return response()->json([
+            'status' => true,
+            'hasSubscription' => $subscriptionDetails ? $subscriptionDetails['is_active'] : false,
+            'details' => $subscriptionDetails
+        ]);
     }
     public function login(Request $request)
     {
@@ -35,8 +50,44 @@ class AuthController extends Controller
                 return response()->json(['status' => false, 'message' => 'The provided credentials are incorrect.']);
             }
             
-            // $subscription = hasActiveSubscription($user);
-            $subscription=true;
+            // Get detailed subscription information for owners
+            $subscription = null;
+            if ($user->role === 'owner') {
+                $subscriptionDetails = getSubscriptionDetails($user);
+                if ($subscriptionDetails) {
+                    $subscription = [
+                        'has_subscription' => true,
+                        'is_active' => $subscriptionDetails['is_active'],
+                        'status' => $subscriptionDetails['database']['status'],
+                        'payment_status' => $subscriptionDetails['stripe']['payment_status'] ?? 'unknown',
+                        'subscription_id' => $subscriptionDetails['database']['stripe_id'],
+                        'current_period_end' => $subscriptionDetails['stripe']['current_period_end'] ?? null,
+                        'cancel_at_period_end' => $subscriptionDetails['stripe']['cancel_at_period_end'] ?? false,
+                    ];
+                } else {
+                    $subscription = [
+                        'has_subscription' => false,
+                        'is_active' => false,
+                        'status' => null,
+                        'payment_status' => null,
+                        'subscription_id' => null,
+                        'current_period_end' => null,
+                        'cancel_at_period_end' => false,
+                    ];
+                }
+            } else {
+                // For non-owners, just return basic info
+                $subscription = [
+                    'has_subscription' => false,
+                    'is_active' => false,
+                    'status' => null,
+                    'payment_status' => null,
+                    'subscription_id' => null,
+                    'current_period_end' => null,
+                    'cancel_at_period_end' => false,
+                ];
+            }
+            
             $token = $user->createToken('api-token')->plainTextToken;
 
             return response()->json([
