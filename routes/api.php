@@ -11,9 +11,19 @@ Route::get('migrations/status', [App\Http\Controllers\MigrationController::class
 // Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
 Route::get('products', [App\Http\Controllers\StripeController::class, 'getProducts']);
 Route::get('stripe/config', [App\Http\Controllers\StripeController::class, 'getStripeConfig']);
+Route::post('stripe/webhook', [App\Http\Controllers\StripeWebhookController::class, 'handleWebhook']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('stripe/subscription', [App\Http\Controllers\StripeController::class, 'createSubscription']);
+    Route::get('stripe/subscription/status', [App\Http\Controllers\StripeController::class, 'checkSubscriptionStatus']);
+    Route::post('stripe/subscription/retry', [App\Http\Controllers\StripeController::class, 'retrySubscriptionPayment']);
+    Route::post('stripe/subscription/sync', [App\Http\Controllers\StripeController::class, 'syncSubscriptionStatus']);
+    Route::post('stripe/payment/complete', [App\Http\Controllers\StripeController::class, 'completePayment']);
+    
+    // Combined subscription management endpoint
+    Route::get('stripe/subscription-data', [App\Http\Controllers\StripeController::class, 'getSubscriptionData']);
+    Route::post('stripe/subscription/cancel', [App\Http\Controllers\StripeController::class, 'cancelSubscription']);
+    Route::post('stripe/subscription/reactivate', [App\Http\Controllers\StripeController::class, 'reactivateSubscription']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -37,6 +47,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:sanctum', 'admin']], f
     Route::apiResource('booking', App\Http\Controllers\Admin\BookingsController::class);
     Route::apiResource('owner', App\Http\Controllers\Admin\OwnerController::class);
     Route::apiResource('property', App\Http\Controllers\Admin\PropertyController::class);
+    
+    // Admin subscription management routes
+    Route::get('subscriptions', [App\Http\Controllers\StripeController::class, 'getAdminSubscriptions']);
+    Route::post('subscriptions/{id}/cancel', [App\Http\Controllers\StripeController::class, 'cancelAdminSubscription']);
 });
 Route::group(['prefix' => 'owner', 'middleware' => ['auth:sanctum', 'owner']], function () {
     Route::get('/', [App\Http\Controllers\Owner\DashboardController::class, 'index']);
