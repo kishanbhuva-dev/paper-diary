@@ -218,13 +218,20 @@ const ownerService = {
     const res = await apiClient.get(`/owner/bookings/${id}`);
     return res.data.data;
   },
+  async cancelBooking(id) {
+    // Corresponds to the route: GET /owner/bookings/{id}
+    const res = await apiClient.post(`/owner/booking-cancel`,
+       { bookingId: id }
+    );
+    return res.data;
+  },
 
   // Update a booking
   async updateBooking(id, payload) {
     // Corresponds to the route: PUT/PATCH /owner/bookings/{id}
     const res = await apiClient.put(`/owner/bookings/${id}`, payload);
     return res.data.data;
-  },
+  },  
 
   // Delete a booking
   async deleteBooking(id) {

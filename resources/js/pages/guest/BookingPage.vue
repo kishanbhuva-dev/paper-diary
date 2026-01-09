@@ -1,520 +1,371 @@
 <template>
-  <main class="container mx-auto py-12">
-    <div class="px-4 sm:px-6 lg:px-8">
-      <h2 class="mb-8 text-3xl font-bold">Confirm Your Booking</h2>
-      <div class="grid gap-8 lg:grid-cols-3">
+  <main class="container mx-auto py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
+    <div v-if="loadingInitial" class="flex flex-col items-center justify-center py-32">
+      <Icon icon="svg-spinners:90-ring-with-bg" class="text-6xl text-primary" />
+      <p class="mt-4 text-gray-500 font-medium animate-pulse">Syncing availability...</p>
+    </div>
+
+    <div v-else class="max-w-7xl mx-auto">
+      <div class="flex items-center gap-3 mb-8">
+        <button @click="router.back()" class="p-2 hover:bg-gray-200 rounded-full transition-colors">
+          <Icon icon="mdi:arrow-left" class="text-2xl" />
+        </button>
+        <h2 class="text-3xl font-black tracking-tight text-gray-900 uppercase font-oswald">Confirm Booking</h2>
+      </div>
+      
+      <div class="grid gap-10 lg:grid-cols-3">
         <div class="space-y-8 lg:col-span-2">
-          <div class="rounded-lg border p-6 shadow-sm">
-            <div class="mb-6 flex-between">
-              <h3 class="text-2xl font-semibold">Booking Summary</h3>
+          
+          <section class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+            <div class="mb-8 flex items-center justify-between border-b border-gray-100 pb-6">
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">1. Stay Details</h3>
+                <p class="text-sm text-gray-500">Review or modify your booking period</p>
+              </div>
               <button
+                @click="handleEditToggle"
                 type="button"
-                @click="handleDateEditToggle"
-                class="cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold transition-colors"
-                :class="
-                  isEditingDates
-                    ? 'bg-green-600 border-green-600 text-white hover:bg-green-700'
-                    : 'border-gray-300 hover:bg-gray-100 text-gray-700'
-                "
+                class="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold transition-all shadow-sm active:scale-95"
+                :class="isEditing ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-900 text-white hover:bg-black'"
               >
-                <div class="flex items-center gap-1">
-                  <Icon :icon="isEditingDates ? 'mdi:check' : 'mdi:pencil'" />
-                  {{ isEditingDates ? "Save" : "Edit" }}
-                </div>
+                <Icon :icon="isEditing ? 'mdi:check-circle' : 'mdi:calendar-edit'" />
+                {{ isEditing ? "Save Selection" : "Edit Selection" }}
               </button>
             </div>
 
-            <div
-              class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start"
-            >
-              <div class="space-y-2">
-                <p class="text-xs text-gray-500 uppercase font-bold">
-                  Check-In
-                </p>
-                <div
-                  v-if="!isEditingDates"
-                  class="flex items-center h-[42px] px-3 bg-gray-50 rounded border border-gray-200 text-sm font-medium"
-                >
-                  {{ bookingDates.checkIn }}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100">
+                <span class="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Check-In</span>
+                <div v-if="!isEditing" class="flex items-center gap-3 text-gray-800">
+                  <Icon icon="mdi:calendar-import" class="text-primary text-xl" />
+                  <span class="font-bold">{{ bookingDates.checkIn }}</span>
                 </div>
-                <BaseDatePicker
-                  v-else
-                  label=""
-                  v-model="bookingDates.checkIn"
-                />
+                <BaseDatePicker v-else v-model="bookingDates.checkIn" />
               </div>
 
-              <div class="space-y-2">
-                <p class="text-xs text-gray-500 uppercase font-bold">
-                  Check-Out
-                </p>
-                <div
-                  v-if="!isEditingDates"
-                  class="flex items-center h-[42px] px-3 bg-gray-50 rounded border border-gray-200 text-sm font-medium"
-                >
-                  {{ bookingDates.checkOut }}
+              <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100">
+                <span class="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Check-Out</span>
+                <div v-if="!isEditing" class="flex items-center gap-3 text-gray-800">
+                  <Icon icon="mdi:calendar-export" class="text-primary text-xl" />
+                  <span class="font-bold">{{ bookingDates.checkOut }}</span>
                 </div>
-                <BaseDatePicker
-                  v-else
-                  label=""
-                  v-model="bookingDates.checkOut"
-                />
+                <BaseDatePicker v-else v-model="bookingDates.checkOut" />
               </div>
 
-              <div class="space-y-2">
-                <p class="text-xs text-gray-500 uppercase font-bold">
-                  Resource Type
-                </p>
-                <div class="flex items-center gap-2 h-[42px]">
-                  <Icon
-                    icon="hugeicons:guest-house"
-                    class="text-2xl text-gray-400"
-                  />
-                  <span class="font-semibold text-sm truncate">
-                    {{ bookingInfo?.resourcetype?.name || "1 Resource" }}
-                  </span>
+              <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100 md:col-span-1">
+                <span class="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Selected Resource Type</span>
+                <div v-if="!isEditing" class="flex items-center gap-3 text-gray-800">
+                  <Icon icon="hugeicons:villa" class="text-primary text-xl" />
+                  <span class="font-bold truncate">{{ bookingInfo?.resourcetype?.name }}</span>
                 </div>
-              </div>
-
-              <div class="space-y-2">
-                <p class="text-xs text-gray-500 uppercase font-bold">Guests</p>
-                <div class="flex items-center gap-2 h-[42px]">
-                  <Icon
-                    icon="hugeicons:user-03"
-                    class="text-2xl text-gray-400"
-                  />
-                  <span class="font-semibold text-sm">
-                    {{ guestDetails.adults }} Adults,
-                    {{ guestDetails.children }} Child
-                  </span>
-                </div>
+                <select v-else v-model="selectedResourceId" class="w-full bg-white border border-gray-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/20">
+                  <option v-for="res in availableResources" :key="res.id" :value="res.id">{{ res.name }}</option>
+                </select>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="rounded-lg border p-6 shadow-sm">
-            <h3 class="mb-6 text-2xl font-semibold">Guests Details</h3>
-            <form class="space-y-4" @submit.prevent="handleBooking">
-              <div class="grid gap-6 sm:grid-cols-2">
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700"
-                    >Full name <span class="text-red-500">*</span></label
-                  >
-                  <input
-                    type="text"
-                    v-model="guestDetails.fullName"
-                    class="w-full rounded-md border border-gray-300 p-2.5 sm:text-sm"
-                    placeholder="Enter name"
-                    required
+          <section class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+            <h3 class="mb-8 text-xl font-bold text-gray-800 border-b border-gray-100 pb-6">2. Guest Information</h3>
+            <form @submit.prevent="handleBooking" class="space-y-8">
+              <div class="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                <div v-for="(field, key) in formSchema" :key="key" class="space-y-1.5">
+                  <label class="block text-sm font-bold text-gray-700">{{ field.label }} <span class="text-red-500">*</span></label>
+                  <input 
+                    :type="field.type" 
+                    v-model="guestDetails[key]" 
+                    class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none placeholder:text-gray-400"
+                    :placeholder="field.placeholder"
+                    :class="{'border-red-500 bg-red-50': errors[key]}"
                   />
+                  <p v-if="errors[key]" class="text-[11px] font-bold text-red-500 animate-pulse">{{ errors[key] }}</p>
                 </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700"
-                    >Email Address <span class="text-red-500">*</span></label
-                  >
-                  <input
-                    type="email"
-                    v-model="guestDetails.email"
-                    class="w-full rounded-md border border-gray-300 p-2.5 sm:text-sm"
-                    placeholder="Email Address"
-                    required
-                  />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700"
-                    >Contact No <span class="text-red-500">*</span></label
-                  >
-                  <input
-                    type="text"
-                    v-model="guestDetails.contactNo"
-                    class="w-full rounded-md border border-gray-300 p-2.5 sm:text-sm"
-                    placeholder="Contact no"
-                    required
-                  />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700"
-                    >Contact Address <span class="text-red-500">*</span></label
-                  >
-                  <input
-                    type="text"
-                    v-model="guestDetails.contactAddress"
-                    class="w-full rounded-md border border-gray-300 p-2.5 sm:text-sm"
-                    placeholder="Contact Address"
-                    required
-                  />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700"
-                    >Adult <span class="text-red-500">*</span></label
-                  >
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="flex items-center gap-3 rounded-full border border-gray-300 p-1"
-                    >
-                      <button
-                        type="button"
-                        @click="updateGuests('adults', -1)"
-                        class="bg-primary p-1.5 rounded-full text-white"
-                      >
-                        <Icon icon="mdi:minus" />
-                      </button>
-                      <span class="font-semibold w-4 text-center">{{
-                        guestDetails.adults
-                      }}</span>
-                      <button
-                        type="button"
-                        @click="updateGuests('adults', 1)"
-                        class="bg-primary p-1.5 rounded-full text-white"
-                      >
-                        <Icon icon="mdi:plus" />
-                      </button>
+
+                <div class="flex gap-12 items-center sm:col-span-2 pt-4">
+                  <div class="space-y-3">
+                    <label class="block text-sm font-bold text-gray-700">Adults</label>
+                    <div class="inline-flex items-center gap-4 rounded-xl border border-gray-200 p-1.5 bg-gray-50">
+                      <button type="button" @click="updateGuests('adults', -1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-100 text-primary transition-all"><Icon icon="mdi:minus" /></button>
+                      <span class="w-6 text-center font-bold text-lg">{{ guestDetails.adults }}</span>
+                      <button type="button" @click="updateGuests('adults', 1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white shadow-md hover:bg-blue-700 transition-all"><Icon icon="mdi:plus" /></button>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700"
-                    >Children <span class="text-red-500">*</span></label
-                  >
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="flex items-center gap-3 rounded-full border border-gray-300 p-1"
-                    >
-                      <button
-                        type="button"
-                        @click="updateGuests('children', -1)"
-                        class="bg-primary p-1.5 rounded-full text-white"
-                      >
-                        <Icon icon="mdi:minus" />
-                      </button>
-                      <span class="font-semibold w-4 text-center">{{
-                        guestDetails.children
-                      }}</span>
-                      <button
-                        type="button"
-                        @click="updateGuests('children', 1)"
-                        class="bg-primary p-1.5 rounded-full text-white"
-                      >
-                        <Icon icon="mdi:plus" />
-                      </button>
+
+                  <div class="space-y-3">
+                    <label class="block text-sm font-bold text-gray-700">Children</label>
+                    <div class="inline-flex items-center gap-4 rounded-xl border border-gray-200 p-1.5 bg-gray-50">
+                      <button type="button" @click="updateGuests('children', -1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-100 text-primary transition-all"><Icon icon="mdi:minus" /></button>
+                      <span class="w-6 text-center font-bold text-lg">{{ guestDetails.children }}</span>
+                      <button type="button" @click="updateGuests('children', 1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white shadow-md hover:bg-blue-700 transition-all"><Icon icon="mdi:plus" /></button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div
-                class="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <h4 class="mb-4 text-sm font-bold text-gray-700 uppercase">
-                  Secure Payment
-                </h4>
-                <div
-                  id="card-element"
-                  class="p-3 bg-white border rounded-md shadow-sm"
-                ></div>
-                <p
-                  id="card-errors"
-                  role="alert"
-                  class="mt-2 text-xs text-red-500"
-                ></p>
+              <div class="mt-10 rounded-2xl bg-gray-900 p-8 text-white">
+                <div class="flex items-center gap-3 mb-6">
+                  <div class="p-2 bg-green-500/20 rounded-lg">
+                    <Icon icon="mdi:shield-check" class="text-green-400 text-xl" />
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold uppercase tracking-widest">Secure Payment</h4>
+                    <p class="text-[11px] text-gray-400">Encrypted via Stripe Gateway</p>
+                  </div>
+                </div>
+                <div id="card-element" class="rounded-xl bg-white p-4 shadow-inner"></div>
+                <p id="card-errors" class="mt-4 text-xs font-bold text-red-400"></p>
               </div>
 
-              <div class="pt-6">
-                <div class="flex items-center mb-4">
-                  <input
-                    id="agreement"
-                    type="checkbox"
-                    v-model="isAgreed"
-                    class="h-4 w-4 rounded border-gray-300 text-primary"
-                    required
-                  />
-                  <label
-                    for="agreement"
-                    class="ml-2 block text-sm text-gray-900"
-                    >By proceeding, I agree to Privacy Policy & Terms of
-                    Service</label
-                  >
+              <div class="pt-6 border-t border-gray-100">
+                <div class="flex items-center gap-3 mb-8">
+                  <input id="agreement" type="checkbox" v-model="isAgreed" class="h-6 w-6 rounded-lg border-gray-300 text-primary cursor-pointer transition-all focus:ring-primary" required />
+                  <label for="agreement" class="text-sm text-gray-600 font-medium cursor-pointer">I agree to the <span class="text-primary underline">Booking Terms & Cancellation Policy</span></label>
                 </div>
+                
                 <div class="flex flex-col sm:flex-row gap-4">
                   <button
                     type="submit"
-                    class="w-full btn-primary sm:w-auto uppercase py-3 px-10"
-                    :disabled="isSubmitting"
+                    :disabled="isSubmitting || isEditing || !isAgreed"
+                    class="flex-[2] rounded-2xl bg-primary py-5 px-8 text-lg font-black text-white shadow-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all uppercase tracking-widest font-oswald"
                   >
-                    {{
-                      isSubmitting
-                        ? "Processing Payment..."
-                        : "PAY & BOOK RESOURCE"
-                    }}
+                    <span v-if="isSubmitting" class="flex items-center justify-center gap-3">
+                      <Icon icon="svg-spinners:ring-resize" class="text-2xl" /> Processing...
+                    </span>
+                    <span v-else>Pay & Confirm £{{ totalPrice.toLocaleString() }}</span>
                   </button>
-                  <button
-                    type="button"
-                    @click="cancelAndExit"
-                    class="w-full sm:w-auto border border-gray-300 rounded-md py-3 px-10 text-sm font-bold uppercase hover:bg-gray-50 transition-colors"
-                    :disabled="isSubmitting"
-                  >
-                    Cancel & Exit
-                  </button>
+                  <button @click="cancelAndExit" type="button" class="flex-1 rounded-2xl border-2 border-gray-200 bg-white py-5 px-8 text-sm font-black text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all uppercase tracking-widest font-oswald">Cancel</button>
                 </div>
               </div>
             </form>
-          </div>
+          </section>
         </div>
 
-        <div class="lg:col-span-1">
-          <div class="overflow-hidden rounded-lg border shadow-sm sticky top-8">
-            <div class="p-6">
-              <h3 class="mb-4 text-2xl font-semibold">Property details</h3>
-              <img
-                :src="bookingInfo?.property?.image || '/public/hotel-1.jpg'"
-                alt="Property"
-                class="aspect-video w-full rounded-lg object-cover"
-              />
-              <h4 class="mt-4 text-xl font-bold">
-                {{ bookingInfo?.property?.name || "Loading..." }}
-              </h4>
-              <div class="mt-1 flex items-center text-gray-500">
-                <Icon icon="mdi:location" />
-                <span class="ml-1 text-sm">{{
-                  bookingInfo?.property?.address || "Location Details"
-                }}</span>
-              </div>
-            </div>
-            <div class="border-t p-6">
-              <h4 class="mb-4 text-lg font-semibold">Price Details</h4>
-              <div class="space-y-2">
-                <div class="flex-between text-sm">
-                  <span>Resource Price</span>
-                  <span>£ {{ bookingInfo?.resourcetype?.price || "0" }}</span>
-                </div>
-                <div class="flex-between text-sm">
-                  <span>Taxes (10%)</span><span>+ £200</span>
+        <aside class="lg:col-span-1">
+          <div class="sticky top-8 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl ring-1 ring-black/5">
+            <div class="relative h-64 overflow-hidden">
+              <img :src="bookingInfo?.property?.image || '/public/hotel-1.jpg'" class="h-full w-full object-cover transition-transform duration-700 hover:scale-110" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent p-8 flex flex-col justify-end">
+                <h4 class="text-2xl font-black text-white font-oswald tracking-wide leading-none mb-2">{{ bookingInfo?.property?.name }}</h4>
+                <div class="flex items-center text-xs text-gray-300 font-bold uppercase tracking-tighter">
+                  <Icon icon="mdi:map-marker" class="mr-1 text-primary" /> {{ bookingInfo?.property?.address }}
                 </div>
               </div>
             </div>
-            <div class="border-t bg-gray-50 p-6">
-              <div class="flex-between text-lg font-bold">
-                <span>Total</span>
-                <span
-                  >£
-                  {{
-                    (
-                      Number(bookingInfo?.resourcetype?.price || 0) + 200
-                    ).toLocaleString()
-                  }}</span
-                >
+
+            <div class="p-8">
+              <h5 class="mb-6 text-[11px] font-black uppercase text-gray-400 tracking-[0.2em] border-b border-gray-100 pb-2">Order Breakdown</h5>
+              <div class="space-y-5">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <span class="text-sm font-black text-gray-900 block">{{ bookingInfo?.resourcetype?.name }}</span>
+                    <p class="text-[11px] font-bold text-gray-500 mt-1 uppercase tracking-wide">£{{ bookingInfo?.resourcetype?.price }} / night × {{ totalNights }} nights</p>
+                  </div>
+                  <span class="font-black text-gray-900">£{{ (bookingInfo?.resourcetype?.price * totalNights).toLocaleString() }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center border-t-2 border-gray-900 pt-6">
+                  <span class="text-lg font-black text-gray-900 font-oswald uppercase tracking-widest">Total</span>
+                  <span class="text-4xl font-black text-primary font-oswald tracking-tighter">£{{ totalPrice.toLocaleString() }}</span>
+                </div>
               </div>
+
+              <!-- <div class="mt-10 p-4 rounded-xl bg-blue-50 border border-blue-100 flex gap-3">
+                <Icon icon="mdi:clock-fast" class="text-blue-600 text-xl flex-shrink-0" />
+                <p class="text-[11px] text-blue-800 font-bold leading-relaxed uppercase tracking-tight">
+                  Instant Confirmation. A receipt will be sent to your email immediately after payment.
+                </p>
+              </div> -->
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, computed, nextTick, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { Icon } from "@iconify/vue";
 import { loadStripe } from "@stripe/stripe-js";
 import { userService } from "../../services/userService";
+import { useAuth } from "../../composables/useAuth";
 import BaseDatePicker from "../../components/global/BaseDatePicker.vue";
+import dayjs from "dayjs";
 
 const router = useRouter();
+const route = useRoute();
+const { user } = useAuth();
+
+// --- Schema for Validation ---
+const formSchema = {
+  fullName: { label: "Full Name", placeholder: "e.g. John Doe", type: "text" },
+  email: { label: "Email Address", placeholder: "user@example.com", type: "email" },
+  contactNo: { label: "Contact Number", placeholder: "+44 ...", type: "text" },
+  contactAddress: { label: "Home Address", placeholder: "Street, City, Postcode", type: "text" },
+};
+
+// --- State ---
+const loadingInitial = ref(true);
+const isSubmitting = ref(false);
+const isEditing = ref(false);
+const isAgreed = ref(false);
+const errors = ref({});
+
+const availableResources = ref([]);
+const selectedResourceId = ref(null);
 const bookingInfo = ref(null);
 const bookingDates = ref({ checkIn: "", checkOut: "" });
-const isAgreed = ref(false);
-const isSubmitting = ref(false);
-const isEditingDates = ref(false);
 
 const guestDetails = ref({
-  fullName: "",
-  email: "",
-  contactNo: "",
-  contactAddress: "",
-  adults: 1,
-  children: 0,
+  fullName: user.value?.name || "",
+  email: user.value?.email || "",
+  contactNo: "", contactAddress: "", adults: 1, children: 0,
 });
 
 const stripe = ref(null);
-const elements = ref(null);
 const card = ref(null);
 const isCardComplete = ref(false);
 
-onMounted(async () => {
-  const publishableKey =
-    "pk_test_51RvEjJ7fYIrC7aOkBuyFRaQM8EH4P3nCf8sW5BEFVufQaLOlM2ZNk8lRDNh7uCtm6sVV2Wa2dhIVbIwI6P2q2xQx00PpDGeuDB";
-
-  stripe.value = await loadStripe(publishableKey);
-  elements.value = stripe.value.elements();
-
-  card.value = elements.value.create("card", {
-    style: {
-      base: {
-        fontSize: "16px",
-        color: "#32325d",
-        fontFamily: "sans-serif",
-      },
-    },
-  });
-  card.value.mount("#card-element");
-  card.value.on("change", (event) => {
-    isCardComplete.value = event.complete;
-    const cardErrors = document.getElementById("card-errors");
-    if (event.error) {
-      cardErrors.textContent = event.error.message;
-    } else {
-      cardErrors.textContent = "";
-    }
-  });
-
-  const qdata = router.currentRoute.value.query;
-
-  if (qdata.slug && qdata.r_id && qdata.in && qdata.out) {
-    bookingDates.value = {
-      checkIn: qdata.in,
-      checkOut: qdata.out,
-    };
-    await fetchInitialData(qdata.slug, qdata.r_id);
-  } else {
-    router.push("/");
-  }
+// --- Calculations ---
+const totalNights = computed(() => {
+  if (!bookingDates.value.checkIn || !bookingDates.value.checkOut) return 1;
+  const start = dayjs(bookingDates.value.checkIn);
+  const end = dayjs(bookingDates.value.checkOut);
+  const diff = end.diff(start, 'day');
+  return diff > 0 ? diff : 1;
 });
 
-const fetchInitialData = async (slug, r_id) => {
-  try {
-    const res = await userService.getAvailableResourcesTypes({
-      slug: slug,
-      arrivalDateTime: bookingDates.value.checkIn,
-      departureDateTime: bookingDates.value.checkOut,
-      totalResources: 1,
-    });
-    if (res.data.status) {
-      const selectresourceType = res.data.data.find(
-        (r) => r.id.toString() === r_id.toString()
-      );
+const totalPrice = computed(() => {
+  const base = Number(bookingInfo.value?.resourcetype?.price || 0);
+  return base * totalNights.value;
+});
 
-      if (selectresourceType) {
-        const propRes = await userService.getPropertyDetails(slug);
+// --- Logic ---
+onMounted(async () => {
+  const { slug, r_id, in: cin, out: cout } = route.query;
+  if (!slug || !r_id) return router.push("/");
 
-        bookingInfo.value = {
-          property: {
-            id: propRes.data.data.id,
-            name: propRes.data.data.propertyName,
-            address: propRes.data.data.address,
-            image: propRes.data.data.property_image[0]?.image,
-            slug: propRes.data.data.slug,
-          },
-          resourcetype: selectresourceType,
-        };
-      } else {
-        router.push({ name: "details", params: { slug: slug } });
+  bookingDates.value = { checkIn: cin, checkOut: cout };
+  selectedResourceId.value = r_id;
+
+  await refreshAvailability(slug);
+  loadingInitial.value = false;
+
+  await nextTick();
+  await initStripe();
+});
+
+const initStripe = async () => {
+  stripe.value = await loadStripe("pk_test_51RvEjJ7fYIrC7aOkBuyFRaQM8EH4P3nCf8sW5BEFVufQaLOlM2ZNk8lRDNh7uCtm6sVV2Wa2dhIVbIwI6P2q2xQx00PpDGeuDB");
+  const elements = stripe.value.elements();
+  card.value = elements.create("card", { 
+    style: { base: { fontSize: "16px", color: "#111827", fontFamily: 'Inter, sans-serif', '::placeholder': { color: '#9ca3af' } } } 
+  });
+  card.value.mount("#card-element");
+  card.value.on("change", (e) => {
+    isCardComplete.value = e.complete;
+    const errEl = document.getElementById("card-errors");
+    if (errEl) errEl.textContent = e.error ? e.error.message : "";
+  });
+};
+watch(
+  () => [bookingDates.value.checkIn, bookingDates.value.checkOut],
+  async ([newIn, newOut]) => {
+    // Only auto-refresh if we are in editing mode and both dates are present
+    if (isEditing.value && newIn && newOut) {
+      // Small delay or check to ensure checkout isn't before checkin
+      if (dayjs(newOut).isAfter(dayjs(newIn))) {
+        await refreshAvailability(route.query.slug);
       }
     }
-  } catch (error) {
-    console.error("Initialization error:", error);
-  }
+  },
+  { deep: true }
+);
+const refreshAvailability = async (slug) => {
+  try {
+    const res = await userService.getAvailableResourcesTypes({
+      slug, arrivalDateTime: bookingDates.value.checkIn, departureDateTime: bookingDates.value.checkOut, totalResources: 1,
+    });
+    if (res.data.status) {
+      availableResources.value = res.data.data;
+      const match = res.data.data.find(r => r.id.toString() === selectedResourceId.value?.toString()) || res.data.data[0];
+      if (match) {
+        selectedResourceId.value = match.id;
+        const propRes = await userService.getPropertyDetails(slug);
+        bookingInfo.value = {
+          property: { id: propRes.data.data.id, name: propRes.data.data.propertyName, address: propRes.data.data.address, image: propRes.data.data.property_image[0]?.image, slug: propRes.data.data.slug },
+          resourcetype: match,
+        };
+      }
+    }
+  } catch (e) { console.error(e); }
 };
 
-const handleDateEditToggle = () => {
-  if (isEditingDates.value) {
-    const q = router.currentRoute.value.query;
-    fetchInitialData(q.slug, q.r_id);
-    isEditingDates.value = false;
-  } else {
-    isEditingDates.value = true;
+const validateForm = () => {
+  errors.value = {};
+  let valid = true;
+
+  // Check inputs
+  Object.keys(formSchema).forEach(key => {
+    if (!guestDetails.value[key]) {
+      errors.value[key] = `${formSchema[key].label} is required`;
+      valid = false;
+    }
+  });
+
+  // Check dates
+  if (dayjs(bookingDates.value.checkOut).isBefore(dayjs(bookingDates.value.checkIn))) {
+    alert("Checkout date cannot be before Check-in date.");
+    valid = false;
   }
+
+  return valid;
 };
 
-const updateGuests = (type, value) => {
-  if (type === "adults")
-    guestDetails.value.adults = Math.max(1, guestDetails.value.adults + value);
-  else if (type === "children")
-    guestDetails.value.children = Math.max(
-      0,
-      guestDetails.value.children + value
-    );
-};
-
-const cancelAndExit = () => {
-  const propertySlug = bookingInfo.value?.property?.slug;
-  if (propertySlug) {
-    router.push({ name: "details", params: { slug: propertySlug } });
-  } else {
-    router.push("/");
+const handleEditToggle = async () => {
+  if (isEditing.value) {
+    loadingInitial.value = true;
+    await refreshAvailability(route.query.slug);
+    loadingInitial.value = false;
+    await nextTick();
+    await initStripe();
   }
+  isEditing.value = !isEditing.value;
 };
 
 const handleBooking = async () => {
-  if (!isCardComplete.value) {
-    const cardErrors = document.getElementById("card-errors");
-    cardErrors.textContent = "Please enter your card details to proceed.";
-    return;
-  }
+  if (!validateForm()) return;
+  if (!isCardComplete.value) return;
   isSubmitting.value = true;
-  const cardErrors = document.getElementById("card-errors");
-  cardErrors.textContent = "";
 
-  // console.log("Booking details:", bookingInfo.value);
   try {
-    const totalAmount =
-      Number(bookingInfo.value?.resourcetype?.price || 0) + 200;
-    const intentRes = await userService.createPaymentIntent({
-      slug: bookingInfo.value?.property?.slug,
-      amount: totalAmount,
-      currency: "gbp",
+    // Concurrency Check
+    const finalCheck = await userService.getAvailableResourcesTypes({
+      slug: bookingInfo.value.property.slug, arrivalDateTime: bookingDates.value.checkIn, departureDateTime: bookingDates.value.checkOut, totalResources: 1,
+    });
+    // if (!finalCheck.data.data.some(r => r.id === selectedResourceId.value)) {
+    //   alert("Resource no longer available for these dates.");
+    //   return;
+    // }
+
+    const intentRes = await userService.createPaymentIntent({ slug: bookingInfo.value.property.slug, amount: totalPrice.value, currency: "gbp" });
+    const clientSecret = intentRes.data.clientSecret || intentRes.data.data?.clientSecret;
+    const { paymentIntent, error } = await stripe.value.confirmCardPayment(clientSecret, {
+      payment_method: { card: card.value, billing_details: { name: guestDetails.value.fullName, email: guestDetails.value.email } },
     });
 
-    const clientSecret =
-      intentRes.data.clientSecret || intentRes.data.data?.clientSecret;
-
-    if (!clientSecret) throw new Error("Invalid response from payment server.");
-
-    const { paymentIntent, error } = await stripe.value.confirmCardPayment(
-      clientSecret,
-      {
-        payment_method: {
-          card: card.value,
-          billing_details: {
-            name: guestDetails.value.fullName,
-            email: guestDetails.value.email,
-          },
-        },
-      }
-    );
-
-    if (error) {
-      cardErrors.textContent = error.message;
-      isSubmitting.value = false;
-      return;
-    }
+    if (error) throw new Error(error.message);
 
     if (paymentIntent.status === "succeeded") {
-      const resourcetypePrice = Number(
-        bookingInfo.value?.resourcetype?.price || 0
-      );
 
-      const payload = {
-        propertyId: bookingInfo.value?.property?.id,
-        resourceTypeId: bookingInfo.value?.resourcetype?.id,
-        arrivalDateTime: bookingDates.value.checkIn,
-        departureDateTime: bookingDates.value.checkOut,
-        adults: guestDetails.value.adults,
-        children: guestDetails.value.children,
-        resources: 1,
-        guestFullName: guestDetails.value.fullName,
-        guestEmail: guestDetails.value.email,
-        guestPhone: guestDetails.value.contactNo,
-        guestAddress: guestDetails.value.contactAddress,
-        status: "confirm",
-        paymentStatus: "paid",
-        price: resourcetypePrice,
-        cost: resourcetypePrice,
-        userId: 5,
-        payment_intent_id: paymentIntent.id,
+      const payload = { 
+        propertyId: bookingInfo.value.property.id, resourceTypeId: selectedResourceId.value, arrivalDateTime: bookingDates.value.checkIn, departureDateTime: bookingDates.value.checkOut, 
+        adults: guestDetails.value.adults, children: guestDetails.value.children, guestFullName: guestDetails.value.fullName, guestEmail: guestDetails.value.email, guestPhone: guestDetails.value.contactNo, resources: 1,
+        guestAddress: guestDetails.value.contactAddress, status: "confirm", paymentStatus: "paid", price: totalPrice.value, cost: totalPrice.value, userId: user.value?.id || 5, payment_intent_id: paymentIntent.id ,
       };
-
       const res = await userService.createBooking(payload);
+      
 
       if (res.data.status) {
         const newBookingId = res.data.data?.id;
@@ -529,17 +380,24 @@ const handleBooking = async () => {
       }
     }
   } catch (err) {
-    console.error("Payment Error:", err);
-  } finally {
-    isSubmitting.value = false;
-  }
+    document.getElementById("card-errors").textContent = err.message;
+  } finally { isSubmitting.value = false; }
 };
+
+const updateGuests = (t, v) => {
+  if (t === 'adults') guestDetails.value.adults = Math.max(1, guestDetails.value.adults + v);
+  else guestDetails.value.children = Math.max(0, guestDetails.value.children + v);
+};
+
+const cancelAndExit = () => router.push({ name: "details", params: { slug: route.query.slug } });
 </script>
 
 <style scoped>
-.flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* Focus transitions for inputs */
+input {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#card-element {
+  min-height: 44px;
 }
 </style>

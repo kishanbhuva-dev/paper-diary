@@ -13,16 +13,7 @@ const routes = [
         name: "details",
         component: () => import("../../js/pages/guest/DetailsPage.vue"),
       },
-      {
-        path: "/booking-summary",
-        name: "booking-summary",
-        component: () => import("../../js/pages/guest/BookingPage.vue"),
-      },
-      {
-        path: "/my-bookings",
-        name: "my-bookings",
-        component: () => import("../../js/pages/guest/MyBookings.vue"),
-      },
+      
       {
         path: "/login",
         name: "login",
@@ -154,6 +145,41 @@ const routes = [
         component: () => import("../pages/admin/Subscriptions.vue"),
         meta: { pageTitle: "Subscriptions"}
       }
+    ],
+  },
+  {
+    path: "/user",
+    component: () => import("../../js/layouts/AuthLayout.vue"), 
+    meta: { requiresAuth: true, role: 'user' }, 
+    children: [
+      // {
+      //   path: "dashboard",
+      //   name: "user-dashboard",
+      //   component: () => import("../../js/pages/user/UserDashboard.vue"),
+      //   meta: { pageTitle: "My Dashboard" },
+      // },
+      {
+        path: "/booking-summary",
+        name: "booking-summary",
+        component: () => import("../../js/pages/guest/BookingPage.vue"),
+      },
+      {
+        path: "/my-bookings",
+        name: "my-bookings",
+        component: () => import("../../js/pages/guest/MyBookings.vue"),
+      },
+      {
+        path: "profile",
+        name: "user-profile",
+        component: () => import("../../js/pages/auth/Profile.vue"),
+        meta: { pageTitle: "Admin Profile" },
+      },
+      {
+        path: "change-password",
+        name: "user-change-password",
+        component: () => import("../../js/pages/auth/ChangePassword.vue"),
+        meta: { pageTitle: "Change Password" },
+      },
     ],
   },
 

@@ -29,10 +29,7 @@
       :columns="tableColumns"
       :rows="properties"
       :server-side="true"
-      :total-items="total"
       :per-page="perPage"
-      :available-filters="filterConfig"
-      @filter-change="handleFilterChange"
       @search="handleSearch"
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
@@ -41,6 +38,7 @@
       @open-edit-modal="navigateToEdit"
       @delete="confirmDelete"
       :showDelete="true"
+      :show-view="false"
       :show-search="true"
       :showAdd="true"
       :showDownload="true"
@@ -70,12 +68,10 @@ const router = useRouter();
 const loading = ref(false);
 const error = ref(null);
 const properties = ref([]);
-const total = ref(0);
 const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 
-const currentFilters = ref({});
 
 // Sorting state (default to backend defaults)
 const orderBy = ref("id");
@@ -93,7 +89,6 @@ const truncateString = (str, maxLen = 15) => {
 
 // Table Configuration with sortable flag
 const tableColumns = [
-  { label: "ID", key: "id", sortable: true },
   { label: "Name", key: "propertyName", sortable: true },
   {
     label: "Address",
@@ -108,47 +103,6 @@ const tableColumns = [
   { label: "Status", key: "status", sortable: true },
 ];
 
-const filterConfig = [
-  {
-    label: "Status",
-    key: "status",
-    type: "select",
-    options: [
-      {
-        label: "Active",
-        value: "1",
-      },
-      {
-        label: "Inactive",
-        value: "0",
-      },
-    ],
-  },
-  {
-    label: "Country",
-    key: "country",
-    type: "select",
-    options: [
-      {
-        label: "India",
-        value: "India",
-      },
-      { label: "USA", value: "USA" },
-    ],
-  },
-];
-
-const handleFilterChange = (filters) => {
-  currentFilters.value = filters;
-  currentPage.value = 1;
-  loadData();
-};
-
-const formatStatus = (property) => {
-  return property.status === 1 || property.status === "Active"
-    ? "Active"
-    : "Inactive";
-};
 
 const loadData = async () => {
   error.value = null;
@@ -161,11 +115,9 @@ const loadData = async () => {
       search: currentSearch.value,
       orderBy: orderBy.value,
       orderDirection: orderDirection.value,
-      ...currentFilters.value,
     });
 
     properties.value = data.data || [];
-    total.value = data.total || 0;
   } catch (err) {
     error.value =
       err.response?.status === 401
