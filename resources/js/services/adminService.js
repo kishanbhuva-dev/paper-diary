@@ -95,7 +95,14 @@ const authService = {
   // admin dashboard
   async adminDashboard() {
     return await apiClient.get('/admin');
-  }
+  },
+  async fetchSubscriptions(query) {
+    const response = await apiClient.get("admin/subscriptions", {
+      params: query,
+    });
+
+    return response.data;
+  },
 };
 
 export default authService;
