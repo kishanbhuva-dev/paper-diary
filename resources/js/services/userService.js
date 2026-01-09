@@ -2,13 +2,13 @@ import api from "./apiClient"; // Assuming your axios instance is in an api.js f
 
 export const userService = {
   getPropertyDetails(slug) {
-    return api.get("/user/property-details", {
+    return api.get("/property-detail", {
       params: { slug },
     });
   },
 
   getAvailableResourcesTypes(params) {
-    return api.get("/user/available-resources-types", {
+    return api.get("/available-resources-types", {
       params: {
         slug: params.slug,
         arrivalDateTime: params.arrivalDateTime,

@@ -8,7 +8,7 @@ Route::post('reset-password', [App\Http\Controllers\AuthController::class, 'rese
 Route::get('property-detail', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);
 Route::get('migrations/run', [App\Http\Controllers\MigrationController::class, 'runMigrations']);
 Route::get('migrations/status', [App\Http\Controllers\MigrationController::class, 'checkMigrationStatus']);
-// Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
+Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
 Route::get('products', [App\Http\Controllers\StripeController::class, 'getProducts']);
 Route::get('stripe/config', [App\Http\Controllers\StripeController::class, 'getStripeConfig']);
 Route::post('stripe/webhook', [App\Http\Controllers\StripeWebhookController::class, 'handleWebhook']);

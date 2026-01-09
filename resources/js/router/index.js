@@ -18,7 +18,9 @@ router.beforeEach((to, from, next) => {
   const { isAuthenticated, isAdmin, isOwner } = useAuth();
 
   if (to.meta.requiresAuth && !isAuthenticated.value) {
-    return next({ name: "login" });
+    return next({ name: "login",
+      query:{redirect:to.fullPath}
+     });
   }
 
   const path = to.path;
