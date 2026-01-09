@@ -248,6 +248,12 @@ const mainMenuItems = [
     icon: "mdi:calendar-check",
     to: { name: "bookings" },
   },
+  {
+    name: "owner-subcription-view",
+    label: "Subcription",
+    icon: "heroicons:credit-card-20-solid",
+    to: { name: "owner-subcription-view" },
+  },
 ];
 
 const systemMenuItems = [

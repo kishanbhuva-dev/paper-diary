@@ -232,6 +232,11 @@ const ownerService = {
     const res = await apiClient.delete(`/owner/bookings/${id}`);
     return res.data.data;
   },
+
+  async fetchSubscriptionDetails() {
+    const res = await apiClient.get("/stripe/subscription-data");
+    return res.data;
+  },
 };
 
 export default ownerService;

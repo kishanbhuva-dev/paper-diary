@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Property;
+use App\Models\Subscription;
 use Laravel\Cashier\Billable;
 
 
@@ -52,5 +53,21 @@ class User extends Authenticatable
     public function properties()
     {
         return $this->hasMany(Property::class, 'ownerId', 'id');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function hasActiveSubscription()
+    {
+        return $this->subscriptions()
+            ->where('stripe_status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                      ->orWhere('ends_at', '>', now());
+            })
+            ->exists();
     }
 }

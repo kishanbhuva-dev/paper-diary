@@ -46,7 +46,7 @@ const routes = [
       {
         path: "/subscription",
         name: "subscription",
-        component: () => import("../../js/pages/guest/SubscriptionPage.vue"),
+        component: () => import("../../js/pages/owner/SubscriptionPage.vue"),
       },
     ],
   },
@@ -91,6 +91,12 @@ const routes = [
         name: "owner-change-password",
         component: () => import("../../js/pages/auth/ChangePassword.vue"),
         meta: { pageTitle: "Change Password" },
+      },
+      {
+        path: "subcription-view",
+        name: "owner-subcription-view",
+        component: () => import("../../js/pages/owner/SubscriptionView.vue"),
+        meta: { pageTitle: "Manage Subcription" },
       },
     ],
   },
@@ -141,6 +147,12 @@ const routes = [
         name: "facilities",
         component: () => import("../pages/admin/Property/Facilities.vue"),
         meta: { pageTitle: "Poperty Facilities"}
+      },
+      {
+        path: "/admin/subscriptions",
+        name: "subscriptions",
+        component: () => import("../pages/admin/Subscriptions.vue"),
+        meta: { pageTitle: "Subscriptions"}
       }
     ],
   },
