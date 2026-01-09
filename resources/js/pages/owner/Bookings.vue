@@ -8,9 +8,7 @@
         icon="eos-icons:loading"
         class="w-12 h-12 text-blue-600 animate-spin"
       />
-      <span class="mt-4 text-xl text-blue-700 font-semibold"
-        >Loading Bookings...</span
-      >
+      <span class="mt-4 text-xl text-blue-700 font-semibold">Loading Bookings...</span>
     </div>
 
     <div
@@ -29,7 +27,6 @@
       :columns="tableColumns"
       :rows="bookings"
       :server-side="true"
-      :total-items="total"
       :per-page="perPage"
       :available-filters="filterConfig"
       @filter-change="handleFilterChange"
@@ -37,32 +34,143 @@
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
       @sort="handleSort"
-      @open-edit-modal="navigateToViewEdit"
+      @open-edit-modal="openEditModal"
+      @view="showbookingdata"
       @delete="confirmDelete"
       :showDelete="false"
+      :show-edit="true"
       :show-search="true"
       :showAdd="false"
       :showDownload="true"
-      :showEdit="false"
       :admin-login="false"
     />
   </div>
 
-  <DeleteModal
+  <Basemodal
+    v-model="isModalVisible"
+    :title="isEditMode ? 'Edit Booking' : 'Booking Details'"
+    width="max-w-3xl"
+    @save="handleSave"
+  >
+    <div class="space-y-6">
+      <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Property</label>
+          <p class="text-sm font-bold text-blue-900">{{ selectedBooking.property?.propertyName || '-' }}</p>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Resource Type</label>
+          <p class="text-sm font-bold text-blue-900">
+            {{ selectedBooking.resource_type_name }}
+          </p>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Booking Status</label>
+          <div class="flex items-center gap-2">
+            <span :class="`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${selectedBooking.status === 'confirm' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`">
+              {{ selectedBooking.status }}
+            </span>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Booked On</label>
+          <p class="text-sm font-medium text-blue-900">{{ selectedBooking.bookedOn }}</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-gray-500 uppercase">Guest Name</label>
+          <input 
+            v-model="selectedBooking.guestName" 
+            :disabled="!isEditMode"
+            placeholder="Full Name"
+            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-gray-500 uppercase">Guest Email</label>
+          <input 
+            v-model="selectedBooking.guestEmail" 
+            :disabled="!isEditMode"
+            placeholder="email@example.com"
+            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+          />
+        </div>
+        
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-gray-500 uppercase">Arrival Date</label>
+          <input 
+            type="date"
+            v-model="editableDates.arrival" 
+            :disabled="!isEditMode"
+            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-gray-500 uppercase">Departure Date</label>
+          <input 
+            type="date"
+            v-model="editableDates.departure" 
+            :disabled="!isEditMode"
+            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+          />
+        </div>
+
+        <!-- <div class="space-y-1">
+          <label class="text-xs font-bold text-gray-500 uppercase">Adults</label>
+          <div class="flex items-center gap-3">
+            <button @click="updateCount('adults', -1)" :disabled="!isEditMode || selectedBooking.adults <= 1" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">-</button>
+            <span class="text-lg font-bold w-8 text-center">{{ selectedBooking.adults || 1 }}</span>
+            <button @click="updateCount('adults', 1)" :disabled="!isEditMode" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">+</button>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-gray-500 uppercase">Children</label>
+          <div class="flex items-center gap-3">
+            <button @click="updateCount('children', -1)" :disabled="!isEditMode || selectedBooking.children <= 0" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">-</button>
+            <span class="text-lg font-bold w-8 text-center">{{ selectedBooking.children || 0 }}</span>
+            <button @click="updateCount('children', 1)" :disabled="!isEditMode" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">+</button>
+          </div>
+        </div> -->
+
+        <div class="md:col-span-2 space-y-1">
+          <label class="text-xs font-bold text-gray-500 uppercase">Guest Address</label>
+          <textarea 
+            v-model="selectedBooking.guestAddress" 
+            :disabled="!isEditMode"
+            rows="2"
+            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+          ></textarea>
+        </div>
+      </div>
+
+      <div v-if="!isEditMode && selectedBooking.status === 'confirm'" class="pt-4 border-t border-gray-100">
+        <button 
+          @click="confirmDelete(selectedBooking.id)"
+          class="flex items-center text-red-600 font-bold text-sm hover:underline cursor-pointer group"
+        >
+          <Icon icon="mdi:calendar-remove" class="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+          Cancel This Booking
+        </button>
+      </div>
+    </div>
+  </Basemodal>
+
+  <ConfirmModal
     v-model="isConfirmationModalVisible"
     :title="'Cancel Booking'"
     :message="`Are you sure you want to cancel booking ID: ${bookingIdToDelete}?`"
-    :warning="'This action will permanently cancel the booking and may trigger a refund process!'"
     @confirm="handleDeleteConfirmation"
   />
 </template>
 
 <script setup>
 import Basetable from "../../components/global/Basetable.vue";
-import DeleteModal from "../../components/global/DeleteModal.vue";
+import ConfirmModal from "../../components/owner/ConfirmModal.vue";
+import Basemodal from "../../components/global/BaseModal.vue";
 import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
-import { useRouter } from "vue-router";
 import ownerService from "../../services/ownerService";
 
 // --- 1. STATE MANAGEMENT ---
@@ -115,8 +223,6 @@ const tableColumns = [
   { label: "Check-out", key: "departureDateTime", sortable: true },
   { label: "Price", key: "price", sortable: true },
   { label: "Status", key: "status", sortable: true },
-  { label: "Payment Status", key: "paymentStatus", sortable: true },
-  { label: "Booked On", key: "bookedOn", sortable: true },
 ];
 
 // --- 2. DATA FETCHING LOGIC ---
@@ -138,7 +244,6 @@ const loadData = async () => {
       sortOrder: sortOrder.value,
       ...actieFilters.value,
     });
-
     bookings.value = data.data || [];
     total.value = data.total || 0;
   } catch (err) {

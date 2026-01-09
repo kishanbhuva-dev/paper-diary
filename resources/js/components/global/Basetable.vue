@@ -11,12 +11,6 @@
         >
           {{ title }}
         </h2>
-        <p
-          v-if="totalItems"
-          class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]"
-        >
-          Total Records: {{ totalItems }}
-        </p>
       </div>
 
       <div
@@ -44,7 +38,7 @@
               v-if="availableFilters.length"
               @click="toggleFilterDropdown"
               :class="[
-                'flex items-center justify-center p-2 rounded-xl border transition-all duration-150 h-10 w-10 active:scale-95',
+                'flex items-center justify-center p-2 rounded-xl border transition-all duration-150 h-10 w-10 active:scale-95 cursor-pointer',
                 isFilterDropdownOpen || hasActiveFilters
                   ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200'
                   : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50 shadow-sm',
@@ -78,7 +72,7 @@
                 >
                 <button
                   @click="clearAllFilters"
-                  class="text-[10px] font-bold text-red-500 hover:text-red-700 uppercase"
+                  class="text-[15px] font-bold text-red-500 hover:text-red-700 hover:bg-red-100 p-3 rounded-xl uppercase cursor-pointer"
                 >
                   Reset
                 </button>
@@ -147,7 +141,7 @@
               <div class="mt-5">
                 <button
                   @click="isFilterDropdownOpen = false"
-                  class="w-full bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl hover:bg-slate-700 transition-colors uppercase tracking-widest"
+                  class="w-full bg-slate-800 text-white cursor-pointer text-xs font-bold py-2.5 rounded-xl hover:bg-slate-700 transition-colors uppercase tracking-widest"
                 >
                   Close Filters
                 </button>
@@ -195,7 +189,7 @@
           <span>{{ getOptionLabel(key, value) }}</span>
           <button
             @click="handleFilterChange(key, '')"
-            class="p-0.5 rounded-md hover:bg-red-50 hover:text-red-500 transition-colors"
+            class="p-0.5 rounded-md hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
           >
             <Icon icon="mdi:close" class="w-3.5 h-3.5" />
           </button>
@@ -209,6 +203,9 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-blue-50/70">
           <tr>
+            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+              No.
+            </th>
             <th
               v-for="col in columns"
               :key="col.key"
@@ -244,7 +241,7 @@
               </div>
             </th>
             <th
-              v-if="showEdit || showDelete || adminLogin"
+              v-if="showView || showEdit || showDelete || adminLogin"
               class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap"
             >
               Actions
@@ -253,10 +250,13 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-100">
           <tr
-            v-for="item in paginatedData"
+            v-for="(item, index) in paginatedData"
             :key="item.id"
             class="hover:bg-blue-50/40 transition duration-150 group"
           >
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-bold italic">
+              {{ (currentPage - 1) * perPageRef + index + 1 }}
+            </td>
             <td
               v-for="col in columns"
               :key="col.key"
@@ -266,35 +266,49 @@
                 ><slot :name="col.key" :row="item"
               /></template>
               <template v-else-if="col.key === 'icon'">
-                <div
+                <div v-if="item[col.key]"
                   class="w-9 h-9 flex items-center justify-center bg-blue-50 rounded-xl border border-blue-100"
                 >
                   <Icon :icon="item[col.key]" class="w-5 h-5 text-blue-600" />
                 </div>
+                <span v-else class="text-gray-300">-</span>
               </template>
               <template v-else-if="col.key === 'status'">
                 <span
+                  v-if="getCellValue(item, col)"
                   class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border"
                   :class="getStatusClasses(getCellValue(item, col))"
                 >
                   {{ formatStatusDisplay(getCellValue(item, col)) }}
                 </span>
+                <span v-else class="text-gray-300">-</span>
               </template>
-              <template v-else
-                ><span :class="{ 'text-gray-300': !getCellValue(item, col) }">{{
-                  getCellValue(item, col) || "-"
-                }}</span></template
-              >
+              <template v-else>
+                <span v-if="getCellValue(item, col) !== null && getCellValue(item, col) !== undefined && getCellValue(item, col) !== ''">
+                  {{ getCellValue(item, col) }}
+                </span>
+                <span v-else class="text-gray-300">-</span>
+              </template>
             </td>
             <td
-              v-if="showEdit || showDelete || adminLogin"
+              v-if="showView || showEdit || showDelete || adminLogin"
               class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
             >
               <div class="flex items-center justify-center gap-1">
                 <button
+                  v-if="showView"
+                  @click="emit('view', item)"
+                  class="text-emerald-600 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-emerald-600 transition duration-150"
+                  title="View Details"
+                >
+                  <Icon icon="mdi:eye-outline" class="w-5 h-5" />
+                </button>
+
+                <button
                   v-if="showEdit"
                   @click="emit('open-edit-modal', item)"
                   class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-blue-600 transition duration-150"
+                  title="Edit"
                 >
                   <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
                 </button>
@@ -302,6 +316,7 @@
                   v-if="showDelete"
                   @click="emit('delete', item.id)"
                   class="text-red-600 hover:text-white cursor-pointer p-2 rounded-xl font-bold hover:bg-red-500 transition duration-150"
+                  title="Delete"
                 >
                   <Icon icon="mdi:delete-forever" class="w-5 h-5" />
                 </button>
@@ -309,6 +324,7 @@
                   v-if="adminLogin"
                   @click="emit('admin-login', item.id)"
                   class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-xl font-bold hover:bg-green-500 transition duration-150"
+                  :title="adminLoginTitle"
                 >
                   <Icon icon="lucide:user-pen" class="w-5 h-5" />
                 </button>
@@ -318,7 +334,7 @@
           <tr v-if="!paginatedData.length">
             <td
               :colspan="
-                columns.length + (showEdit || showDelete || adminLogin ? 1 : 0)
+                columns.length + 1 + (showView || showEdit || showDelete || adminLogin ? 1 : 0)
               "
               class="no-data px-6 py-12 text-center text-gray-500 italic"
             >
@@ -374,7 +390,7 @@
             <button
               @click="changePage(currentPage - 1)"
               :disabled="currentPage === 1"
-              class="relative inline-flex items-center rounded-l-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed"
+              class="relative inline-flex items-center rounded-l-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
             >
               <Icon icon="mdi:chevron-left" class="w-5 h-5" />
             </button>
@@ -388,7 +404,7 @@
                 v-else
                 @click="changePage(page)"
                 :class="[
-                  'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border',
+                  'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border cursor-pointer',
                   page === currentPage
                     ? 'z-10 bg-blue-600 text-white border-blue-600'
                     : 'text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-600',
@@ -400,7 +416,7 @@
             <button
               @click="changePage(currentPage + 1)"
               :disabled="currentPage === totalPages"
-              class="relative inline-flex items-center rounded-r-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed"
+              class="relative inline-flex items-center rounded-r-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
             >
               <Icon icon="mdi:chevron-right" class="w-5 h-5" />
             </button>
@@ -427,6 +443,7 @@ const emit = defineEmits([
   "admin-login",
   "sort",
   "filter-change",
+  "view",
 ]);
 
 const props = defineProps({
@@ -437,6 +454,7 @@ const props = defineProps({
   serverSide: { type: Boolean, default: false },
   totalItems: { type: Number, default: 0 },
   showAdd: { type: Boolean, default: true },
+  showView: { type: Boolean, default: true },
   showEdit: { type: Boolean, default: true },
   adminLogin: { type: Boolean, default: true },
   adminLoginTitle: { type: String, default: "Login as User" },

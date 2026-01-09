@@ -20,7 +20,7 @@ import { computed } from "vue";
 const model = defineModel();
 
 const props = defineProps({
-  label: { type: String, required: true, default: "Label" },
+  label: { type: String, required: false, default: "" },
 });
 
 const labelSlug = computed(() => {

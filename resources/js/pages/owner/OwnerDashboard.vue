@@ -185,7 +185,7 @@
               </span>
               <span class="text-[11px] text-gray-600 flex items-center gap-1">
                 <Icon icon="mdi:clock-check-outline" class="text-orange-400" />
-                Booked: {{ booking.bookedOn || "N/A" }}
+                Booked On: {{ booking.bookedOn || "N/A" }}
               </span>
             </div>
           </div>
@@ -244,8 +244,14 @@
         )
       "
       @close="showBookingModal = false"
-      @cancel="handleCancelBooking"
+      @cancel="triggerCancelFlow"
     />
+    <ConfirmModal
+    v-model="isCancelModalOpen"
+    title="Cancel Booking?"
+    message="This will permanently cancel the guest's reservation. Are you sure you want to proceed?"
+    @confirm="handleCancelBooking"
+  />
   </div>
 </template>
 
@@ -257,10 +263,17 @@ import ownerService from "@/services/ownerService";
 import BookingDetailModal from "@/components/modals/BookingDetailModal.vue";
 import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
 import "vue-hotel-booking-calendar/dist/style.css";
+import ConfirmModal from "@/components/owner/ConfirmModal.vue"
+
 
 const propertyDropdown = ref([]);
 const selectedProperties = ref([]);
 const isDropdownOpen = ref(false);
+
+// --- State ---
+const isCancelModalOpen = ref(false);
+const bookingToCancelId = ref(null);
+const isLoading = ref(false);
 
 const rooms = ref([]);
 const bookings = ref([]);
@@ -274,7 +287,10 @@ const viewAllBookings = () => {
   router.push({ name: "bookings" });
 };
 
-// New helper function to remove a single property
+const triggerCancelFlow = (id) => {
+  bookingToCancelId.value = id;
+  isCancelModalOpen.value = true;
+};
 const removeProperty = (id) => {
   selectedProperties.value = selectedProperties.value.filter(
     (item) => item !== id
@@ -368,14 +384,31 @@ const handleBookingClick = (booking) => {
 };
 
 const handleCancelBooking = async (bookingId) => {
-  if (confirm("Are you sure you want to cancel this booking?")) {
-    try {
-      await getResources();
-      await getRecentBookings();
+  if (!bookingToCancelId.value) return;
+  
+  isLoading.value = true;
+  isCancelModalOpen.value = false; // Close modal immediately for better UX
+
+  try {
+   const res = await ownerService.cancelBooking(bookingToCancelId.value);
+    if (res && res.status === true) {
+
+      await Promise.all([
+        getResources(),
+        getRecentBookings()
+      ]);
+      isCancelModalOpen.value = false;
       showBookingModal.value = false;
-    } catch (error) {
-      console.error("Error cancelling booking:", error);
+      
+    } else {
+      isCancelModalOpen.value = false;
     }
+    
+  } catch (error) {
+    console.error("API Error:", error);
+  } finally {
+    isLoading.value = false;
+    bookingToCancelId.value = null;
   }
 };
 
