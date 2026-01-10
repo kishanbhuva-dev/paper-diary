@@ -13,11 +13,7 @@
             hosting like a professional.
           </p>
           <div class="flex items-center space-x-3 text-sm">
-            <img
-              src="/public/avatar_group.png"
-              alt="Avatar Group"
-              class="h-8"
-            />
+            <img src="/public/avatar_group.png" alt="Avatar Group" class="h-8" />
             <div class="flex-center gap-x-1">
               <Icon icon="mdi:star" class="text-yellow-500" />
               <span class="font-bold">4.9/5.0</span>
