@@ -131,7 +131,7 @@ const routes = [
         path: "/admin/listings",
         name: "listings",
         component: () => import("../pages/admin/Property/Listing.vue"),
-        meta: { pageTitle: "Poperty Listings"}
+        meta: { pageTitle: "Poperty Listings" }
       },
       {
         path: "/admin/facilities",
