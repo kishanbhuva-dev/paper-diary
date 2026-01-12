@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint (strict)
+      - name: Run ESLint (strict - zero warnings)
         run: npm run lint:strict
 
       - name: Check Prettier formatting
@@ -115,3 +115,25 @@ jobs:
 
       - name: Run tests
         run: php artisan test --parallel
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BLOCK DIRECT COMMITS TO MAIN (Server-side enforcement)
+  # ═══════════════════════════════════════════════════════════════════════════
+  block-direct-push:
+    name: Block Direct Push to Main
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - name: Check if push is from PR merge
+        run: |
+          # Allow if this is a merge from a PR (GitHub adds a specific commit message)
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MSG" == Merge\ pull\ request* ]] || [[ "$COMMIT_MSG" == *"(#"*")"* ]]; then
+            echo "✅ This is a PR merge commit - allowed"
+            exit 0
+          fi
+          
+          echo "❌ Direct push to ${{ github.ref }} detected!"
+          echo "All changes must go through Pull Requests."
+          exit 1
