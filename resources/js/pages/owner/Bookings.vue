@@ -222,6 +222,8 @@ const tableColumns = [
   { label: "Check-in", key: "arrivalDateTime", sortable: true },
   { label: "Check-out", key: "departureDateTime", sortable: true },
   { label: "Price", key: "price", sortable: true },
+  { label: "bookedOn", key: "bookedOn", sortable: true },
+  { label: "Price", key: "price", sortable: true },
   { label: "Status", key: "status", sortable: true },
 ];
 

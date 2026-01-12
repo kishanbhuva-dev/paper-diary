@@ -322,7 +322,7 @@
                 </button>
                 <button
                   v-if="adminLogin"
-                  @click="emit('admin-login', item.id)"
+                  @click="emit('admin-login', item)"
                   class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-xl font-bold hover:bg-green-500 transition duration-150"
                   :title="adminLoginTitle"
                 >

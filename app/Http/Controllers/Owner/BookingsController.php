@@ -18,28 +18,9 @@ class BookingsController extends Controller
     {
         try {
             $propertyIds = Auth::user()->properties->pluck('id');
-
-            $bookings = BookingOrder::selectRaw("
-    booking_orders.id,
-    booking_orders.resourceTypeId,
-    booking_orders.userId,
-    booking_orders.propertyId,
-    date_format(booking_orders.arrivalDateTime,'%d %b %Y') as arrivalDateTime,
-    date_format(booking_orders.departureDateTime,'%d %b %Y') as departureDateTime,
-    booking_orders.status,
-    booking_orders.guestFullName as guestName,
-    booking_orders.paymentStatus,
-    booking_orders.price,
-    booking_orders.guestEmail,
-    booking_orders.guestAddress,
-    booking_orders.created_at,
-    date_format(booking_orders.created_at,'%d %b %Y ') as bookedOn
-")->withAggregate('resourceType', 'name')
-                ->whereIn('propertyId', $propertyIds)
-                ->with(['property' => function ($query) {
-                    $query->select('id', 'propertyName');
-                }]);
-
+            $bookings = BookingOrder::selectRaw("booking_orders.id,booking_orders.resourceTypeId,booking_orders.userId,booking_orders.propertyId,date_format(booking_orders.arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(booking_orders.departureDateTime,'%d %b %Y') as departureDateTime,booking_orders.status,booking_orders.guestFullName as guestName,booking_orders.paymentStatus,booking_orders.price,booking_orders.guestEmail,booking_orders.guestAddress, booking_orders.created_at,date_format(booking_orders.created_at,'%d %b %Y ') as bookedOn")->withAggregate('resourceType', 'name')->whereIn('propertyId', $propertyIds)->with(['property' => function ($query) {
+                $query->select('id', 'propertyName');
+            }]);
             if ($request->search) {
                 $bookings->whereHas('property', function ($query) use ($request) {
                     $query->where('propertyName', 'like', '%' . $request->search . '%');

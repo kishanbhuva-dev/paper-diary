@@ -139,8 +139,8 @@
         isOpenDelete.value = true;
     };
 
-    const handleLoginAsUser = async (id) => {
-        const email = propertLisings.value.find(p => p.id === id)?.ownerEmail;
+    const handleLoginAsUser = async (item) => {
+        const email = item.ownerEmail;
 
         if (!email) {
             console.warn("Admin login attempted without email");
@@ -163,9 +163,9 @@
         localStorage.setItem('adminToken', adminToken);
         localStorage.setItem('adminUser', adminUser);
 
-        router.push({ name: 'owner-dashboard' });
-
-        setTimeout(() => location.reload(), 1000);
+        // router.push({ name: 'owner-dashboard' });
+        // setTimeout(() => location.reload(), 1000);
+        window.location.href = '/owner';
     };
 
     onMounted(() => {
