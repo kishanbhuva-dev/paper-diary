@@ -219,6 +219,7 @@ const tableColumns = [
   { label: "Property", key: "property.propertyName", sortable: true },
   { label: "Resource Type", key: "resource_type_name", sortable: true },
   { label: "Guest Name", key: "guestName", sortable: true },
+  { label: "Guest Email", key: "guestEmail", sortable: true },
   { label: "Check-in", key: "arrivalDateTime", sortable: true },
   { label: "Check-out", key: "departureDateTime", sortable: true },
   { label: "Price", key: "price", sortable: true },
