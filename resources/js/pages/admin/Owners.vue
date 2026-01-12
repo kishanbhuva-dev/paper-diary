@@ -20,6 +20,7 @@
       :showAdd="true"
       :showDownload="true"
       :showEdit="true"
+      :show-view="false"
       adminLoginTitle="Login as Owner"
     />
     <BaseModal
@@ -265,7 +266,6 @@ const handlePerPageChange = (size) => {
 const owners = ref([]);
 
 const tableColumns = [
-  { label: "ID", key: "id" },
   { label: "Name", key: (row) => row?.firstName + " " + row?.lastName },
   { label: "Email", key: "email" },
   { label: "Address", key: "address" },

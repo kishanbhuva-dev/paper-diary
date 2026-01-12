@@ -21,6 +21,7 @@
       :showDownload="true"
       :showEdit="true"
       :adminLogin="true"
+      :show-view="false"
       adminLoginTitle="Login as User"
     />
     <BaseModal
@@ -267,7 +268,6 @@ const handlePerPageChange = (size) => {
 
 
 const tableColumns = [
-  { label: "ID", key: "id", sortable: true },
   { label: "Name", key: (row) => row?.firstName + " " + row?.lastName, sortable: true },
   { label: "Email", key: "email", ssortable: true },
   { label: "Address", key: "address", sortable: true },

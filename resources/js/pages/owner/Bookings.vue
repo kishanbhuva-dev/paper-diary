@@ -213,16 +213,19 @@ const filterConfig = [
   { label: "Guest Name", key: "guestName", type: "text" },
   { label: "Check-in Date", key: "arrivalDateTime", type: "date" },
   { label: "Check-out Date", key: "departureDateTime", type: "date" },
+  { label: "From Now", key: "fromNow", type: "date" },
 ];
 
 const tableColumns = [
   { label: "Property", key: "property.propertyName", sortable: true },
   { label: "Resource Type", key: "resource_type_name", sortable: true },
   { label: "Guest Name", key: "guestName", sortable: true },
+  { label: "Guest Email", key: "guestEmail", sortable: true },
   { label: "Check-in", key: "arrivalDateTime", sortable: true },
   { label: "Check-out", key: "departureDateTime", sortable: true },
   { label: "Price", key: "price", sortable: true },
   { label: "bookedOn", key: "bookedOn", sortable: true },
+  { label: "FROM-NOW", key: "fromNow", sortable: true },
   { label: "Price", key: "price", sortable: true },
   { label: "Status", key: "status", sortable: true },
 ];
