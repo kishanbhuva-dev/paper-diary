@@ -24,6 +24,7 @@ class BookingsController extends Controller
                 booking_orders.status,
                 booking_orders.guestFullName,
                 booking_orders.guestEmail,
+                DATE_FORMAT(booking_orders.created_at, '%d %b %Y') as bookedOn,
                 DATE_FORMAT(booking_orders.arrivalDateTime, '%d-%m-%Y') as arrivalDateTime, 
                 DATE_FORMAT(booking_orders.departureDateTime, '%d-%m-%Y') as departureDateTime, 
                 booking_orders.status, 
@@ -70,6 +71,7 @@ class BookingsController extends Controller
                 'status'            => 'booking_orders.status',
                 'guestFullName'     => 'booking_orders.guestFullName',
                 'guestEmail'        => 'booking_orders.guestEmail',
+                'bookedOn'          => 'booking_orders.created_at',
             ];
 
             $finalSort = $sortMapping[$sortBy] ?? 'booking_orders.id';
@@ -90,6 +92,7 @@ class BookingsController extends Controller
                     'status'            => $booking->status,
                     'guestFullName'     => $booking->guestFullName,
                     'guestEmail'        => $booking->guestEmail,
+                    'bookedOn'          => $booking->bookedOn,
                 ];
             });
 
