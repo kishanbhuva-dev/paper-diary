@@ -9,7 +9,6 @@
 /.idea
 /.nova
 /.phpunit.cache
-/.vscode
 /.zed
 /auth.json
 /node_modules
@@ -29,3 +28,21 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# IDE Helper generated files
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+
+# PHPStan baseline (optional - uncomment if you want to track it)
+# phpstan-baseline.neon
+
+# OS generated files
+*.swp
+*.swo
+*~
+
+# NPM debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

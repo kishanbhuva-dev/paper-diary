@@ -1,0 +1,16 @@
+{
+  "*.{js,mjs,cjs,vue}": [
+    "eslint --max-warnings 0 --fix",
+    "prettier --write"
+  ],
+  "*.{json,md,yaml,yml}": [
+    "prettier --write"
+  ],
+  "*.php": [
+    "php ./vendor/bin/pint --test",
+    "php ./vendor/bin/pint"
+  ],
+  "*.css": [
+    "prettier --write"
+  ]
+}

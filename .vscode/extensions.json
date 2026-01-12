@@ -1,0 +1,35 @@
+{
+  "recommendations": [
+    // Vue & JavaScript
+    "Vue.volar",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    
+    // PHP & Laravel
+    "bmewburn.vscode-intelephense-client",
+    "open-tool.laravel-pint",
+    "shufo.vscode-blade-formatter",
+    "onecentlin.laravel-blade",
+    "amiralizadeh9480.laravel-extra-intellisense",
+    
+    // Tailwind CSS
+    "bradlc.vscode-tailwindcss",
+    
+    // Git
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    
+    // General productivity
+    "EditorConfig.EditorConfig",
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    "Gruntfuggly.todo-tree",
+    
+    // Icons
+    "vscode-icons-team.vscode-icons",
+    "Iconify.iconify"
+  ],
+  "unwantedRecommendations": [
+    "octref.vetur" // Use Volar instead of Vetur for Vue 3
+  ]
+}

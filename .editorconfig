@@ -1,0 +1,46 @@
+# EditorConfig helps maintain consistent coding styles
+# https://editorconfig.org
+
+root = true
+
+# Default settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# JavaScript, Vue, JSON, CSS
+[*.{js,mjs,cjs,vue,json,css,scss,yaml,yml}]
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# PHP files
+[*.php]
+indent_size = 4
+
+# Blade templates
+[*.blade.php]
+indent_size = 4
+
+# Shell scripts
+[*.sh]
+end_of_line = lf
+
+# Windows batch files
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# Makefiles require tabs
+[Makefile]
+indent_style = tab
+
+# Git config
+[.git*]
+indent_size = 4
+indent_style = tab

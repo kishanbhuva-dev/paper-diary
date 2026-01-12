@@ -1,0 +1,52 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    # ═══════════════════════════════════════════════════════════════════════════
+    # STRICT MODE CONFIGURATION
+    # Level 6 is enforced - all type hints and return types must be correct
+    # ═══════════════════════════════════════════════════════════════════════════
+    level: 6
+
+    paths:
+        - app/
+
+    excludePaths:
+        - app/Console/Kernel.php
+        - app/Exceptions/Handler.php
+
+    # Memory limit for analysis
+    memory_limit: 1G
+
+    # Strict type checking
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
+    checkMissingTypehints: true
+
+    # Additional strict rules
+    polluteScopeWithLoopInitialAssignments: false
+    polluteScopeWithAlwaysIterableForeach: false
+    checkAlwaysTrueCheckTypeFunctionCall: true
+    checkAlwaysTrueInstanceof: true
+    checkAlwaysTrueStrictComparison: true
+    checkExplicitMixedMissingReturn: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    reportMaybesInMethodSignatures: true
+    reportStaticMethodSignatures: true
+
+    # Ignore specific errors (minimal - only what's truly necessary)
+    ignoreErrors:
+        # Ignore dynamic property access on models (Laravel magic)
+        - '#Access to an undefined property App\\Models\\[a-zA-Z]+::\$[a-zA-Z_]+#'
+        
+        # Ignore undefined methods on Query Builder (common in Laravel)
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::[a-zA-Z]+\(\)#'
+
+    # Report unmatched ignored errors
+    reportUnmatchedIgnoredErrors: false
+
+    # Parallel processing
+    parallel:
+        maximumNumberOfProcesses: 4

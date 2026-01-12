@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+public/build/
+public/hot
+public/storage
+bootstrap/cache/
+
+# Laravel specific
+storage/
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Package managers
+package-lock.json
+composer.lock
+yarn.lock
+pnpm-lock.yaml
+
+# Other
+*.min.js
+*.min.css
+coverage/
+.phpunit.result.cache
