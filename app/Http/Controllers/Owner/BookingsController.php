@@ -18,9 +18,28 @@ class BookingsController extends Controller
     {
         try {
             $propertyIds = Auth::user()->properties->pluck('id');
-            $bookings = BookingOrder::selectRaw("id,resourceTypeId,userId,propertyId,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime,status,guestFullName as guestName,paymentStatus,price,guestEmail,guestAddress, created_at,date_format(created_at,'%d %b %Y ') as bookedOn")->withAggregate('resourceType', 'name')->whereIn('propertyId', $propertyIds)->with(['property' => function ($query) {
-                $query->select('id', 'propertyName');
-            }]);
+
+            $bookings = BookingOrder::selectRaw("
+    booking_orders.id,
+    booking_orders.resourceTypeId,
+    booking_orders.userId,
+    booking_orders.propertyId,
+    date_format(booking_orders.arrivalDateTime,'%d %b %Y') as arrivalDateTime,
+    date_format(booking_orders.departureDateTime,'%d %b %Y') as departureDateTime,
+    booking_orders.status,
+    booking_orders.guestFullName as guestName,
+    booking_orders.paymentStatus,
+    booking_orders.price,
+    booking_orders.guestEmail,
+    booking_orders.guestAddress,
+    booking_orders.created_at,
+    date_format(booking_orders.created_at,'%d %b %Y ') as bookedOn
+")->withAggregate('resourceType', 'name')
+                ->whereIn('propertyId', $propertyIds)
+                ->with(['property' => function ($query) {
+                    $query->select('id', 'propertyName');
+                }]);
+
             if ($request->search) {
                 $bookings->whereHas('property', function ($query) use ($request) {
                     $query->where('propertyName', 'like', '%' . $request->search . '%');
@@ -59,14 +78,13 @@ class BookingsController extends Controller
             }
 
 
-            if ($request->checkInDate && $request->checkOutDate) {
-                $startDate = Carbon::parse($request->checkInDate)->startOfDay();
-                $endDate   = Carbon::parse($request->checkOutDate)->endOfDay();
 
-                $bookings->where(function ($query) use ($startDate, $endDate) {
-                    $query->where('arrivalDateTime', '<=', $endDate)
-                        ->where('departureDateTime', '>=', $startDate);
-                });
+            if ($request->arrivalDateTime && $request->departureDateTime) {
+
+                $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
+                $endDate   = Carbon::parse($request->departureDateTime)->endOfDay();
+
+                $bookings->whereBetween('arrivalDateTime', [$startDate, $endDate]);
             }
 
             if ($request->status && $request->status !== 'all') {
@@ -89,30 +107,66 @@ class BookingsController extends Controller
                 }
             }
 
+            if ($request->fromNow) {
+
+                $now = Carbon::now();
+
+                switch ($request->fromNow) {
+
+                    case 'hour':
+                        $from = $now->copy()->subHour();
+                        $bookings->whereBetween([$from, $now]);
+                        break;
+
+                    case 'today':
+                        $from = Carbon::today();
+                        $bookings->whereBetween([$from, $now]);
+                        break;
+
+                    case 'week':
+                        $from = $now->copy()->startOfWeek();
+                        $bookings->whereBetween([$from, $now]);
+                        break;
+
+                    case 'month':
+                        $from = $now->copy()->startOfMonth();
+                        $bookings->whereBetween([$from, $now]);
+                        break;
+
+                    case 'year':
+                        $from = $now->copy()->startOfYear();
+                        $bookings->whereBetween([$from, $now]);
+                        break;
+                }
+
+                $bookings->orderBy('created_at', 'desc');
+            }
+
+
+
+
             $bookings->with(['user' => function ($query) {
                 $query->select('id', 'firstName', 'lastName', 'email');
             }, 'resourceType.resources' => function ($query) {
                 $query->select('id', 'resourceTypeId', 'name');
             }]);
-            $perPage = $request->perPage ?? 10; 
-            $sortBy = $request->sortBy ?? 'id';
-            $sortOrder = $request->sortOrder ?? 'desc';
             $perPage = $request->perPage ?? 10;
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'desc';
 
-
             if ($sortBy === 'propertyName') {
                 $bookings->join('property', 'property.id', '=', 'booking_orders.propertyId')
-                    ->orderBy('property.propertyName', $sortOrder)
-                    ->select('booking_orders.*');
+                    ->orderBy('property.propertyName', $sortOrder);
             } else {
-                $bookings->orderBy($sortBy, $sortOrder);
+                $bookings->orderBy('booking_orders.' . $sortBy, $sortOrder);
             }
+
 
 
             $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
             $bookings->getCollection()->transform(function ($booking) {
+
+                $booking->fromNow = carbon::parse($booking->created_at)->diffForHumans();
 
 
                 return $booking;
