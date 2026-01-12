@@ -21,7 +21,9 @@ class BookingsController extends Controller
                 booking_orders.propertyId, 
                 booking_orders.resourceTypeId, 
                 booking_orders.userId, 
-                booking_orders.status, 
+                booking_orders.status,
+                booking_orders.guestFullName,
+                booking_orders.guestEmail,
                 DATE_FORMAT(booking_orders.arrivalDateTime, '%d-%m-%Y') as arrivalDateTime, 
                 DATE_FORMAT(booking_orders.departureDateTime, '%d-%m-%Y') as departureDateTime, 
                 COALESCE(property.propertyName, 'N/A') as propertyName, 
@@ -62,7 +64,9 @@ class BookingsController extends Controller
                 'ownerEmail'        => 'users.email',
                 'arrivalDateTime'   => 'booking_orders.arrivalDateTime',
                 'departureDateTime' => 'booking_orders.departureDateTime',
-                'status'            => 'booking_orders.status'
+                'status'            => 'booking_orders.status',
+                'guestFullName'     => 'booking_orders.guestFullName',
+                'guestEmail'        => 'booking_orders.guestEmail',
             ];
 
             $finalSort = $sortMapping[$sortBy] ?? 'booking_orders.id';
@@ -81,6 +85,8 @@ class BookingsController extends Controller
                     'arrivalDateTime'   => $booking->arrivalDateTime,
                     'departureDateTime' => $booking->departureDateTime,
                     'status'            => $booking->status,
+                    'guestFullName'     => $booking->guestFullName,
+                    'guestEmail'        => $booking->guestEmail,
                 ];
             });
 
