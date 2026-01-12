@@ -1,168 +1,226 @@
 # Contributing Guidelines
 
-Welcome to the Paper Diary project! This document outlines the **mandatory** development practices
-all contributors must follow.
+Welcome to the Paper Diary project! This document outlines the **mandatory** development practices all contributors must follow.
 
-## ⚠️ MANDATORY SETUP
+## ⚠️ MANDATORY SETUP (All Platforms)
 
-**Before you write ANY code, you MUST complete these steps:**
+**Works on: Windows, macOS, Ubuntu/Linux**
 
 ```bash
-# 1. Install PHP dependencies
+# 1. Clone the repository
+git clone <repository-url>
+cd paper-diary
+
+# 2. Install PHP dependencies
 composer install
 
-# 2. Install Node.js dependencies (this auto-installs git hooks)
+# 3. Install Node.js dependencies (auto-installs git hooks)
 npm install
 
-# 3. Verify hooks are installed
-ls .husky/  # Should show: pre-commit, commit-msg
+# 4. Verify hooks are installed
+ls .husky/  # Should show: pre-commit, pre-push, commit-msg
 ```
 
 > **❌ No exceptions.** Pull requests from developers who bypass these checks will be rejected.
 
 ---
 
-## 🔒 Enforced Quality Standards
+## 🔒 Branch Protection
 
-### Pre-Commit Hooks (Automatic)
+### Protected Branches
+- `main` - Production code
+- `master` - Production code (legacy)
+- `develop` - Development branch
 
-Every commit is automatically checked for:
+### What's Blocked
 
-| Check                  | Tool         | Strictness                |
-| ---------------------- | ------------ | ------------------------- |
-| JavaScript/Vue linting | ESLint       | Zero warnings allowed     |
-| Code formatting        | Prettier     | Must pass                 |
-| PHP code style         | Laravel Pint | Must pass                 |
-| Commit message format  | Commitlint   | Conventional commits only |
+| Action | Blocked? |
+|--------|----------|
+| Commit directly to `main` | ❌ **Yes** |
+| Push directly to `main` | ❌ **Yes** |
+| Commit to feature branch | ✅ Allowed (after lint passes) |
+| Push to feature branch | ✅ Allowed |
 
-**These hooks CANNOT be disabled.** If your code doesn't pass, you cannot commit.
+### Required Workflow
 
-### Continuous Integration (Backup Enforcement)
+```bash
+# 1. Create a feature branch from develop
+git checkout develop
+git pull origin develop
+git checkout -b feat/your-feature-name
 
-Even if someone attempts to bypass local hooks, CI will catch it:
+# 2. Make changes and commit
+git add .
+git commit -m "feat(scope): description"
 
-- ❌ PRs with lint errors are **auto-blocked**
-- ❌ PRs with formatting issues are **auto-blocked**
-- ❌ PRs that fail PHPStan are **auto-blocked**
-- ❌ PRs with failing tests are **auto-blocked**
+# 3. Push your feature branch
+git push origin feat/your-feature-name
+
+# 4. Create Pull Request on GitHub/GitLab
+#    - Target: develop (for features) or main (for releases)
+#    - Require at least 1 code review
+#    - CI must pass
+
+# 5. Merge via web interface (not command line)
+```
+
+---
+
+## 🛡️ Enforced Quality Standards
+
+### Pre-Commit Checks (Automatic)
+
+Every commit attempt runs these checks on **ALL files**:
+
+| Check | Tool | Rule |
+|-------|------|------|
+| Branch protection | Node script | Cannot commit to main/master/develop |
+| JavaScript/Vue linting | ESLint | Zero errors, zero warnings |
+| Code formatting | Prettier | Must match config |
+
+### Pre-Push Checks (Automatic)
+
+| Check | Rule |
+|-------|------|
+| Branch protection | Cannot push to main/master |
+
+### Commit Message (Automatic)
+
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <description>
+```
 
 ---
 
 ## 📝 Commit Message Format
 
-All commits **MUST** follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer]
-```
-
 ### Allowed Types
 
-| Type       | When to Use                 |
-| ---------- | --------------------------- |
-| `feat`     | New feature                 |
-| `fix`      | Bug fix                     |
-| `docs`     | Documentation only          |
-| `style`    | Formatting, no logic change |
-| `refactor` | Code restructuring          |
-| `perf`     | Performance improvement     |
-| `test`     | Adding/updating tests       |
-| `build`    | Build system changes        |
-| `ci`       | CI/CD changes               |
-| `chore`    | Maintenance                 |
+| Type | When to Use |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `style` | Formatting, no logic change |
+| `refactor` | Code restructuring |
+| `perf` | Performance improvement |
+| `test` | Adding/updating tests |
+| `build` | Build system changes |
+| `ci` | CI/CD changes |
+| `chore` | Maintenance |
 
 ### Examples
 
 ```bash
 # ✅ GOOD
-git commit -m "feat(booking): add date validation"
-git commit -m "fix(auth): correct token refresh logic"
+git commit -m "feat(auth): add password reset"
+git commit -m "fix(booking): correct date validation"
 git commit -m "docs: update API documentation"
 
 # ❌ BAD - Will be rejected
 git commit -m "fixed stuff"
 git commit -m "WIP"
 git commit -m "updates"
-```
 
-### Interactive Commits (Recommended)
-
-Use the interactive tool to ensure correct format:
-
-```bash
+# 💡 Use interactive commit (recommended)
 npm run commit
 ```
 
 ---
 
-## 🚫 What Will Get Your PR Rejected
+## 🚫 What Will Block Your Work
 
-1. **Any ESLint errors or warnings** - Zero tolerance
-2. **Unformatted code** - Must pass Prettier
-3. **PHP code style violations** - Must pass Pint
-4. **Non-conventional commit messages**
-5. **console.log() statements** - Remove before committing
-6. **debugger statements**
-7. **Unused variables or imports**
+### Commit Blocked
+
+1. **On protected branch** (main, master, develop)
+2. **Any ESLint errors** - Zero tolerance
+3. **Any ESLint warnings** - Zero tolerance
+4. **Prettier formatting issues**
+5. **Invalid commit message format**
+
+### Push Blocked
+
+1. **Pushing to main or master** - Use Pull Requests
+
+### PR Blocked (CI)
+
+1. **Lint failures**
+2. **Format check failures**
+3. **PHP style violations**
+4. **PHPStan errors**
+5. **Test failures**
 
 ---
 
 ## 🛠️ Quick Fix Commands
 
-If your commit is blocked, use these commands:
-
 ```bash
-# Fix JavaScript/Vue issues automatically
+# Fix JavaScript/Vue issues
 npm run lint:fix
 
 # Format all files
 npm run format
 
+# Check everything before committing
+npm run quality
+
 # Fix PHP code style
 composer lint:fix
 
-# Check everything before committing
-npm run quality && composer quality
+# Interactive commit (ensures correct format)
+npm run commit
 ```
 
 ---
 
 ## 🔄 Development Workflow
 
-1. **Create a feature branch**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         main                                 │
+│  (protected - no direct commits/pushes)                     │
+└──────────────────────────▲──────────────────────────────────┘
+                           │ Pull Request (reviewed)
+┌──────────────────────────┴──────────────────────────────────┐
+│                        develop                               │
+│  (protected - no direct commits)                            │
+└──────────────────────────▲──────────────────────────────────┘
+                           │ Pull Request (reviewed)
+┌──────────────────────────┴──────────────────────────────────┐
+│                   feat/your-feature                          │
+│  (you work here)                                            │
+└─────────────────────────────────────────────────────────────┘
+```
 
-   ```bash
-   git checkout -b feat/your-feature-name
-   ```
+---
 
-2. **Make your changes**
+## 💻 Cross-Platform Notes
 
-3. **Verify quality locally**
+### Windows
+- Git hooks work via Node.js (cross-platform)
+- Use PowerShell or Git Bash
+- Line endings are auto-normalized (see `.gitattributes`)
 
-   ```bash
-   npm run quality
-   composer quality
-   ```
+### macOS / Linux
+- Git hooks work natively
+- Use Terminal or any shell
 
-4. **Commit with conventional message**
+### Common Issues
 
-   ```bash
-   npm run commit
-   # OR
-   git commit -m "feat(scope): description"
-   ```
+**"Permission denied" on Mac/Linux:**
+```bash
+chmod +x .husky/*
+chmod +x scripts/*.js
+```
 
-5. **Push and create PR**
-
-   ```bash
-   git push origin feat/your-feature-name
-   ```
-
-6. **Wait for CI to pass** - PRs cannot be merged until all checks pass
+**Hooks not running:**
+```bash
+# Reinstall Husky
+rm -rf .husky/_
+npm run prepare
+```
 
 ---
 
@@ -170,36 +228,25 @@ npm run quality && composer quality
 
 ### "Can I bypass the hooks with `--no-verify`?"
 
-**No.** While Git allows this flag, CI will catch any violations. Your PR will be rejected, and
-you'll have to fix everything anyway. Save yourself time—fix issues before committing.
+**No.** While Git allows this flag, CI will catch any violations. Your PR will be rejected.
 
-### "The hooks are too strict!"
+### "I need to commit to main for an emergency fix!"
 
-They're strict by design. Clean, consistent code is a non-negotiable requirement for this project.
-The few extra minutes spent fixing lint errors prevents hours of debugging later.
+Contact the team lead. Emergency fixes should still go through a fast-tracked PR with at least one reviewer.
 
-### "I have a legitimate console.log for debugging"
+### "The linter is too strict!"
 
-Use the proper logging utilities or browser dev tools. If you absolutely need console output
-temporarily, use this pattern (but remove before committing):
+It's strict by design. Run `npm run lint:fix` to auto-fix most issues.
 
-```javascript
-// eslint-disable-next-line no-console
-console.log('Temporary debug - DO NOT COMMIT');
-```
+### "I have legacy code with errors"
 
-### "PHPStan is complaining about something that works fine"
-
-Add type hints to your code. PHPStan level 6 requires proper typing. This catches bugs before they
-reach production.
+Fix them. The team decided to enforce quality standards. Use `npm run lint:fix` to auto-fix ~450 errors automatically.
 
 ---
 
 ## 📞 Getting Help
 
-If you're stuck:
-
-1. Check the error messages carefully—they're usually descriptive
-2. Run `npm run lint` or `composer analyse` to see all issues
+1. Check error messages - they're descriptive
+2. Run `npm run lint` to see all issues
 3. Ask in the team Slack channel
-4. Check existing code for examples of correct patterns
+4. Check this guide's examples
