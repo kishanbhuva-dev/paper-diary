@@ -72,11 +72,25 @@ git push origin feat/your-feature-name
 
 Every commit attempt runs these checks on **ALL files**:
 
+#### Frontend Checks
+
+| Check | Tool | Rule |
+|-------|------|------|
+| JavaScript/Vue linting | ESLint | Zero errors, zero warnings |
+| Code formatting | Prettier | Must match config |
+
+#### Backend Checks
+
+| Check | Tool | Rule |
+|-------|------|------|
+| PHP code style | Laravel Pint | Must pass style check |
+| Static analysis | PHPStan (Level 6) | Zero errors allowed |
+
+#### Branch Protection
+
 | Check | Tool | Rule |
 |-------|------|------|
 | Branch protection | Node script | Cannot commit to main/master/develop |
-| JavaScript/Vue linting | ESLint | Zero errors, zero warnings |
-| Code formatting | Prettier | Must match config |
 
 ### Pre-Push Checks (Automatic)
 
@@ -138,7 +152,9 @@ npm run commit
 2. **Any ESLint errors** - Zero tolerance
 3. **Any ESLint warnings** - Zero tolerance
 4. **Prettier formatting issues**
-5. **Invalid commit message format**
+5. **Laravel Pint style violations** - PHP code style must pass
+6. **PHPStan errors** - Static analysis must pass (Level 6)
+7. **Invalid commit message format**
 
 ### Push Blocked
 
@@ -156,18 +172,41 @@ npm run commit
 
 ## 🛠️ Quick Fix Commands
 
+### Frontend
+
 ```bash
-# Fix JavaScript/Vue issues
+# Fix JavaScript/Vue linting issues
 npm run lint:fix
 
-# Format all files
+# Format all frontend files
 npm run format
 
-# Check everything before committing
+# Check frontend quality
 npm run quality
+```
 
-# Fix PHP code style
+### Backend
+
+```bash
+# Fix PHP code style (Laravel Pint)
 composer lint:fix
+
+# Run PHP static analysis (PHPStan)
+composer analyse
+
+# Run all backend quality checks
+composer quality
+
+# Auto-fix backend issues
+composer quality:fix
+```
+
+### Full Stack
+
+```bash
+# Check everything (frontend + backend)
+npm run quality && composer quality
+```
 
 # Interactive commit (ensures correct format)
 npm run commit
