@@ -273,8 +273,8 @@ const tableColumns = [
   { label: "Role", key: "role" },
 ];
 
-const handleLoginAsUser = async (id) => {
-  const email = owners.value.find(p => p.id === id)?.email;
+const handleLoginAsUser = async (item) => {
+      const email = item.email;
 
   if (!email) {
       console.warn("Admin login attempted without email");
@@ -298,8 +298,9 @@ const handleLoginAsUser = async (id) => {
   localStorage.setItem('adminToken', adminToken);
   localStorage.setItem('adminUser', adminUser);
 
-  router.push({ name: 'owner-dashboard' });
-  setTimeout(() => location.reload(), 1000);
+  // router.push({ name: 'owner-dashboard' });
+  // setTimeout(() => location.reload(), 1000);
+   window.location.href = '/owner';
 };
 
 onMounted(() => {

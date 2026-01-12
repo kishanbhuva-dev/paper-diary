@@ -275,8 +275,8 @@ const tableColumns = [
   { label: "Role", key: "role", sortable: true },
 ];
 
-const handleLoginAsUser = async (id) => {
-      const email = users.value.find(p => p.id === id)?.email;
+const handleLoginAsUser = async (item) => {
+      const email = item.email;
 
       if (!email) {
           console.warn("Admin login attempted without email");
