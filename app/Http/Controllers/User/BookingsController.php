@@ -204,8 +204,8 @@ class BookingsController extends Controller
             if (isset($request->children)) {
                 $booking->children = $request->children;
             }
-            $booking->price = $resourcePriceTotal;
-            $booking->cost = $resourcePriceTotal;
+            $booking->price = $request->cost;
+            $booking->cost = $request->price;
             $booking->userId = Auth::user()->id;
             if (isset($request->status)) {
                 $booking->status = $request->status;
@@ -324,7 +324,9 @@ class BookingsController extends Controller
                 ->with(['resourceTypes.resources' => function($query) {
                     $query->select('id','name','customPrice','status')->where('status',1);
                 }])->first(); 
-
+            if (!$property && $request->booking=='confirm') { 
+                return response()->json(['status' => false, 'message' => 'You cannot book this resource,Because this resource type already booked', 'data' => []], 404); 
+            } 
             if (!$property) { 
                 return response()->json(['status' => false, 'message' => 'Property not found', 'data' => []], 404); 
             } 

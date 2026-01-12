@@ -84,8 +84,27 @@ export function useAuth() {
     } else {
       routeName = "home";
     }
+    const urlParams= new URLSearchParams(window.location.search);
+    const redirectPath = urlParams.get('redirect');
 
-    routerInstance.push({ name: routeName });
+    if (redirectPath) {
+      routerInstance.push(redirectPath);
+      
+    } else{
+
+      const role = res.data.user.role?.toLowerCase();
+      let routeName;
+      
+      if (role === "owner") {
+        routeName = res.data.subscription ? "owner-dashboard" : "subscription";
+      } else if (role === "admin") {
+        routeName = "admin-dashboard";
+      } else {
+        routeName = "home";
+      }
+      
+      routerInstance.push({ name: routeName });
+    }
 
     return { success: true, data: res.data };
   }
