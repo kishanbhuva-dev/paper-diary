@@ -76,9 +76,9 @@
           class="space-y-1"
         >
           <button
-            @click="settingsOpen = !settingsOpen"
             class="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 text-gray-700 hover:bg-blue-50"
             :class="{ 'bg-blue-50/50': isSystemRouteActive }"
+            @click="settingsOpen = !settingsOpen"
           >
             <div
               class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
@@ -142,12 +142,11 @@
 
           <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
             <component
-              v-for="subItem in group.children"
-              :key="subItem.name"
               :is="subItem.to ? 'router-link' : 'button'"
+              v-for="subItem in group.children"
               v-show="!subItem.show || subItem.show.value"
+              :key="subItem.name"
               :to="subItem.to"
-              @click="subItem.onClick && subItem.onClick()"
               class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
               :class="{
                 'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
@@ -155,6 +154,7 @@
                 'text-gray-700 hover:bg-blue-50':
                   $route.name !== subItem.name,
               }"
+              @click="subItem.onClick && subItem.onClick()"
             >
               <Icon
                 :icon="subItem.icon"
@@ -284,11 +284,9 @@ const systemMenuItems = [
   },
 ];
 
-const isSystemRouteActive = computed(() => {
-  return systemMenuItems.some((group) =>
+const isSystemRouteActive = computed(() => systemMenuItems.some((group) =>
     group.children.some((child) => child.name === route.name)
-  );
-});
+  ));
 
 
 function backToAdmin() {
@@ -319,7 +317,7 @@ onMounted(() => {
 });
 
 function closeOnMobile() {
-  if (window.innerWidth < 1024) sidebarOpen.value = false;
+  if (window.innerWidth < 1024) {sidebarOpen.value = false;}
 }
 
 const handleLogout = async () => {

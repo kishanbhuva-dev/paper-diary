@@ -5,11 +5,11 @@
       Register now to access your Paper Diary account.
     </p>
 
-    <form @submit.prevent="handleRegister" class="grid grid-cols-2 gap-5">
+    <form class="grid grid-cols-2 gap-5" @submit.prevent="handleRegister">
       <BaseInput
         ref="firstNameInput"
-        label="First Name"
         v-model="form.firstName"
+        label="First Name"
         width="full"
         required
         icon="lucide:user"
@@ -17,8 +17,8 @@
       />
       <BaseInput
         ref="lastNameInput"
-        label="Last Name"
         v-model="form.lastName"
+        label="Last Name"
         width="full"
         required
         icon="lucide:user"
@@ -26,8 +26,8 @@
       />
       <BaseInput
         ref="emailInput"
-        label="Your Email"
         v-model="form.email"
+        label="Your Email"
         type="email"
         autocomplete="email"
         width="full"
@@ -59,34 +59,34 @@
       </div>
       <BaseInput
         ref="passwordInput"
-        label="Password"
         v-model="form.password"
+        label="Password"
         type="password"
         autocomplete="new-password"
         width="full"
         required
-        :minLength="6"
+        :min-length="6"
         icon="lucide:lock"
         placeholder="••••••••"
       />
       <BaseInput
         ref="confirmPasswordInput"
-        label="Confirm Password"
         v-model="form.confirm_password"
+        label="Confirm Password"
         type="password"
         autocomplete="new-password"
         width="full"
         required
         :pattern="new RegExp(`^${form.password}$`)"
-        customError="Passwords do not match."
+        custom-error="Passwords do not match."
         icon="lucide:lock"
         placeholder="••••••••"
       />
 
       <BaseInput
         ref="addressInput"
-        label="Address"
         v-model="form.address"
+        label="Address"
         width="full"
         required
         class="col-span-2"
@@ -94,8 +94,8 @@
         placeholder="123 Main St"
       />
       <BaseInput
-        label="Address 2"
         v-model="form.address2"
+        label="Address 2"
         width="full"
         class="col-span-2"
         icon="lucide:map-pin"
@@ -103,8 +103,8 @@
       />
       <BaseInput
         ref="cityInput"
-        label="City"
         v-model="form.city"
+        label="City"
         width="full"
         required
         icon="mdi:city"
@@ -112,8 +112,8 @@
       />
       <BaseInput
         ref="countryInput"
-        label="Country"
         v-model="form.country"
+        label="Country"
         width="full"
         required
         icon="lucide:globe"
@@ -121,8 +121,8 @@
       />
       <BaseInput
         ref="postcodeInput"
-        label="Postcode"
         v-model="form.postcode"
+        label="Postcode"
         width="full"
         required
         class="col-span-2"
@@ -131,8 +131,8 @@
       />
       <BaseInput
         ref="phoneInput"
-        label="Phone"
         v-model="form.phone"
+        label="Phone"
         type="phone"
         width="full"
         required
@@ -141,8 +141,8 @@
       />
       <BaseInput
         ref="telephoneInput"
-        label="telephone"
         v-model="form.telephone"
+        label="telephone"
         type="phone"
         width="full"
         icon="lucide:phone"

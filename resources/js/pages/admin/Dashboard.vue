@@ -17,7 +17,8 @@
 
     <!-- Main Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div v-for="(stat, index) in mainStats" :key="index"
+      <div
+v-for="(stat, index) in mainStats" :key="index"
         class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
         <div class="flex items-center justify-between">
           <div>
@@ -93,7 +94,8 @@
             <h3 class="text-sm font-semibold text-gray-900">Revenue Trend</h3>
             <div class="bg-gray-50 rounded-lg p-3">
               <div class="flex items-end space-x-1 h-24">
-                <div v-for="(day, index) in dashboardDetail?.details?.revenue?.trend7Days || []" :key="index"
+                <div
+v-for="(day, index) in dashboardDetail?.details?.revenue?.trend7Days || []" :key="index"
                   class="flex-1 bg-blue-500 rounded-t"
                   :style="{ height: getChartHeight(day.amount, maxRevenue) + '%' }"></div>
               </div>
@@ -251,7 +253,7 @@ const dashboardData = async () => {
 }
 
 const formatCurrency = amount => {
-  if (!amount) return '0.00';
+  if (!amount) {return '0.00';}
   return parseFloat(amount).toLocaleString('en-GB', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -259,7 +261,7 @@ const formatCurrency = amount => {
 };
 
 const getChartHeight = (value, max) => {
-  if (!value || !max) return 0;
+  if (!value || !max) {return 0;}
   return Math.max((value / max) * 100, 5);
 };
 

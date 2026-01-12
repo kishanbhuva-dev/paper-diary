@@ -18,7 +18,7 @@ library.add(fas, far, fab)
 // createApp(App).use(router).mount("#app");
 const app = createApp(App);
 app.component("Icon", Icon);
-app.component('font-awesome-icon', FontAwesomeIcon);
+app.component('FontAwesomeIcon', FontAwesomeIcon);
 app.use(router);
 
 app.mount("#app");

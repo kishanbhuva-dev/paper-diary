@@ -18,12 +18,10 @@ const formatValidationErrors = (errors) => {
   return messages.join("\n");
 };
 
-const isValidationError = (error) => {
-  return (
+const isValidationError = (error) => (
     error?.response?.data?.message === "Validation failed" &&
     error?.response?.data?.errors &&
     typeof error?.response?.data?.errors === "object"
   );
-};
 
 export { formatValidationErrors, isValidationError };

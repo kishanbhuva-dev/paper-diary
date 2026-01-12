@@ -29,20 +29,20 @@
       :server-side="true"
       :per-page="perPage"
       :available-filters="filterConfig"
+      :show-delete="false"
+      :show-edit="false"
+      :show-search="true"
       @filter-change="handleFilterChange"
+      :show-add="false"
       @search="handleSearch"
+      :show-download="true"
       @page-change="handlePageChange"
+      :admin-login="false"
       @per-page-change="handlePerPageChange"
       @sort="handleSort"
       @open-edit-modal="openEditModal"
       @view="showbookingdata"
       @delete="confirmDelete"
-      :showDelete="false"
-      :show-edit="false"
-      :show-search="true"
-      :showAdd="false"
-      :showDownload="true"
-      :admin-login="false"
     />
   </div>
 
@@ -101,8 +101,8 @@
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Arrival Date</label>
           <input 
-            type="date"
-            v-model="editableDates.arrival" 
+            v-model="editableDates.arrival"
+            type="date" 
             :disabled="!isEditMode"
             class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
           />
@@ -110,8 +110,8 @@
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Departure Date</label>
           <input 
-            type="date"
-            v-model="editableDates.departure" 
+            v-model="editableDates.departure"
+            type="date" 
             :disabled="!isEditMode"
             class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
           />
@@ -147,8 +147,8 @@
 
       <div v-if="!isEditMode && selectedBooking.status === 'confirm'" class="pt-4 border-t border-gray-100">
         <button 
-          @click="confirmDelete(selectedBooking.id)"
           class="flex items-center text-red-600 font-bold text-sm hover:underline cursor-pointer group"
+          @click="confirmDelete(selectedBooking.id)"
         >
           <Icon icon="mdi:calendar-remove" class="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
           Cancel This Booking
@@ -159,7 +159,7 @@
 
   <ConfirmModal
     v-model="isConfirmationModalVisible"
-    :title="'Cancel Booking'"
+    title="Cancel Booking"
     :message="`Are you sure you want to cancel booking ID: ${bookingIdToDelete}?`"
     @confirm="handleDeleteConfirmation"
   />

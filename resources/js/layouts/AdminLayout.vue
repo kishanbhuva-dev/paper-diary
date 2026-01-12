@@ -9,7 +9,8 @@
       <img src="/public/main_logo.png" class="h-10" alt="Logo" />
     </div>
 
-    <aside :class="[
+    <aside
+:class="[
       'fixed lg:static top-0 left-0 h-full w-64 z-50 backdrop-blur-xl bg-white/70 shadow-2xl lg:shadow-xl transition-all duration-300',
       sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]">
@@ -23,16 +24,19 @@
         </div>
 
         <div v-for="item in menuItems" :key="item.label">
-          <router-link :to="item.to"
+          <router-link
+:to="item.to"
             class="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200"
             :class="{
               'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
                 $route.path === item.to,
               'text-gray-700 hover:bg-blue-50': $route.path !== item.to,
             }" @click="closeOnMobile">
-            <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200"
+            <div
+class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200"
               :class="$route.path === item.to ? 'bg-white/20' : 'bg-blue-100'">
-              <Icon :icon="item.icon" width="18" :class="$route.path === item.to ? 'text-white' : 'text-blue-600'
+              <Icon
+:icon="item.icon" width="18" :class="$route.path === item.to ? 'text-white' : 'text-blue-600'
                 " />
             </div>
             {{ item.label }}
@@ -41,10 +45,12 @@
 
 
         <div class="space-y-1">
-          <button @click="propertyOpen = !propertyOpen"
-            class="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 text-gray-700 hover:bg-blue-50"
-            :class="{ 'bg-blue-50/50': isPropertyMenuActive }">
-            <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors" :class="isPropertyMenuActive
+          <button
+class="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 text-gray-700 hover:bg-blue-50"
+            :class="{ 'bg-blue-50/50': isPropertyMenuActive }"
+            @click="propertyOpen = !propertyOpen">
+            <div
+class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors" :class="isPropertyMenuActive
               ? 'bg-blue-600 text-white'
               : 'bg-blue-100 text-blue-600'
               ">
@@ -53,20 +59,23 @@
             <span class="flex-1 text-left" :class="{ 'text-blue-600': isPropertyMenuActive }">
               Properties
             </span>
-            <Icon icon="mdi:chevron-down" class="transition-transform duration-200" :class="[
+            <Icon
+icon="mdi:chevron-down" class="transition-transform duration-200" :class="[
               { 'rotate-180': propertyOpen },
               isPropertyMenuActive ? 'text-blue-600' : 'text-gray-400',
             ]" />
           </button>
 
           <div v-show="propertyOpen" class="pl-12 space-y-1 mt-1">
-            <router-link v-for="subItem in propertyMenu" :key="subItem.label" :to="subItem.to"
+            <router-link
+v-for="subItem in propertyMenu" :key="subItem.label" :to="subItem.to"
               class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200" :class="{
                 'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
                   $route.path === subItem.to,
                 'text-gray-700 hover:bg-blue-50': $route.path !== subItem.to,
               }" @click="closeOnMobile">
-              <Icon :icon="subItem.icon" width="16" :class="$route.path === subItem.to ? 'text-white' : 'text-blue-600'
+              <Icon
+:icon="subItem.icon" width="16" :class="$route.path === subItem.to ? 'text-white' : 'text-blue-600'
                 " />
               {{ subItem.label }}
             </router-link>
@@ -79,14 +88,16 @@
         </div>
 
         <div v-for="mg in manageMenu" :key="mg.label">
-          <router-link :to="mg.to"
+          <router-link
+:to="mg.to"
             class="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200"
             :class="{
               'bg-blue-600 text-white shadow-lg shadow-blue-500/50':
                 $route.path === mg.to,
               'text-gray-700 hover:bg-blue-50': $route.path !== mg.to,
             }" @click="closeOnMobile">
-            <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200"
+            <div
+class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200"
               :class="$route.path === mg.to ? 'bg-white/20' : 'bg-blue-100'">
               <Icon :icon="mg.icon" width="18" :class="$route.path === mg.to ? 'text-white' : 'text-blue-600'" />
             </div>
@@ -95,10 +106,12 @@
         </div>
 
         <div class="space-y-1">
-          <button @click="settingsOpen = !settingsOpen"
-            class="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 text-gray-700 hover:bg-blue-50"
-            :class="{ 'bg-blue-50/50': isSystemRouteActive }">
-            <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors" :class="isSystemRouteActive
+          <button
+class="w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200 text-gray-700 hover:bg-blue-50"
+            :class="{ 'bg-blue-50/50': isSystemRouteActive }"
+            @click="settingsOpen = !settingsOpen">
+            <div
+class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors" :class="isSystemRouteActive
               ? 'bg-blue-600 text-white'
               : 'bg-blue-100 text-blue-600'
               ">
@@ -107,20 +120,23 @@
             <span class="flex-1 text-left" :class="{ 'text-blue-600': isSystemRouteActive }">
               Settings
             </span>
-            <Icon icon="mdi:chevron-down" class="transition-transform duration-200" :class="[
+            <Icon
+icon="mdi:chevron-down" class="transition-transform duration-200" :class="[
               { 'rotate-180': settingsOpen },
               isSystemRouteActive ? 'text-blue-600' : 'text-gray-400',
             ]" />
           </button>
 
           <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
-            <router-link v-for="subItem in systemMenuItems" :key="subItem.label" :to="subItem.to"
+            <router-link
+v-for="subItem in systemMenuItems" :key="subItem.label" :to="subItem.to"
               class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200" :class="{
                 'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
                   $route.path === subItem.to,
                 'text-gray-700 hover:bg-blue-50': $route.path !== subItem.to,
               }" @click="closeOnMobile">
-              <Icon :icon="subItem.icon" width="16" :class="$route.path === subItem.to ? 'text-white' : 'text-blue-600'
+              <Icon
+:icon="subItem.icon" width="16" :class="$route.path === subItem.to ? 'text-white' : 'text-blue-600'
                 " />
               {{ subItem.label }}
             </router-link>
@@ -146,7 +162,8 @@
           <button
             class="p-2 rounded-xl text-gray-400 hover:bg-red-100 hover:text-red-600 transition duration-150 group cursor-pointer ml-auto"
             title="Logout" @click="handleLogout">
-            <Icon icon="heroicons:arrow-right-on-rectangle" width="20"
+            <Icon
+icon="heroicons:arrow-right-on-rectangle" width="20"
               class="group-hover:scale-105 transition-transform" />
           </button>
         </div>
@@ -169,7 +186,7 @@ const { logout, user } = useAuth();
 const route = useRoute();
 
 const userData = computed(() => ({
-  username: user.value?.firstName + " " + user.value?.lastName ?? "",
+  username: `${user.value?.firstName  } ${  user.value?.lastName}` ?? "",
   email: user.value?.email ?? "",
 }));
 
@@ -216,13 +233,9 @@ const systemMenuItems = [
   },
 ];
 
-const isSystemRouteActive = computed(() => {
-  return systemMenuItems.some((item) => item.to === route.path);
-});
+const isSystemRouteActive = computed(() => systemMenuItems.some((item) => item.to === route.path));
 
-const isPropertyMenuActive = computed(() => {
-  return propertyMenu.some((item) => item.to === route.path);
-});
+const isPropertyMenuActive = computed(() => propertyMenu.some((item) => item.to === route.path));
 
 onMounted(() => {
   if (isSystemRouteActive.value) {
@@ -235,7 +248,7 @@ onMounted(() => {
 });
 
 function closeOnMobile() {
-  if (window.innerWidth < 1024) sidebarOpen.value = false;
+  if (window.innerWidth < 1024) {sidebarOpen.value = false;}
 }
 
 const handleLogout = async () => {

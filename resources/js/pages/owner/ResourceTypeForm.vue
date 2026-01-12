@@ -26,8 +26,8 @@
 
       <button
         type="button"
-        @click="addType"
         class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors group"
+        @click="addType"
       >
         <Icon
           icon="mdi:plus-circle"
@@ -47,45 +47,45 @@
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
             <div class="md:col-span-5">
               <BaseInput
+                :ref="setInputRef"
                 v-model="type.name"
                 label="Resource Type Name"
                 width="full"
                 placeholder="e.g. Deluxe Suite"
-                :ref="setInputRef"
               />
             </div>
 
             <div class="md:col-span-3">
               <BaseInput
+                :ref="setInputRef"
                 v-model.number="type.price"
                 label="Base Price"
                 type="number"
                 width="full"
                 placeholder="0.00"
                 :min="0"
-                :ref="setInputRef"
                 prefix="$"
               />
             </div>
 
             <div class="md:col-span-3">
               <BaseInput
+                :ref="setInputRef"
                 v-model.number="type.capacity"
                 label="Max Occupancy"
                 type="number"
                 width="full"
                 placeholder="Guests"
                 :min="1"
-                :ref="setInputRef"
               />
             </div>
 
             <div class="md:col-span-1 flex justify-end mt-[28px]">
               <button
                 type="button"
-                @click="openRemoveTypeModal(idx)"
                 class="w-11 h-11 cursor-pointer text-slate-400 bg-slate-50 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center border border-transparent hover:border-red-100"
                 title="Delete type"
+                @click="openRemoveTypeModal(idx)"
               >
                 <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
               </button>
@@ -99,15 +99,15 @@
       <div v-if="!props.inWizard" class="flex items-center gap-4">
         <button
           type="button"
-          @click="cancel"
           class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
+          @click="cancel"
         >
           Cancel
         </button>
         <button
           type="button"
-          @click="handleSubmit"
           class="px-10 py-3 text-sm font-bold text-white bg-blue-600 rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95"
+          @click="handleSubmit"
         >
           {{ submitting ? "Processing..." : "Save & Continue" }}
         </button>
@@ -117,7 +117,7 @@
 
   <DeleteModal
     v-model="isConfirmationModalVisible"
-    :title="'Remove Category'"
+    title="Remove Category"
     :message="`Are you sure you want to remove the '${typeNameToRemove}' category?`"
     :warning="
       typeIndexToRemove !== null && types[typeIndexToRemove]?.id
@@ -167,7 +167,7 @@ const typeNameToRemove = computed(() => {
 const initialSnapshot = ref(null);
 const inputRefs = ref([]);
 const setInputRef = (el) => {
-  if (el) inputRefs.value.push(el);
+  if (el) {inputRefs.value.push(el);}
 };
 onBeforeUpdate(() => {
   inputRefs.value = [];
@@ -184,7 +184,7 @@ const makeSnapshot = (list) =>
   );
 
 const loadExistingTypes = async () => {
-  if (!props.propertyId) return;
+  if (!props.propertyId) {return;}
   try {
     const existing = await ownerService.fetchResourceTypes(props.propertyId);
     if (Array.isArray(existing) && existing.length) {
@@ -226,7 +226,7 @@ onMounted(() => {
 watch(
   () => props.propertyId,
   (val) => {
-    if (val) loadExistingTypes();
+    if (val) {loadExistingTypes();}
   }
 );
 
@@ -246,7 +246,7 @@ const openRemoveTypeModal = (idx) => {
   const type = types.value[idx];
   const isDummyOrBlank =
     !type.id && (!type.name || type.name.toString().trim() === "");
-  if (types.value.length === 1 && !isDummyOrBlank) return;
+  if (types.value.length === 1 && !isDummyOrBlank) {return;}
   if (isDummyOrBlank) {
     typeIndexToRemove.value = idx;
     confirmRemoval();
@@ -288,12 +288,12 @@ const confirmRemoval = () => {
 };
 
 const validate = () => {
-  if (!props.propertyId) return false;
+  if (!props.propertyId) {return false;}
   let isInputsValid = true;
   inputRefs.value.forEach((inputComponent) => {
     if (inputComponent && typeof inputComponent.validate === "function") {
       const isValid = inputComponent.validate();
-      if (!isValid) isInputsValid = false;
+      if (!isValid) {isInputsValid = false;}
     }
   });
   const filled = (types.value || []).filter(
@@ -324,7 +324,7 @@ const handleSubmit = async () => {
     toast.error("Please ensure all required fields are correctly filled.");
     return;
   }
-  if (submitting.value) return;
+  if (submitting.value) {return;}
   submitting.value = true;
   try {
     const serverList = await ownerService.fetchResourceTypes(props.propertyId);
@@ -334,7 +334,7 @@ const handleSubmit = async () => {
     }, {});
     const serverByName = (serverList || []).reduce((acc, r) => {
       const key = (r.name || "").toString().trim().toLowerCase();
-      if (key) acc[key] = r;
+      if (key) {acc[key] = r;}
       return acc;
     }, {});
     const toCreate = [];
@@ -346,7 +346,7 @@ const handleSubmit = async () => {
         capacity: Number(t.capacity) || 0,
         slot: t.slot || null,
       };
-      if (!normalized.name) continue;
+      if (!normalized.name) {continue;}
       if (t.id) {
         const server = serverById[t.id];
         if (!server) {

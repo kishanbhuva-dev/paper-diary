@@ -7,33 +7,33 @@
             :server-side="true"
             :total-items="total"
             :per-page="perPage"
+            :show-delete="true"
+            :show-search="true"
+            :show-add="true"
+            :show-download="true"
             @search="handleSearch"
+            :show-edit="true"
             @page-change="handlePageChange"
+            :admin-login="false"
             @per-page-change="handlePerPageChange"
+            :show-view="false"
             @open-add-modal="handleAdd"
             @open-edit-modal="handleEdit"
             @delete="handleDelete"
             @sort="handleSort"
-            :showDelete="true"
-            :show-search="true"
-            :showAdd="true"
-            :showDownload="true"
-            :showEdit="true"
-            :adminLogin="false"
-            :show-view="false"
         />
 
         <BaseModal
-            :title="form?.id ? 'Edit Facilies' : 'Facility'"
             v-model="isOpen"
+            :title="form?.id ? 'Edit Facilies' : 'Facility'"
             width="max-w-xl"
             @save="handleSubmit"
         >
             <div class="grid grid-cols-2 gap-4">
                 <BaseInput
                     ref="nameInput"
-                    label="Facility Name"
                     v-model="form.name"
+                    label="Facility Name"
                     width="full"
                     required
                     class="col-span-2"
@@ -53,8 +53,8 @@
                                 'flex-1 outline-none border p-2.5 rounded-md text-sm placeholder:text-xs focus:outline-none focus:ring-0 transition duration-300 ease focus:border-blue-900',
                                 errors.icon ? 'border-red-500' : 'border-gray-300',
                             ]"
-                            @focus="clearError('icon')"
                             readonly
+                            @focus="clearError('icon')"
                         />
                         <Icon
                             v-if="editingWidget.icon"
@@ -72,8 +72,8 @@
                 </div>
                 <BaseInput
                     ref="descriptionInput"
-                    label="Description"
                     v-model="form.description"
+                    label="Description"
                     width="full"
                     required
                     multiline=""
@@ -83,8 +83,8 @@
                 />
                 <BaseSelect
                     ref="statusInput"
-                    label="Status"
                     v-model="form.status"
+                    label="Status"
                     :options="[
                         { label: 'Active', value: 1 },
                         { label: 'Inactive', value: 0 }
@@ -205,8 +205,8 @@
 
         const allValid = inputs.every((input) => input.value.validate());
 
-        if (!validateForm()) return;
-        if (!allValid) return;
+        if (!validateForm()) {return;}
+        if (!allValid) {return;}
 
         let res;
 

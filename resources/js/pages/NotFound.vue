@@ -34,8 +34,8 @@
           </router-link>
 
           <button
-            @click="goBack"
             class="cursor-pointer inline-flex items-center justify-center rounded-full border-2 border-gray-300 bg-white px-8 py-3.5 font-semibold text-gray-700 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200"
+            @click="goBack"
           >
             <Icon icon="lucide:arrow-left" class="mr-2 h-5 w-5" />
             <span>Go Back</span>

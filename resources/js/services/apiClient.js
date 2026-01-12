@@ -51,10 +51,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 402) {
       const responseData = error.response.data || {};
 
-      const message = responseData.message;
+      const {message} = responseData;
       toast(message, { type: "warning" });
-    } else {
-      if (isValidationError(error)) {
+    } else if (isValidationError(error)) {
         const formattedMessage = formatValidationErrors(
           error.response.data.errors
         );
@@ -67,7 +66,6 @@ apiClient.interceptors.response.use(
         const message = error.response?.data?.message || "An error occurred";
         toast(message, { type: "error" });
       }
-    }
 
     console.error("API error:", error);
 

@@ -51,7 +51,7 @@ function persistAuth(newToken, newUser) {
 }
 
 export function useAuth() {
-  if (!routerInstance) routerInstance = useRouter();
+  if (!routerInstance) {routerInstance = useRouter();}
 
   const checkAuth = () => {
     const storedToken = localStorage.getItem(TOKEN_KEY);

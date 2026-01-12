@@ -14,8 +14,8 @@
           Booking Details
         </h3>
         <button
-          @click="$emit('close')"
           class="text-indigo-400 hover:text-red-500 transition duration-150 p-1 rounded-full hover:bg-white/50"
+          @click="$emit('close')"
         >
           <Icon icon="mdi:close" class="w-6 h-6" />
         </button>
@@ -106,8 +106,8 @@
         <button
           v-if="booking?.status?.toLowerCase() !== 'cancelled' && canCancel"
           type="button"
-          @click="$emit('cancel', booking.id)"
           class="px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 border border-red-200 rounded-lg transition duration-150 flex items-center"
+          @click="$emit('cancel', booking.id)"
         >
           <Icon icon="mdi:calendar-remove" class="w-5 h-5 mr-1" />
           Cancel Booking
@@ -115,8 +115,8 @@
         <div v-else></div>
         <button
           type="button"
-          @click="$emit('close')"
           class="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center shadow-md outline-indigo-400 shadow-indigo-200"
+          @click="$emit('close')"
         >
           Done
         </button>

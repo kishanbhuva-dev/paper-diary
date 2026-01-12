@@ -104,13 +104,15 @@
 
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
-                      <div :class="[
+                      <div
+:class="[
                         'w-2 h-2 rounded-full',
                         sub.status === 'active' ? 'bg-emerald-500' :
                           sub.status === 'canceled' ? 'bg-rose-500' :
                             sub.status === 'past_due' ? 'bg-amber-500' : 'bg-slate-400'
                       ]"></div>
-                      <span :class="[
+                      <span
+:class="[
                         'text-sm font-medium capitalize',
                         sub.status === 'active' ? 'text-emerald-600' :
                           sub.status === 'canceled' ? 'text-rose-600' :
@@ -142,13 +144,14 @@
     </div>
 
     <!-- Subscription Details Modal -->
-    <div v-if="showDetailsModal && selectedSubscription"
+    <div
+v-if="showDetailsModal && selectedSubscription"
       class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="p-8">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-slate-900">Subscription Details</h3>
-            <button @click="showDetailsModal = false" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+            <button class="p-2 hover:bg-slate-100 rounded-lg transition-colors" @click="showDetailsModal = false">
               <Icon icon="heroicons:x-mark-20-solid" class="w-5 h-5 text-slate-400" />
             </button>
           </div>
@@ -192,13 +195,15 @@
                 <div>
                   <label class="text-sm font-medium text-slate-600">Status</label>
                   <div class="flex items-center gap-2 mt-1">
-                    <div :class="[
+                    <div
+:class="[
                       'w-2 h-2 rounded-full',
                       selectedSubscription.status === 'active' ? 'bg-emerald-500' :
                         selectedSubscription.status === 'canceled' ? 'bg-rose-500' :
                           selectedSubscription.status === 'past_due' ? 'bg-amber-500' : 'bg-slate-400'
                     ]"></div>
-                    <span :class="[
+                    <span
+:class="[
                       'text-sm font-medium capitalize',
                       selectedSubscription.status === 'active' ? 'text-emerald-600' :
                         selectedSubscription.status === 'canceled' ? 'text-rose-600' :
@@ -221,8 +226,9 @@
           </div>
 
           <div class="mt-6 flex gap-4">
-            <button @click="showDetailsModal = false"
-              class="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors">
+            <button
+class="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors"
+              @click="showDetailsModal = false">
               Close
             </button>
           </div>
@@ -336,7 +342,7 @@ onMounted(async () => {
 });
 
 const calculateEndDate = (startDate, interval) => {
-  if (!startDate) return 'No date';
+  if (!startDate) {return 'No date';}
 
   // Handle both timestamp numbers and string dates
   const date = typeof startDate === 'number'
@@ -344,7 +350,7 @@ const calculateEndDate = (startDate, interval) => {
     : new Date(startDate);
 
   // Check if date is valid
-  if (isNaN(date.getTime())) return 'Invalid date';
+  if (isNaN(date.getTime())) {return 'Invalid date';}
 
   // Parse interval to get months
   let monthsToAdd = 3; // default
@@ -384,7 +390,7 @@ const calculateEndDate = (startDate, interval) => {
 };
 
 const formatDate = (timestamp) => {
-  if (!timestamp) return 'No date';
+  if (!timestamp) {return 'No date';}
 
   // Handle both timestamp numbers and string dates
   const date = typeof timestamp === 'number'
@@ -392,7 +398,7 @@ const formatDate = (timestamp) => {
     : new Date(timestamp);
 
   // Check if date is valid
-  if (isNaN(date.getTime())) return 'Invalid date';
+  if (isNaN(date.getTime())) {return 'Invalid date';}
 
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -414,9 +420,7 @@ const formatStatus = (status) => {
   return statusMap[status] || status || 'Unknown';
 };
 
-const formatPlan = (item) => {
-  return `${item.plan_name || 'Professional Plan'} (${item.stripe_id || 'N/A'})`;
-};
+const formatPlan = (item) => `${item.plan_name || 'Professional Plan'} (${item.stripe_id || 'N/A'})`;
 
 const formatPeriod = (item) => {
   const startDate = item.current_period_start || 'N/A';

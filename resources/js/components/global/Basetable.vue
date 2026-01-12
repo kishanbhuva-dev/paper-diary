@@ -19,8 +19,8 @@
         <div v-if="showSearch" class="order-2 w-full sm:w-64">
           <div class="relative group">
             <input
-              type="text"
               v-model="localSearchTerm"
+              type="text"
               placeholder="Search..."
               class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-blue-500 text-sm pl-10 transition duration-150 shadow-sm"
               title="Search by keyword"
@@ -36,7 +36,6 @@
           <div class="relative">
             <button
               v-if="availableFilters.length"
-              @click="toggleFilterDropdown"
               :class="[
                 'flex items-center justify-center p-2 rounded-xl border transition-all duration-150 h-10 w-10 active:scale-95 cursor-pointer',
                 isFilterDropdownOpen || hasActiveFilters
@@ -44,6 +43,7 @@
                   : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50 shadow-sm',
               ]"
               title="Toggle Filters"
+              @click="toggleFilterDropdown"
             >
               <Icon
                 :icon="
@@ -71,8 +71,8 @@
                   >Filter Options</span
                 >
                 <button
-                  @click="clearAllFilters"
                   class="text-[15px] font-bold text-red-500 hover:text-red-700 hover:bg-red-100 p-3 rounded-xl uppercase cursor-pointer"
+                  @click="clearAllFilters"
                 >
                   Reset
                 </button>
@@ -94,11 +94,11 @@
                     class="relative"
                   >
                     <select
+                      :value="appliedFilters[filter.key] || ''"
+                      class="appearance-none w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold text-slate-700 focus:ring-4 focus:ring-blue-50 outline-none transition-all cursor-pointer"
                       @change="
                         (e) => handleFilterChange(filter.key, e.target.value)
                       "
-                      :value="appliedFilters[filter.key] || ''"
-                      class="appearance-none w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold text-slate-700 focus:ring-4 focus:ring-blue-50 outline-none transition-all cursor-pointer"
                     >
                       <option value="">All {{ filter.label }}</option>
                       <option
@@ -120,28 +120,28 @@
                     type="text"
                     :placeholder="`Enter ${filter.label}...`"
                     :value="appliedFilters[filter.key] || ''"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold focus:ring-4 focus:ring-blue-50 outline-none transition-all"
                     @input="
                       (e) => handleFilterChange(filter.key, e.target.value)
                     "
-                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold focus:ring-4 focus:ring-blue-50 outline-none transition-all"
                   />
 
                   <input
                     v-else-if="filter.type === 'date'"
                     type="date"
                     :value="appliedFilters[filter.key] || ''"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold focus:ring-4 focus:ring-blue-50 outline-none transition-all"
                     @input="
                       (e) => handleFilterChange(filter.key, e.target.value)
                     "
-                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold focus:ring-4 focus:ring-blue-50 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div class="mt-5">
                 <button
-                  @click="isFilterDropdownOpen = false"
                   class="w-full bg-slate-800 text-white cursor-pointer text-xs font-bold py-2.5 rounded-xl hover:bg-slate-700 transition-colors uppercase tracking-widest"
+                  @click="isFilterDropdownOpen = false"
                 >
                   Close Filters
                 </button>
@@ -151,18 +151,18 @@
 
           <button
             v-if="showAdd"
-            @click="emit('open-add-modal')"
             class="flex items-center justify-center p-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 cursor-pointer transition duration-150 h-10 w-10 shadow-md shadow-blue-300 active:scale-95"
             title="Add New"
+            @click="emit('open-add-modal')"
           >
             <Icon icon="ic:round-add" class="w-6 h-6" />
           </button>
 
           <button
             v-if="showDownload"
-            @click="exportToExcel"
             class="flex items-center justify-center p-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200 cursor-pointer transition duration-150 h-10 w-10 active:scale-95"
             title="Download"
+            @click="exportToExcel"
           >
             <Icon icon="mdi:microsoft-excel" class="w-6 h-6" />
           </button>
@@ -188,8 +188,8 @@
           >
           <span>{{ getOptionLabel(key, value) }}</span>
           <button
-            @click="handleFilterChange(key, '')"
             class="p-0.5 rounded-md hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+            @click="handleFilterChange(key, '')"
           >
             <Icon icon="mdi:close" class="w-3.5 h-3.5" />
           </button>
@@ -209,13 +209,13 @@
             <th
               v-for="col in columns"
               :key="col.key"
-              @click="col.sortable !== false ? handleSort(col) : null"
               :class="[
                 'px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap',
                 col.sortable !== false
                   ? 'cursor-pointer hover:bg-blue-100 transition duration-150'
                   : '',
               ]"
+              @click="col.sortable !== false ? handleSort(col) : null"
             >
               <div class="flex items-center gap-1">
                 {{ col.label }}
@@ -264,9 +264,10 @@
             >
               <template v-if="$slots[col.key]"
                 ><slot :name="col.key" :row="item"
-              /></template>
+              ></slot></template>
               <template v-else-if="col.key === 'icon'">
-                <div v-if="item[col.key]"
+                <div
+v-if="item[col.key]"
                   class="w-9 h-9 flex items-center justify-center bg-blue-50 rounded-xl border border-blue-100"
                 >
                   <Icon :icon="item[col.key]" class="w-5 h-5 text-blue-600" />
@@ -308,34 +309,34 @@
               <div class="flex items-center justify-center gap-1">
                 <button
                   v-if="showView"
-                  @click="emit('view', item)"
                   class="text-emerald-600 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-emerald-600 transition duration-150"
                   title="View Details"
+                  @click="emit('view', item)"
                 >
                   <Icon icon="mdi:eye-outline" class="w-5 h-5" />
                 </button>
 
                 <button
                   v-if="showEdit"
-                  @click="emit('open-edit-modal', item)"
                   class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-blue-600 transition duration-150"
                   title="Edit"
+                  @click="emit('open-edit-modal', item)"
                 >
                   <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
                 </button>
                 <button
                   v-if="showDelete"
-                  @click="emit('delete', item.id)"
                   class="text-red-600 hover:text-white cursor-pointer p-2 rounded-xl font-bold hover:bg-red-500 transition duration-150"
                   title="Delete"
+                  @click="emit('delete', item.id)"
                 >
                   <Icon icon="mdi:delete-forever" class="w-5 h-5" />
                 </button>
                 <button
                   v-if="adminLogin"
-                  @click="emit('admin-login', item)"
                   class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-xl font-bold hover:bg-green-500 transition duration-150"
                   :title="adminLoginTitle"
+                  @click="emit('admin-login', item)"
                 >
                   <Icon icon="lucide:user-pen" class="w-5 h-5" />
                 </button>
@@ -363,8 +364,8 @@
     </div>
 
     <div
-      class="pagination flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200 px-1 sm:px-0 mb-2"
       v-if="totalPages > 0"
+      class="pagination flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200 px-1 sm:px-0 mb-2"
     >
       <div
         class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto mt-2 sm:mt-0"
@@ -399,9 +400,9 @@
             class="isolate inline-flex -space-x-px rounded-xl md:shadow-md w-full sm:w-auto justify-center"
           >
             <button
-              @click="changePage(currentPage - 1)"
               :disabled="currentPage === 1"
               class="relative inline-flex items-center rounded-l-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
+              @click="changePage(currentPage - 1)"
             >
               <Icon icon="mdi:chevron-left" class="w-5 h-5" />
             </button>
@@ -413,21 +414,21 @@
               >
               <button
                 v-else
-                @click="changePage(page)"
                 :class="[
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border cursor-pointer',
                   page === currentPage
                     ? 'z-10 bg-blue-600 text-white border-blue-600'
                     : 'text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-600',
                 ]"
+                @click="changePage(page)"
               >
                 {{ page }}
               </button>
             </template>
             <button
-              @click="changePage(currentPage + 1)"
               :disabled="currentPage === totalPages"
               class="relative inline-flex items-center rounded-r-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
+              @click="changePage(currentPage + 1)"
             >
               <Icon icon="mdi:chevron-right" class="w-5 h-5" />
             </button>
@@ -442,20 +443,6 @@
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { Icon } from "@iconify/vue";
 import * as XLSX from "xlsx";
-
-const emit = defineEmits([
-  "open-add-modal",
-  "download",
-  "delete",
-  "open-edit-modal",
-  "search",
-  "page-change",
-  "per-page-change",
-  "admin-login",
-  "sort",
-  "filter-change",
-  "view",
-]);
 
 const props = defineProps({
   title: { type: String, default: "Data Table" },
@@ -474,6 +461,20 @@ const props = defineProps({
   showSearch: { type: Boolean, default: true },
   availableFilters: { type: Array, default: () => [] },
 });
+
+const emit = defineEmits([
+  "open-add-modal",
+  "download",
+  "delete",
+  "open-edit-modal",
+  "search",
+  "page-change",
+  "per-page-change",
+  "admin-login",
+  "sort",
+  "filter-change",
+  "view",
+]);
 
 // --- FILTER UI ---
 const isFilterDropdownOpen = ref(false);
@@ -505,7 +506,7 @@ const getFilterLabel = (key) =>
   props.availableFilters.find((f) => f.key === key)?.label || key;
 const getOptionLabel = (key, value) => {
   const filter = props.availableFilters.find((f) => f.key === key);
-  if (!filter || !filter.options) return value;
+  if (!filter || !filter.options) {return value;}
   return (
     filter.options.find((o) => String(o.value) === String(value))?.label ||
     value
@@ -519,20 +520,20 @@ const getStatusClasses = (val) => {
   // console.log('getStatusClasses s', s);
   const success = ["1", "active", "confirm", "paid", "success", "confirmed"];
   const danger = ["0", "inactive", "cancelled", "unpaid", "failed"];
-  if (success.includes(s)) return "bg-green-50 text-green-700 border-green-200";
-  if (danger.includes(s)) return "bg-red-50 text-red-700 border-red-200";
+  if (success.includes(s)) {return "bg-green-50 text-green-700 border-green-200";}
+  if (danger.includes(s)) {return "bg-red-50 text-red-700 border-red-200";}
   return "bg-gray-50 text-gray-600 border-gray-200";
 };
 
 const formatStatusDisplay = (val) => {
-  if (val === 1 || String(val).toLowerCase() === "active") return "Active";
-  if (val === 0 || String(val).toLowerCase() === "inactive") return "Inactive";
+  if (val === 1 || String(val).toLowerCase() === "active") {return "Active";}
+  if (val === 0 || String(val).toLowerCase() === "inactive") {return "Inactive";}
   return val;
 };
 
 const getCellValue = (item, col) => {
-  if (typeof col.key === "function") return col.key(item);
-  if (!col.key) return "";
+  if (typeof col.key === "function") {return col.key(item);}
+  if (!col.key) {return "";}
   return col.key.split(".").reduce((acc, part) => acc && acc[part], item);
 };
 
@@ -556,7 +557,7 @@ watch(localSearchTerm, (newVal) => {
   debounceTimeout = setTimeout(() => {
     debouncedSearchTerm.value = newVal;
     currentPage.value = 1;
-    if (props.serverSide) emit("search", newVal);
+    if (props.serverSide) {emit("search", newVal);}
   }, 400);
 });
 
@@ -565,7 +566,7 @@ const perPageOptions = [10, 20, 50, 100];
 const currentPage = ref(1);
 
 const processedData = computed(() => {
-  if (props.serverSide) return props.rows;
+  if (props.serverSide) {return props.rows;}
   let data = [...props.rows];
 
   Object.keys(appliedFilters.value).forEach((key) => {
@@ -583,8 +584,8 @@ const processedData = computed(() => {
       const col = props.columns.find(
         (c) => (typeof c.key === "function" ? c.label : c.key) === sortKey.value
       );
-      let vA = String(getCellValue(a, col) || "");
-      let vB = String(getCellValue(b, col) || "");
+      const vA = String(getCellValue(a, col) || "");
+      const vB = String(getCellValue(b, col) || "");
       return sortOrder.value === "asc"
         ? vA.localeCompare(vB)
         : vB.localeCompare(vA);
@@ -601,7 +602,7 @@ const totalPages = computed(() => {
 });
 
 const paginatedData = computed(() => {
-  if (props.serverSide) return props.rows;
+  if (props.serverSide) {return props.rows;}
   const start = (currentPage.value - 1) * perPageRef.value;
   return processedData.value.slice(start, start + perPageRef.value);
 });
@@ -609,7 +610,7 @@ const paginatedData = computed(() => {
 const changePage = (p) => {
   if (p >= 1 && p <= totalPages.value) {
     currentPage.value = p;
-    if (props.serverSide) emit("page-change", p);
+    if (props.serverSide) {emit("page-change", p);}
   }
 };
 
@@ -619,12 +620,12 @@ const visiblePages = computed(() => {
   const range = [];
   for (let i = 1; i <= total; i++) {
     if (i === 1 || i === total || (i >= current - 1 && i <= current + 1))
-      range.push(i);
+      {range.push(i);}
   }
   const withDots = [];
   let last;
   range.forEach((i) => {
-    if (last && i - last > 1) withDots.push("...");
+    if (last && i - last > 1) {withDots.push("...");}
     withDots.push(i);
     last = i;
   });
@@ -635,7 +636,7 @@ const exportToExcel = () => {
   const data = props.rows.map((item) => {
     const row = {};
     props.columns.forEach((col) => {
-      if (col.key !== "icon") row[col.label] = getCellValue(item, col) || "-";
+      if (col.key !== "icon") {row[col.label] = getCellValue(item, col) || "-";}
     });
     return row;
   });
@@ -649,7 +650,7 @@ const exportToExcel = () => {
 onBeforeUnmount(() => clearTimeout(debounceTimeout));
 watch(perPageRef, (v) => {
   currentPage.value = 1;
-  if (props.serverSide) emit("per-page-change", v);
+  if (props.serverSide) {emit("per-page-change", v);}
 });
 </script>
 

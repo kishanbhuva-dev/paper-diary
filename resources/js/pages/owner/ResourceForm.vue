@@ -23,8 +23,8 @@
 
       <button
         type="button"
-        @click="addResourceItem"
         class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-all group active:scale-95"
+        @click="addResourceItem"
       >
         <Icon
           icon="mdi:plus"
@@ -71,9 +71,9 @@
             <div class="md:col-span-1 flex justify-end mt-[28px]">
               <button
                 type="button"
-                @click="openRemoveResourceItemModal(idx)"
                 class="w-11 h-11 cursor-pointer text-slate-300 bg-slate-50 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center border border-transparent hover:border-red-100"
                 title="Remove resource"
+                @click="openRemoveResourceItemModal(idx)"
               >
                 <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
               </button>
@@ -87,16 +87,16 @@
       <div v-if="!props.inWizard" class="flex items-center gap-3">
         <button
           type="button"
-          @click="cancel"
           class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
+          @click="cancel"
         >
           Cancel
         </button>
         <button
           type="button"
-          @click="handleSubmit"
           :disabled="submitting"
           class="px-10 py-3 text-sm font-bold text-white bg-indigo-600 rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95 flex items-center gap-2"
+          @click="handleSubmit"
         >
           <Icon
             v-if="submitting"
@@ -111,7 +111,7 @@
 
   <DeleteModal
     v-model="isConfirmationModalVisible"
-    :title="'Remove Individual Unit'"
+    title="Remove Individual Unit"
     :message="`Are you sure you want to remove '${resourceItemNameToRemove}'?`"
     :warning="
       resourceItemIndexToRemove !== null &&
@@ -188,7 +188,7 @@ onMounted(() => {
 watch(
   () => props.propertyId,
   (val) => {
-    if (val) loadData();
+    if (val) {loadData();}
   }
 );
 
@@ -201,7 +201,7 @@ const openRemoveResourceItemModal = (idx) => {
   const isDummyOrBlank =
     !resourceItem.id &&
     (!resourceItem.name || resourceItem.name.toString().trim() === "");
-  if (resourceItems.value.length === 1 && !isDummyOrBlank) return;
+  if (resourceItems.value.length === 1 && !isDummyOrBlank) {return;}
   if (isDummyOrBlank) {
     resourceItemIndexToRemove.value = idx;
     confirmRemoval();
@@ -235,7 +235,7 @@ const confirmRemoval = () => {
 };
 
 const validate = () => {
-  if (!props.propertyId) return false;
+  if (!props.propertyId) {return false;}
   const filled = (resourceItems.value || []).filter(
     (r) => r.name && r.name.toString().trim() !== ""
   );
@@ -253,8 +253,8 @@ const validate = () => {
 };
 
 const handleSubmit = async () => {
-  if (!validate()) return;
-  if (submitting.value) return;
+  if (!validate()) {return;}
+  if (submitting.value) {return;}
   submitting.value = true;
   try {
     const serverList = await ownerService.fetchResources(props.propertyId);
@@ -264,7 +264,7 @@ const handleSubmit = async () => {
     }, {});
     const serverByName = (serverList || []).reduce((acc, r) => {
       const key = (r.name || "").toString().trim().toLowerCase();
-      if (key) acc[key] = r;
+      if (key) {acc[key] = r;}
       return acc;
     }, {});
     const toCreate = [];
@@ -275,7 +275,7 @@ const handleSubmit = async () => {
         status: typeof rm.status !== "undefined" ? Number(rm.status) : 1,
         resourceTypeId: parseInt(rm.resourceTypeId, 10) || null,
       };
-      if (!normalized.name) continue;
+      if (!normalized.name) {continue;}
       if (rm.id) {
         const server = serverById[rm.id];
         if (!server) {

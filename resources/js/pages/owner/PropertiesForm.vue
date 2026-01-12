@@ -290,8 +290,8 @@
                     ]"
                   >
                     <input
-                      type="checkbox"
                       v-model="formData.facilities"
+                      type="checkbox"
                       :value="facility.id"
                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
@@ -337,8 +337,8 @@
           >
             <button
               type="button"
-              @click="handleCancel"
               class="px-8 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors"
+              @click="handleCancel"
             >
               Discard Changes
             </button>
@@ -420,15 +420,15 @@ const validateForm = () => {
   let ok = true;
   inputRefs.value.forEach((c) => {
     if (c && typeof c.validate === "function") {
-      if (!c.validate()) ok = false;
+      if (!c.validate()) {ok = false;}
     }
   });
   return ok;
 };
 
 const decodeId = (val) => {
-  if (!val) return val;
-  if (typeof val === "number" || /^\d+$/.test(String(val))) return Number(val);
+  if (!val) {return val;}
+  if (typeof val === "number" || /^\d+$/.test(String(val))) {return Number(val);}
   try {
     const maybe = atob(String(val));
     return !isNaN(Number(maybe)) ? Number(maybe) : val;
@@ -437,15 +437,13 @@ const decodeId = (val) => {
   }
 };
 
-const formatImages = (images = []) => {
-  return (images || []).map((img) => ({
+const formatImages = (images = []) => (images || []).map((img) => ({
     id: img.id,
     url: img.url ? img.url : `/storage/property/images/${img.image}`,
     file: null,
     image: img.image,
     position: img.position,
   }));
-};
 
 const loadPropertyForEdit = async (id) => {
   loadingItem.value = true;
@@ -453,7 +451,7 @@ const loadPropertyForEdit = async (id) => {
     const resolved = decodeId(id);
     const item = await ownerService.fetchPropertyById(resolved);
     if (!item) {
-      if (!inWizard.value) router.push({ name: "properties" });
+      if (!inWizard.value) {router.push({ name: "properties" });}
       return;
     }
 
@@ -478,7 +476,7 @@ const loadPropertyForEdit = async (id) => {
     formData.value = loadedData;
   } catch (err) {
     console.error("Failed to load property:", err);
-    if (!inWizard.value) router.push({ name: "properties" });
+    if (!inWizard.value) {router.push({ name: "properties" });}
   } finally {
     loadingItem.value = false;
   }
@@ -494,14 +492,14 @@ onMounted(async () => {
     console.error("Failed to load facilities:", e);
   }
 
-  if (!isEditing.value) formData.value = { ...defaultFormData };
+  if (!isEditing.value) {formData.value = { ...defaultFormData };}
 });
 
 watch(
   () => effectiveId.value,
   (val) => {
-    if (val) loadPropertyForEdit(val);
-    else formData.value = { ...defaultFormData };
+    if (val) {loadPropertyForEdit(val);}
+    else {formData.value = { ...defaultFormData };}
   },
   { immediate: true }
 );
@@ -548,10 +546,10 @@ const handleDependentDataUpdates = async (
   const uploadedIdsQueue = (uploaded || []).map((u) => u.id || null);
   const orderedIds = [];
   for (const slot of uiOrdered) {
-    if (slot.id) orderedIds.push(slot.id);
+    if (slot.id) {orderedIds.push(slot.id);}
     else if (slot.file) {
       const next = uploadedIdsQueue.shift();
-      if (next) orderedIds.push(next);
+      if (next) {orderedIds.push(next);}
     }
   }
 
@@ -617,8 +615,8 @@ const savePropertyData = async (apiPayload) => {
 };
 
 const handleSubmit = async () => {
-  if (submitting.value) return;
-  if (!validateForm()) return;
+  if (submitting.value) {return;}
+  if (!validateForm()) {return;}
   submitting.value = true;
   try {
     const { newFiles, removedIds } = processImages();
@@ -646,7 +644,7 @@ const handleSubmit = async () => {
 
     const savedPropertyId = await savePropertyData(apiPayload);
     if (!savedPropertyId)
-      throw new Error("Could not determine saved property id");
+      {throw new Error("Could not determine saved property id");}
 
     await handleDependentDataUpdates(
       savedPropertyId,
@@ -655,8 +653,8 @@ const handleSubmit = async () => {
       formData.value.images
     );
 
-    if (inWizard.value) emits("success", { id: savedPropertyId });
-    else router.push({ name: "properties" });
+    if (inWizard.value) {emits("success", { id: savedPropertyId });}
+    else {router.push({ name: "properties" });}
   } catch (e) {
     console.error("[PropertiesForm] Submission Error:", e);
   } finally {
@@ -665,8 +663,8 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
-  if (inWizard.value) emits("cancel");
-  else router.push({ name: "properties" });
+  if (inWizard.value) {emits("cancel");}
+  else {router.push({ name: "properties" });}
 };
 
 defineExpose({ handleSubmit, onImagesReorder });

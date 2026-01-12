@@ -35,8 +35,8 @@
       <div class="flex flex-wrap items-center gap-3">
         <div class="relative w-full sm:w-64">
           <div
-            @click="isDropdownOpen = !isDropdownOpen"
             class="bg-white border border-gray-300 px-3 py-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors select-none"
+            @click="isDropdownOpen = !isDropdownOpen"
           >
             <span class="text-sm text-gray-600 truncate">
               {{
@@ -62,9 +62,9 @@
               class="flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors group"
             >
               <input
+                v-model="selectedProperties"
                 type="checkbox"
                 :value="item.id"
-                v-model="selectedProperties"
                 class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
               <span
@@ -86,8 +86,8 @@
               {{ propertyDropdown.find((p) => p.id === id)?.name }}
             </span>
             <button
-              @click="removeProperty(id)"
               class="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+              @click="removeProperty(id)"
             >
               <Icon icon="mdi:close" class="text-sm" />
             </button>
@@ -95,8 +95,8 @@
 
           <button
             v-if="selectedProperties.length > 0"
-            @click="selectedProperties = []"
             class="text-[10px] font-bold text-gray-400 hover:text-red-500 uppercase tracking-tighter ml-1"
+            @click="selectedProperties = []"
           >
             Clear All
           </button>
@@ -130,8 +130,8 @@
             Top {{ recentBookings.length }} Latest Bookings
           </span>
           <button
-            @click="viewAllBookings"
             class="relative px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center group overflow-hidden"
+            @click="viewAllBookings"
           >
             <span class="relative z-10">View All</span>
             <span
@@ -238,7 +238,7 @@
     <BookingDetailModal
       :show="showBookingModal"
       :booking="selectedBooking"
-      :canCancel="
+      :can-cancel="
         isFutureBooking(
           selectedBooking?.checkIn || selectedBooking?.arrivalDateTime
         )
@@ -316,8 +316,8 @@ const customStatuses = [
 const getStatusBadgeClass = (status) => {
   const s = status?.toLowerCase();
   if (s === "confirm" || s === "confirmed")
-    return "bg-emerald-50 text-emerald-700 border-emerald-100";
-  if (s === "cancelled") return "bg-rose-50 text-rose-700 border-rose-100";
+    {return "bg-emerald-50 text-emerald-700 border-emerald-100";}
+  if (s === "cancelled") {return "bg-rose-50 text-rose-700 border-rose-100";}
   return "bg-amber-50 text-amber-700 border-amber-100";
 };
 
@@ -362,11 +362,11 @@ watch(selectedProperties, () => {
 });
 
 const isFutureBooking = (checkInStr) => {
-  if (!checkInStr) return false;
+  if (!checkInStr) {return false;}
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  let dateParts = checkInStr.includes("-") ? checkInStr.split("-") : [];
-  let bookingDate =
+  const dateParts = checkInStr.includes("-") ? checkInStr.split("-") : [];
+  const bookingDate =
     dateParts[0].length === 4
       ? new Date(checkInStr)
       : new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
@@ -384,7 +384,7 @@ const handleBookingClick = (booking) => {
 };
 
 const handleCancelBooking = async (bookingId) => {
-  if (!bookingToCancelId.value) return;
+  if (!bookingToCancelId.value) {return;}
   
   isLoading.value = true;
   isCancelModalOpen.value = false; // Close modal immediately for better UX
@@ -454,7 +454,7 @@ const getResources = async () => {
       number: res.name,
     }));
     const formatDate = (dateStr) => {
-      if (!dateStr) return "";
+      if (!dateStr) {return "";}
       const [d, m, y] = dateStr.trim().split("-");
       return `${y}-${m}-${d}`;
     };

@@ -7,13 +7,13 @@
       <select
         :id="labelSlug"
         v-model="model"
-        @blur="validate"
         :class="[
           'ease w-full cursor-pointer appearance-none rounded-lg border bg-white py-2 pr-8 pl-3 text-sm font-medium shadow-sm transition duration-300 placeholder:text-gray-400 focus:shadow-md focus:outline-none',
           !isValid && touched 
             ? 'border-red-500 focus:border-red-500' 
             : 'border-gray-200 hover:border-gray-400 focus:border-gray-400'
         ]"
+        @blur="validate"
       >
         <option value="">{{ placeholder }}</option>
         <option
@@ -51,14 +51,14 @@
 <script setup>
 import { computed, ref } from "vue";
 
-const model = defineModel();
-
 const props = defineProps({
   label: { type: String, required: true, default: "Label" },
   placeholder: { type: String, default: "Select an option" },
   options: { type: Array, required: true },
   required: { type: Boolean, default: false }, // Added to support validation check
 });
+
+const model = defineModel();
 
 // --- VALIDATION STATE ---
 const touched = ref(false);
@@ -87,7 +87,5 @@ defineExpose({
   validate
 });
 
-const labelSlug = computed(() => {
-  return props.label.toLowerCase().replace(/\s+/g, "-");
-});
+const labelSlug = computed(() => props.label.toLowerCase().replace(/\s+/g, "-"));
 </script>

@@ -7,28 +7,28 @@
             :server-side="true"
             :total-items="total"
             :per-page="perPage"
+            :show-search="true"
+            :show-add="false"
+            :show-download="true"
+            :show-edit="false"
+            :show-delete="false"
             @search="handleSearch"
+            :show-view="false"
             @page-change="handlePageChange"
+            :admin-login="true"
             @per-page-change="handlePerPageChange"
+            admin-login-title="Login as User"
             @delete="handleDelete"
             @admin-login="handleLoginAsUser"
             @sort="handleSort"
-            :show-search="true"
-            :showAdd="false"
-            :showDownload="true"
-            :showEdit="false"
-            :showDelete="false"
-            :show-view="false"
-            :adminLogin="true"
-            adminLoginTitle="Login as User"
         >
             <template #toggle-status="{ row }">
                 <div class="flex items-center">
                     <label class="relative inline-flex items-center cursor-pointer select-none">
                         <input
+                            v-model="row.status"
                             type="checkbox"
                             class="sr-only peer"
-                            v-model="row.status"
                             :true-value="1"
                             :false-value="0"
                             @change="ChangeStatus(row.id, row.status)"
@@ -86,7 +86,7 @@
     const ChangeStatus = async (propertyId, status) => {
         const payload = {
             id: propertyId,
-            status: status
+            status
         }
         const res = await adminService.ChangePropertyStatus(payload);
         console.log('res', res);

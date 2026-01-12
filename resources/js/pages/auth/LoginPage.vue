@@ -7,11 +7,11 @@
       Welcome back! Please enter your details.
     </p>
 
-    <form @submit.prevent="handleLogin" class="space-y-5">
+    <form class="space-y-5" @submit.prevent="handleLogin">
       <BaseInput
         ref="emailInput"
-        label="Your Email"
         v-model="form.email"
+        label="Your Email"
         type="email"
         autocomplete="email"
         width="full"
@@ -22,8 +22,8 @@
 
       <BaseInput
         ref="passwordInput"
-        label="Password"
         v-model="form.password"
+        label="Password"
         type="password"
         autocomplete="current-password"
         width="full"

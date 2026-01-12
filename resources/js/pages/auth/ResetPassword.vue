@@ -5,11 +5,11 @@
       Enter your new password below to reset your password.
     </p>
 
-    <form @submit.prevent="handleResetPassword" class="space-y-5">
+    <form class="space-y-5" @submit.prevent="handleResetPassword">
       <BaseInput
         ref="passwordInput"
-        label="New Password"
         v-model="form.password"
+        label="New Password"
         type="password"
         autocomplete="new-password"
         width="full"
@@ -20,8 +20,8 @@
 
       <BaseInput
         ref="confirmPasswordInput"
-        label="Confirm New Password"
         v-model="form.confirmPassword"
+        label="Confirm New Password"
         type="password"
         autocomplete="new-password"
         width="full"
@@ -29,7 +29,7 @@
         placeholder="••••••••"
         icon="lucide:lock"
         :pattern="new RegExp(`^${form.password}$`)"
-        customError="Passwords do not match."
+        custom-error="Passwords do not match."
       />
 
       <button type="submit" class="btn-primary w-full py-1.5">

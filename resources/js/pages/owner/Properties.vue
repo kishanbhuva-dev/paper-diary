@@ -30,28 +30,28 @@
       :rows="properties"
       :server-side="true"
       :per-page="perPage"
+      :show-delete="true"
+      :show-view="false"
+      :show-search="true"
+      :show-add="true"
       @search="handleSearch"
+      :show-download="true"
       @page-change="handlePageChange"
+      :show-edit="true"
       @per-page-change="handlePerPageChange"
+      :admin-login="false"
       @sort="handleSort"
       @open-add-modal="navigateToAdd"
       @open-edit-modal="navigateToEdit"
       @delete="confirmDelete"
-      :showDelete="true"
-      :show-view="false"
-      :show-search="true"
-      :showAdd="true"
-      :showDownload="true"
-      :showEdit="true"
-      :admin-login="false"
     />
   </div>
 
   <DeleteModal
     v-model="isConfirmationModalVisible"
-    :title="'Delete Property'"
+    title="Delete Property"
     :message="`Are you sure you want to delete the property: ${propertyNameToDelete} ?`"
-    :warning="'This action cannot be undone and will permanently delete the property, all associated resource types, and images!'"
+    warning="This action cannot be undone and will permanently delete the property, all associated resource types, and images!"
     @confirm="handleDeleteConfirmation"
   />
 </template>
@@ -82,9 +82,9 @@ const propertyIdToDelete = ref(null);
 const propertyNameToDelete = ref("");
 
 const truncateString = (str, maxLen = 15) => {
-  if (!str) return "";
+  if (!str) {return "";}
   const s = String(str);
-  return s.length > maxLen ? s.substring(0, maxLen) + "..." : s;
+  return s.length > maxLen ? `${s.substring(0, maxLen)  }...` : s;
 };
 
 // Table Configuration with sortable flag
@@ -173,14 +173,14 @@ const handleDelete = async (id) => {
     try {
       const images = await ownerService.fetchPropertyImages(id);
       const imageIds = (images || []).map((i) => i.id).filter(Boolean);
-      if (imageIds.length) await ownerService.deletePropertyImages(imageIds);
+      if (imageIds.length) {await ownerService.deletePropertyImages(imageIds);}
     } catch (err) {
       console.debug("delete images failed:", err);
     }
 
     await ownerService.deleteProperty(id);
     if (properties.value.length === 1 && currentPage.value > 1)
-      currentPage.value--;
+      {currentPage.value--;}
     await loadData();
   } catch (err) {
     error.value = err.response?.status === 401 ? "Unauthorized" : err.message;

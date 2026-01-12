@@ -5,7 +5,7 @@
   <Toaster
     position="top-right"
     :expand="true"
-    richColors
+    rich-colors
     :style="{ zIndex: 99999 }"
   />
 </template>

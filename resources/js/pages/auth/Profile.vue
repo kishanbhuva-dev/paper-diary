@@ -15,7 +15,7 @@
         </p>
       </div>
 
-      <form @submit.prevent="handleUpdateProfile" class="p-6 md:p-10 space-y-8">
+      <form class="p-6 md:p-10 space-y-8" @submit.prevent="handleUpdateProfile">
         <div class="space-y-2">
           <div
             class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
@@ -27,8 +27,8 @@
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <BaseInput
               ref="input_firstName"
-              label="First Name"
               v-model="form.firstName"
+              label="First Name"
               width="full"
               required
               icon="mdi:account-outline"
@@ -36,16 +36,16 @@
             />
             <BaseInput
               ref="input_lastName"
-              label="Last Name"
               v-model="form.lastName"
+              label="Last Name"
               width="full"
               required
               icon="mdi:account-outline"
               placeholder="Doe"
             />
             <BaseInput
-              label="Email Address"
               v-model="form.email"
+              label="Email Address"
               width="full"
               variant="gray"
               disabled
@@ -65,16 +65,16 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BaseInput
               ref="input_phone"
-              label="Phone Number"
               v-model="form.phone"
+              label="Phone Number"
               width="full"
               icon="mdi:phone"
               placeholder="+44 123 456 7890"
             />
             <BaseInput
               ref="input_telephone"
-              label="Secondary Telephone"
               v-model="form.telephone"
+              label="Secondary Telephone"
               width="full"
               icon="mdi:phone-classic"
               placeholder="Home or office number"
@@ -93,16 +93,16 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BaseInput
               ref="input_address"
-              label="Address Line 1"
               v-model="form.address"
+              label="Address Line 1"
               width="full"
               icon="mdi:home-outline"
               placeholder="123 Main Street"
             />
             <BaseInput
               ref="input_address2"
-              label="Address Line 2"
               v-model="form.address2"
+              label="Address Line 2"
               width="full"
               icon="mdi:home-plus-outline"
               placeholder="Apartment, suite, etc."
@@ -112,24 +112,24 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <BaseInput
               ref="input_city"
-              label="City"
               v-model="form.city"
+              label="City"
               width="full"
               icon="mdi:city-variant-outline"
               placeholder="London"
             />
             <BaseInput
               ref="input_postcode"
-              label="Postcode"
               v-model="form.postcode"
+              label="Postcode"
               width="full"
               icon="mdi:mailbox-outline"
               placeholder="E1 6AN"
             />
             <BaseInput
               ref="input_country"
-              label="Country"
               v-model="form.country"
+              label="Country"
               width="full"
               icon="mdi:earth"
               placeholder="United Kingdom"
@@ -148,8 +148,8 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BaseInput
               ref="input_stripePublicKey"
-              label="Stripe Public Key"
               v-model="form.stripePublicKey"
+              label="Stripe Public Key"
               width="full"
               icon="mdi:key"
               placeholder="pk_test_..."
@@ -159,8 +159,8 @@
             />
             <BaseInput
               ref="input_stripeSecretKey"
-              label="Stripe Secret Key"
               v-model="form.stripeSecretKey"
+              label="Stripe Secret Key"
               width="full"
               icon="mdi:lock-outline"
               type="password"
@@ -177,8 +177,8 @@
         >
           <button
             type="button"
-            @click="$router.back()"
             class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
+            @click="$router.back()"
           >
             Cancel
           </button>

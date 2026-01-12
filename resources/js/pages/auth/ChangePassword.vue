@@ -15,7 +15,7 @@
         </p>
       </div>
 
-      <form @submit.prevent="openConfirmation" class="p-6 md:p-10 space-y-8">
+      <form class="p-6 md:p-10 space-y-8" @submit.prevent="openConfirmation">
         <div class="space-y-2">
           <div
             class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
@@ -51,8 +51,8 @@
                 />
                 <button
                   type="button"
-                  @click="showPass1 = !showPass1"
                   class="focus:outline-none text-slate-400 hover:text-slate-600"
+                  @click="showPass1 = !showPass1"
                 >
                   <Icon
                     :icon="
@@ -107,8 +107,8 @@
                 />
                 <button
                   type="button"
-                  @click="showPass2 = !showPass2"
                   class="focus:outline-none text-slate-400 hover:text-slate-600"
+                  @click="showPass2 = !showPass2"
                 >
                   <Icon
                     :icon="
@@ -150,8 +150,8 @@
         >
           <button
             type="button"
-            @click="resetForm"
             class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
+            @click="resetForm"
           >
             Clear Fields
           </button>
@@ -196,15 +196,15 @@
 
         <div class="flex gap-3 mt-6">
           <button
-            @click="showModal = false"
             class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
+            @click="showModal = false"
           >
             Cancel
           </button>
           <button
-            @click="handlePasswordUpdate"
             :disabled="loading"
             class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow-md transition-all disabled:opacity-50"
+            @click="handlePasswordUpdate"
           >
             {{ loading ? "Updating..." : "Yes, Update" }}
           </button>
@@ -287,7 +287,7 @@ const handlePasswordUpdate = async () => {
       resetForm();
 
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const role = storedUser.role;
+      const {role} = storedUser;
 
       if (role === "admin") {
         router.push({ name: "admin-dashboard" });

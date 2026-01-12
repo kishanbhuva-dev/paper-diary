@@ -12,7 +12,7 @@
     </div>
 
     <div v-else class="container mx-auto px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl" v-if="!selectedPlanDetails">
+      <div v-if="!selectedPlanDetails" class="mx-auto max-w-4xl">
         <div class="text-center">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl">
             Find the Perfect Plan for Your Business
@@ -103,8 +103,8 @@
           <div class="border-b border-gray-200 px-4 py-4 sm:px-8 sm:py-6 grid grid-cols-3 items-center">
             <div class="flex justify-start">
               <button
-                @click="clearSelection"
                 class="flex items-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer font-medium text-sm sm:text-base whitespace-nowrap"
+                @click="clearSelection"
               >
                 <Icon icon="mdi:arrow-left" class="h-5 w-5 mr-1" />
                 <span class="hidden sm:inline">Back</span>
@@ -149,7 +149,7 @@
             </div>
           </div>
 
-          <form @submit.prevent="handleSubscriptionPayment" class="px-4 py-6 sm:px-8 sm:py-8 space-y-5 sm:space-y-6">
+          <form class="px-4 py-6 sm:px-8 sm:py-8 space-y-5 sm:space-y-6" @submit.prevent="handleSubscriptionPayment">
             <div>
               <label class="block text-xs sm:text-sm font-bold text-gray-700 mb-1.5 uppercase tracking-wide">
                 Cardholder Name
@@ -310,7 +310,7 @@ const selectPlan = async (plan) => {
 };
 
 const mountStripeElement = () => {
-  if (!stripe.value) return;
+  if (!stripe.value) {return;}
 
   elements.value = stripe.value.elements();
   card.value = elements.value.create("card", {

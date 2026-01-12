@@ -1,6 +1,6 @@
 <template>
     <div class="relative inline-flex" @mouseenter="visible = true" @mouseleave="visible = false">
-        <slot />
+        <slot ></slot>
 
         <!-- Tooltip -->
         <transition name="fade-scale">
@@ -12,7 +12,7 @@
                 {{ text }}
 
                 <!-- Arrow -->
-                <span class="absolute w-1.5 h-1.5 rotate-45 bg-blue-500" :class="arrowClass" />
+                <span class="absolute w-1.5 h-1.5 rotate-45 bg-blue-500" :class="arrowClass" ></span>
             </div>
         </transition>
     </div>
@@ -21,8 +21,6 @@
 <script setup>
     import { ref, computed } from 'vue';
 
-    const visible = ref(false);
-
     const props = defineProps({
         text: String,
         position: {
@@ -30,6 +28,8 @@
             default: 'bottom',
         },
     });
+
+    const visible = ref(false);
 
     const positionClass = computed(() => {
         switch (props.position) {

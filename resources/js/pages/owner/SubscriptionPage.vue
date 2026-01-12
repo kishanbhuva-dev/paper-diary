@@ -10,7 +10,7 @@
 
     <div v-else class="container mx-auto px-4 py-12 sm:py-20 max-w-7xl">
       <transition name="fade-down" appear>
-        <div class="mx-auto max-w-3xl text-center mb-16" v-if="!selectedPlanDetails">
+        <div v-if="!selectedPlanDetails" class="mx-auto max-w-3xl text-center mb-16">
           <span class="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-widest text-blue-700 uppercase bg-blue-50 rounded-full">
             Pricing & Plans
           </span>
@@ -66,9 +66,9 @@
                 <div class="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center mt-0.5">
                   <Icon icon="heroicons:check-16-solid" class="w-3.5 h-3.5 text-emerald-600" />
                 </div>
-                <span class="text-sm text-slate-600" v-if="plan.display_interval === '3 months'">Billed every 3 months</span>
-                <span class="text-sm text-slate-600" v-else-if="plan.recurring?.interval === 'year'">Billed annually (save 20%)</span>
-                <span class="text-sm text-slate-600" v-else>Billed monthly</span>
+                <span v-if="plan.display_interval === '3 months'" class="text-sm text-slate-600">Billed every 3 months</span>
+                <span v-else-if="plan.recurring?.interval === 'year'" class="text-sm text-slate-600">Billed annually (save 20%)</span>
+                <span v-else class="text-sm text-slate-600">Billed monthly</span>
               </div>
               <div class="flex items-start gap-3">
                 <div class="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center mt-0.5">
@@ -94,7 +94,7 @@
           <div class="bg-white rounded-[2rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.08)] border border-slate-100 overflow-hidden">
             
             <div class="px-8 pt-10 pb-6 text-center relative">
-              <button @click="clearSelection" class="absolute left-8 top-11 p-2 rounded-full hover:bg-slate-50 transition-colors">
+              <button class="absolute left-8 top-11 p-2 rounded-full hover:bg-slate-50 transition-colors" @click="clearSelection">
                 <Icon icon="heroicons:arrow-left-20-solid" class="w-5 h-5 text-slate-400" />
               </button>
               <h2 class="text-2xl font-black text-slate-900">Complete your subscription</h2>
@@ -115,7 +115,7 @@
               </div>
             </div>
 
-            <form @submit.prevent="handleSubscriptionPayment" class="px-8 pb-12">
+            <form class="px-8 pb-12" @submit.prevent="handleSubscriptionPayment">
               <div class="space-y-6">
                 <div class="space-y-2">
                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider ml-1 text-left">Cardholder Name</label>
@@ -282,7 +282,7 @@ const selectPlan = async (plan) => {
 };
 
 const mountStripeElement = () => {
-  if (!stripe.value) return;
+  if (!stripe.value) {return;}
 
   elements.value = stripe.value.elements();
   card.value = elements.value.create("card", {
@@ -325,7 +325,7 @@ const handleSubscriptionPayment = async () => {
       },
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {throw new Error(error.message);}
 
     const response = await axios.post('/api/stripe/subscription', {
       priceId: selectedPlanDetails.value.id,
@@ -339,7 +339,7 @@ const handleSubscriptionPayment = async () => {
       router.push('/owner');
     } else if (response.data.data?.clientSecret) {
       const { error: confirmError } = await stripe.value.confirmCardPayment(response.data.data.clientSecret);
-      if (confirmError) throw new Error(confirmError.message);
+      if (confirmError) {throw new Error(confirmError.message);}
       
       toast.success('Payment confirmed! Subscription activated.');
       router.push('/owner');

@@ -5,23 +5,23 @@
     }}</label>
 
     <div
-      @dragover="onParentDragOver"
-      @dragleave="onParentDragLeave"
-      @drop="onParentDrop"
-      @click="triggerFileInput"
       :class="{
         'border-blue-500 bg-blue-50': isDragging,
         'border-gray-300 bg-gray-50 hover:bg-gray-100': !isDragging,
       }"
       class="w-full p-6 text-center border-2 border-dashed rounded-lg cursor-pointer transition duration-200"
+      @dragover="onParentDragOver"
+      @dragleave="onParentDragLeave"
+      @drop="onParentDrop"
+      @click="triggerFileInput"
     >
       <input
         ref="fileInputRef"
         type="file"
         :accept="accept"
         multiple
-        @change="handleFileChange"
         class="hidden"
+        @change="handleFileChange"
       />
       <Icon
         icon="mdi:cloud-upload"
@@ -51,10 +51,10 @@
         v-for="(image, index) in images"
         :key="image.id || image.file.name"
         draggable="true"
+        class="relative group aspect-square rounded-lg overflow-hidden shadow-md border border-gray-200 cursor-grab"
         @dragstart="onDragStart(index, $event)"
         @dragover.prevent="onDragOver(index, $event)"
         @drop.prevent="onDrop(index, $event)"
-        class="relative group aspect-square rounded-lg overflow-hidden shadow-md border border-gray-200 cursor-grab"
       >
         <img
           :src="image.url"
@@ -63,10 +63,10 @@
         />
 
         <button
-          @click.stop="deleteImage(index)"
           type="button"
           class="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition duration-300 transform group-hover:scale-100 scale-75 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
           title="Delete Image"
+          @click.stop="deleteImage(index)"
         >
           <Icon icon="mdi:close" class="w-4 h-4" />
         </button>
@@ -138,7 +138,7 @@ const onDrop = (index, e) => {
   e.preventDefault();
   const from = dragIndex.value;
   const to = index;
-  if (from === null || from === to) return;
+  if (from === null || from === to) {return;}
   const newImages = [...images.value];
   const [moved] = newImages.splice(from, 1);
   newImages.splice(to, 0, moved);
@@ -255,7 +255,7 @@ const processFiles = (newFiles) => {
   });
 
   const processedImages = sizeFiltered.map((file) => ({
-    file: file,
+    file,
     url: URL.createObjectURL(file), // Create a temporary URL for preview
     // The 'id' property is left null for new uploads until they are saved to the API
     id: null,
@@ -276,6 +276,7 @@ const deleteImage = (index) => {
   toast.info("Image deleted successfully (will be removed upon save).");
 };
 </script>
+
 <script>
 export default {
   methods: {

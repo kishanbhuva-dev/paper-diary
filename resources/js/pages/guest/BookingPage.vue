@@ -14,7 +14,7 @@
 
     <div v-else class="max-w-7xl mx-auto">
       <div class="flex items-center gap-3 mb-8">
-        <button @click="router.back()" class="p-2 hover:bg-gray-200 rounded-full transition-colors">
+        <button class="p-2 hover:bg-gray-200 rounded-full transition-colors" @click="router.back()">
           <Icon icon="mdi:arrow-left" class="text-2xl" />
         </button>
         <h2 class="text-3xl font-black tracking-tight text-gray-900 uppercase font-oswald">
@@ -33,10 +33,10 @@
                   <p class="text-sm text-gray-500">Review or modify your booking period</p>
                 </div>
                 <button
-                  @click="handleEditToggle"
                   type="button"
                   class="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold transition-all shadow-sm active:scale-95"
                   :class="isEditing ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-900 text-white hover:bg-black'"
+                  @click="handleEditToggle"
                 >
                   <Icon :icon="isEditing ? 'mdi:check-circle' : 'mdi:calendar-edit'" />
                   {{ isEditing ? "Save Selection" : "Edit Selection" }}
@@ -78,13 +78,13 @@
             <section class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm relative overflow-hidden">
               <h3 class="mb-8 text-xl font-bold text-gray-800 border-b border-gray-100 pb-6">2. Guest Information</h3>
               
-              <form @submit.prevent="initiateBooking" class="space-y-8">
+              <form class="space-y-8" @submit.prevent="initiateBooking">
                 <div class="grid gap-x-8 gap-y-6 sm:grid-cols-2">
                   <div v-for="(field, key) in formSchema" :key="key" class="space-y-1.5">
                     <label class="block text-sm font-bold text-gray-700">{{ field.label }} <span class="text-red-500">*</span></label>
                     <input 
-                      :type="field.type" 
                       v-model="guestDetails[key]" 
+                      :type="field.type" 
                       class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none placeholder:text-gray-400"
                       :placeholder="field.placeholder"
                       :class="{'border-red-500 bg-red-50': errors[key]}"
@@ -106,17 +106,17 @@
                     <div class="space-y-3">
                       <label class="block text-sm font-bold text-gray-700">Adults</label>
                       <div class="inline-flex items-center gap-4 rounded-xl border border-gray-200 p-1.5 bg-gray-50">
-                        <button type="button" @click="updateGuests('adults', -1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all"><Icon icon="mdi:minus" /></button>
+                        <button type="button" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all" @click="updateGuests('adults', -1)"><Icon icon="mdi:minus" /></button>
                         <span class="w-6 text-center font-bold text-lg">{{ guestDetails.adults }}</span>
-                        <button type="button" @click="updateGuests('adults', 1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all"><Icon icon="mdi:plus" /></button>
+                        <button type="button" class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all" @click="updateGuests('adults', 1)"><Icon icon="mdi:plus" /></button>
                       </div>
                     </div>
                     <div class="space-y-3">
                       <label class="block text-sm font-bold text-gray-700">Children</label>
                       <div class="inline-flex items-center gap-4 rounded-xl border border-gray-200 p-1.5 bg-gray-50">
-                        <button type="button" @click="updateGuests('children', -1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all"><Icon icon="mdi:minus" /></button>
+                        <button type="button" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all" @click="updateGuests('children', -1)"><Icon icon="mdi:minus" /></button>
                         <span class="w-6 text-center font-bold text-lg">{{ guestDetails.children }}</span>
-                        <button type="button" @click="updateGuests('children', 1)" class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all"><Icon icon="mdi:plus" /></button>
+                        <button type="button" class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all" @click="updateGuests('children', 1)"><Icon icon="mdi:plus" /></button>
                       </div>
                     </div>
                   </div>
@@ -124,7 +124,7 @@
 
                 <div class="pt-6 border-t border-gray-100">
                   <div class="flex items-center gap-3 mb-8">
-                    <input id="agreement" type="checkbox" v-model="isAgreed" class="h-6 w-6 rounded-lg border-gray-300 text-primary cursor-pointer transition-all focus:ring-primary" required />
+                    <input id="agreement" v-model="isAgreed" type="checkbox" class="h-6 w-6 rounded-lg border-gray-300 text-primary cursor-pointer transition-all focus:ring-primary" required />
                     <label for="agreement" class="text-sm text-gray-600 font-medium cursor-pointer">I agree to the <span class="text-primary underline font-bold">Booking Terms & Cancellation Policy</span></label>
                   </div>
                   
@@ -137,7 +137,7 @@
                       <Icon v-if="isSubmitting" icon="svg-spinners:ring-resize" />
                       <span>Confirm & Proceed to Payment</span>
                     </button>
-                    <button @click="cancelAndExit" type="button" class="flex-1 rounded-2xl border-2 border-gray-200 bg-white py-5 px-8 text-sm font-black text-gray-400 hover:bg-gray-50 transition-all uppercase tracking-widest font-oswald">Cancel</button>
+                    <button type="button" class="flex-1 rounded-2xl border-2 border-gray-200 bg-white py-5 px-8 text-sm font-black text-gray-400 hover:bg-gray-50 transition-all uppercase tracking-widest font-oswald" @click="cancelAndExit">Cancel</button>
                   </div>
                 </div>
               </form>
@@ -160,14 +160,14 @@
                 
                 <div class="mt-8 flex flex-col sm:flex-row gap-4">
                   <button 
-                    @click="processFinalPayment"
                     :disabled="isProcessingFinal"
                     class="flex-[2] rounded-xl bg-green-600 py-5 px-8 text-lg font-black text-white shadow-lg hover:bg-green-700 disabled:bg-gray-300 transition-all uppercase tracking-widest font-oswald flex items-center justify-center gap-3"
+                    @click="processFinalPayment"
                   >
                     <Icon v-if="isProcessingFinal" icon="svg-spinners:ring-resize" />
                     {{ isProcessingFinal ? 'Processing...' : `Pay £${totalPrice.toLocaleString()} Now` }}
                   </button>
-                  <button @click="showPaymentArea = false" class="flex-1 text-sm font-bold text-gray-400 hover:text-gray-600">Go Back</button>
+                  <button class="flex-1 text-sm font-bold text-gray-400 hover:text-gray-600" @click="showPaymentArea = false">Go Back</button>
                 </div>
                 
                 <div class="mt-6 flex items-center justify-center gap-4 opacity-50">
@@ -268,7 +268,7 @@ const pendingBookingId = ref(null);
 
 // --- Calculations ---
 const totalNights = computed(() => {
-  if (!bookingDates.value.checkIn || !bookingDates.value.checkOut) return 1;
+  if (!bookingDates.value.checkIn || !bookingDates.value.checkOut) {return 1;}
   const start = dayjs(bookingDates.value.checkIn);
   const end = dayjs(bookingDates.value.checkOut);
   const diff = end.diff(start, 'day');
@@ -292,7 +292,7 @@ onMounted(async () => {
   }
 
   const { slug, r_id, in: cin, out: cout } = route.query;
-  if (!slug || !r_id) return router.push("/");
+  if (!slug || !r_id) {return router.push("/");}
 
   bookingDates.value = { checkIn: cin, checkOut: cout };
   selectedResourceId.value = r_id;
@@ -338,7 +338,7 @@ const validateForm = () => {
 };
 
 const initiateBooking = async () => {
-  if (!validateForm()) return;
+  if (!validateForm()) {return;}
   isSubmitting.value = true;
 
   try {
@@ -363,7 +363,7 @@ const initiateBooking = async () => {
     };
 
     const bookingRes = await userService.createBooking(payload);
-    if (!bookingRes.data.status) throw new Error(bookingRes.data.message);
+    if (!bookingRes.data.status) {throw new Error(bookingRes.data.message);}
     pendingBookingId.value = bookingRes.data.data.id;
 
     const intentRes = await userService.createPaymentIntent({
@@ -390,14 +390,14 @@ const initiateBooking = async () => {
     card.value.mount("#card-element");
 
   } catch (err) {
-    alert("Error: " + err.message);
+    alert(`Error: ${  err.message}`);
   } finally {
     isSubmitting.value = false;
   }
 };
 
 const processFinalPayment = async () => {
-  if (isProcessingFinal.value) return;
+  if (isProcessingFinal.value) {return;}
   isProcessingFinal.value = true;
 
   try {
@@ -447,8 +447,8 @@ const handleEditToggle = async () => {
 };
 
 const updateGuests = (t, v) => {
-  if (t === 'adults') guestDetails.value.adults = Math.max(1, guestDetails.value.adults + v);
-  else guestDetails.value.children = Math.max(0, guestDetails.value.children + v);
+  if (t === 'adults') {guestDetails.value.adults = Math.max(1, guestDetails.value.adults + v);}
+  else {guestDetails.value.children = Math.max(0, guestDetails.value.children + v);}
 };
 
 const cancelAndExit = () => router.push({ name: "details", params: { slug: route.query.slug } });

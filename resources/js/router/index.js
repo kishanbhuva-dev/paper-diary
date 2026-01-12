@@ -23,10 +23,10 @@ router.beforeEach((to, from, next) => {
      });
   }
 
-  const path = to.path;
+  const {path} = to;
 
   if (path.startsWith("/admin")) {
-    if (!isAuthenticated.value) return next({ name: "login" });
+    if (!isAuthenticated.value) {return next({ name: "login" });}
 
     if (!isAdmin.value) {
       return next(
@@ -36,7 +36,7 @@ router.beforeEach((to, from, next) => {
   }
 
   if (path.startsWith("/owner")) {
-    if (!isAuthenticated.value) return next({ name: "login" });
+    if (!isAuthenticated.value) {return next({ name: "login" });}
 
     if (!isOwner.value) {
       return next(

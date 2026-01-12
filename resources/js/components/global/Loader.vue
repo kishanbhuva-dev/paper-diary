@@ -1,18 +1,3 @@
-<script setup>
-import { ref } from "vue";
-
-const visible = ref(false);
-
-function show() {
-  visible.value = true;
-}
-function hide() {
-  visible.value = false;
-}
-
-defineExpose({ show, hide });
-</script>
-
 <template>
   <div
     v-if="visible"
@@ -43,6 +28,21 @@ defineExpose({ show, hide });
     </p>
   </div>
 </template>
+
+<script setup>
+import { ref } from "vue";
+
+const visible = ref(false);
+
+function show() {
+  visible.value = true;
+}
+function hide() {
+  visible.value = false;
+}
+
+defineExpose({ show, hide });
+</script>
 
 <style scoped>
 @keyframes fadeIn {

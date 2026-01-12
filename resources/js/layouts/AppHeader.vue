@@ -20,8 +20,8 @@
 
             <div v-else-if="item.isDropdown" class="relative">
               <button
-                @click.stop="toggleDropdown(item.label)"
                 class="flex items-center text-sm font-semibold text-gray-600 hover:text-blue-600 focus:outline-none transition-colors duration-200"
+                @click.stop="toggleDropdown(item.label)"
               >
                 <span>{{ item.label }}</span>
                 <Icon
@@ -62,8 +62,8 @@
           <template v-else>
             <div class="hidden lg:block relative ml-6">
               <button
-                @click.stop="toggleDropdown('userProfile')"
                 class="group flex items-center p-1 rounded-full hover:bg-gray-50 transition-all duration-200 ring-1 ring-transparent hover:ring-gray-200"
+                @click.stop="toggleDropdown('userProfile')"
               >
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-bold text-lg shadow-inner group-hover:shadow-md transition-all">
                   {{ userInitials }}
@@ -101,8 +101,8 @@
 
                 <div class="p-2 bg-gray-50/50 border-t border-gray-100">
                   <button
-                    @click="handleLogout"
                     class="w-full flex items-center px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+                    @click="handleLogout"
                   >
                     <div class="w-8 h-8 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center mr-3 transition-colors">
                       <Icon icon="lucide:log-out" class="h-4 w-4 text-red-600" />
@@ -116,8 +116,8 @@
 
           <div class="lg:hidden ml-4">
             <button
-              @click="toggleMobileMenu"
               class="p-2 rounded-xl text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+              @click="toggleMobileMenu"
             >
               <Icon :icon="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'" class="h-6 w-6" />
             </button>
@@ -131,7 +131,7 @@
       <div class="fixed inset-y-0 right-0 w-[280px] bg-white shadow-2xl z-50 p-6 flex flex-col transform transition-transform duration-300">
         <div class="flex justify-between items-center mb-8">
           <img src="/public/main_logo.png" alt="Logo" class="h-8" />
-          <button @click="toggleMobileMenu" class="p-2 rounded-full bg-gray-50 text-gray-500"><Icon icon="lucide:x" /></button>
+          <button class="p-2 rounded-full bg-gray-50 text-gray-500" @click="toggleMobileMenu"><Icon icon="lucide:x" /></button>
         </div>
 
         <nav class="flex-1 space-y-2">
@@ -147,8 +147,8 @@
 
             <div v-else-if="item.isDropdown">
               <button
-                @click="toggleDropdown(item.label)"
                 class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-semibold text-gray-700 hover:bg-gray-50"
+                @click="toggleDropdown(item.label)"
               >
                 <span>{{ item.label }}</span>
                 <Icon icon="lucide:chevron-down" :class="{ 'rotate-180': openDropdown === item.label }" class="transition-transform" />
@@ -193,7 +193,7 @@
                 <Icon :icon="link.icon" class="mr-3 h-4 w-4 text-gray-400" />
                 {{ link.label }}
               </router-link>
-              <button @click="handleLogout" class="w-full flex items-center px-4 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50">
+              <button class="w-full flex items-center px-4 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50" @click="handleLogout">
                 <Icon icon="lucide:log-out" class="mr-3 h-4 w-4" />
                 Logout
               </button>
@@ -237,13 +237,13 @@ onUnmounted(() => {
 });
 
 const userInitials = computed(() => {
-  if (!user.value?.firstName) return "U";
+  if (!user.value?.firstName) {return "U";}
   return user.value.firstName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 });
 
 const authLinks = computed(() => {
   const role = user.value?.role?.toLowerCase();
-  if (!role) return [];
+  if (!role) {return [];}
 
   const links = [
     { name: `${role}-profile`, label: "My Profile", icon: "lucide:user-circle" },

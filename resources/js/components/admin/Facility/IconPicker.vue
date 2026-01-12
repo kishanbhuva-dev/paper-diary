@@ -45,12 +45,12 @@
                 <div
                     v-for="icon in paginatedIcons"
                     :key="icon.id + '-' + icon.style"
-                    @click="selectIcon(icon)"
                     class="cursor-pointer border rounded-md p-1.5 text-center hover:border-blue-900 transition duration-150 ease-in-out"
                     :class="{
                         'border-blue-500 shadow-md':
                             selectedIcon && selectedIcon.id === icon.id && selectedIcon.style === icon.style,
                     }"
+                    @click="selectIcon(icon)"
                 >
                     <i :class="`fa-${icon.style} fa-${icon.id} text-gray-700 text-lg`"></i>
                 </div>
@@ -59,31 +59,31 @@
             <!-- Pagination -->
             <div v-if="totalPages > 1" class="flex justify-center mt-6 space-x-1 text-sm">
                 <button
-                    @click="currentPage = 1"
                     :disabled="currentPage === 1"
                     class="px-2 py-1 rounded border hover:bg-gray-100 disabled:opacity-50"
+                    @click="currentPage = 1"
                 >
                     &laquo;
                 </button>
                 <button
-                    @click="currentPage--"
                     :disabled="currentPage === 1"
                     class="px-2 py-1 rounded border hover:bg-gray-100 disabled:opacity-50"
+                    @click="currentPage--"
                 >
                     &lsaquo;
                 </button>
                 <span class="px-3 py-1">{{ currentPage }} / {{ totalPages }}</span>
                 <button
-                    @click="currentPage++"
                     :disabled="currentPage === totalPages"
                     class="px-2 py-1 rounded border hover:bg-gray-100 disabled:opacity-50"
+                    @click="currentPage++"
                 >
                     &rsaquo;
                 </button>
                 <button
-                    @click="currentPage = totalPages"
                     :disabled="currentPage === totalPages"
                     class="px-2 py-1 rounded border hover:bg-gray-100 disabled:opacity-50"
+                    @click="currentPage = totalPages"
                 >
                     &raquo;
                 </button>
@@ -111,7 +111,7 @@
     // Filtered icons based on search term
     const filteredIcons = computed(() => {
         const query = searchTerm.value.toLowerCase().trim();
-        if (!query) return allIcons.value.slice(0, 100);
+        if (!query) {return allIcons.value.slice(0, 100);}
         return allIcons.value.filter(icon => icon.searchTerms.some(term => term.includes(query)));
     });
 
@@ -129,7 +129,7 @@
         error.value = null;
         try {
             const response = await fetch(FONT_AWESOME_METADATA_URL);
-            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            if (!response.ok) {throw new Error(`HTTP error: ${response.status}`);}
             const data = await response.json();
 
             const freeIcons = Object.entries(data).flatMap(([id, icon]) => {

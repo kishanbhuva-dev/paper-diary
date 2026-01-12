@@ -1,34 +1,3 @@
-<script setup>
-import { Icon } from "@iconify/vue";
-import { ref } from "vue";
-
-const props = defineProps({
-  room: { type: Object, required: true },
-});
-
-const activeImageIndex = ref(0);
-const selectedText = ref("");
-
-const nextImage = () => {
-  activeImageIndex.value =
-    (activeImageIndex.value + 1) % props.room.imageUrls.length;
-};
-
-const prevImage = () => {
-  activeImageIndex.value =
-    (activeImageIndex.value - 1 + props.room.imageUrls.length) %
-    props.room.imageUrls.length;
-};
-
-const selectRoom = () => {
-  selectedText.value = `Selecting...`;
-
-  setTimeout(() => {
-    selectedText.value = "Booked!";
-  }, 3000);
-};
-</script>
-
 <template>
   <div
     class="flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg transition-shadow duration-300 hover:shadow-2xl lg:flex-row"
@@ -48,13 +17,13 @@ const selectRoom = () => {
             <div
               v-for="(url, index) in room.imageUrls.slice(0, 4)"
               :key="index"
-              @click.stop="activeImageIndex = index"
               :class="[
                 'size-8 cursor-pointer overflow-hidden rounded-full border-2 shadow-md transition',
                 index === activeImageIndex
                   ? 'border-white ring-2 ring-blue-400'
                   : 'border-transparent opacity-80 hover:opacity-100',
               ]"
+              @click.stop="activeImageIndex = index"
             >
               <img
                 :src="url"
@@ -66,14 +35,14 @@ const selectRoom = () => {
 
           <div class="flex-center gap-1">
             <button
-              @click.stop="prevImage"
               class="flex-center size-8 cursor-pointer rounded bg-white/50 text-white backdrop-blur-sm"
+              @click.stop="prevImage"
             >
               <Icon icon="mdi:chevron-left" class="text-2xl" />
             </button>
             <button
-              @click.stop="nextImage"
               class="flex-center size-8 cursor-pointer rounded bg-white/50 text-white backdrop-blur-sm"
+              @click.stop="nextImage"
             >
               <Icon icon="mdi:chevron-right" class="text-2xl" />
             </button>
@@ -129,7 +98,6 @@ const selectRoom = () => {
         </div>
 
         <button
-          @click="selectRoom"
           :disabled="!!selectedText"
           :class="[
             'flex-center rounded-lg px-6 py-2.5 text-base font-semibold whitespace-nowrap transition duration-150 ease-in-out',
@@ -138,6 +106,7 @@ const selectRoom = () => {
               : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 disabled:cursor-wait disabled:opacity-70',
             'shadow-xl',
           ]"
+          @click="selectRoom"
         >
           <Icon
             v-if="selectedText === 'Selecting...'"
@@ -174,3 +143,34 @@ const selectRoom = () => {
     }"
   /> -->
 </template>
+
+<script setup>
+import { Icon } from "@iconify/vue";
+import { ref } from "vue";
+
+const props = defineProps({
+  room: { type: Object, required: true },
+});
+
+const activeImageIndex = ref(0);
+const selectedText = ref("");
+
+const nextImage = () => {
+  activeImageIndex.value =
+    (activeImageIndex.value + 1) % props.room.imageUrls.length;
+};
+
+const prevImage = () => {
+  activeImageIndex.value =
+    (activeImageIndex.value - 1 + props.room.imageUrls.length) %
+    props.room.imageUrls.length;
+};
+
+const selectRoom = () => {
+  selectedText.value = `Selecting...`;
+
+  setTimeout(() => {
+    selectedText.value = "Booked!";
+  }, 3000);
+};
+</script>

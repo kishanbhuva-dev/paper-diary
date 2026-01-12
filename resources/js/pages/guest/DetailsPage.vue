@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-8" v-if="propertyData">
+  <main v-if="propertyData" class="space-y-8">
     <section class="space-y-6 bg-blue-100 py-4 sm:py-6 lg:py-8">
       <div class="container mx-auto">
         <div class="px-4 sm:px-6 lg:px-8 flex justify-center">
@@ -7,18 +7,18 @@
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-fit max-w-full items-end justify-center"
           >
             <div class="w-full sm:w-[180px] lg:w-[220px]">
-              <BaseDatePicker label="CHECK-IN" v-model="details.checkIn" />
+              <BaseDatePicker v-model="details.checkIn" label="CHECK-IN" />
             </div>
 
             <div class="w-full sm:w-[180px] lg:w-[220px]">
-              <BaseDatePicker label="CHECK-OUT" v-model="details.checkOut" />
+              <BaseDatePicker v-model="details.checkOut" label="CHECK-OUT" />
             </div>
 
             <div class="w-full sm:w-[180px] lg:w-[220px]">
               <BaseSelect
+                v-model="details.roomGuests"
                 label="ROOM & GUESTS"
                 placeholder="Select Room & Guests"
-                v-model="details.roomGuests"
                 :options="[
                   { value: '1room_3adults', label: '1 Room, 3 Adults' },
                 ]"
@@ -28,9 +28,9 @@
             <div class="w-full sm:w-[180px] lg:w-[220px]">
               <button
                 type="button"
-                @click="handleShowResources"
                 class="w-full btn-primary px-2 py-2.5 text-sm uppercase font-bold h-[42px] flex items-center justify-center box-border m-0 overflow-hidden"
                 :disabled="fetchingResources"
+                @click="handleShowResources"
               >
                 <span class="truncate text-center w-full">
                   {{ fetchingResources ? "..." : "Show Resource Types" }}
@@ -76,13 +76,13 @@
               <button
                 v-for="date in dateList"
                 :key="date.dateString"
-                @click="selectDate(date.dateString)"
                 class="cursor-pointer rounded-md border border-gray-200 p-2"
                 :class="
                   date.dateString === selectedDate.format('YYYY-MM-DD')
                     ? 'bg-green-600 text-white'
                     : 'bg-white text-gray-900'
                 "
+                @click="selectDate(date.dateString)"
               >
                 <div class="font-semibold">{{ date.dayNumber }}</div>
                 <div>{{ date.dayName }}</div>
@@ -121,11 +121,11 @@
         >
           <div
             v-for="(image, index) in propertyImages"
-            :key="image.id"
             v-show="index < 5"
-            @click="openCarousel(index)"
+            :key="image.id"
             :class="getFlexGrowClass(image.id)"
             class="relative flex-1 cursor-pointer overflow-hidden rounded-lg transition-all duration-500 ease-in-out"
+            @click="openCarousel(index)"
             @mouseover="setExpanded(image.id)"
           >
             <img :src="image.image" class="h-full w-full object-cover" />
@@ -151,8 +151,8 @@
               v-html="propertyData.description"
             ></div>
             <button
-              @click="isAboutExpanded = !isAboutExpanded"
               class="mt-2 font-semibold text-primary uppercase text-sm"
+              @click="isAboutExpanded = !isAboutExpanded"
             >
               {{ isAboutExpanded ? "Show Less" : "Show More" }}
               <Icon
@@ -359,8 +359,8 @@
                     </h5>
                   </div>
                   <button
-                    @click="goToBooking(roomType)"
                     class="mt-4 w-full btn-primary px-10 py-3 text-sm sm:w-auto uppercase tracking-wider"
+                    @click="goToBooking(roomType)"
                   >
                     Book now
                   </button>
@@ -378,14 +378,14 @@
         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/95"
       >
         <button
-          @click="closeCarousel"
           class="absolute top-6 right-6 text-white hover:text-gray-300 z-[1000]"
+          @click="closeCarousel"
         >
           <Icon icon="mdi:close" class="text-4xl" />
         </button>
         <button
-          @click="prevImage"
           class="absolute left-4 text-white hover:bg-white/10 p-2 rounded-full z-[1000]"
+          @click="prevImage"
         >
           <Icon icon="mdi:chevron-left" class="text-5xl" />
         </button>
@@ -399,8 +399,8 @@
           </p>
         </div>
         <button
-          @click="nextImage"
           class="absolute right-4 text-white hover:bg-white/10 p-2 rounded-full z-[1000]"
+          @click="nextImage"
         >
           <Icon icon="mdi:chevron-right" class="text-5xl" />
         </button>
@@ -530,7 +530,7 @@ const prevImage = () => {
 // Property Details Fetching
 const fetchProperty = async () => {
   try {
-    const slug = route.params.slug;
+    const {slug} = route.params;
     const res = await userService.getPropertyDetails(slug);
     if (res.data.status) {
       propertyData.value = res.data.data;

@@ -10,8 +10,8 @@
           <div class="relative transition-colors hover:bg-gray-50">
             <select
               v-model="filters.status"
-              @change="fetchBookings"
               class="mr-6 w-full cursor-pointer appearance-none p-2 outline-0"
+              @change="fetchBookings"
             >
               <option value="">Status</option>
               <option value="pending">Pending</option>
@@ -25,26 +25,26 @@
           </div>
           <div class="relative transition-colors hover:bg-gray-50">
             <input
-              type="date"
               v-model="filters.arrivalDateTime"
-              @change="fetchBookings"
+              type="date"
               class="w-full cursor-pointer p-2 outline-0"
               onclick="this.showPicker()"
+              @change="fetchBookings"
             />
           </div>
           <div class="relative transition-colors hover:bg-gray-50">
             <input
-              type="date"
               v-model="filters.departureDateTime"
-              @change="fetchBookings"
+              type="date"
               class="w-full cursor-pointer p-2 outline-0"
               onclick="this.showPicker()"
+              @change="fetchBookings"
             />
           </div>
           <div>
             <button
-              @click="resetFilters"
               class="flex-center w-full cursor-pointer gap-1 p-2 text-red-600 outline-0 transition-colors hover:bg-red-50"
+              @click="resetFilters"
             >
               <Icon icon="mdi:refresh" />
               Reset Filter
@@ -53,15 +53,15 @@
         </div>
         <div class="relative transition-colors hover:bg-gray-50">
           <input
-            type="text"
             v-model="filters.search"
-            @keyup.enter="fetchBookings"
+            type="text"
             placeholder="Search property or status"
             class="w-full rounded-md border border-gray-300 p-2 pr-10 outline-0"
+            @keyup.enter="fetchBookings"
           />
           <button
-            @click="fetchBookings"
             class="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer rounded bg-primary p-2 text-white"
+            @click="fetchBookings"
           >
             <Icon icon="mdi:search" />
           </button>
@@ -73,13 +73,13 @@
           <button
             v-for="tab in tabs"
             :key="tab.value"
-            @click="handleTabChange(tab.value)"
             :class="[
               activeTab === tab.value
                 ? 'border-primary text-primary'
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
               'cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap',
             ]"
+            @click="handleTabChange(tab.value)"
           >
             {{ tab.name }}
           </button>
@@ -117,7 +117,7 @@
                   No bookings found.
                 </td>
               </tr>
-              <tr v-for="(booking, index) in bookings" :key="booking.id" v-else>
+              <tr v-for="(booking, index) in bookings" v-else :key="booking.id">
                 <td class="px-6 py-4 text-sm whitespace-nowrap">
                   <!-- #{{ booking.id }} -->
                   {{ ++index }}
@@ -151,8 +151,8 @@
                 >
                   <button
                     v-if="booking.status !== 'cancelled'"
-                    @click="initiateCancel(booking)"
                     class="text-red-600 hover:text-red-900 font-bold transition-colors cursor-pointer"
+                    @click="initiateCancel(booking)"
                   >
                     Cancel
                   </button>
@@ -195,15 +195,15 @@
 
         <div class="flex justify-end gap-3">
           <button
-            @click="isModalOpen = false"
             class="rounded-md px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+            @click="isModalOpen = false"
           >
             Keep Booking
           </button>
           <button
-            @click="confirmCancel"
             :disabled="!cancelReason || isSubmitting"
             class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+            @click="confirmCancel"
           >
             {{ isSubmitting ? "Processing..." : "Confirm Cancellation" }}
           </button>

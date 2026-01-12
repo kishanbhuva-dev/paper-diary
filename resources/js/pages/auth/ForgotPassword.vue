@@ -8,11 +8,11 @@
       password.
     </p>
 
-    <form @submit.prevent="handleForgotPassword" class="space-y-5">
+    <form class="space-y-5" @submit.prevent="handleForgotPassword">
       <BaseInput
         ref="emailInput"
-        label="Your Email"
         v-model="form.email"
+        label="Your Email"
         type="email"
         autocomplete="email"
         width="full"

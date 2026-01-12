@@ -59,8 +59,8 @@
       <button
         v-if="isPasswordType && !disabled"
         type="button"
-        @click="showPassword = !showPassword"
         class="focus:outline-none text-slate-400 hover:text-slate-600"
+        @click="showPassword = !showPassword"
       >
         <Icon
           :icon="showPassword ? 'mdi:eye-off-outline' : 'mdi:eye-outline'"
@@ -176,8 +176,8 @@ const showPassword = ref(false);
 const isPasswordType = computed(() => props.type === "password");
 
 const computedType = computed(() => {
-  if (isPasswordType.value && !showPassword.value) return "password";
-  if (props.type === "number") return "number";
+  if (isPasswordType.value && !showPassword.value) {return "password";}
+  if (props.type === "number") {return "number";}
   return "text";
 });
 
@@ -189,7 +189,7 @@ watch(
 );
 
 const handleInput = (event) => {
-  let val = event.target.value;
+  const val = event.target.value;
   if (props.type === "number") {
     if (val === "") {
       innerValue.value = null;
@@ -208,7 +208,7 @@ const handleInput = (event) => {
     innerValue.value = val;
     emit("update:modelValue", val);
   }
-  if (touched.value) validateInput();
+  if (touched.value) {validateInput();}
 };
 
 const patterns = { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ };

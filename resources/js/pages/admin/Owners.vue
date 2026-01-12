@@ -7,33 +7,33 @@
       :server-side="true"
       :total-items="total"
       :per-page="perPage"
+      :show-delete="true"
+      :show-search="true"
+      :show-add="true"
       @search="handleSearch"
+      :show-download="true"
       @page-change="handlePageChange"
+      :show-edit="true"
       @per-page-change="handlePerPageChange"
+      :show-view="false"
       @open-add-modal="handleAdd"
+      admin-login-title="Login as Owner"
       @open-edit-modal="handleEdit"
       @delete="handleDelete"
       @admin-login="handleLoginAsUser"
       @sort="handleSort"
-      :showDelete="true"
-      :show-search="true"
-      :showAdd="true"
-      :showDownload="true"
-      :showEdit="true"
-      :show-view="false"
-      adminLoginTitle="Login as Owner"
     />
     <BaseModal
-      :title="form?.id ? 'Edit Owner' : 'Add Owner'"
       v-model="isOpen"
+      :title="form?.id ? 'Edit Owner' : 'Add Owner'"
       width="max-w-xl"
       @save="handleSubmit"
     >
       <div class="grid grid-cols-2 gap-4">
         <BaseInput
           ref="firstNameInput"
-          label="First Name"
           v-model="form.firstName"
+          label="First Name"
           width="full"
           required
           icon="lucide:user"
@@ -41,8 +41,8 @@
         />
         <BaseInput
           ref="lastNameInput"
-          label="Last Name"
           v-model="form.lastName"
+          label="Last Name"
           width="full"
           required
           icon="lucide:user"
@@ -50,8 +50,8 @@
         />
         <BaseInput
           ref="emailInput"
-          label="Your Email"
           v-model="form.email"
+          label="Your Email"
           type="email"
           autocomplete="email"
           width="full"
@@ -61,20 +61,20 @@
         />
         <BaseInput
           ref="passwordInput"
-          label="Password"
           v-model="form.password"
+          label="Password"
           type="password"
           autocomplete="new-password"
           width="full"
           :required="!form.id"
-          :minLength="6"
+          :min-length="6"
           icon="lucide:lock"
           placeholder="••••••••"
         />
         <BaseInput
           ref="addressInput"
-          label="Address"
           v-model="form.address"
+          label="Address"
           width="full"
           required
           class="col-span-2"
@@ -82,46 +82,46 @@
           placeholder="123 Main St"
         />
         <BaseInput
-          label="Address 2"
           v-model="form.address2"
+          label="Address 2"
           width="full"
           class="col-span-2"
           icon="lucide:map-pin"
           placeholder="Apt/Suite"
         />
         <BaseInput
-          label="City"
           v-model="form.city"
+          label="City"
           width="full"
           icon="mdi:city"
           placeholder="City"
         />
         <BaseInput
-          label="Country"
           v-model="form.country"
+          label="Country"
           width="full"
           icon="lucide:globe"
           placeholder="United States"
         />
         <BaseInput
-          label="Postcode"
           v-model="form.postcode"
+          label="Postcode"
           width="full"
           class="col-span-2"
           icon="lucide:map-pin"
           placeholder="12345"
         />
         <BaseInput
-          label="Phone"
           v-model="form.phone"
+          label="Phone"
           type="phone"
           width="full"
           icon="lucide:phone"
           placeholder="(123) 456-7890"
         />
         <BaseInput
-          label="telephone"
           v-model="form.telephone"
+          label="telephone"
           type="phone"
           width="full"
           icon="lucide:phone"
@@ -214,7 +214,7 @@ const handleSubmit = async () => {
 
   const allValid = inputs.every((input) => input.value.validate());
 
-  if (!allValid) return;
+  if (!allValid) {return;}
 
   let res;
 
@@ -266,7 +266,7 @@ const handlePerPageChange = (size) => {
 const owners = ref([]);
 
 const tableColumns = [
-  { label: "Name", key: (row) => row?.firstName + " " + row?.lastName },
+  { label: "Name", key: (row) => `${row?.firstName  } ${  row?.lastName}` },
   { label: "Email", key: "email" },
   { label: "Address", key: "address" },
   { label: "Phone", key: "phone" },
@@ -274,7 +274,7 @@ const tableColumns = [
 ];
 
 const handleLoginAsUser = async (item) => {
-      const email = item.email;
+      const {email} = item;
 
   if (!email) {
       console.warn("Admin login attempted without email");

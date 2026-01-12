@@ -10,14 +10,14 @@
         
         <div class="flex gap-3">
           <button 
-            @click="$emit('update:modelValue', false)"
             class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer"
+            @click="$emit('update:modelValue', false)"
           >
             No, Keep it
           </button>
           <button 
-            @click="$emit('confirm')"
             class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-200 transition-all active:scale-95 cursor-pointer"
+            @click="$emit('confirm')"
           >
             Yes, Cancel
           </button>

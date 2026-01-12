@@ -3,8 +3,8 @@
     <div class="max-w-5xl mx-auto">
       <div class="flex items-center justify-between mb-8">
         <button
-          @click="handleBackButton"
           class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-blue-600 transition-all shadow-sm group"
+          @click="handleBackButton"
         >
           <Icon
             icon="mdi:arrow-left"
@@ -19,8 +19,8 @@
           </h2>
         </div>
         <button
-          @click="cancelWizard"
           class="text-sm font-bold text-gray-400 hover:text-red-500 uppercase tracking-wider transition-colors"
+          @click="cancelWizard"
         >
           Exit
         </button>
@@ -30,7 +30,6 @@
         <div class="flex items-center justify-between relative z-10">
           <div v-for="step in 3" :key="step" class="flex flex-col items-center">
             <div
-              @click="handleStepClick(step)"
               :class="[
                 'w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 border-4',
                 currentStep >= step
@@ -40,6 +39,7 @@
                   ? 'cursor-pointer hover:scale-105'
                   : 'cursor-default',
               ]"
+              @click="handleStepClick(step)"
             >
               <Icon
                 v-if="currentStep > step"
@@ -77,8 +77,8 @@
               <div :key="currentStep">
                 <PropertiesForm
                   v-if="currentStep === 1"
-                  ref="step1Ref"
                   :id="normalizedPropertyId"
+                  ref="step1Ref"
                   :in-wizard="true"
                   :edit-mode="startedWithId"
                   @success="handleStep1Success"
@@ -124,16 +124,16 @@
           <div class="flex items-center gap-4">
             <button
               v-if="currentStep > 1"
-              @click="prevStep"
               class="px-6 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors"
+              @click="prevStep"
             >
               Previous
             </button>
 
             <button
-              @click="submitCurrentStep"
               :disabled="loading"
               class="relative px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center group overflow-hidden"
+              @click="submitCurrentStep"
             >
               <div v-if="loading" class="mr-3">
                 <Icon icon="eos-icons:loading" class="w-5 h-5 animate-spin" />
@@ -202,7 +202,7 @@ onMounted(() => {
 // --- COMPUTED ---
 
 const normalizedPropertyId = computed(() => {
-  if (!propertyId.value) return null;
+  if (!propertyId.value) {return null;}
   try {
     const decoded = atob(String(propertyId.value));
     return !isNaN(Number(decoded)) ? Number(decoded) : propertyId.value;
@@ -212,9 +212,9 @@ const normalizedPropertyId = computed(() => {
 });
 
 const currentStepRef = computed(() => {
-  if (currentStep.value === 1) return step1Ref.value;
-  if (currentStep.value === 2) return step2Ref.value;
-  if (currentStep.value === 3) return step3Ref.value;
+  if (currentStep.value === 1) {return step1Ref.value;}
+  if (currentStep.value === 2) {return step2Ref.value;}
+  if (currentStep.value === 3) {return step3Ref.value;}
   return null;
 });
 
@@ -225,7 +225,7 @@ const stepTitle = computed(() => {
 
 // --- NAVIGATION ---
 const submitCurrentStep = async () => {
-  if (!currentStepRef.value?.handleSubmit) return;
+  if (!currentStepRef.value?.handleSubmit) {return;}
   
   loading.value = true;
   try {
@@ -233,9 +233,9 @@ const submitCurrentStep = async () => {
     
     // If in Edit mode, we collect the returned payload for final batch update
     if (startedWithId.value) {
-      if (currentStep.value === 1) pendingChanges.value.property = result;
-      if (currentStep.value === 2) pendingChanges.value.resourceTypes = result;
-      if (currentStep.value === 3) pendingChanges.value.resources = result;
+      if (currentStep.value === 1) {pendingChanges.value.property = result;}
+      if (currentStep.value === 2) {pendingChanges.value.resourceTypes = result;}
+      if (currentStep.value === 3) {pendingChanges.value.resources = result;}
       
       if (currentStep.value === 3) {
         await applyEdits();
@@ -266,14 +266,14 @@ const prevStep = () => {
 };
 
 const handleStepClick = async (step) => {
-  if (!startedWithId.value) return;
+  if (!startedWithId.value) {return;}
   await ensureStepDataLoaded(step);
   currentStep.value = step;
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const ensureStepDataLoaded = async (step) => {
-  if (!normalizedPropertyId.value) return;
+  if (!normalizedPropertyId.value) {return;}
   if ((step === 2 || step === 3) && resourceTypes.value.length === 0) {
     await loadResourceTypes(normalizedPropertyId.value);
   }
@@ -291,7 +291,7 @@ const loadResourceTypes = async (id) => {
 // --- HANDLERS ---
 const handleStep1Success = async (data) => {
   if (!startedWithId.value) {
-    if (!propertyId.value) createdInWizard.value = true;
+    if (!propertyId.value) {createdInWizard.value = true;}
     propertyId.value = data.id;
   }
   nextStep();
@@ -318,7 +318,7 @@ const cancelWizard = async () => {
     try {
       const images = await ownerService.fetchPropertyImages(normalizedPropertyId.value);
       const imageIds = (images || []).map((i) => i.id).filter(Boolean);
-      if (imageIds.length) await ownerService.deletePropertyImages(imageIds);
+      if (imageIds.length) {await ownerService.deletePropertyImages(imageIds);}
       await ownerService.deleteProperty(normalizedPropertyId.value);
     } catch (err) {
       console.debug("Cleanup failed", err);
@@ -343,8 +343,8 @@ const applyEdits = async () => {
     // 1. Process Property Changes
     if (pendingChanges.value.property) {
       const p = pendingChanges.value.property;
-      if (p.propertyPayload) await ownerService.updateProperty(numericId, p.propertyPayload);
-      if (p.removedImageIds?.length) await ownerService.deletePropertyImages(p.removedImageIds);
+      if (p.propertyPayload) {await ownerService.updateProperty(numericId, p.propertyPayload);}
+      if (p.removedImageIds?.length) {await ownerService.deletePropertyImages(p.removedImageIds);}
       
       let uploadedNewIds = [];
       if (p.newFiles?.length) {
@@ -353,7 +353,7 @@ const applyEdits = async () => {
       }
 
       const finalOrder = [...(p.orderedImageIds || [])];
-      if (uploadedNewIds.length) finalOrder.push(...uploadedNewIds);
+      if (uploadedNewIds.length) {finalOrder.push(...uploadedNewIds);}
       if (finalOrder.length > 0) {
         await ownerService.changePropertyImagePosition(numericId, finalOrder).catch(() => {});
       }
@@ -367,7 +367,7 @@ const applyEdits = async () => {
     if (pendingChanges.value.resourceTypes) {
       const rt = pendingChanges.value.resourceTypes;
       if (rt.deleted?.length) {
-        for (const id of rt.deleted) await ownerService.deleteResourceType(id);
+        for (const id of rt.deleted) {await ownerService.deleteResourceType(id);}
       }
       if (rt.toUpdate?.length) {
         await ownerService.resourceTypeMultipleUpdate({
@@ -394,7 +394,7 @@ const applyEdits = async () => {
     if (pendingChanges.value.resources) {
       const rs = pendingChanges.value.resources;
       if (rs.deleted?.length) {
-        for (const id of rs.deleted) await ownerService.deleteResource(id);
+        for (const id of rs.deleted) {await ownerService.deleteResource(id);}
       }
       if (rs.toUpdate?.length) {
         await ownerService.resourceMultipleUpdate({

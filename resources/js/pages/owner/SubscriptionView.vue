@@ -22,11 +22,13 @@
               <div>
                 <h2 class="text-2xl font-bold text-slate-900 mb-2">Current Plan</h2>
                 <div class="flex items-center gap-2">
-                  <div :class="[
+                  <div
+:class="[
                     'w-2 h-2 rounded-full',
                     subscription.is_active ? 'bg-emerald-500' : 'bg-rose-500'
                   ]"></div>
-                  <span :class="[
+                  <span
+:class="[
                     'text-sm font-medium',
                     subscription.is_active ? 'text-emerald-600' : 'text-rose-600'
                   ]">
@@ -122,13 +124,15 @@
                   </td>
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
-                      <div :class="[
+                      <div
+:class="[
                         'w-2 h-2 rounded-full',
                         sub.status === 'active' ? 'bg-emerald-500' : 
                         sub.status === 'canceled' ? 'bg-rose-500' : 
                         sub.status === 'past_due' ? 'bg-amber-500' : 'bg-slate-400'
                       ]"></div>
-                      <span :class="[
+                      <span
+:class="[
                         'text-sm font-medium capitalize',
                         sub.status === 'active' ? 'text-emerald-600' : 
                         sub.status === 'canceled' ? 'text-rose-600' : 
@@ -186,8 +190,8 @@
           <h2 class="text-2xl font-bold text-slate-900 mb-4">No Active Subscription</h2>
           <p class="text-slate-500 mb-8">You don't have an active subscription. Choose a plan to get started.</p>
           <button 
-            @click="$router.push('/subscription')"
             class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2 mx-auto"
+            @click="$router.push('/subscription')"
           >
             <Icon icon="heroicons:plus-20-solid" class="w-5 h-5" />
             Choose a Plan
@@ -202,8 +206,8 @@
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-slate-900">Subscription Details</h3>
             <button 
-              @click="showDetailsModal = false"
               class="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              @click="showDetailsModal = false"
             >
               <Icon icon="heroicons:x-mark-20-solid" class="w-5 h-5 text-slate-400" />
             </button>
@@ -224,13 +228,15 @@
                 <div>
                   <label class="text-sm font-medium text-slate-600">Status</label>
                   <div class="flex items-center gap-2 mt-1">
-                    <div :class="[
+                    <div
+:class="[
                       'w-2 h-2 rounded-full',
                       selectedSubscription.status === 'active' ? 'bg-emerald-500' : 
                       selectedSubscription.status === 'canceled' ? 'bg-rose-500' : 
                       selectedSubscription.status === 'past_due' ? 'bg-amber-500' : 'bg-slate-400'
                     ]"></div>
-                    <span :class="[
+                    <span
+:class="[
                       'text-sm font-medium capitalize',
                       selectedSubscription.status === 'active' ? 'text-emerald-600' : 
                       selectedSubscription.status === 'canceled' ? 'text-rose-600' : 
@@ -322,15 +328,15 @@
 
           <div class="mt-8 flex gap-4">
             <button 
-              @click="showDetailsModal = false"
               class="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors"
+              @click="showDetailsModal = false"
             >
               Close
             </button>
             <button 
               v-if="selectedSubscription.status === 'canceled'"
-              @click="reactivateAndClose(selectedSubscription)"
               class="flex-1 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+              @click="reactivateAndClose(selectedSubscription)"
             >
               <Icon icon="heroicons:arrow-path-20-solid" class="w-4 h-4" />
               Reactivate Subscription
@@ -435,7 +441,7 @@ const handleCancelSubscription = async () => {
 };
 
 const calculateEndDate = (startDate, interval) => {
-  if (!startDate) return 'No date';
+  if (!startDate) {return 'No date';}
   
   // Handle both timestamp numbers and string dates
   const date = typeof startDate === 'number' 
@@ -443,7 +449,7 @@ const calculateEndDate = (startDate, interval) => {
     : new Date(startDate);
   
   // Check if date is valid
-  if (isNaN(date.getTime())) return 'Invalid date';
+  if (isNaN(date.getTime())) {return 'Invalid date';}
   
   // Parse interval to get months
   let monthsToAdd = 3; // default
@@ -483,7 +489,7 @@ const calculateEndDate = (startDate, interval) => {
 };
 
 const formatDate = (timestamp) => {
-  if (!timestamp) return 'No date';
+  if (!timestamp) {return 'No date';}
   
   // Handle both timestamp numbers and string dates
   const date = typeof timestamp === 'number' 
@@ -491,7 +497,7 @@ const formatDate = (timestamp) => {
     : new Date(timestamp);
   
   // Check if date is valid
-  if (isNaN(date.getTime())) return 'Invalid date';
+  if (isNaN(date.getTime())) {return 'Invalid date';}
   
   return date.toLocaleDateString('en-US', { 
     year: 'numeric', 
