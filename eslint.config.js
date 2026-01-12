@@ -19,6 +19,7 @@ export default [
       'dist/**',
       '*.min.js',
       '_ide_helper.php',
+      'scripts/**', // Git hooks scripts need console.log for user feedback
     ],
   },
 
