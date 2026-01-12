@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -11,15 +10,18 @@ use Illuminate\Queue\SerializesModels;
 
 class Booking extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new message instance.
+     *
+     * @param mixed $data
      */
-    public function __construct($data,string $recipientType)
+    public function __construct($data, string $recipientType)
     {
         $this->data = $data;
-        $this->recipientType = $recipientType; // 
+        $this->recipientType = $recipientType;
     }
 
     /**
@@ -30,6 +32,7 @@ class Booking extends Mailable
         $subject = ($this->recipientType === 'owner')
             ? 'New Booking Received'
             : 'Your Booking is Confirmed';
+
         return new Envelope(
             subject: $subject,
         );
@@ -40,7 +43,6 @@ class Booking extends Mailable
      */
     public function content(): Content
     {
-        
         $view = ($this->recipientType === 'owner')
             ? 'emails.owner.booking'
             : 'emails.user.booking';

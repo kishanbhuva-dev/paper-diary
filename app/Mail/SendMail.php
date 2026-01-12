@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -9,10 +10,15 @@ use Illuminate\Queue\SerializesModels;
 
 class SendMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
+
     public $data;
+
     /**
      * Create a new message instance.
+     *
+     * @param mixed $data
      */
     public function __construct($data)
     {
@@ -43,6 +49,7 @@ class SendMail extends Mailable
         return $this->view('emails.reset-password')
             ->with($this->data);
     }
+
     /**
      * Get the attachments for the message.
      *

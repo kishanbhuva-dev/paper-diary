@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use App\Models\Property;
+use Exception;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -16,11 +18,13 @@ class FacilityController extends Controller
             if (empty($facilities)) {
                 return response()->json(['status' => false, 'message' => 'No facility found']);
             }
+
             return response()->json(['status' => true, 'message' => '', 'data' => $facilities]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
     public function addFacilityProperty(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -31,11 +35,12 @@ class FacilityController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()]);
         }
-        $propertyId  = $request->data['propertyId'];
+        $propertyId = $request->data['propertyId'];
         $facilityIds = $request->data['facilityId'];
-        $property    = Property::where('id', $propertyId)->firstOrFail();
+        $property = Property::where('id', $propertyId)->firstOrFail();
         $property->facilities()->sync($facilityIds);
         $property->load('facilities');
+
         return response()->json(['status' => true, 'message' => 'Property facilities updated successfully', 'data' => '']);
     }
 }

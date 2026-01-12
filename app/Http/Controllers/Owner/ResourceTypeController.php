@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\ResourceType;
 use Illuminate\Http\Request;
+use Throwable;
 use Validator;
 
 class ResourceTypeController extends Controller
@@ -12,13 +14,16 @@ class ResourceTypeController extends Controller
     {
         try {
             $resourceTypes = ResourceType::where('propertyId', $request->id)->with('property')->get();
-            $response      = ['status' => true, 'message' => '', 'data' => $resourceTypes];
+            $response = ['status' => true, 'message' => '', 'data' => $resourceTypes];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function multipleStore(Request $request)
     {
         try {
@@ -43,28 +48,32 @@ class ResourceTypeController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
             foreach ($request->name as $key => $nameValue) {
-                $resourceType                = new ResourceType();
-                $resourceType->propertyId    = $request->propertyId;
-                $resourceType->name          = $nameValue;
-                $resourceType->price         = $request->price[$key];
+                $resourceType = new ResourceType;
+                $resourceType->propertyId = $request->propertyId;
+                $resourceType->name = $nameValue;
+                $resourceType->price = $request->price[$key];
                 $resourceType->adjustedPrice = $request->adjustedPrice[$key] ?? null;
                 $resourceType->adjustedStart = ($request->adjustedStart[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart[$key])) : null;
-                $resourceType->adjustedEnd   = ($request->adjustedEnd[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedEnd[$key])) : null;
-                $resourceType->capacity      = $request->capacity[$key];
+                $resourceType->adjustedEnd = ($request->adjustedEnd[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedEnd[$key])) : null;
+                $resourceType->capacity = $request->capacity[$key];
                 if (isset($request->slot[$key])) {
                     $resourceType->slot = $request->slot[$key];
                 }if (! $resourceType->save()) {
                     $response = ['status' => false, 'message' => 'Resource Type not added', 'data' => []];
+
                     return response()->json($response);
                 }
             }
             $response = ['status' => true, 'message' => 'Resource Types successfully added', 'data' => []];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
         // try {
@@ -104,6 +113,7 @@ class ResourceTypeController extends Controller
         //     return response()->json($response);
         // }
     }
+
     public function store(Request $request)
     {
         try {
@@ -119,28 +129,33 @@ class ResourceTypeController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
-            $resourceType                = new ResourceType;
-            $resourceType->propertyId    = $request->propertyId;
-            $resourceType->name          = $request->name;
-            $resourceType->price         = $request->price;
+            $resourceType = new ResourceType;
+            $resourceType->propertyId = $request->propertyId;
+            $resourceType->name = $request->name;
+            $resourceType->price = $request->price;
             $resourceType->adjustedPrice = $request->adjustPrice;
             $resourceType->adjustedStart = $request->adjustedStart ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart)) : null;
-            $resourceType->adjustedEnd   = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
-            $resourceType->capacity=$request->capacity;
+            $resourceType->adjustedEnd = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
+            $resourceType->capacity = $request->capacity;
             if (! $resourceType->save()) {
                 $response = ['status' => false, 'message' => 'Resource Type not updated', 'data' => []];
+
                 return response()->json($response);
             }
             $response = ['status' => true, 'message' => '', 'data' => $resourceType];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
-    public function update(Request $request,$id)
+
+    public function update(Request $request, $id)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -155,27 +170,32 @@ class ResourceTypeController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
-            $resourceType                = ResourceType::where('id',$id)->first();
-            $resourceType->propertyId    = $request->propertyId;
-            $resourceType->name          = $request->name;
-            $resourceType->price         = $request->price;
+            $resourceType = ResourceType::where('id', $id)->first();
+            $resourceType->propertyId = $request->propertyId;
+            $resourceType->name = $request->name;
+            $resourceType->price = $request->price;
             $resourceType->adjustedPrice = $request->adjustPrice;
             $resourceType->adjustedStart = $request->adjustedStart ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart)) : null;
-            $resourceType->adjustedEnd   = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
-            $resourceType->capacity=$request->capacity;
+            $resourceType->adjustedEnd = $request->adjustedEnd ? date('Y-m-d 23:59:59', strtotime($request->adjustedEnd)) : null;
+            $resourceType->capacity = $request->capacity;
             if (! $resourceType->save()) {
                 $response = ['status' => false, 'message' => 'Resource Type not updated', 'data' => []];
+
                 return response()->json($response);
             }
             $response = ['status' => true, 'message' => '', 'data' => $resourceType];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function multipleUpdate(Request $request)
     {
         try {
@@ -200,29 +220,32 @@ class ResourceTypeController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
             foreach ($request->name as $key => $value) {
-                $resourceType                = ResourceType::where('id', $request->ids[$key])->first();
-                $resourceType->propertyId    = $request->propertyId;
-                $resourceType->name          = $value;
-                $resourceType->price         = $request->price[$key];
+                $resourceType = ResourceType::where('id', $request->ids[$key])->first();
+                $resourceType->propertyId = $request->propertyId;
+                $resourceType->name = $value;
+                $resourceType->price = $request->price[$key];
                 $resourceType->adjustedPrice = $request->adjustedPrice[$key] ?? null;
                 $resourceType->adjustedStart = ($request->adjustedStart[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedStart[$key])) : null;
-                $resourceType->adjustedEnd   = ($request->adjustedEnd[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedEnd[$key])) : null;
-                $resourceType->capacity      = $request->capacity[$key];
+                $resourceType->adjustedEnd = ($request->adjustedEnd[$key] ?? null) ? date('Y-m-d 00:00:00', strtotime($request->adjustedEnd[$key])) : null;
+                $resourceType->capacity = $request->capacity[$key];
                 if (isset($request->slot[$key])) {
                     $resourceType->slot = $request->slot[$key];
                 }if (! $resourceType->save()) {
                     $response = ['status' => false, 'message' => 'Resource Type not added', 'data' => []];
+
                     return response()->json($response);
                 }
             }
             $response = ['status' => true, 'message' => 'Resource Type updated successfully', 'data' => []];
-            return response()->json($response);
 
-        } catch (\Throwable $th) {
+            return response()->json($response);
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
 
@@ -281,21 +304,26 @@ class ResourceTypeController extends Controller
         //         return response()->json($response);
         //     }
     }
+
     public function show($id)
     {
         try {
             $resourceType = ResourceType::where('id', $id)->with('property')->first();
             if (! $resourceType) {
                 $response = ['status' => false, 'message' => 'Resource Type not found', 'data' => []];
+
                 return response()->json($response);
             }
             $response = ['status' => true, 'message' => '', 'data' => $resourceType];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function destroy(string $id)
     {
         try {
@@ -309,13 +337,15 @@ class ResourceTypeController extends Controller
             }
             $resourceType->resources()->delete();
             $deleted = $resourceType->delete();
+
             return response()->json([
                 'status'  => $deleted,
                 'message' => $deleted ? 'Resource Type deleted successfully' : 'Resource Type not deleted',
                 'data'    => [],
             ]);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }

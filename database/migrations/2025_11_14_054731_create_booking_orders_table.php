@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('children')->default(0);
             $table->decimal('price', 15, 2);
             $table->decimal('cost', 15, 2)->default(0);
-            $table->enum('status', [ 'pending','confirm', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'confirm', 'cancelled'])->default('pending');
             $table->enum('paymentStatus', ['paid', 'unpaid', 'failed', 'cancelled', 'confirm'])->default('unpaid');
             $table->timestamps();
         });

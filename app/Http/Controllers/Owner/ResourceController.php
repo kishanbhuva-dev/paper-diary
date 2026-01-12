@@ -1,15 +1,16 @@
 <?php
+
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\Resource;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Models\BookingOrder;
 use App\Models\Property;
+use App\Models\Resource;
 use App\Models\ResourceType;
-use App\Models\Bookings;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class ResourceController extends Controller
 {
@@ -21,6 +22,7 @@ class ResourceController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
             $resources = Resource::whereHas('resourceType', function ($query) use ($request) {
@@ -31,12 +33,15 @@ class ResourceController extends Controller
             } else {
                 $response = ['status' => true, 'message' => 'No resources found', 'data' => []];
             }
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function store(Request $request)
     {
         try {
@@ -47,9 +52,10 @@ class ResourceController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
-            $resources       = new Resource;
+            $resources = new Resource;
             $resources->name = $request->name;
             if (isset($request->status)) {
                 $resources->status = $request->status;
@@ -57,15 +63,17 @@ class ResourceController extends Controller
             $resources->resourceTypeId = $request->resourceTypeId;
             $resources->save();
             $response = ['status' => true, 'message' => 'Resource created successfully', 'data' => []];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function multipleStore(Request $request)
     {
-
         try {
             $validator = Validator::make($request->all(), [
                 'name'             => 'required|array',
@@ -77,10 +85,11 @@ class ResourceController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
             foreach ($request->name as $key => $value) {
-                $resources       = new Resource;
+                $resources = new Resource;
                 $resources->name = $value;
                 if (isset($request->status[$key])) {
                     $resources->status = $request->status[$key];
@@ -89,12 +98,15 @@ class ResourceController extends Controller
                 $resources->save();
             }
             $response = ['status' => true, 'message' => 'Resources created successfully', 'data' => []];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function show(string $id)
     {
         try {
@@ -104,12 +116,15 @@ class ResourceController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'Resource not found', 'data' => []];
             }
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function update(Request $request, $id)
     {
         try {
@@ -120,6 +135,7 @@ class ResourceController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
             $resources = Resource::where('id', $id)->first();
@@ -134,12 +150,15 @@ class ResourceController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'Resource not found', 'data' => []];
             }
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function multipleUpdate(Request $request)
     {
         try {
@@ -155,11 +174,12 @@ class ResourceController extends Controller
             ]);
             if ($validator->fails()) {
                 $response = ['status' => false, 'message' => $validator->errors()->first(), 'data' => []];
+
                 return response()->json($response);
             }
 
             foreach ($request->ids as $key => $value) {
-                $resources       = Resource::where('id', $value)->first();
+                $resources = Resource::where('id', $value)->first();
                 $resources->name = $request->name[$key];
                 if (isset($request->status[$key])) {
                     $resources->status = $request->status[$key];
@@ -168,12 +188,15 @@ class ResourceController extends Controller
                 $resources->save();
             }
             $response = ['status' => true, 'message' => 'Resources updated successfully', 'data' => []];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function destroy(string $id)
     {
         try {
@@ -187,55 +210,58 @@ class ResourceController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'Resource not found', 'data' => []];
             }
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }
+
     public function resourceWiseList(Request $request)
     {
         try {
             $propertyIds = $request->propertyIds;
-            
-            if (!empty($propertyIds)) {
+
+            if (! empty($propertyIds)) {
                 $propertyIds = is_array($propertyIds) ? $propertyIds : [$propertyIds];
                 $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
                 $resourceTypeIds = $resourceTypes->pluck('id');
                 $resources = Resource::select('id', 'name', 'resourceTypeId')
-                ->whereIn('resourceTypeId', $resourceTypeIds)
-                ->with('resourceType.property')
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
-                    ];
-                });
+                    ->whereIn('resourceTypeId', $resourceTypeIds)
+                    ->with('resourceType.property')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id'            => $item->id,
+                            'name'          => $item->name,
+                            'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
+                        ];
+                    });
             } else {
                 $ownerId = auth()->id();
                 $propertyIds = Property::where('ownerId', $ownerId)->pluck('id');
                 $resourceTypes = ResourceType::whereIn('propertyId', $propertyIds)->get();
                 $resourceTypeIds = $resourceTypes->pluck('id');
                 $resources = Resource::select('id', 'name', 'resourceTypeId')
-                ->whereIn('resourceTypeId', $resourceTypeIds)
-                ->with('resourceType.property')
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
-                    ];
-                });
+                    ->whereIn('resourceTypeId', $resourceTypeIds)
+                    ->with('resourceType.property')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id'            => $item->id,
+                            'name'          => $item->name,
+                            'property_name' => $item->resourceType->property->propertyName ?? 'N/A',
+                        ];
+                    });
             }
-            
+
             $resourcesid = $resources->pluck('id');
             $bookings = collect();
             if ($resourcesid->isNotEmpty()) {
                 $selectedResourceTypeIds = collect();
-                if (!empty($request->propertyIds)) {
+                if (! empty($request->propertyIds)) {
                     $requestPropertyIds = is_array($request->propertyIds) ? $request->propertyIds : [$request->propertyIds];
                     $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $requestPropertyIds)->pluck('id');
                 } else {
@@ -243,44 +269,48 @@ class ResourceController extends Controller
                     $ownerPropertyIds = Property::where('ownerId', $ownerId)->pluck('id');
                     $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $ownerPropertyIds)->pluck('id');
                 }
-                $bookings = BookingOrder::selectRaw("id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status,adult,children")
-                ->whereIn('resourceTypeId', $selectedResourceTypeIds)
-                ->with([
-                'booking' => function ($query) use ($resourcesid) {$query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);},'booking.resource:id,name'])->get();
+                $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status,adult,children')
+                    ->whereIn('resourceTypeId', $selectedResourceTypeIds)
+                    ->with([
+                        'booking' => function ($query) use ($resourcesid) {
+                            $query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);
+                        }, 'booking.resource:id,name'])->get();
                 $bookings = $bookings->map(function ($order) {
                     return [
-                        'id'               => $order->id,
-                        'guestFullName'    => $order->guestFullName,
-                        'guestEmail'       => $order->guestEmail,
-                        'guestPhone'       => $order->guestPhone,
-                        'resourceTypeId'   => $order->resourceTypeId,
-                        'arrivalDateTime'  => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
-                        'departureDateTime'=> Carbon::parse($order->departureDateTime)->format('d-m-Y'),
-                        'status'           => $order->status,
-                        'adult'            => $order->adult,
-                        'children'         => $order->children,
-                        'resource_name'    => optional(optional($order->booking->first())->resource)->name ?? 'N/A',
+                        'id'                => $order->id,
+                        'guestFullName'     => $order->guestFullName,
+                        'guestEmail'        => $order->guestEmail,
+                        'guestPhone'        => $order->guestPhone,
+                        'resourceTypeId'    => $order->resourceTypeId,
+                        'arrivalDateTime'   => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
+                        'departureDateTime' => Carbon::parse($order->departureDateTime)->format('d-m-Y'),
+                        'status'            => $order->status,
+                        'adult'             => $order->adult,
+                        'children'          => $order->children,
+                        'resource_name'     => optional(optional($order->booking->first())->resource)->name ?? 'N/A',
                     ];
                 });
             }
 
             $ownerProperty = Property::where('ownerId', auth()->id());
-            
+
             $totalBooking = BookingOrder::whereIn('propertyId', $ownerProperty->pluck('id'))->count();
             $todayBooking = BookingOrder::whereIn('propertyId', $ownerProperty->pluck('id'))->whereDate('arrivalDateTime', Carbon::today())->count();
             $cancelledBooking = BookingOrder::whereIn('propertyId', $ownerProperty->pluck('id'))->where('status', 'cancelled')->count();
             $data = [
-                'resource' => $resources->toArray(),
-                'booking' => $bookings->toArray(),
-                'totalProperty' => $ownerProperty->count(),
-                'totalBooking' => $totalBooking,
-                'todayBooking' => $todayBooking,
+                'resource'         => $resources->toArray(),
+                'booking'          => $bookings->toArray(),
+                'totalProperty'    => $ownerProperty->count(),
+                'totalBooking'     => $totalBooking,
+                'todayBooking'     => $todayBooking,
                 'cancelledBooking' => $cancelledBooking,
             ];
-            $response  = ['status' => true, 'message' => '', 'data' => $data];
+            $response = ['status' => true, 'message' => '', 'data' => $data];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
+
             return response()->json($response);
         }
     }

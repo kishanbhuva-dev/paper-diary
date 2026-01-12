@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -12,16 +13,16 @@ class IsUser
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         try {
             if (Auth::check() && Auth::user()->role == 'user') {
                 return $next($request);
-            } else {
-                return response()->json(['status' => false, 'message' => 'Unauthorized']);
             }
+
+            return response()->json(['status' => false, 'message' => 'Unauthorized']);
         } catch (Throwable $th) {
             return response()->json(['status' => false, 'message' => 'Unauthorized']);
         }

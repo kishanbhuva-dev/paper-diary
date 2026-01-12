@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
@@ -19,7 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('stripe/subscription/retry', [App\Http\Controllers\StripeController::class, 'retrySubscriptionPayment']);
     Route::post('stripe/subscription/sync', [App\Http\Controllers\StripeController::class, 'syncSubscriptionStatus']);
     Route::post('stripe/payment/complete', [App\Http\Controllers\StripeController::class, 'completePayment']);
-    
+
     // Combined subscription management endpoint
     Route::get('stripe/subscription-data', [App\Http\Controllers\StripeController::class, 'getSubscriptionData']);
     Route::post('stripe/subscription/cancel', [App\Http\Controllers\StripeController::class, 'cancelSubscription']);
@@ -47,7 +48,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:sanctum', 'admin']], f
     Route::apiResource('booking', App\Http\Controllers\Admin\BookingsController::class);
     Route::apiResource('owner', App\Http\Controllers\Admin\OwnerController::class);
     Route::apiResource('property', App\Http\Controllers\Admin\PropertyController::class);
-    
+
     // Admin subscription management routes
     Route::get('subscriptions', [App\Http\Controllers\StripeController::class, 'getAdminSubscriptions']);
     Route::post('subscriptions/{id}/cancel', [App\Http\Controllers\StripeController::class, 'cancelAdminSubscription']);

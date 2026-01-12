@@ -6,23 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class BookingOrder extends Model
 {
-    function property()
+    public function property()
     {
         return $this->belongsTo(Property::class, 'propertyId');
     }
-    function resourceType()
+
+    public function resourceType()
     {
         return $this->belongsTo(ResourceType::class, 'resourceTypeId');
     }
-    function user()
+
+    public function user()
     {
         return $this->belongsTo(User::class, 'userId');
     }
-    function resource()
+
+    public function resource()
     {
         return $this->belongsTo(Resource::class, 'resourceId');
     }
-    function booking()
+
+    public function booking()
     {
         return $this->HasMany(Bookings::class, 'bookingOrderId', 'id');
     }

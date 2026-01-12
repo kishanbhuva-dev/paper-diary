@@ -18,6 +18,4 @@ return Application::configure(basePath: dirname(__DIR__))
             'user'  => App\Http\Middleware\IsUser::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+    ->withExceptions(function (Exceptions $exceptions): void {})->create();

@@ -2,17 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-   public function run()
+    public function run()
     {
         User::create(
             [
@@ -28,7 +27,7 @@ class UserSeeder extends Seeder
                 'postcode'  => '123456',
                 'phone'     => '9999999999',
                 'telephone' => '02212345678',
-            ]
+            ],
         );
         User::create(
             [
@@ -44,7 +43,7 @@ class UserSeeder extends Seeder
                 'postcode'  => '654321',
                 'phone'     => '8888888888',
                 'telephone' => '02298765432',
-            ]
+            ],
         );
 
         User::create(
@@ -61,7 +60,7 @@ class UserSeeder extends Seeder
                 'postcode'  => '987654',
                 'phone'     => '7777777777',
                 'telephone' => '02211223344',
-            ]
+            ],
         );
     }
 }

@@ -6,19 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\BookingOrder;
 use App\Models\Property;
 use Carbon\Carbon;
+use Throwable;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         try {
-            $liveProperties  = Property::where('status', 1)->count();
+            $liveProperties = Property::where('status', 1)->count();
             $totalProperties = Property::count();
-            $totalRevenue    = BookingOrder::where('status', 'confirm')->sum('price');
+            $totalRevenue = BookingOrder::where('status', 'confirm')->sum('price');
 
             $todayStart = Carbon::today();
-            $todayEnd   = Carbon::today()->endOfDay();
-
+            $todayEnd = Carbon::today()->endOfDay();
 
             $totalLostAmount = BookingOrder::where('status', 'cancelled')->sum('price');
 
@@ -26,16 +26,16 @@ class DashboardController extends Controller
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->sum('price');
             $summary = [
-                'liveProperties'   => $liveProperties,
-                'totalProperties'  => $totalProperties,
-                'totalRevenue'     => $totalRevenue,
-                'totalLostAmount'  => $totalLostAmount,
+                'liveProperties'  => $liveProperties,
+                'totalProperties' => $totalProperties,
+                'totalRevenue'    => $totalRevenue,
+                'totalLostAmount' => $totalLostAmount,
             ];
 
-            $weekStart  = Carbon::now()->startOfWeek();
-            $weekEnd    = Carbon::now()->endOfWeek();
+            $weekStart = Carbon::now()->startOfWeek();
+            $weekEnd = Carbon::now()->endOfWeek();
             $monthStart = Carbon::now()->startOfMonth();
-            $monthEnd   = Carbon::now()->endOfMonth();
+            $monthEnd = Carbon::now()->endOfMonth();
 
             $todayRevenue = BookingOrder::where('status', 'confirm')
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
@@ -59,8 +59,8 @@ class DashboardController extends Controller
             $trend7Days = [];
             for ($i = 6; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i)->toDateString();
-                $day  = Carbon::now()->subDays($i)->format('D');
-                $row  = $revenueTrendRaw->firstWhere('date', $date);
+                $day = Carbon::now()->subDays($i)->format('D');
+                $row = $revenueTrendRaw->firstWhere('date', $date);
 
                 $trend7Days[] = [
                     'day'    => $day,
@@ -72,7 +72,7 @@ class DashboardController extends Controller
             $todayConfirmed = BookingOrder::where('status', 'confirm')
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count();
-            $todayPending   = BookingOrder::where('status', 'pending')
+            $todayPending = BookingOrder::where('status', 'pending')
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count();
             $totalCancelled = BookingOrder::whereRaw('LOWER(status) = ?', ['cancelled'])->whereBetween('created_at', [$todayStart, $todayEnd])->count();
@@ -89,7 +89,7 @@ class DashboardController extends Controller
                     'todaysRevenue'   => $todayRevenue,
                     'lostAmountToday' => $lostAmountToday,
 
-                    'bookingStatus'   => [
+                    'bookingStatus' => [
                         'confirmed' => $todayConfirmed,
                         'cancelled' => $totalCancelled,
                         'pending'   => $todayPending,
@@ -105,7 +105,7 @@ class DashboardController extends Controller
                     'details' => $details,
                 ],
             ]);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return response()->json([
                 'status'  => false,
                 'message' => $th->getMessage(),

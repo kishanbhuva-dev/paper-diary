@@ -1,14 +1,16 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
+use Exception;
 use Illuminate\Http\Request;
+use Throwable;
 use Validator;
 
 class FacilityController extends Controller
 {
-
     public function index(Request $request)
     {
         try {
@@ -31,8 +33,8 @@ class FacilityController extends Controller
                     }
                 });
             }
-            $order      = $request->orderBy ?? 'id';
-            $sort       = $request->sort ?? 'asc';
+            $order = $request->orderBy ?? 'id';
+            $sort = $request->sort ?? 'asc';
             $pagination = $request->pagination ?? 10;
             $facilities = $facility->orderBy($order, $sort)->paginate($pagination);
 
@@ -41,11 +43,13 @@ class FacilityController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'No facilities found', 'data' => []];
             }
+
             return response()->json($response);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['status' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
     public function store(Request $request)
     {
         try {
@@ -58,20 +62,22 @@ class FacilityController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
             }
-            $facility              = new Facility;
-            $facility->name        = $request->name;
-            $facility->icon        = $request->icon;
+            $facility = new Facility;
+            $facility->name = $request->name;
+            $facility->icon = $request->icon;
             $facility->description = $request->description;
             if (isset($request->status)) {
                 $facility->status = true;
             }
             $facility->save();
             $response = ['status' => true, 'message' => 'Facility created successfully', 'data' => $facility];
+
             return response()->json($response, 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['status' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
     public function show(string $id)
     {
         try {
@@ -80,11 +86,13 @@ class FacilityController extends Controller
                 return response()->json(['status' => false, 'message' => 'Facility not found'], 404);
             }
             $response = ['status' => true, 'message' => 'Facility retrieved successfully', 'data' => $facility];
+
             return response()->json($response);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return response()->json(['status' => false, 'message' => 'An error occurred: ' . $th->getMessage()], 500);
         }
     }
+
     public function update(Request $request, string $id)
     {
         try {
@@ -101,8 +109,8 @@ class FacilityController extends Controller
             if (! $facility) {
                 return response()->json(['status' => false, 'message' => 'Facility not found'], 404);
             }
-            $facility->name        = $request->name;
-            $facility->icon        = $request->icon;
+            $facility->name = $request->name;
+            $facility->icon = $request->icon;
             $facility->description = $request->description;
 
             if (isset($request->status)) {
@@ -113,11 +121,13 @@ class FacilityController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'Facility update failed', 'data' => []];
             }
+
             return response()->json($response);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['status' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
     public function destroy(string $id)
     {
         try {
@@ -130,8 +140,9 @@ class FacilityController extends Controller
             } else {
                 $response = ['status' => false, 'message' => 'Facility delete failed', 'data' => []];
             }
+
             return response()->json($response);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['status' => false, 'message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }

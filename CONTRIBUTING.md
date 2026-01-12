@@ -1,6 +1,7 @@
 # Contributing Guidelines
 
-Welcome to the Paper Diary project! This document outlines the **mandatory** development practices all contributors must follow.
+Welcome to the Paper Diary project! This document outlines the **mandatory** development practices
+all contributors must follow.
 
 ## ⚠️ MANDATORY SETUP (All Platforms)
 
@@ -28,18 +29,19 @@ ls .husky/  # Should show: pre-commit, pre-push, commit-msg
 ## 🔒 Branch Protection
 
 ### Protected Branches
+
 - `main` - Production code
 - `master` - Production code (legacy)
 - `develop` - Development branch
 
 ### What's Blocked
 
-| Action | Blocked? |
-|--------|----------|
-| Commit directly to `main` | ❌ **Yes** |
-| Push directly to `main` | ❌ **Yes** |
-| Commit to feature branch | ✅ Allowed (after lint passes) |
-| Push to feature branch | ✅ Allowed |
+| Action                    | Blocked?                       |
+| ------------------------- | ------------------------------ |
+| Commit directly to `main` | ❌ **Yes**                     |
+| Push directly to `main`   | ❌ **Yes**                     |
+| Commit to feature branch  | ✅ Allowed (after lint passes) |
+| Push to feature branch    | ✅ Allowed                     |
 
 ### Required Workflow
 
@@ -74,28 +76,28 @@ Every commit attempt runs these checks on **ALL files**:
 
 #### Frontend Checks
 
-| Check | Tool | Rule |
-|-------|------|------|
-| JavaScript/Vue linting | ESLint | Zero errors, zero warnings |
-| Code formatting | Prettier | Must match config |
+| Check                  | Tool     | Rule                       |
+| ---------------------- | -------- | -------------------------- |
+| JavaScript/Vue linting | ESLint   | Zero errors, zero warnings |
+| Code formatting        | Prettier | Must match config          |
 
 #### Backend Checks
 
-| Check | Tool | Rule |
-|-------|------|------|
-| PHP code style | Laravel Pint | Must pass style check |
-| Static analysis | PHPStan (Level 6) | Zero errors allowed |
+| Check           | Tool              | Rule                  |
+| --------------- | ----------------- | --------------------- |
+| PHP code style  | Laravel Pint      | Must pass style check |
+| Static analysis | PHPStan (Level 6) | Zero errors allowed   |
 
 #### Branch Protection
 
-| Check | Tool | Rule |
-|-------|------|------|
+| Check             | Tool        | Rule                                 |
+| ----------------- | ----------- | ------------------------------------ |
 | Branch protection | Node script | Cannot commit to main/master/develop |
 
 ### Pre-Push Checks (Automatic)
 
-| Check | Rule |
-|-------|------|
+| Check             | Rule                       |
+| ----------------- | -------------------------- |
 | Branch protection | Cannot push to main/master |
 
 ### Commit Message (Automatic)
@@ -112,18 +114,18 @@ All commits must follow [Conventional Commits](https://www.conventionalcommits.o
 
 ### Allowed Types
 
-| Type | When to Use |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Formatting, no logic change |
-| `refactor` | Code restructuring |
-| `perf` | Performance improvement |
-| `test` | Adding/updating tests |
-| `build` | Build system changes |
-| `ci` | CI/CD changes |
-| `chore` | Maintenance |
+| Type       | When to Use                 |
+| ---------- | --------------------------- |
+| `feat`     | New feature                 |
+| `fix`      | Bug fix                     |
+| `docs`     | Documentation only          |
+| `style`    | Formatting, no logic change |
+| `refactor` | Code restructuring          |
+| `perf`     | Performance improvement     |
+| `test`     | Adding/updating tests       |
+| `build`    | Build system changes        |
+| `ci`       | CI/CD changes               |
+| `chore`    | Maintenance                 |
 
 ### Examples
 
@@ -209,7 +211,9 @@ npm run quality && composer quality
 ```
 
 # Interactive commit (ensures correct format)
+
 npm run commit
+
 ```
 
 ---
@@ -217,21 +221,16 @@ npm run commit
 ## 🔄 Development Workflow
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         main                                 │
-│  (protected - no direct commits/pushes)                     │
-└──────────────────────────▲──────────────────────────────────┘
-                           │ Pull Request (reviewed)
-┌──────────────────────────┴──────────────────────────────────┐
-│                        develop                               │
-│  (protected - no direct commits)                            │
-└──────────────────────────▲──────────────────────────────────┘
-                           │ Pull Request (reviewed)
-┌──────────────────────────┴──────────────────────────────────┐
-│                   feat/your-feature                          │
-│  (you work here)                                            │
+
+┌─────────────────────────────────────────────────────────────┐ │ main │ │ (protected - no direct
+commits/pushes) │ └──────────────────────────▲──────────────────────────────────┘ │ Pull Request
+(reviewed) ┌──────────────────────────┴──────────────────────────────────┐ │ develop │ │
+(protected - no direct commits) │ └──────────────────────────▲──────────────────────────────────┘ │
+Pull Request (reviewed) ┌──────────────────────────┴──────────────────────────────────┐ │
+feat/your-feature │ │ (you work here) │
 └─────────────────────────────────────────────────────────────┘
-```
+
+````
 
 ---
 
@@ -252,9 +251,10 @@ npm run commit
 ```bash
 chmod +x .husky/*
 chmod +x scripts/*.js
-```
+````
 
 **Hooks not running:**
+
 ```bash
 # Reinstall Husky
 rm -rf .husky/_
@@ -271,7 +271,8 @@ npm run prepare
 
 ### "I need to commit to main for an emergency fix!"
 
-Contact the team lead. Emergency fixes should still go through a fast-tracked PR with at least one reviewer.
+Contact the team lead. Emergency fixes should still go through a fast-tracked PR with at least one
+reviewer.
 
 ### "The linter is too strict!"
 
@@ -279,7 +280,8 @@ It's strict by design. Run `npm run lint:fix` to auto-fix most issues.
 
 ### "I have legacy code with errors"
 
-Fix them. The team decided to enforce quality standards. Use `npm run lint:fix` to auto-fix ~450 errors automatically.
+Fix them. The team decided to enforce quality standards. Use `npm run lint:fix` to auto-fix ~450
+errors automatically.
 
 ---
 

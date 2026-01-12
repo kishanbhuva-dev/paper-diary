@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\BookingOrder;
 use App\Models\Bookings;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
+use Throwable;
 
 class BookingsController extends Controller
 {
-
-
     public function index(Request $request)
     {
         try {
@@ -44,7 +43,6 @@ class BookingsController extends Controller
             }
             // filter
 
-
             if ($request->guestName) {
                 $bookings->where('guestFullName', 'like', '%' . $request->guestName . '%');
             }
@@ -58,12 +56,9 @@ class BookingsController extends Controller
                 $bookings->whereDate('created_at', $bookedDate);
             }
 
-
-
             if ($request->arrivalDateTime && $request->departureDateTime) {
-
                 $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
-                $endDate   = Carbon::parse($request->departureDateTime)->endOfDay();
+                $endDate = Carbon::parse($request->departureDateTime)->endOfDay();
 
                 $bookings->whereBetween('arrivalDateTime', [$startDate, $endDate]);
             }
@@ -71,7 +66,7 @@ class BookingsController extends Controller
             if ($request->status && $request->status !== 'all') {
                 $valid = ['confirm', 'cancelled'];
                 $filtered = array_intersect(explode(',', $request->status), $valid);
-                if (!empty($filtered)) {
+                if (! empty($filtered)) {
                     $bookings->whereIn('status', $filtered);
                 } else {
                     $bookings->whereRaw('1 = 0');
@@ -81,7 +76,7 @@ class BookingsController extends Controller
             if ($request->paymentstatus && $request->paymentstatus !== 'all') {
                 $valid = ['paid', 'failed'];
                 $filtered = array_intersect(explode(',', $request->paymentstatus), $valid);
-                if (!empty($filtered)) {
+                if (! empty($filtered)) {
                     $bookings->whereIn('paymentStatus', $filtered);
                 } else {
                     $bookings->whereRaw('1 = 0');
@@ -89,42 +84,42 @@ class BookingsController extends Controller
             }
 
             if ($request->fromNow) {
-
                 $now = Carbon::now();
 
                 switch ($request->fromNow) {
-
                     case 'hour':
                         $from = $now->copy()->subHour();
                         $bookings->whereBetween([$from, $now]);
+
                         break;
 
                     case 'today':
                         $from = Carbon::today();
                         $bookings->whereBetween([$from, $now]);
+
                         break;
 
                     case 'week':
                         $from = $now->copy()->startOfWeek();
                         $bookings->whereBetween([$from, $now]);
+
                         break;
 
                     case 'month':
                         $from = $now->copy()->startOfMonth();
                         $bookings->whereBetween([$from, $now]);
+
                         break;
 
                     case 'year':
                         $from = $now->copy()->startOfYear();
                         $bookings->whereBetween([$from, $now]);
+
                         break;
                 }
 
                 $bookings->orderBy('created_at', 'desc');
             }
-
-
-
 
             $bookings->with(['user' => function ($query) {
                 $query->select('id', 'firstName', 'lastName', 'email');
@@ -142,23 +137,19 @@ class BookingsController extends Controller
                 $bookings->orderBy('booking_orders.' . $sortBy, $sortOrder);
             }
 
-
-
             $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
             $bookings->getCollection()->transform(function ($booking) {
-
-                $booking->fromNow = carbon::parse($booking->created_at)->diffForHumans();
-
+                $booking->fromNow = Carbon::parse($booking->created_at)->diffForHumans();
 
                 return $booking;
             });
 
-
             return response()->json(['status' => true, 'message' => '', 'data' => $bookings]);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
     }
+
     public function update(Request $request, string $id)
     {
         $validator = Validator::make($request->all(), [
@@ -170,8 +161,10 @@ class BookingsController extends Controller
         $bookingOrder = BookingOrder::where('id', $id)->first();
         $bookingOrder->ownerNotes = $request->ownerNotes;
         $bookingOrder->save();
+
         return response()->json(['status' => true, 'message' => 'Booking updated successfully', 'data' => []]);
     }
+
     public function bookingCancel(Request $request)
     {
         try {
@@ -183,7 +176,7 @@ class BookingsController extends Controller
             }
             $bookingOrder = BookingOrder::where('id', $request->bookingId)->first();
             $propertyIds = Auth::user()->properties->pluck('id');
-            if (!$propertyIds->contains($bookingOrder->propertyId)) {
+            if (! $propertyIds->contains($bookingOrder->propertyId)) {
                 return response()->json(['status' => false, 'message' => 'you are not authorized to cancel this booking', 'data' => []]);
             }
             $booking = Bookings::where('bookingOrderId', $request->bookingId)->get();
@@ -194,9 +187,10 @@ class BookingsController extends Controller
             $bookingOrder->status = 'cancelled';
             $bookingOrder->paymentStatus = 'failed';
             $bookingOrder->save();
+
             return response()->json(['status' => true, 'message' => 'Booking cancelled successfully', 'data' => []]);
-        } catch (\Throwable $th) {
-            return response()->json(['status' => false, 'message'    => $th->getMessage(), 'data' => []]);
+        } catch (Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
     }
 }
