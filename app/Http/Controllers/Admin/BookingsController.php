@@ -26,6 +26,9 @@ class BookingsController extends Controller
                 booking_orders.guestEmail,
                 DATE_FORMAT(booking_orders.arrivalDateTime, '%d-%m-%Y') as arrivalDateTime, 
                 DATE_FORMAT(booking_orders.departureDateTime, '%d-%m-%Y') as departureDateTime, 
+                booking_orders.status, 
+                DATE_FORMAT(booking_orders.arrivalDateTime, '%d %b %Y') as arrivalDateTime, 
+                DATE_FORMAT(booking_orders.departureDateTime, '%d %b %Y') as departureDateTime, 
                 COALESCE(property.propertyName, 'N/A') as propertyName, 
                 COALESCE(CONCAT(users.firstName, ' ', users.lastName), 'N/A') as ownerName, 
                 COALESCE(users.email, 'N/A') as ownerEmail
@@ -92,7 +95,7 @@ class BookingsController extends Controller
 
             return response()->json([
                 'status'  => true,
-                'message' => 'Bookings retrieved successfully',
+                'message' => '',
                 'data'    => $paginatedData
             ]);
         } catch (\Throwable $th) {

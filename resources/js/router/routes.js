@@ -144,6 +144,12 @@ const routes = [
         name: "subscriptions",
         component: () => import("../pages/admin/Subscriptions.vue"),
         meta: { pageTitle: "Subscriptions"}
+      },
+      {
+        path: "/admin/bookings",
+        name: "admin-bookings",
+        component: () => import("../pages/admin/Bookings.vue"),
+        meta: { pageTitle: "Admin Bookings"}
       }
     ],
   },

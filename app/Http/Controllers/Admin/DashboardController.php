@@ -75,7 +75,7 @@ class DashboardController extends Controller
             $todayPending   = BookingOrder::where('status', 'pending')
                 ->whereBetween('created_at', [$todayStart, $todayEnd])
                 ->count();
-            $totalCancelled = BookingOrder::whereRaw('LOWER(status) = ?', ['cancelled'])->count();
+            $totalCancelled = BookingOrder::whereRaw('LOWER(status) = ?', ['cancelled'])->whereBetween('created_at', [$todayStart, $todayEnd])->count();
 
             $details = [
                 'revenue' => [

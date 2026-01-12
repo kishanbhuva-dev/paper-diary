@@ -49,7 +49,7 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-slate-600">Total Revenue</p>
-              <p class="text-2xl font-bold text-slate-900">${{ stats.totalRevenue }}</p>
+              <p class="text-2xl font-bold text-slate-900">£{{ stats.totalRevenue }}</p>
             </div>
             <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
               <Icon icon="heroicons:currency-dollar-20-solid" class="w-6 h-6 text-amber-600" />
@@ -57,25 +57,74 @@
           </div>
         </div>
       </div>
-
-      <!-- Subscriptions Table -->
-       <Basetable
-      title="Owner Subscriptions"
-      :columns="tableColumns"
-      :rows="subscriptions"
-      :server-side="true"
-      :total-items="total"
-      :per-page="perPage"
-      :show-add="false"
-      :show-download="false"
-      :show-delete = "false"
-      :show-edit = "false"
-      :adminLogin = "false"
-      :showSearch = "false"
-      @page-change="handlePageChange"
-      @per-page-change="handlePerPageChange"
-     
-    />
+        <!-- Owner Subscriptions History -->
+      <div v-if="subscriptions.length > 0" class="mt-12">
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">Owner Subscriptions</h2>
+          <!-- <p class="text-slate-500">View your subscription history and past billing cycles</p> -->
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Plan</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Period</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
+                  <!-- <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th> -->
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr v-for="(sub, index) in subscriptions" :key="sub.id" class="hover:bg-slate-50 transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      
+                      <div>
+                        <div class="text-sm font-medium text-slate-900">{{ sub.plan_name || 'Professional Plan' }}</div>
+                        <div class="text-xs text-slate-500 font-mono">{{ sub.stripe_id?.slice(0, 30) }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                      <div :class="[
+                        'w-2 h-2 rounded-full',
+                        sub.status === 'active' ? 'bg-emerald-500' : 
+                        sub.status === 'canceled' ? 'bg-rose-500' : 
+                        sub.status === 'past_due' ? 'bg-amber-500' : 'bg-slate-400'
+                      ]"></div>
+                      <span :class="[
+                        'text-sm font-medium capitalize',
+                        sub.status === 'active' ? 'text-emerald-600' : 
+                        sub.status === 'canceled' ? 'text-rose-600' : 
+                        sub.status === 'past_due' ? 'text-amber-600' : 'text-slate-600'
+                      ]">
+                        {{ sub.status.replace('_', ' ') }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-slate-900">
+                      <div>{{ formatDate(sub.created_at) }} - {{ calculateEndDate(sub.created_at, sub.interval) }}</div>
+                      
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-slate-900">£{{ sub.amount || '12.00' }}</div>
+                    <div class="text-xs text-slate-500">{{ sub.interval || '3 months' }}</div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-slate-900">{{ formatDate(sub.created_at) }}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Subscription Details Modal -->
@@ -275,6 +324,72 @@ const fetchSubscriptions = async () => {
 onMounted(async () => {
   await fetchSubscriptions();
 });
+
+const calculateEndDate = (startDate, interval) => {
+  if (!startDate) return 'No date';
+  
+  // Handle both timestamp numbers and string dates
+  const date = typeof startDate === 'number' 
+    ? new Date(startDate * 1000) 
+    : new Date(startDate);
+  
+  // Check if date is valid
+  if (isNaN(date.getTime())) return 'Invalid date';
+  
+  // Parse interval to get months
+  let monthsToAdd = 3; // default
+  
+  if (interval) {
+    const match = interval.match(/(\d+)\s*(month|year|week|day)s?/i);
+    if (match) {
+      const value = parseInt(match[1]);
+      const unit = match[2].toLowerCase();
+      
+      switch (unit) {
+        case 'month':
+          monthsToAdd = value;
+          break;
+        case 'year':
+          monthsToAdd = value * 12;
+          break;
+        case 'week':
+          monthsToAdd = Math.floor(value / 4); // approximate weeks to months
+          break;
+        case 'day':
+          monthsToAdd = Math.floor(value / 30); // approximate days to months
+          break;
+      }
+    }
+  }
+  
+  // Calculate end date
+  const endDate = new Date(date);
+  endDate.setMonth(endDate.getMonth() + monthsToAdd);
+  
+  return endDate.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+};
+
+const formatDate = (timestamp) => {
+  if (!timestamp) return 'No date';
+  
+  // Handle both timestamp numbers and string dates
+  const date = typeof timestamp === 'number' 
+    ? new Date(timestamp * 1000) 
+    : new Date(timestamp);
+  
+  // Check if date is valid
+  if (isNaN(date.getTime())) return 'Invalid date';
+  
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+};
 
 const formatStatus = (status) => {
   const statusMap = {
