@@ -1,48 +1,121 @@
-*.log
-.DS_Store
+# ═══════════════════════════════════════════════════════════════
+# ENVIRONMENT & CONFIG
+# ═══════════════════════════════════════════════════════════════
 .env
 .env.backup
 .env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.zed
+.env.*.local
 /auth.json
-/node_modules
+
+# ═══════════════════════════════════════════════════════════════
+# LOGS
+# ═══════════════════════════════════════════════════════════════
+*.log
+/storage/logs/*
+!/storage/logs/.gitignore
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ═══════════════════════════════════════════════════════════════
+# CACHE FILES
+# ═══════════════════════════════════════════════════════════════
+
+# PHPStan cache
+.phpstan/
+.phpstan/cache/
+
+# PHPUnit cache
+.phpunit.cache/
+.phpunit.result.cache
+
+# Composer cache
+composer.lock.backup
+composer.phar
+
+# NPM / Node cache
+.npm/
+.yarn/
+.pnp/
+.pnp.js
+node_modules/.cache/
+
+# Vite cache
+.vite/
+dist/
+
+# Laravel cache
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# Storage keys
+/storage/*.key
+/storage/pail
+/storage/api-docs/*
+
+# Public storage
 /public/build
 /public/hot
 /public/storage
-/storage/framework/cache/*
-/storage/*.key
-/storage/pail
-/bootstrap/cache/*
-/storage/api-docs/*
 
-/storage/framework/sessions
-/storage/framework/views
-/storage/logs
+# ═══════════════════════════════════════════════════════════════
+# DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════
 /vendor
-Homestead.json
-Homestead.yaml
-Thumbs.db
+/node_modules
+
+# ═══════════════════════════════════════════════════════════════
+# IDE FILES
+# ═══════════════════════════════════════════════════════════════
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.fleet/
+.nova/
+.zed/
+.phpactor.json
+.phpstorm.meta.php
 
 # IDE Helper generated files
 _ide_helper.php
 _ide_helper_models.php
-.phpstorm.meta.php
 
-# PHPStan baseline (optional - uncomment if you want to track it)
-# phpstan-baseline.neon
-
-# OS generated files
+# ═══════════════════════════════════════════════════════════════
+# OS FILES
+# ═══════════════════════════════════════════════════════════════
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
 *.swp
 *.swo
 *~
 
-# NPM debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# ═══════════════════════════════════════════════════════════════
+# TEMPORARY FILES
+# ═══════════════════════════════════════════════════════════════
+*.tmp
+*.temp
+*.cache
+.cache/
+tmp/
+temp/
+
+# ═══════════════════════════════════════════════════════════════
+# PROJECT SPECIFIC
+# ═══════════════════════════════════════════════════════════════
+Homestead.json
+Homestead.yaml
+
+# PHPStan baseline (optional - uncomment if you want to track it)
+# phpstan-baseline.neon

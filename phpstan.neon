@@ -12,29 +12,12 @@ parameters:
         - app/
 
     excludePaths:
-        - app/Console/Kernel.php
-        - app/Exceptions/Handler.php
+        analyseAndScan:
+            - app/Console/Kernel.php (?)
+            - app/Exceptions/Handler.php (?)
 
     # Memory limit for analysis
-    memory_limit: 1G
-
-    # Strict type checking
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
-    treatPhpDocTypesAsCertain: false
-    checkMissingTypehints: true
-
-    # Additional strict rules
-    polluteScopeWithLoopInitialAssignments: false
-    polluteScopeWithAlwaysIterableForeach: false
-    checkAlwaysTrueCheckTypeFunctionCall: true
-    checkAlwaysTrueInstanceof: true
-    checkAlwaysTrueStrictComparison: true
-    checkExplicitMixedMissingReturn: true
-    checkFunctionNameCase: true
-    checkInternalClassCaseSensitivity: true
-    reportMaybesInMethodSignatures: true
-    reportStaticMethodSignatures: true
+    tmpDir: .phpstan
 
     # Ignore specific errors (minimal - only what's truly necessary)
     ignoreErrors:
