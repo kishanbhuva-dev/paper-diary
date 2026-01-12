@@ -200,6 +200,7 @@ const manageMenu = [
   { label: "Users", to: "/admin/users", icon: "heroicons:user-group" },
   { label: "Owners", to: "/admin/owners", icon: "heroicons:user-plus" },
   { label: "Subscriptions", to: "/admin/subscriptions", icon: "heroicons:credit-card-20-solid" },
+  { label: "Bookings", to: "/admin/bookings", icon: "mdi:calendar-check" },
 ];
 
 const systemMenuItems = [

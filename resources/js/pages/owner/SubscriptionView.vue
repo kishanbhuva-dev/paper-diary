@@ -35,7 +35,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-3xl font-black text-slate-900">${{ getPlanPrice() }}</div>
+                <div class="text-3xl font-black text-slate-900">£{{ getPlanPrice() }}</div>
                 <div class="text-slate-500 text-sm">{{ getPlanInterval() }}</div>
                 <div class="text-slate-400 text-xs mt-1">{{ getPlanName() }}</div>
               </div>
@@ -71,11 +71,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span class="text-slate-600">Plan ID:</span>
-                    <span class="ml-2 font-mono text-slate-900">{{ subscription.subscription_id?.slice(0, 12) }}...</span>
+                    <span class="ml-2 font-mono text-slate-900">{{ subscription.subscription_id?.slice(0, 30) }}</span>
                   </div>
                   <div>
                     <span class="text-slate-600">Price ID:</span>
-                    <span class="ml-2 font-mono text-slate-900">{{ subscription.price_id?.slice(0, 12) }}...</span>
+                    <span class="ml-2 font-mono text-slate-900">{{ subscription.price_id?.slice(0, 30) }}</span>
                   </div>
                   <div>
                     <span class="text-slate-600">Plan Name:</span>
@@ -116,7 +116,7 @@
                       
                       <div>
                         <div class="text-sm font-medium text-slate-900">{{ sub.plan_name || 'Professional Plan' }}</div>
-                        <div class="text-xs text-slate-500 font-mono">{{ sub.stripe_id?.slice(0, 8) }}...</div>
+                        <div class="text-xs text-slate-500 font-mono">{{ sub.stripe_id?.slice(0, 30) }}</div>
                       </div>
                     </div>
                   </td>
@@ -145,7 +145,7 @@
                     </div>
                   </td>
                   <td class="px-6 py-4">
-                    <div class="text-sm font-medium text-slate-900">${{ sub.amount || '12.00' }}</div>
+                    <div class="text-sm font-medium text-slate-900">£{{ sub.amount || '12.00' }}</div>
                     <div class="text-xs text-slate-500">{{ sub.interval || '3 months' }}</div>
                   </td>
                   <td class="px-6 py-4">

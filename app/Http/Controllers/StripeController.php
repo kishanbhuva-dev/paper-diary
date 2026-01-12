@@ -804,7 +804,7 @@ class StripeController extends Controller
             
             return response()->json([
                 'status' => true,
-                'message' => 'Admin subscriptions retrieved successfully',
+                'message' => '',
                 'data' => $adminSubscriptions
             ]);
             

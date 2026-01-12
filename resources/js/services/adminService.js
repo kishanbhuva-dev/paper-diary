@@ -96,6 +96,7 @@ const authService = {
   async adminDashboard() {
     return await apiClient.get('/admin');
   },
+
   async fetchSubscriptions(query) {
     const response = await apiClient.get("admin/subscriptions", {
       params: query,
@@ -103,6 +104,15 @@ const authService = {
 
     return response.data;
   },
+
+  async fetchAdminBookings(query) {
+    const response = await apiClient.get("admin/booking", {
+      params: query,
+    });
+    return response.data;
+  },
+
+
 };
 
 export default authService;
