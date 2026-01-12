@@ -240,12 +240,10 @@ const dashboardData = async () => {
   error.value = null;
   try {
     const response = await adminService.adminDashboard();
-    console.log("response", response);
     if (response.data.status === true) {
       dashboardDetail.value = response.data.data
     }
   } catch {
-    console.error('Dashboard data error:', err);
     error.value = err.message || 'Failed to load dashboard data';
   } finally {
     loading.value = false;

@@ -40,8 +40,11 @@ const tableColumns = [
   { label: "Property", key: "propertyName", sortable: true },
   { label: "Owner Name", key: "ownerName", sortable: true },
   { label: "Owner Email", key: "ownerEmail", sortable: true },
+  { label: "Guest Name", key: "guestFullName", sortable: true },
+  { label: "Guest Email", key: "guestEmail", sortable: true },
   { label: "Check-in", key: "arrivalDateTime", sortable: true },
   { label: "Check-out", key: "departureDateTime", sortable: true },
+  { label: "Booked On", key: "bookedOn", sortable: true },
   { label: "Status", key: "status", sortable: true },
 ];
 
