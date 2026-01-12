@@ -52,7 +52,9 @@ class BookingsController extends Controller
                         ->orWhere('booking_orders.arrivalDateTime', 'like', $searchTerm)
                         ->orWhere('booking_orders.departureDateTime', 'like', $searchTerm)
                         ->orWhereDate('booking_orders.arrivalDateTime', '=', $rawSearch)
-                        ->orWhereDate('booking_orders.departureDateTime', '=', $rawSearch);
+                        ->orWhereDate('booking_orders.departureDateTime', '=', $rawSearch)
+                        ->orWhere('booking_orders.guestFullName', 'like', $searchTerm)
+                        ->orWhere('booking_orders.guestEmail', 'like', $searchTerm);
                 });
             }
 
