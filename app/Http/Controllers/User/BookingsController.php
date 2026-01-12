@@ -115,36 +115,24 @@ class BookingsController extends Controller
 
             $bookingOrder = BookingOrder::where('id',$request->bookingId)->first();
             $booking = Bookings::where('bookingOrderId',$request->bookingId)->get();
-            foreach ($booking as $key => $value) {
-                if($request->status=='confirm'){
+            $paymentIntentId = $request->payment_intent_id;
+            $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId);
+            if ($paymentIntent->status=='succeeded') {
+                foreach ($booking as $key => $value) {
                     $value->status = 'confirmed';
-                }elseif($request->status=='cancelled'){  
-                    $value->status = $request->status;
-                }else{
-                    $value->status = 'pending';
+                    $value->save();
                 }
-                $value->save();
-            }
-            
-            $bookingOrder->status = $request->status;
-            if ($request->status =='pending') {
-                $bookingOrder->paymentStatus = 'unpaid';
-            }elseif ($request->status =='cancelled') {
-                $bookingOrder->paymentStatus = 'failed';
-            }else{
                 $bookingOrder->paymentStatus = 'paid';
-            }
-            $bookingOrder->save();
+                $bookingOrder->save();   
+            }else{
+                $bookingOrder->paymentStatus = 'cancelled';
+                $bookingOrder->status = 'cancelled';
+                $bookingOrder->save();   
+            }            
             $bookingOrderId = $bookingOrder->propertyId;
-            $property = Property::where('id',$bookingOrderId)->first();
-            if ($property->stripeSecretKey) {
-                $ownerStripeSecret = $property->stripeSecretKey;
-            }else {
-                $ownerStripeSecret = User::where('id', $property->ownerId)->value('stripeSecretKey');
-            }
+            
             $stripe = new \Stripe\StripeClient($ownerStripeSecret);
-            $paymentDetail = $stripe->paymentIntents->retrieve($request->payment_intent_id);
-            $paymentDetail->status;
+            $paymentDetail = $stripe->paymentIntents->retrieve($request->token);
             if ($paymentDetail->status == 'succeeded') {
                 $payment = new Payment();
                 $payment->transaction_id = $paymentDetail->id;
@@ -179,6 +167,19 @@ class BookingsController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
             }
+            $property = Property::where('slug', $request->slug)->first();
+            if ($property->stripePublicKey) {
+                $ownerStripePublicKey = $property->stripePublicKey;
+            }else {
+                $ownerStripePublicKey = User::where('id', $property->ownerId)->value('stripePublicKey');
+            }
+            if (!$property->stripePublicKey && !$ownerStripePublicKey) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'You can not book this property',
+                    'data'    => []
+                ]);
+            }
             $availableResourcesData = getResourcesAvailable($request->resourceTypeId, $request->arrivalDateTime, $request->departureDateTime);
             if ($availableResourcesData->count() < $request->resources) {
                 return response()->json(['status' => false, 'message' => 'Resources not available for the selected dates and quantity', 'data' => []]);
@@ -204,8 +205,8 @@ class BookingsController extends Controller
             if (isset($request->children)) {
                 $booking->children = $request->children;
             }
-            $booking->price = $request->cost;
-            $booking->cost = $request->price;
+            $booking->price = $resourcePriceTotal->price * (int)$request->nightsCount;
+            $booking->cost = $resourceType->price;
             $booking->userId = Auth::user()->id;
             if (isset($request->status)) {
                 $booking->status = $request->status;
@@ -281,6 +282,22 @@ class BookingsController extends Controller
                         Mail::to($ownerEmail)->send(new BookingMail($ownerData, 'owner'));
                     }
                 }
+                $paymentIntent = PaymentIntent::create([
+                'amount'                    => $booking->price * 100,
+                'currency'                  => "GBP",
+                'customer'                  => Auth::user()->id,
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                ],
+                "metadata"=>["registrationId"=>$bookingOrderId]
+                ]);
+                $response = [
+                    'status'       => true,
+                    'token'        => (string) $paymentIntent->id,
+                    'clientSecret' => $paymentIntent->client_secret,
+                    'publishable'  => base64_encode($ownerStripePublicKey),
+                    "total"        => $booking->price,
+                ];
                 return response()->json(['status' => true, 'message' => '', 'data' => ['id' => $bookingOrderId]], 201);
             }else {
                 return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
