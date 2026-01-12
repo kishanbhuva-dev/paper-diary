@@ -952,5 +952,542 @@ No OpenAPI/Swagger documentation for API endpoints.
 
 ---
 
+---
+
+## 13. File Handling Issues
+
+### 13.1 Image Storage Path Inconsistency
+**File:** `app/Http/Controllers/Owner/PropertyController.php`
+
+```php
+$fileName = $file->hashName();
+$file->move(storage_path('app/public/property/images'), $fileName);
+$propertyImage->image = $fileName;
+```
+
+**Issue:** 
+1. Using `move()` instead of Laravel's `store()` method
+2. Path handling inconsistency - using raw `storage_path()` instead of `Storage` facade
+3. No file validation for dimensions, size, or type beyond basic mimes check
+
+**Recommendation:**
+```php
+$path = $file->store('property/images', 'public');
+$propertyImage->image = basename($path);
+```
+
+---
+
+### 13.2 Missing File Cleanup on Deletion
+**File:** `app/Http/Controllers/Owner/PropertyController.php`
+**Method:** `deletePropertyImage()`
+
+```php
+public function deletePropertyImage(Request $request)
+{
+    $imageId = $request->imageId;
+    $propertyImage = PropertyImage::whereIn('id', $imageId)->delete();
+    return response()->json(['status' => true, 'message' => 'Image deleted successfully', 'data' => null]);
+}
+```
+
+**Issue:** Database records deleted but actual files remain on disk, causing storage bloat.
+
+**Recommendation:**
+```php
+public function deletePropertyImage(Request $request)
+{
+    $images = PropertyImage::whereIn('id', $request->imageId)->get();
+    foreach ($images as $image) {
+        Storage::disk('public')->delete("property/images/{$image->image}");
+        $image->delete();
+    }
+    return response()->json(['status' => true, 'message' => 'Image deleted successfully']);
+}
+```
+
+---
+
+### 13.3 No File Size Limits in Validation
+**File:** `app/Http/Controllers/Owner/PropertyController.php`
+
+```php
+$request->validate([
+    'images.*' => 'mimes:jpeg,png,jpg,gif,svg',
+]);
+```
+
+**Issue:** No maximum file size validation. Users could upload extremely large files.
+
+**Recommendation:**
+```php
+$request->validate([
+    'images.*' => 'mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+]);
+```
+
+---
+
+### 13.4 Hardcoded Storage Paths
+**Files:** Multiple controllers
+
+```php
+storage_path('app/public/property/images')
+"/storage/property/images/{$image->image}"
+```
+
+**Issue:** Hardcoded paths throughout codebase. Should be configurable.
+
+**Recommendation:** Create config for storage paths:
+```php
+// config/filestorage.php
+return [
+    'property_images' => 'property/images',
+    'avatars' => 'avatars',
+];
+```
+
+---
+
+### 13.5 No Image Optimization
+**Issue:** No image optimization or resizing on upload. Large images stored as-is.
+
+**Recommendation:** Use Intervention Image for resizing:
+```php
+$image = Image::make($file)
+    ->resize(1920, null, function ($constraint) {
+        $constraint->aspectRatio();
+        $constraint->upsize();
+    })
+    ->encode('jpg', 85);
+```
+
+---
+
+## 14. File Location & Organization Issues
+
+### 14.1 Inconsistent Controller Namespacing
+**Current Structure:**
+```
+app/Http/Controllers/
+├── Admin/
+│   ├── BookingsController.php    
+│   ├── DashboardController.php   
+│   ├── FacilityController.php    
+│   ├── ProfileController.php     
+│   ├── PropertyController.php    
+│   └── UserAndOwnerController.php  <- Combined, inconsistent
+├── Owner/
+│   ├── BookingsController.php    
+│   ├── DashboardController.php   
+│   ├── FacilityController.php    
+│   ├── PropertyController.php    
+│   ├── ResourceController.php    
+│   └── ResourceTypeController.php
+├── User/
+│   └── BookingsController.php    <- Only one controller, inconsistent depth
+├── AuthController.php            <- Should be in Auth/ folder
+├── Controller.php
+├── MigrationController.php       <- Should be in Console/ or removed
+└── StripeController.php          <- Should be in separate folder
+```
+
+**Recommended Structure:**
+```
+app/Http/Controllers/
+├── Admin/
+│   ├── BookingController.php     # Singular naming
+│   ├── DashboardController.php
+│   ├── FacilityController.php
+│   ├── OwnerController.php       # Separate from user
+│   ├── PropertyController.php
+│   └── UserController.php        # Separate from owner
+├── Auth/
+│   └── AuthController.php
+├── Owner/
+│   └── ...
+├── Payment/
+│   └── StripeController.php
+└── User/
+    ├── BookingController.php
+    └── ProfileController.php
+```
+
+---
+
+### 14.2 Helper File Location
+**Current:** `app/helper/helper.php`
+
+**Issues:**
+1. Lowercase folder name (`helper` vs `Helper`)
+2. Single file with global functions
+3. Non-standard Laravel location
+
+**Recommendation:**
+```
+app/
+├── Helpers/
+│   ├── BookingHelper.php      # Class-based
+│   ├── SubscriptionHelper.php
+│   └── PropertyHelper.php
+```
+
+Or use proper Service classes.
+
+---
+
+### 14.3 Missing Folders
+**Missing standard Laravel folders:**
+- `app/Events/` - No event classes
+- `app/Listeners/` - No listener classes  
+- `app/Exceptions/` - No custom exceptions (Handler exists)
+- `app/Jobs/` - No queue jobs
+- `app/Notifications/` - No notification classes
+- `app/Policies/` - No authorization policies
+- `app/Rules/` - No custom validation rules
+- `app/Http/Requests/` - No form request classes
+
+---
+
+### 14.4 Email Templates Location
+**Current:** `resources/views/emails/`
+
+Files:
+- `reset-password.blade.php`
+- `booking-confirmation.blade.php` (missing from read)
+- `booking-owner.blade.php` (likely exists)
+
+**Issue:** Email templates have inconsistent naming and no organization by type.
+
+**Recommendation:**
+```
+resources/views/emails/
+├── auth/
+│   ├── reset-password.blade.php
+│   └── welcome.blade.php
+├── bookings/
+│   ├── confirmation-guest.blade.php
+│   └── confirmation-owner.blade.php
+└── layouts/
+    └── base.blade.php
+```
+
+---
+
+### 14.5 Model Naming Issues
+**File:** `app/Models/Bookings.php`
+
+**Issue:** Plural model name. Laravel conventions dictate singular.
+
+**Related Files Impacted:**
+- All controllers using `Bookings::` 
+- All relationships referencing `Bookings`
+- Helper functions
+
+**Recommendation:** Rename to `Booking.php` and update all references.
+
+---
+
+## 15. Additional Code Optimizations
+
+### 15.1 Query Optimization in Availability Check
+**File:** `app/helper/helper.php`
+
+```php
+function getResourcesAvailable($resourceTypesId, $arrivalDateTime, $departureDateTime)
+{
+    $bookedResourceIds = Bookings::where('resourceTypeId', $resourceTypesId)
+        ->whereIn('status', ['pending', 'confirmed'])
+        ->where(function ($query) use ($arrivalDateTime, $departureDateTime) {
+            $query->whereDate('arrivalDateTime', '<=', date('Y-m-d', strtotime($departureDateTime)))
+                  ->whereDate('departureDateTime', '>=', date('Y-m-d', strtotime($arrivalDateTime)));
+        })
+        ->pluck('resourceId');
+
+    $availableResources = Resource::where('resourceTypeId', $resourceTypesId)
+        ->whereNotIn('id', $bookedResourceIds)
+        ->get();
+```
+
+**Issues:**
+1. Two separate queries when one would suffice
+2. No index usage optimization
+3. Using `date()` and `strtotime()` instead of Carbon
+
+**Optimized Version:**
+```php
+use Carbon\Carbon;
+
+function getResourcesAvailable(int $resourceTypesId, string $arrivalDateTime, string $departureDateTime): Collection
+{
+    $arrival = Carbon::parse($arrivalDateTime)->startOfDay();
+    $departure = Carbon::parse($departureDateTime)->endOfDay();
+
+    return Resource::where('resourceTypeId', $resourceTypesId)
+        ->whereDoesntHave('bookings', function ($q) use ($arrival, $departure) {
+            $q->whereIn('status', ['pending', 'confirmed'])
+              ->where('arrivalDateTime', '<=', $departure)
+              ->where('departureDateTime', '>=', $arrival);
+        })
+        ->get();
+}
+```
+
+---
+
+### 15.2 Subscription Check Optimization
+**File:** `app/helper/helper.php`
+**Lines:** 53-163
+
+The `getSubscriptionDetails()` function is 110 lines and makes multiple Stripe API calls.
+
+**Issues:**
+1. Function is too long (should be < 50 lines)
+2. Multiple Stripe API calls for single check
+3. No caching of subscription data
+
+**Recommendation:**
+1. Cache subscription status for 5-10 minutes
+2. Split into smaller functions
+3. Use webhook events to update subscription status proactively
+
+```php
+function getSubscriptionDetails(User $user): array
+{
+    return Cache::remember(
+        "subscription:{$user->id}",
+        now()->addMinutes(5),
+        fn() => $this->fetchSubscriptionFromStripe($user)
+    );
+}
+```
+
+---
+
+### 15.3 Booking Calculation Optimization
+**File:** `app/Http/Controllers/User/BookingsController.php`
+
+```php
+$resourceTypeCount = ResourceType::whereIn('propertyId', $propertyIds)->count();
+$resourceCount = Resource::whereIn('resourceTypeId', function($query) use ($propertyIds) {
+    $query->select('id')->from('resource_types')->whereIn('propertyId', $propertyIds);
+})->count();
+```
+
+**Issue:** Two queries for dashboard counts.
+
+**Optimized:**
+```php
+$stats = DB::table('resource_types as rt')
+    ->leftJoin('resources as r', 'r.resourceTypeId', '=', 'rt.id')
+    ->whereIn('rt.propertyId', $propertyIds)
+    ->selectRaw('COUNT(DISTINCT rt.id) as type_count, COUNT(r.id) as resource_count')
+    ->first();
+```
+
+---
+
+### 15.4 Stripe API Call Batching
+**File:** `app/Http/Controllers/StripeController.php`
+
+```php
+foreach ($subscriptions as $sub) {
+    $stripeSub = \Stripe\Subscription::retrieve($sub->stripe_id);
+    if ($sub->stripe_price) {
+        $price = \Stripe\Price::retrieve($sub->stripe_price);
+        $product = \Stripe\Product::retrieve($price->product);
+    }
+}
+```
+
+**Issue:** N+1 API calls to Stripe (potentially 3 calls per subscription).
+
+**Optimized:**
+```php
+// Collect all IDs first
+$subIds = $subscriptions->pluck('stripe_id');
+$priceIds = $subscriptions->pluck('stripe_price')->filter();
+
+// Batch fetch from Stripe
+$stripeSubscriptions = \Stripe\Subscription::all(['ids' => $subIds->toArray()]);
+$prices = \Stripe\Price::all(['ids' => $priceIds->toArray()]);
+$products = \Stripe\Product::all(['ids' => $prices->pluck('product')->toArray()]);
+
+// Map data
+// ...
+```
+
+---
+
+### 15.5 Database Transaction Patterns
+**File:** `app/Http/Controllers/Owner/PropertyController.php`
+
+```php
+public function store(Request $request)
+{
+    // Creates Property
+    $property = Property::create([...]);
+    
+    // Then images
+    foreach ($request->images as $image) {
+        PropertyImage::create([...]);
+    }
+    
+    // Then facilities
+    $property->facilities()->sync([...]);
+}
+```
+
+**Issue:** No transaction. If image upload fails mid-way, orphaned records remain.
+
+**Optimized:**
+```php
+public function store(Request $request)
+{
+    return DB::transaction(function () use ($request) {
+        $property = Property::create([...]);
+        
+        foreach ($request->images as $image) {
+            PropertyImage::create([...]);
+        }
+        
+        $property->facilities()->sync([...]);
+        
+        return $property;
+    });
+}
+```
+
+---
+
+### 15.6 Eager Loading Patterns
+**File:** `app/Http/Controllers/Admin/PropertyController.php`
+
+```php
+public function index(Request $request)
+{
+    $properties = Property::query();
+    // ... filtering
+    $properties = $properties->paginate($perPage);
+    
+    // Later in response or view:
+    foreach ($properties as $p) {
+        $p->owner->name;        // N+1
+        $p->facilities->count; // N+1
+    }
+}
+```
+
+**Optimized:**
+```php
+$properties = Property::with(['owner:id,firstName,lastName', 'facilities'])
+    ->withCount('facilities')
+    ->paginate($perPage);
+```
+
+---
+
+### 15.7 String Concatenation in Queries
+**File:** `app/Http/Controllers/Admin/DashboardController.php`
+
+```php
+->selectRaw("DATE_FORMAT(created_at, '%a') as day")
+```
+
+**Issue:** Database-specific syntax. Won't work if switching databases.
+
+**Recommendation:** Use Carbon for formatting or create accessor in model.
+
+---
+
+### 15.8 Unused Method Parameters
+**File:** `app/Http/Controllers/Admin/BookingsController.php`
+
+```php
+public function update(Request $request)
+{
+    // Method is empty
+}
+
+public function destroy(Request $request)
+{
+    // Method is empty
+}
+```
+
+**Issue:** Empty methods declared. Either implement or remove.
+
+---
+
+### 15.9 Configuration Caching Consideration
+**Issue:** With `env()` calls in controllers, config caching (`php artisan config:cache`) will break the application.
+
+All `env()` calls must be moved to config files:
+- `AuthController.php` line 227: `env('FRONTEND_URL')`
+- `StripeController.php` line 44: `env('STRIPE_KEY')`
+
+---
+
+### 15.10 Model Events for Side Effects
+**Issue:** Side effects (emails, notifications) handled directly in controllers.
+
+**Recommendation:** Use model observers:
+```php
+// app/Observers/BookingOrderObserver.php
+class BookingOrderObserver
+{
+    public function created(BookingOrder $booking)
+    {
+        Mail::to($booking->guestEmail)->send(new BookingConfirmation($booking));
+    }
+}
+```
+
+---
+
+## 16. Email Template Issues
+
+### 16.1 Reset Password Template
+**File:** `resources/views/emails/reset-password.blade.php`
+
+```php
+<a href="{{ url('/reset-password?token=') . $token }}" ...>
+```
+
+**Issues:**
+1. Using `url()` instead of `route()` helper
+2. Token exposed in plain URL
+3. No expiration display for user
+
+---
+
+### 16.2 Missing Email Templates
+**Expected but not found:**
+- Booking cancellation email
+- Password changed confirmation
+- Owner booking notification
+- Payment failure notification
+
+---
+
+## 17. Test Coverage Issues
+
+### 17.1 Existing Tests
+**Files in `tests/`:**
+- `Feature/ExampleTest.php` - Default Laravel test
+- `Feature/OwnerMiddlewareTest.php` - One middleware test
+- `Unit/ExampleTest.php` - Default Laravel test
+
+### 17.2 Missing Critical Tests
+- Authentication flow tests
+- Booking creation/cancellation tests
+- Payment processing tests
+- Subscription lifecycle tests
+- Authorization policy tests
+- API endpoint tests
+
+---
+
 *Review completed: January 12, 2026*
 *Reviewer: Senior Developer Code Review*
+*Updated: January 12, 2026 - Added file handling, location, and optimization sections*
