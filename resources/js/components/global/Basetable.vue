@@ -273,9 +273,20 @@
                 </div>
                 <span v-else class="text-gray-300">-</span>
               </template>
-              <template v-else-if="col.key === 'status'">
+              <!-- <template v-else-if="col.key === 'status'">
                 <span
                   v-if="getCellValue(item, col)"
+                  class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border"
+                  :class="getStatusClasses(getCellValue(item, col))"
+                >
+                  {{ formatStatusDisplay(getCellValue(item, col)) }}
+                </span>
+                <span v-else class="text-gray-300">-</span>
+              </template> -->
+
+              <template v-else-if="col.key === 'status'">
+                <span
+                  v-if="getCellValue(item, col) !== null && getCellValue(item, col) !== undefined"
                   class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border"
                   :class="getStatusClasses(getCellValue(item, col))"
                 >
@@ -503,7 +514,9 @@ const getOptionLabel = (key, value) => {
 
 // --- STATUS LOGIC ---
 const getStatusClasses = (val) => {
+  // console.log('getStatusClasses val', val);
   const s = String(val).toLowerCase();
+  // console.log('getStatusClasses s', s);
   const success = ["1", "active", "confirm", "paid", "success", "confirmed"];
   const danger = ["0", "inactive", "cancelled", "unpaid", "failed"];
   if (success.includes(s)) return "bg-green-50 text-green-700 border-green-200";

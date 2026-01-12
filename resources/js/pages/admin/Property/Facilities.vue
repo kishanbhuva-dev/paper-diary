@@ -20,6 +20,7 @@
             :showDownload="true"
             :showEdit="true"
             :adminLogin="false"
+            :show-view="false"
         />
 
         <BaseModal
@@ -130,7 +131,6 @@
     const orderDirection = ref("asc");
 
     const tableColumns = [
-        { label: "ID", key: "id", sortable: true  },
         { label: "name", key: (row) => row?.name, sortable: true  },
         { label: "icon", key: "icon", sortable: true  },
         { label: "description", key: "description", sortable: true  },
