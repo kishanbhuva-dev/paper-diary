@@ -18,6 +18,7 @@
             :showDownload="true"
             :showEdit="false"
             :showDelete="false"
+            :show-view="false"
             :adminLogin="true"
             adminLoginTitle="Login as User"
         >
@@ -101,6 +102,8 @@
             sortOrder: orderDirection.value
         });
 
+        console.log('res for status', res);
+
         if (res.status) {
             propertLisings.value = res.data.data;
             total.value = res.data.total || 0;
@@ -108,7 +111,6 @@
     }
 
     const handleSort = (sortData) => {
-        console.log('sortData', sortData);
         orderBy.value = sortData.key;
         orderDirection.value = sortData.order;
         fetchPropertLisings();

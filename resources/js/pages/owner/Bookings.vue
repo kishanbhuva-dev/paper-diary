@@ -213,6 +213,7 @@ const filterConfig = [
   { label: "Guest Name", key: "guestName", type: "text" },
   { label: "Check-in Date", key: "arrivalDateTime", type: "date" },
   { label: "Check-out Date", key: "departureDateTime", type: "date" },
+  { label: "From Now", key: "fromNow", type: "date" },
 ];
 
 const tableColumns = [
