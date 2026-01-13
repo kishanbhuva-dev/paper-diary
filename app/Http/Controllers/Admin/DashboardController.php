@@ -106,7 +106,7 @@ class DashboardController extends Controller
                 ->limit(10)
                 ->get();
             $details['topSites'] = $topSites;
-            
+
             $bookingTotalPerMonth = BookingOrder::where('status', 'confirm')
                 ->selectRaw('DATE_FORMAT(created_at, "%b-%Y") as month, SUM(price) as total')
                 ->groupBy('month')
@@ -119,7 +119,7 @@ class DashboardController extends Controller
             foreach ($bookingTotalPerMonth as $booking) {
                 $total = (float) $booking->total;
                 $grandTotal += $total;
-                
+
                 $monthlyBookingData[] = [
                     'month' => $booking->month,
                     'total' => $total,
@@ -130,7 +130,7 @@ class DashboardController extends Controller
                 'data' => $monthlyBookingData,
                 'grandTotal' => $grandTotal,
             ];
-            
+
             return response()->json([
                 'status'  => true,
                 'message' => '',
