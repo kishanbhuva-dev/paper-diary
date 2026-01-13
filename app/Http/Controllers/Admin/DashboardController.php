@@ -96,7 +96,41 @@ class DashboardController extends Controller
                     ],
                 ],
             ];
+            $topSites = BookingOrder::where('status', 'confirm')
+                ->whereBetween('created_at', [$todayStart, $todayEnd])
+                ->join('properties', 'booking_orders.property_id', '=', 'properties.id')
+                ->join('users', 'properties.owner_id', '=', 'users.id')
+                ->selectRaw('properties.name as property_name, users.name as owner_name, COUNT(booking_orders.id) as booking_count')
+                ->groupBy('properties.id', 'properties.name', 'users.name')
+                ->orderByDesc('booking_count')
+                ->limit(10)
+                ->get();
+            $details['topSites'] = $topSites;
+            
+            $bookingTotalPerMonth = BookingOrder::where('status', 'confirm')
+                ->selectRaw('DATE_FORMAT(created_at, "%b-%Y") as month, SUM(price) as total')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get();
 
+            $monthlyBookingData = [];
+            $grandTotal = 0;
+
+            foreach ($bookingTotalPerMonth as $booking) {
+                $total = (float) $booking->total;
+                $grandTotal += $total;
+                
+                $monthlyBookingData[] = [
+                    'month' => $booking->month,
+                    'total' => $total,
+                ];
+            }
+
+            $details['bookingTotalPerMonth'] = [
+                'data' => $monthlyBookingData,
+                'grandTotal' => $grandTotal,
+            ];
+            
             return response()->json([
                 'status'  => true,
                 'message' => '',
