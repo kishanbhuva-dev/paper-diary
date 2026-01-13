@@ -178,7 +178,7 @@ const fetchAllOwners = async () => {
     page: currentPage.value,
     per_page: perPage.value,
     search: currentSearch.value,
-    descending: orderDirection.value,       
+    descending: orderDirection.value,
     sortBy: orderBy.value
   });
   if (res.status) {
@@ -290,9 +290,9 @@ const handleLoginAsUser = async (item) => {
   console.warn("Login as user failed", response);
   return;
   }
-  
+
   const { token, user } = response.data.data;
-  
+
   localStorage.setItem('authToken', token);
   localStorage.setItem('user', JSON.stringify(user));
   localStorage.setItem('adminToken', adminToken);

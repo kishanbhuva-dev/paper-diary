@@ -191,9 +191,101 @@ v-for="(day, index) in dashboardDetail?.details?.revenue?.trend7Days || []" :key
           </div>
         </div>
       </div>
-
-
     </div>
+
+    <!-- Recent Activity & Top Sites -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <!-- Recent Activity -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div class="p-4 border-b border-gray-100">
+                  <div class="flex items-center justify-between">
+                      <h2 class="text-lg font-bold text-gray-900">Recent Activity</h2>
+                      <button
+                          class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200"
+                      >
+                          View All
+                      </button>
+                  </div>
+              </div>
+              <div class="p-4">
+                  <div class="space-y-3">
+                      <div
+                          v-for="(booking, index) in recentBookings || []"
+                          :key="index"
+                          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                          <div class="flex items-center space-x-3">
+                              <div class="p-2 bg-blue-100 rounded-lg">
+                                  <Icon icon="heroicons:calendar" class="text-blue-600 text-sm" />
+                              </div>
+                              <div>
+                                  <p class="font-medium text-gray-900 text-sm">
+                                      {{ booking.propertyName || 'Unknown Site' }}
+                                  </p>
+                                  <p class="text-xs text-gray-600">
+                                      {{ booking.ownerName }}
+                                  </p>
+                              </div>
+                          </div>
+                          <div class="text-right">
+                              <p class="text-xs font-medium text-gray-900">{{ booking.bookedOn }}</p>
+                              <p class="text-xs text-gray-500">{{ booking.status }}</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Top Sites -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div class="p-4 border-b border-gray-100">
+                  <div class="flex items-center justify-between">
+                      <h2 class="text-lg font-bold text-gray-900">Today's Top Sites</h2>
+                      <button
+                          class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200"
+                      >
+                          View All
+                      </button>
+                  </div>
+              </div>
+              <div class="p-4">
+                  <!-- No Data State -->
+                  <div
+                      v-if="!dashboardDetail?.performance_stats?.todaysTopSites?.length"
+                      class="flex flex-col items-center justify-center py-12 text-center"
+                  >
+                      <div class="p-4 bg-gray-100 rounded-full mb-4">
+                          <Icon icon="heroicons:map-pin" class="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 class="text-lg font-medium text-gray-900 mb-2">No Top Sites Today</h3>
+                      <p class="text-sm text-gray-500 mb-4">
+                          There are no bookings or activity for today's top sites.
+                      </p>
+                  </div>
+                  <div v-else class="space-y-3">
+                      <div
+                          v-for="(site, index) in dashboardDetail?.performance_stats?.todaysTopSites || []"
+                          :key="index"
+                          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                          <div class="flex items-center space-x-3">
+                              <div class="p-2 bg-green-100 rounded-lg">
+                                  <Icon icon="heroicons:map-pin" class="text-green-600 text-sm" />
+                              </div>
+                              <div>
+                                  <p class="font-medium text-gray-900 text-sm">{{ site.site_name }}</p>
+                                  <p class="text-xs text-gray-600">{{ site.first_name }} {{ site.last_name }}</p>
+                              </div>
+                          </div>
+                          <div class="text-right">
+                              <p class="font-bold text-gray-900 text-sm">£{{ formatCurrency(site.total_price) }}</p>
+                              <p class="text-xs text-gray-500">{{ site.room_booking_count }} bookings</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
 
   </div>
 </template>
@@ -203,6 +295,7 @@ import { computed, onMounted, ref } from 'vue';
 import adminService from '../../services/adminService'
 
 const dashboardDetail = ref({});
+const recentBookings = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
@@ -252,6 +345,20 @@ const dashboardData = async () => {
   }
 }
 
+const fetchAdminBookings = async () => {
+    const res = await adminService.fetchAdminBookings({
+      page: 1,
+      perPage: 10,
+      search: '',
+      sortBy: 'created_at',
+      sortOrder: 'desc',
+    });
+
+    if (res.status) {
+        recentBookings.value = res.data.data;
+    }
+};
+
 const formatCurrency = amount => {
   if (!amount) {return '0.00';}
   return parseFloat(amount).toLocaleString('en-GB', {
@@ -272,5 +379,6 @@ const maxRevenue = computed(() => {
 
 onMounted(() => {
   dashboardData();
+  fetchAdminBookings();
 })
 </script>
