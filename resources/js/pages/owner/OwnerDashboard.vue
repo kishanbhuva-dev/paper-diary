@@ -12,14 +12,23 @@
               {{ stat.label }}
             </p>
             <div class="mt-2 flex items-baseline gap-2">
-              <span class="text-xl font-bold" :class="stat.textClass">
+              <span
+                class="text-xl font-bold"
+                :class="stat.textClass"
+              >
                 {{ stat.value }}
               </span>
               <span class="text-xs text-gray-400 font-medium">Units</span>
             </div>
           </div>
-          <div class="p-2.5 rounded-xl" :class="stat.bgClass">
-            <Icon :icon="stat.icon" class="text-xl" />
+          <div
+            class="p-2.5 rounded-xl"
+            :class="stat.bgClass"
+          >
+            <Icon
+              :icon="stat.icon"
+              class="text-xl"
+            />
           </div>
         </div>
       </div>
@@ -27,9 +36,7 @@
 
     <!-- Property Filter -->
     <div class="mb-6">
-      <label
-        class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1"
-      >
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
         Property Filter
       </label>
       <div class="flex flex-wrap items-center gap-3">
@@ -41,8 +48,8 @@
             <span class="text-sm text-gray-600 truncate">
               {{
                 selectedProperties.length > 0
-                  ? selectedProperties.length + " Selected"
-                  : "All Properties"
+                  ? selectedProperties.length + ' Selected'
+                  : 'All Properties'
               }}
             </span>
             <Icon
@@ -67,9 +74,7 @@
                 :value="item.id"
                 class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
-              <span
-                class="text-sm text-gray-700 font-medium group-hover:text-blue-700"
-              >
+              <span class="text-sm text-gray-700 font-medium group-hover:text-blue-700">
                 {{ item.name }}
               </span>
             </label>
@@ -89,7 +94,10 @@
               class="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
               @click="removeProperty(id)"
             >
-              <Icon icon="mdi:close" class="text-sm" />
+              <Icon
+                icon="mdi:close"
+                class="text-sm"
+              />
             </button>
           </div>
 
@@ -108,7 +116,7 @@
       :rooms="rooms"
       :bookings="bookings"
       :status-config="customStatuses"
-      :allow-previous-month-navigation="true"
+      :allow-previous-month-navigation
       :text-labels="{
         room: 'Resources',
         available: 'Free',
@@ -122,7 +130,10 @@
     <div class="mt-10">
       <div class="flex items-center justify-between mb-5 px-1">
         <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <Icon icon="mdi:history" class="text-blue-600" />
+          <Icon
+            icon="mdi:history"
+            class="text-blue-600"
+          />
           Recent Bookings
         </h3>
         <div class="flex items-center gap-4">
@@ -157,11 +168,9 @@
               <h4
                 class="text-sm font-bold text-gray-800 truncate group-hover:text-blue-700 transition-colors"
               >
-                {{ booking.guestName || "Guest" }}
+                {{ booking.guestName || 'Guest' }}
               </h4>
-              <p
-                class="text-[10px] font-bold text-blue-500 uppercase tracking-tight"
-              >
+              <p class="text-[10px] font-bold text-blue-500 uppercase tracking-tight">
                 Ref #{{ booking.id }}
               </p>
             </div>
@@ -169,41 +178,49 @@
 
           <div class="flex-grow min-w-[280px]">
             <div class="flex items-center gap-2 mb-1.5">
-              <Icon icon="mdi:email-outline" class="text-gray-400 text-xs" />
+              <Icon
+                icon="mdi:email-outline"
+                class="text-gray-400 text-xs"
+              />
               <span class="text-[11px] text-gray-500 truncate font-medium">
-                {{ booking.guestEmail || "no-email-provided@mail.com" }}
+                {{ booking.guestEmail || 'no-email-provided@mail.com' }}
               </span>
             </div>
             <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
               <span class="text-[11px] text-gray-600 flex items-center gap-1">
-                <Icon icon="mdi:office-building" class="text-blue-400" />
-                {{ booking.property?.propertyName || "Main Property" }}
+                <Icon
+                  icon="mdi:office-building"
+                  class="text-blue-400"
+                />
+                {{ booking.property?.propertyName || 'Main Property' }}
               </span>
               <span class="text-[11px] text-gray-600 flex items-center gap-1">
-                <Icon icon="mdi:door-open" class="text-green-500" />
+                <Icon
+                  icon="mdi:door-open"
+                  class="text-green-500"
+                />
                 {{ booking.resource_type_name }}
               </span>
               <span class="text-[11px] text-gray-600 flex items-center gap-1">
-                <Icon icon="mdi:clock-check-outline" class="text-orange-400" />
-                Booked On: {{ booking.bookedOn || "N/A" }}
+                <Icon
+                  icon="mdi:clock-check-outline"
+                  class="text-orange-400"
+                />
+                Booked On: {{ booking.bookedOn || 'N/A' }}
               </span>
             </div>
           </div>
 
           <div class="flex items-center gap-5 px-6 border-l border-gray-100">
             <div class="text-center">
-              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">
-                Check-In
-              </p>
+              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">Check-In</p>
               <p class="text-xs font-bold text-gray-700 whitespace-nowrap">
                 {{ booking.arrivalDateTime }}
               </p>
             </div>
             <div class="h-6 w-px bg-gray-100 rotate-[20deg]"></div>
             <div class="text-center">
-              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">
-                Check-Out
-              </p>
+              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">Check-Out</p>
               <p class="text-xs font-bold text-gray-700 whitespace-nowrap">
                 {{ booking.departureDateTime }}
               </p>
@@ -228,9 +245,7 @@
             icon="mdi:calendar-blank-outline"
             class="text-4xl text-gray-200 mx-auto mb-2"
           />
-          <p class="text-gray-400 text-sm">
-            No activity recorded for the selected filter.
-          </p>
+          <p class="text-gray-400 text-sm">No activity recorded for the selected filter.</p>
         </div>
       </div>
     </div>
@@ -238,33 +253,28 @@
     <BookingDetailModal
       :show="showBookingModal"
       :booking="selectedBooking"
-      :can-cancel="
-        isFutureBooking(
-          selectedBooking?.checkIn || selectedBooking?.arrivalDateTime
-        )
-      "
+      :can-cancel="isFutureBooking(selectedBooking?.checkIn || selectedBooking?.arrivalDateTime)"
       @close="showBookingModal = false"
       @cancel="triggerCancelFlow"
     />
     <ConfirmModal
-    v-model="isCancelModalOpen"
-    title="Cancel Booking?"
-    message="This will permanently cancel the guest's reservation. Are you sure you want to proceed?"
-    @confirm="handleCancelBooking"
-  />
+      v-model="isCancelModalOpen"
+      title="Cancel Booking?"
+      message="This will permanently cancel the guest's reservation. Are you sure you want to proceed?"
+      @confirm="handleCancelBooking"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { Icon } from "@iconify/vue";
-import { useRouter } from "vue-router";
-import ownerService from "@/services/ownerService";
-import BookingDetailModal from "@/components/modals/BookingDetailModal.vue";
-import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
-import "vue-hotel-booking-calendar/dist/style.css";
-import ConfirmModal from "@/components/owner/ConfirmModal.vue"
-
+import { ref, onMounted, watch } from 'vue';
+import { Icon } from '@iconify/vue';
+import { useRouter } from 'vue-router';
+import ownerService from '@/services/ownerService';
+import BookingDetailModal from '@/components/modals/BookingDetailModal.vue';
+import { HotelDashboardCalendar } from 'vue-hotel-booking-calendar';
+import 'vue-hotel-booking-calendar/dist/style.css';
+import ConfirmModal from '@/components/owner/ConfirmModal.vue';
 
 const propertyDropdown = ref([]);
 const selectedProperties = ref([]);
@@ -284,7 +294,7 @@ const statsList = ref([]);
 const router = useRouter();
 
 const viewAllBookings = () => {
-  router.push({ name: "bookings" });
+  router.push({ name: 'bookings' });
 };
 
 const triggerCancelFlow = (id) => {
@@ -292,66 +302,67 @@ const triggerCancelFlow = (id) => {
   isCancelModalOpen.value = true;
 };
 const removeProperty = (id) => {
-  selectedProperties.value = selectedProperties.value.filter(
-    (item) => item !== id
-  );
+  selectedProperties.value = selectedProperties.value.filter((item) => item !== id);
 };
 
 const customStatuses = [
-  { key: "available", label: "Available", color: "", backgroundColor: "" },
+  { key: 'available', label: 'Available', color: '', backgroundColor: '' },
   {
-    key: "confirm",
-    label: "Confirm",
-    color: "#155e75",
-    backgroundColor: "#a7f3d0",
+    key: 'confirm',
+    label: 'Confirm',
+    color: '#155e75',
+    backgroundColor: '#a7f3d0',
   },
   {
-    key: "cancelled",
-    label: "Cancelled",
-    color: "#991b1b",
-    backgroundColor: "#fee2e2",
+    key: 'cancelled',
+    label: 'Cancelled',
+    color: '#991b1b',
+    backgroundColor: '#fee2e2',
   },
 ];
 
 const getStatusBadgeClass = (status) => {
   const s = status?.toLowerCase();
-  if (s === "confirm" || s === "confirmed")
-    {return "bg-emerald-50 text-emerald-700 border-emerald-100";}
-  if (s === "cancelled") {return "bg-rose-50 text-rose-700 border-rose-100";}
-  return "bg-amber-50 text-amber-700 border-amber-100";
+  if (s === 'confirm' || s === 'confirmed') {
+    return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+  }
+  if (s === 'cancelled') {
+    return 'bg-rose-50 text-rose-700 border-rose-100';
+  }
+  return 'bg-amber-50 text-amber-700 border-amber-100';
 };
 
 const formatLabel = (key) =>
-  key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+  key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 
 const getStatConfig = (key) => {
   const configs = {
     totalProperty: {
-      icon: "mdi:office-building-marker-outline",
-      bg: "bg-blue-50 text-blue-600",
-      text: "text-gray-800",
+      icon: 'mdi:office-building-marker-outline',
+      bg: 'bg-blue-50 text-blue-600',
+      text: 'text-gray-800',
     },
     totalBooking: {
-      icon: "mdi:calendar-check",
-      bg: "bg-indigo-50 text-indigo-600",
-      text: "text-gray-800",
+      icon: 'mdi:calendar-check',
+      bg: 'bg-indigo-50 text-indigo-600',
+      text: 'text-gray-800',
     },
     todayBooking: {
-      icon: "mdi:calendar-today",
-      bg: "bg-green-50 text-green-600",
-      text: "text-green-600",
+      icon: 'mdi:calendar-today',
+      bg: 'bg-green-50 text-green-600',
+      text: 'text-green-600',
     },
     cancelledBooking: {
-      icon: "mdi:calendar-remove",
-      bg: "bg-red-50 text-red-600",
-      text: "text-red-600",
+      icon: 'mdi:calendar-remove',
+      bg: 'bg-red-50 text-red-600',
+      text: 'text-red-600',
     },
   };
   return (
     configs[key] || {
-      icon: "mdi:chart-bar",
-      bg: "bg-gray-50 text-gray-600",
-      text: "text-gray-800",
+      icon: 'mdi:chart-bar',
+      bg: 'bg-gray-50 text-gray-600',
+      text: 'text-gray-800',
     }
   );
 };
@@ -362,10 +373,12 @@ watch(selectedProperties, () => {
 });
 
 const isFutureBooking = (checkInStr) => {
-  if (!checkInStr) {return false;}
+  if (!checkInStr) {
+    return false;
+  }
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const dateParts = checkInStr.includes("-") ? checkInStr.split("-") : [];
+  const dateParts = checkInStr.includes('-') ? checkInStr.split('-') : [];
   const bookingDate =
     dateParts[0].length === 4
       ? new Date(checkInStr)
@@ -383,29 +396,25 @@ const handleBookingClick = (booking) => {
   showBookingModal.value = true;
 };
 
-const handleCancelBooking = async (bookingId) => {
-  if (!bookingToCancelId.value) {return;}
-  
+const handleCancelBooking = async () => {
+  if (!bookingToCancelId.value) {
+    return;
+  }
+
   isLoading.value = true;
   isCancelModalOpen.value = false; // Close modal immediately for better UX
 
   try {
-   const res = await ownerService.cancelBooking(bookingToCancelId.value);
+    const res = await ownerService.cancelBooking(bookingToCancelId.value);
     if (res && res.status === true) {
-
-      await Promise.all([
-        getResources(),
-        getRecentBookings()
-      ]);
+      await Promise.all([getResources(), getRecentBookings()]);
       isCancelModalOpen.value = false;
       showBookingModal.value = false;
-      
     } else {
       isCancelModalOpen.value = false;
     }
-    
   } catch (error) {
-    console.error("API Error:", error);
+    throw new Error(error);
   } finally {
     isLoading.value = false;
     bookingToCancelId.value = null;
@@ -416,14 +425,12 @@ const getRecentBookings = async () => {
   try {
     const params = {
       limit: 10,
-      property_ids: selectedProperties.value.length
-        ? selectedProperties.value
-        : undefined,
+      property_ids: selectedProperties.value.length ? selectedProperties.value : undefined,
     };
     const res = await ownerService.fetchBookings(params);
     recentBookings.value = (res.data || res).slice(0, 10);
   } catch (error) {
-    console.error("Error fetching recent bookings:", error);
+    throw new Error(error);
   }
 };
 
@@ -432,12 +439,7 @@ const getResources = async () => {
     const ResourcesData = await ownerService.resourceList({
       propertyIds: selectedProperties.value,
     });
-    const keysToDisplay = [
-      "totalProperty",
-      "totalBooking",
-      "todayBooking",
-      "cancelledBooking",
-    ];
+    const keysToDisplay = ['totalProperty', 'totalBooking', 'todayBooking', 'cancelledBooking'];
     statsList.value = keysToDisplay.map((key) => {
       const config = getStatConfig(key);
       return {
@@ -454,8 +456,10 @@ const getResources = async () => {
       number: res.name,
     }));
     const formatDate = (dateStr) => {
-      if (!dateStr) {return "";}
-      const [d, m, y] = dateStr.trim().split("-");
+      if (!dateStr) {
+        return '';
+      }
+      const [d, m, y] = dateStr.trim().split('-');
       return `${y}-${m}-${d}`;
     };
     bookings.value = ResourcesData.booking.map((book) => ({
@@ -471,7 +475,7 @@ const getResources = async () => {
       status: book.status,
     }));
   } catch (error) {
-    console.error("Error loading resources:", error);
+    throw new Error(error);
   }
 };
 
@@ -480,7 +484,7 @@ const fetchPropertiesdropdown = async () => {
     const res = await ownerService.fetchPropertiesdropdown();
     propertyDropdown.value = res.data.data || [];
   } catch (error) {
-    console.error("Error fetching properties dropdown:", error);
+    throw new Error(error);
   }
 };
 

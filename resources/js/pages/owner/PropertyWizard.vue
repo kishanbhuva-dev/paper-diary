@@ -28,16 +28,18 @@
 
       <div class="mb-10 relative">
         <div class="flex items-center justify-between relative z-10">
-          <div v-for="step in 3" :key="step" class="flex flex-col items-center">
+          <div
+            v-for="step in 3"
+            :key="step"
+            class="flex flex-col items-center"
+          >
             <div
               :class="[
                 'w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 border-4',
                 currentStep >= step
                   ? 'bg-blue-600 border-blue-100 text-white shadow-lg shadow-blue-200'
                   : 'bg-white border-gray-100 text-gray-300',
-                startedWithId
-                  ? 'cursor-pointer hover:scale-105'
-                  : 'cursor-default',
+                startedWithId ? 'cursor-pointer hover:scale-105' : 'cursor-default',
               ]"
               @click="handleStepClick(step)"
             >
@@ -54,14 +56,12 @@
                 currentStep >= step ? 'text-blue-600' : 'text-gray-400',
               ]"
             >
-              {{ step === 1 ? "Property Details" : step === 2 ? "Resource Types" : "Resources" }}
+              {{ step === 1 ? 'Property Details' : step === 2 ? 'Resource Types' : 'Resources' }}
             </span>
           </div>
         </div>
 
-        <div
-          class="absolute top-5 left-0 w-full h-1 bg-gray-200 -z-0 rounded-full"
-        ></div>
+        <div class="absolute top-5 left-0 w-full h-1 bg-gray-200 -z-0 rounded-full"></div>
         <div
           class="absolute top-5 left-0 h-1 bg-blue-600 transition-all duration-500 ease-in-out rounded-full -z-0"
           :style="{ width: ((currentStep - 1) / 2) * 100 + '%' }"
@@ -73,13 +73,16 @@
       >
         <div class="p-6 md:p-10">
           <div class="form-container">
-            <transition name="fade-slide" mode="out-in">
+            <transition
+              name="fade-slide"
+              mode="out-in"
+            >
               <div :key="currentStep">
                 <PropertiesForm
                   v-if="currentStep === 1"
                   :id="normalizedPropertyId"
                   ref="step1Ref"
-                  :in-wizard="true"
+                  :in-wizard
                   :edit-mode="startedWithId"
                   @success="handleStep1Success"
                 />
@@ -88,7 +91,7 @@
                   v-if="currentStep === 2"
                   ref="step2Ref"
                   :property-id="normalizedPropertyId"
-                  :in-wizard="true"
+                  :in-wizard
                   :edit-mode="startedWithId"
                   @success="handleStep2Success"
                 />
@@ -98,7 +101,7 @@
                   ref="step3Ref"
                   :property-id="normalizedPropertyId"
                   :resource-types="resourceTypes"
-                  :in-wizard="true"
+                  :in-wizard
                   :edit-mode="startedWithId"
                   @success="handleStep3Success"
                 />
@@ -111,9 +114,7 @@
           class="bg-gray-50/80 backdrop-blur-sm border-t border-gray-100 p-6 flex items-center justify-between"
         >
           <div class="flex flex-col">
-            <p
-              class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1"
-            >
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
               Current Progress
             </p>
             <p class="text-sm font-bold text-blue-600">
@@ -135,12 +136,18 @@
               class="relative px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center group overflow-hidden"
               @click="submitCurrentStep"
             >
-              <div v-if="loading" class="mr-3">
-                <Icon icon="eos-icons:loading" class="w-5 h-5 animate-spin" />
+              <div
+                v-if="loading"
+                class="mr-3"
+              >
+                <Icon
+                  icon="eos-icons:loading"
+                  class="w-5 h-5 animate-spin"
+                />
               </div>
 
               <span class="relative z-10 flex items-center">
-                {{ currentStep < 3 ? "Save & Continue" : "Complete Setup" }}
+                {{ currentStep < 3 ? 'Save & Continue' : 'Complete Setup' }}
                 <Icon
                   v-if="!loading && currentStep < 3"
                   icon="mdi:arrow-right"
@@ -161,14 +168,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { Icon } from "@iconify/vue";
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { Icon } from '@iconify/vue';
 
-import PropertiesForm from "./PropertiesForm.vue";
-import ResourceTypeForm from "./ResourceTypeForm.vue";
-import ResourceForm from "./ResourceForm.vue";
-import ownerService from "../../services/ownerService";
+import PropertiesForm from './PropertiesForm.vue';
+import ResourceTypeForm from './ResourceTypeForm.vue';
+import ResourceForm from './ResourceForm.vue';
+import ownerService from '../../services/ownerService';
 
 const router = useRouter();
 const route = useRoute();
@@ -202,41 +209,57 @@ onMounted(() => {
 // --- COMPUTED ---
 
 const normalizedPropertyId = computed(() => {
-  if (!propertyId.value) {return null;}
+  if (!propertyId.value) {
+    return null;
+  }
   try {
     const decoded = atob(String(propertyId.value));
     return !isNaN(Number(decoded)) ? Number(decoded) : propertyId.value;
-  } catch (e) {
+  } catch {
     return propertyId.value;
   }
 });
 
 const currentStepRef = computed(() => {
-  if (currentStep.value === 1) {return step1Ref.value;}
-  if (currentStep.value === 2) {return step2Ref.value;}
-  if (currentStep.value === 3) {return step3Ref.value;}
+  if (currentStep.value === 1) {
+    return step1Ref.value;
+  }
+  if (currentStep.value === 2) {
+    return step2Ref.value;
+  }
+  if (currentStep.value === 3) {
+    return step3Ref.value;
+  }
   return null;
 });
 
 const stepTitle = computed(() => {
-  const titles = ["Property Details", "Resource Categories", "Resource Setup"];
-  return titles[currentStep.value - 1] || "Wizard";
+  const titles = ['Property Details', 'Resource Categories', 'Resource Setup'];
+  return titles[currentStep.value - 1] || 'Wizard';
 });
 
 // --- NAVIGATION ---
 const submitCurrentStep = async () => {
-  if (!currentStepRef.value?.handleSubmit) {return;}
-  
+  if (!currentStepRef.value?.handleSubmit) {
+    return;
+  }
+
   loading.value = true;
   try {
     const result = await currentStepRef.value.handleSubmit();
-    
+
     // If in Edit mode, we collect the returned payload for final batch update
     if (startedWithId.value) {
-      if (currentStep.value === 1) {pendingChanges.value.property = result;}
-      if (currentStep.value === 2) {pendingChanges.value.resourceTypes = result;}
-      if (currentStep.value === 3) {pendingChanges.value.resources = result;}
-      
+      if (currentStep.value === 1) {
+        pendingChanges.value.property = result;
+      }
+      if (currentStep.value === 2) {
+        pendingChanges.value.resourceTypes = result;
+      }
+      if (currentStep.value === 3) {
+        pendingChanges.value.resources = result;
+      }
+
       if (currentStep.value === 3) {
         await applyEdits();
       } else {
@@ -246,7 +269,7 @@ const submitCurrentStep = async () => {
       // Create mode: Success is handled by child success emits
     }
   } catch (e) {
-    console.error("Step submission failed:", e);
+    throw new Error(e);
   } finally {
     loading.value = false;
   }
@@ -255,7 +278,7 @@ const submitCurrentStep = async () => {
 const nextStep = () => {
   if (currentStep.value < 3) {
     currentStep.value++;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 };
 
@@ -266,14 +289,18 @@ const prevStep = () => {
 };
 
 const handleStepClick = async (step) => {
-  if (!startedWithId.value) {return;}
+  if (!startedWithId.value) {
+    return;
+  }
   await ensureStepDataLoaded(step);
   currentStep.value = step;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 const ensureStepDataLoaded = async (step) => {
-  if (!normalizedPropertyId.value) {return;}
+  if (!normalizedPropertyId.value) {
+    return;
+  }
   if ((step === 2 || step === 3) && resourceTypes.value.length === 0) {
     await loadResourceTypes(normalizedPropertyId.value);
   }
@@ -284,14 +311,16 @@ const loadResourceTypes = async (id) => {
     const types = await ownerService.fetchResourceTypes(id);
     resourceTypes.value = (types || []).map((t) => t.id);
   } catch (e) {
-    console.error("Failed to load resource types:", e);
+    throw new Error(e);
   }
 };
 
 // --- HANDLERS ---
-const handleStep1Success = async (data) => {
+const handleStep1Success = (data) => {
   if (!startedWithId.value) {
-    if (!propertyId.value) {createdInWizard.value = true;}
+    if (!propertyId.value) {
+      createdInWizard.value = true;
+    }
     propertyId.value = data.id;
   }
   nextStep();
@@ -309,7 +338,7 @@ const handleStep3Success = async (data) => {
     pendingChanges.value.resources = data;
     await applyEdits();
   } else {
-    router.push({ name: "properties" });
+    router.push({ name: 'properties' });
   }
 };
 
@@ -318,13 +347,15 @@ const cancelWizard = async () => {
     try {
       const images = await ownerService.fetchPropertyImages(normalizedPropertyId.value);
       const imageIds = (images || []).map((i) => i.id).filter(Boolean);
-      if (imageIds.length) {await ownerService.deletePropertyImages(imageIds);}
+      if (imageIds.length) {
+        await ownerService.deletePropertyImages(imageIds);
+      }
       await ownerService.deleteProperty(normalizedPropertyId.value);
     } catch (err) {
-      console.debug("Cleanup failed", err);
+      throw new Error(err);
     }
   }
-  router.push({ name: "properties" });
+  router.push({ name: 'properties' });
 };
 
 const handleBackButton = async () => {
@@ -343,9 +374,13 @@ const applyEdits = async () => {
     // 1. Process Property Changes
     if (pendingChanges.value.property) {
       const p = pendingChanges.value.property;
-      if (p.propertyPayload) {await ownerService.updateProperty(numericId, p.propertyPayload);}
-      if (p.removedImageIds?.length) {await ownerService.deletePropertyImages(p.removedImageIds);}
-      
+      if (p.propertyPayload) {
+        await ownerService.updateProperty(numericId, p.propertyPayload);
+      }
+      if (p.removedImageIds?.length) {
+        await ownerService.deletePropertyImages(p.removedImageIds);
+      }
+
       let uploadedNewIds = [];
       if (p.newFiles?.length) {
         const uploaded = await ownerService.addPropertyImages(numericId, p.newFiles);
@@ -353,13 +388,18 @@ const applyEdits = async () => {
       }
 
       const finalOrder = [...(p.orderedImageIds || [])];
-      if (uploadedNewIds.length) {finalOrder.push(...uploadedNewIds);}
+      if (uploadedNewIds.length) {
+        finalOrder.push(...uploadedNewIds);
+      }
       if (finalOrder.length > 0) {
         await ownerService.changePropertyImagePosition(numericId, finalOrder).catch(() => {});
       }
 
       if (Array.isArray(p.facilityIds)) {
-        await ownerService.setPropertyFacilities({ propertyId: numericId, facilityId: p.facilityIds });
+        await ownerService.setPropertyFacilities({
+          propertyId: numericId,
+          facilityId: p.facilityIds,
+        });
       }
     }
 
@@ -367,25 +407,28 @@ const applyEdits = async () => {
     if (pendingChanges.value.resourceTypes) {
       const rt = pendingChanges.value.resourceTypes;
       if (rt.deleted?.length) {
-        for (const id of rt.deleted) {await ownerService.deleteResourceType(id);}
+        for (const id of rt.deleted) {
+          // eslint-disable-next-line no-await-in-loop
+          await ownerService.deleteResourceType(id);
+        }
       }
       if (rt.toUpdate?.length) {
         await ownerService.resourceTypeMultipleUpdate({
           propertyId: numericId,
-          ids: rt.toUpdate.map(r => r.id),
-          name: rt.toUpdate.map(r => r.name),
-          price: rt.toUpdate.map(r => r.price),
-          capacity: rt.toUpdate.map(r => r.capacity),
-          slot: rt.toUpdate.map(r => r.slot),
+          ids: rt.toUpdate.map((r) => r.id),
+          name: rt.toUpdate.map((r) => r.name),
+          price: rt.toUpdate.map((r) => r.price),
+          capacity: rt.toUpdate.map((r) => r.capacity),
+          slot: rt.toUpdate.map((r) => r.slot),
         });
       }
       if (rt.toCreate?.length) {
         await ownerService.resourceTypeMultipleStore({
           propertyId: numericId,
-          name: rt.toCreate.map(r => r.name),
-          price: rt.toCreate.map(r => r.price),
-          capacity: rt.toCreate.map(r => r.capacity),
-          slot: rt.toCreate.map(r => r.slot),
+          name: rt.toCreate.map((r) => r.name),
+          price: rt.toCreate.map((r) => r.price),
+          capacity: rt.toCreate.map((r) => r.capacity),
+          slot: rt.toCreate.map((r) => r.slot),
         });
       }
     }
@@ -394,28 +437,31 @@ const applyEdits = async () => {
     if (pendingChanges.value.resources) {
       const rs = pendingChanges.value.resources;
       if (rs.deleted?.length) {
-        for (const id of rs.deleted) {await ownerService.deleteResource(id);}
+        for (const id of rs.deleted) {
+          // eslint-disable-next-line no-await-in-loop
+          await ownerService.deleteResource(id);
+        }
       }
       if (rs.toUpdate?.length) {
         await ownerService.resourceMultipleUpdate({
-          ids: rs.toUpdate.map(r => r.id),
-          name: rs.toUpdate.map(r => r.name),
-          status: rs.toUpdate.map(r => r.status),
-          resourceTypeId: rs.toUpdate.map(r => r.resourceTypeId),
+          ids: rs.toUpdate.map((r) => r.id),
+          name: rs.toUpdate.map((r) => r.name),
+          status: rs.toUpdate.map((r) => r.status),
+          resourceTypeId: rs.toUpdate.map((r) => r.resourceTypeId),
         });
       }
       if (rs.toCreate?.length) {
         await ownerService.resourceMultipleStore({
-          name: rs.toCreate.map(r => r.name),
-          status: rs.toCreate.map(r => r.status),
-          resourceTypeId: rs.toCreate.map(r => r.resourceTypeId),
+          name: rs.toCreate.map((r) => r.name),
+          status: rs.toCreate.map((r) => r.status),
+          resourceTypeId: rs.toCreate.map((r) => r.resourceTypeId),
         });
       }
     }
 
-    router.push({ name: "properties" });
+    router.push({ name: 'properties' });
   } catch (err) {
-    console.error("Failed to apply edits", err);
+    throw new Error(err);
   } finally {
     loading.value = false;
   }
@@ -427,6 +473,12 @@ const applyEdits = async () => {
 .fade-slide-leave-active {
   transition: all 0.3s ease;
 }
-.fade-slide-enter-from { opacity: 0; transform: translateX(20px); }
-.fade-slide-leave-to { opacity: 0; transform: translateX(-20px); }
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
 </style>

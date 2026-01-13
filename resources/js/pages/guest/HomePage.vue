@@ -8,14 +8,20 @@
             <span class="text-primary">Effortlessly Simple.</span>
           </h1>
           <p class="text-lg">
-            Manage all your bookings, channels, and daily operations from one
-            powerful, intuitive platform. Stop juggling software and start
-            hosting like a professional.
+            Manage all your bookings, channels, and daily operations from one powerful, intuitive
+            platform. Stop juggling software and start hosting like a professional.
           </p>
           <div class="flex items-center space-x-3 text-sm">
-            <img src="/public/avatar_group.png" alt="Avatar Group" class="h-8" />
+            <img
+              src="/public/avatar_group.png"
+              alt="Avatar Group"
+              class="h-8"
+            />
             <div class="flex-center gap-x-1">
-              <Icon icon="mdi:star" class="text-yellow-500" />
+              <Icon
+                icon="mdi:star"
+                class="text-yellow-500"
+              />
               <span class="font-bold">4.9/5.0</span>
               Based on 1,000,000+ Reviews
             </div>
@@ -26,7 +32,10 @@
           </div>
         </div>
         <div class="flex justify-center lg:justify-end">
-          <img src="/public/hero1.png" alt="Hero Image" />
+          <img
+            src="/public/hero1.png"
+            alt="Hero Image"
+          />
         </div>
       </div>
     </section>
@@ -34,7 +43,10 @@
     <section class="px-4 py-6 sm:px-6 sm:py-12 lg:px-8 lg:py-18">
       <div class="grid items-center gap-12 lg:grid-cols-2">
         <div class="flex justify-center lg:justify-start">
-          <img src="/public/hero2.png" alt="Hero Image" />
+          <img
+            src="/public/hero2.png"
+            alt="Hero Image"
+          />
         </div>
         <div class="space-y-6">
           <h2>
@@ -42,9 +54,8 @@
             <span class="text-primary">One Dashboard.</span>
           </h2>
           <p class="text-lg">
-            consolidates all your booking systems and daily operations. Our
-            Property Management Dashboard is one simple-to-use place to
-            streamline your entire accommodation business.
+            consolidates all your booking systems and daily operations. Our Property Management
+            Dashboard is one simple-to-use place to streamline your entire accommodation business.
           </p>
           <div class="flex flex-wrap gap-4">
             <button class="btn-outlined">View Key Features</button>
@@ -62,10 +73,9 @@
             <span class="text-primary">Paper Note.</span>
           </h2>
           <p class="text-lg">
-            Paper Note’s integrated booking engine turns your website into a
-            powerful, automated reservation tool. Deploy it instantly to secure
-            commission-free direct bookings, giving you an immediate boost in
-            revenue and complete control over the guest relationship.
+            Paper Note’s integrated booking engine turns your website into a powerful, automated
+            reservation tool. Deploy it instantly to secure commission-free direct bookings, giving
+            you an immediate boost in revenue and complete control over the guest relationship.
           </p>
           <div class="flex flex-wrap gap-4">
             <button class="btn-primary">Request a Demo</button>
@@ -73,7 +83,10 @@
           </div>
         </div>
         <div class="flex justify-center lg:justify-end">
-          <img src="/public/hero3.png" alt="Hero Image" />
+          <img
+            src="/public/hero3.png"
+            alt="Hero Image"
+          />
         </div>
       </div>
     </section>
@@ -85,15 +98,17 @@
           <span class="text-primary">Paper Note.</span>
         </h2>
         <p class="mx-auto max-w-2xl text-lg">
-          Paper Note’s integrated booking engine turns your website into a
-          powerful, automated reservation tool. Deploy it instantly to secure
-          commission-free direct bookings, giving you an immediate boost in
-          revenue and complete control over the guest relationship.
+          Paper Note’s integrated booking engine turns your website into a powerful, automated
+          reservation tool. Deploy it instantly to secure commission-free direct bookings, giving
+          you an immediate boost in revenue and complete control over the guest relationship.
         </p>
         <button class="relative z-10 btn-primary">View The Integrals</button>
       </div>
       <div class="-mt-24 flex-center">
-        <img src="/public/hero4.png" alt="Hero Image" />
+        <img
+          src="/public/hero4.png"
+          alt="Hero Image"
+        />
       </div>
     </section>
 
@@ -106,32 +121,22 @@
         <div class="grid gap-8 md:grid-cols-4">
           <div class="flex flex-col items-center gap-4">
             <h3 class="text-primary">&pound;80m+</h3>
-            <p class="max-w-xs text-lg">
-              in booking value processed for our customers in 2025
-            </p>
+            <p class="max-w-xs text-lg">in booking value processed for our customers in 2025</p>
           </div>
           <div class="flex flex-col items-center gap-4">
             <h3 class="text-primary">341k</h3>
-            <p class="max-w-xs text-lg">
-              bookings processed for our customers in 2024
-            </p>
+            <p class="max-w-xs text-lg">bookings processed for our customers in 2024</p>
           </div>
           <div class="flex flex-col items-center gap-4">
             <h3 class="text-primary">75%</h3>
-            <p class="max-w-xs text-lg">
-              bookings processed for our customers in 2024
-            </p>
+            <p class="max-w-xs text-lg">bookings processed for our customers in 2024</p>
           </div>
           <div class="flex flex-col items-center gap-4">
             <h3 class="text-primary">27</h3>
-            <p class="max-w-xs text-lg">
-              bookings processed for our customers in 2024
-            </p>
+            <p class="max-w-xs text-lg">bookings processed for our customers in 2024</p>
           </div>
         </div>
       </div>
     </section>
   </main>
 </template>
-
-

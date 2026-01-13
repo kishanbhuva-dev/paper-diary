@@ -20,6 +20,7 @@ export default [
       '*.min.js',
       '_ide_helper.php',
       'scripts/**', // Git hooks scripts need console.log for user feedback
+      'skeleton/**',
     ],
   },
 
@@ -88,7 +89,7 @@ export default [
       'vue/require-explicit-emits': 'error',
       'vue/v-on-event-hyphenation': 'error',
       'vue/component-name-in-template-casing': ['error', 'PascalCase'],
-      'vue/custom-event-name-casing': ['error', 'camelCase'],
+      'vue/custom-event-name-casing': ['error', 'kebab-case'],
       'vue/no-empty-component-block': 'error',
       'vue/prefer-true-attribute-shorthand': 'error',
 

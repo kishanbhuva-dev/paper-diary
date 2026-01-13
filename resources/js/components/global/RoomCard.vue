@@ -38,13 +38,19 @@
               class="flex-center size-8 cursor-pointer rounded bg-white/50 text-white backdrop-blur-sm"
               @click.stop="prevImage"
             >
-              <Icon icon="mdi:chevron-left" class="text-2xl" />
+              <Icon
+                icon="mdi:chevron-left"
+                class="text-2xl"
+              />
             </button>
             <button
               class="flex-center size-8 cursor-pointer rounded bg-white/50 text-white backdrop-blur-sm"
               @click.stop="nextImage"
             >
-              <Icon icon="mdi:chevron-right" class="text-2xl" />
+              <Icon
+                icon="mdi:chevron-right"
+                class="text-2xl"
+              />
             </button>
           </div>
         </div>
@@ -78,9 +84,7 @@
         </div>
       </div>
 
-      <div
-        class="mt-4 flex items-center justify-between border-t border-gray-100 pt-4"
-      >
+      <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
           <span
             class="order-2 mt-2 rounded-full border border-red-200 bg-red-100 px-3 py-1 text-sm font-semibold text-red-600 sm:order-1 sm:mt-0"
@@ -88,9 +92,7 @@
             {{ room.discount }}% off
           </span>
           <div class="order-1 flex items-baseline space-x-2 sm:order-2">
-            <span class="text-3xl font-bold text-gray-900">
-              ${{ room.price }}
-            </span>
+            <span class="text-3xl font-bold text-gray-900"> ${{ room.price }} </span>
             <span class="text-lg text-gray-400 line-through">
               ${{ Math.round(room.price / (1 - room.discount / 100)) }}
             </span>
@@ -114,7 +116,7 @@
             class="mr-2 inline text-lg"
             :class="{ 'animate-spin': selectedText === 'Selecting...' }"
           />
-          {{ selectedText || "SELECT ROOM" }}
+          {{ selectedText || 'SELECT ROOM' }}
         </button>
       </div>
     </div>
@@ -145,32 +147,30 @@
 </template>
 
 <script setup>
-import { Icon } from "@iconify/vue";
-import { ref } from "vue";
+import { Icon } from '@iconify/vue';
+import { ref } from 'vue';
 
 const props = defineProps({
   room: { type: Object, required: true },
 });
 
 const activeImageIndex = ref(0);
-const selectedText = ref("");
+const selectedText = ref('');
 
 const nextImage = () => {
-  activeImageIndex.value =
-    (activeImageIndex.value + 1) % props.room.imageUrls.length;
+  activeImageIndex.value = (activeImageIndex.value + 1) % props.room.imageUrls.length;
 };
 
 const prevImage = () => {
   activeImageIndex.value =
-    (activeImageIndex.value - 1 + props.room.imageUrls.length) %
-    props.room.imageUrls.length;
+    (activeImageIndex.value - 1 + props.room.imageUrls.length) % props.room.imageUrls.length;
 };
 
 const selectRoom = () => {
   selectedText.value = `Selecting...`;
 
   setTimeout(() => {
-    selectedText.value = "Booked!";
+    selectedText.value = 'Booked!';
   }, 3000);
 };
 </script>

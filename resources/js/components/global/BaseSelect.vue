@@ -1,7 +1,15 @@
 <template>
   <div class="w-full max-w-xs min-w-[100px]">
-    <label :for="labelSlug" class="block text-sm font-medium text-gray-500">
-      {{ label }} <span v-if="required" class="text-red-500">*</span>
+    <label
+      :for="labelSlug"
+      class="block text-sm font-medium text-gray-500"
+    >
+      {{ label }}
+      <span
+        v-if="required"
+        class="text-red-500"
+        >*</span
+      >
     </label>
     <div class="relative">
       <select
@@ -9,9 +17,9 @@
         v-model="model"
         :class="[
           'ease w-full cursor-pointer appearance-none rounded-lg border bg-white py-2 pr-8 pl-3 text-sm font-medium shadow-sm transition duration-300 placeholder:text-gray-400 focus:shadow-md focus:outline-none',
-          !isValid && touched 
-            ? 'border-red-500 focus:border-red-500' 
-            : 'border-gray-200 hover:border-gray-400 focus:border-gray-400'
+          !isValid && touched
+            ? 'border-red-500 focus:border-red-500'
+            : 'border-gray-200 hover:border-gray-400 focus:border-gray-400',
         ]"
         @blur="validate"
       >
@@ -39,8 +47,8 @@
         />
       </svg>
     </div>
-    <p 
-      v-if="!isValid && touched" 
+    <p
+      v-if="!isValid && touched"
       class="text-xs text-red-500 mt-1 transition-all duration-200"
     >
       {{ errorMessage }}
@@ -49,43 +57,46 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref } from 'vue';
 
 const props = defineProps({
-  label: { type: String, required: true, default: "Label" },
-  placeholder: { type: String, default: "Select an option" },
+  label: { type: String, required: true, default: 'Label' },
+  placeholder: { type: String, default: 'Select an option' },
   options: { type: Array, required: true },
   required: { type: Boolean, default: false }, // Added to support validation check
 });
 
-const model = defineModel();
+const model = defineModel({
+  type: [String, Number],
+  default: null,
+});
 
 // --- VALIDATION STATE ---
 const touched = ref(false);
 const isValid = ref(true);
-const errorMessage = ref("");
+const errorMessage = ref('');
 
 // --- VALIDATION METHOD ---
 const validate = () => {
   touched.value = true;
-  
+
   // Check if value is empty/null/undefined when required
-  if (props.required && (model.value === "" || model.value === null || model.value === undefined)) {
+  if (props.required && (model.value === '' || model.value === null || model.value === undefined)) {
     isValid.value = false;
-    errorMessage.value = "This field is required";
+    errorMessage.value = 'This field is required';
     return false;
   }
-  
+
   isValid.value = true;
-  errorMessage.value = "";
+  errorMessage.value = '';
   return true;
 };
 
 // --- EXPOSE TO PARENT ---
 // This allows the parent component to call .validate() via the ref
 defineExpose({
-  validate
+  validate,
 });
 
-const labelSlug = computed(() => props.label.toLowerCase().replace(/\s+/g, "-"));
+const labelSlug = computed(() => props.label.toLowerCase().replace(/\s+/g, '-'));
 </script>

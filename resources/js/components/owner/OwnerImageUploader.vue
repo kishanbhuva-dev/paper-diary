@@ -1,8 +1,6 @@
 <template>
   <div class="mb-4">
-    <label class="block text-sm font-semibold text-gray-700 mb-2">{{
-      label
-    }}</label>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ label }}</label>
 
     <div
       :class="{
@@ -28,15 +26,17 @@
         class="w-8 h-8 mx-auto text-gray-400 mb-2"
       />
       <p class="text-sm text-gray-600">
-        <span class="font-medium text-blue-600">Click to upload</span> or drag
-        and drop
+        <span class="font-medium text-blue-600">Click to upload</span> or drag and drop
       </p>
-      <p v-if="accept" class="text-xs text-gray-500 mt-1">
+      <p
+        v-if="accept"
+        class="text-xs text-gray-500 mt-1"
+      >
         {{
           accept
-            .split(",")
-            .map((ext) => ext.replace("image/", "."))
-            .join(", ")
+            .split(',')
+            .map((ext) => ext.replace('image/', '.'))
+            .join(', ')
             .toUpperCase()
         }}
         up to {{ maxFiles }} files
@@ -68,7 +68,10 @@
           title="Delete Image"
           @click.stop="deleteImage(index)"
         >
-          <Icon icon="mdi:close" class="w-4 h-4" />
+          <Icon
+            icon="mdi:close"
+            class="w-4 h-4"
+          />
         </button>
       </div>
     </div>
@@ -76,9 +79,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { Icon } from "@iconify/vue";
-import { toast } from "vue-sonner";
+import { ref, watch } from 'vue';
+import { Icon } from '@iconify/vue';
+import { toast } from 'vue-sonner';
 
 const props = defineProps({
   modelValue: {
@@ -87,11 +90,11 @@ const props = defineProps({
   },
   label: {
     type: String,
-    default: "Property Images",
+    default: 'Property Images',
   },
   accept: {
     type: String,
-    default: "image/jpeg,image/png,image/webp",
+    default: 'image/jpeg,image/png,image/webp',
   },
   maxFiles: {
     type: Number,
@@ -107,7 +110,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue", "reorder"]);
+const emit = defineEmits(['update:modelValue', 'reorder']);
 
 // Local state for the list of images (files and URLs)
 const images = ref([...props.modelValue]);
@@ -116,36 +119,38 @@ const dragIndex = ref(null);
 const onDragStart = (index, e) => {
   dragIndex.value = index;
   // set data to allow drop
-  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.effectAllowed = 'move';
   try {
     // Some browsers require data to be set to allow drops between elements
-    e.dataTransfer.setData("text/plain", "drag-image");
+    e.dataTransfer.setData('text/plain', 'drag-image');
     // Use the dragged element as the drag image for better UX
     if (e.target && e.dataTransfer.setDragImage) {
       e.dataTransfer.setDragImage(e.target, 16, 16);
     }
   } catch (err) {
-    // ignore
+    throw new Error(err);
   }
 };
 
 const onDragOver = (index, e) => {
   e.preventDefault();
-  e.dataTransfer.dropEffect = "move";
+  e.dataTransfer.dropEffect = 'move';
 };
 
 const onDrop = (index, e) => {
   e.preventDefault();
   const from = dragIndex.value;
   const to = index;
-  if (from === null || from === to) {return;}
+  if (from === null || from === to) {
+    return;
+  }
   const newImages = [...images.value];
   const [moved] = newImages.splice(from, 1);
   newImages.splice(to, 0, moved);
   images.value = newImages;
-  emit("update:modelValue", images.value);
+  emit('update:modelValue', images.value);
   // Also emit a reorder event with the new list
-  emit("reorder", images.value);
+  emit('reorder', images.value);
   dragIndex.value = null;
 };
 const isDragging = ref(false);
@@ -170,7 +175,7 @@ const handleFileChange = (event) => {
   processFiles(newFiles);
   // Clear the input value so the same file can be selected again
   if (fileInputRef.value) {
-    fileInputRef.value.value = "";
+    fileInputRef.value.value = '';
   }
 };
 
@@ -182,27 +187,21 @@ const handleDrop = (event) => {
 
 const onParentDragOver = (e) => {
   // Only show drag indicator if dragging files from outside (not when reordering existing thumbnails)
-  const types =
-    e.dataTransfer && e.dataTransfer.types
-      ? Array.from(e.dataTransfer.types)
-      : [];
-  if (types.includes("Files") || types.includes("application/x-moz-file")) {
+  const types = e.dataTransfer && e.dataTransfer.types ? Array.from(e.dataTransfer.types) : [];
+  if (types.includes('Files') || types.includes('application/x-moz-file')) {
     e.preventDefault();
     isDragging.value = true;
   }
 };
 
-const onParentDragLeave = (e) => {
+const onParentDragLeave = () => {
   isDragging.value = false;
 };
 
 const onParentDrop = (e) => {
   isDragging.value = false;
   // Only process if files are present (file upload), otherwise let child drop handle reorder
-  const files =
-    e.dataTransfer && e.dataTransfer.files
-      ? Array.from(e.dataTransfer.files)
-      : [];
+  const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
   if (files.length) {
     e.preventDefault();
     handleDrop(e);
@@ -216,14 +215,10 @@ const processFiles = (newFiles) => {
   }
 
   // Filter for accepted types and process
-  const acceptedFiles = newFiles.filter((file) =>
-    props.accept.includes(file.type)
-  );
+  const acceptedFiles = newFiles.filter((file) => props.accept.includes(file.type));
 
   if (acceptedFiles.length < newFiles.length) {
-    toast.warning(
-      "Some files were ignored because they are not valid image types."
-    );
+    toast.warning('Some files were ignored because they are not valid image types.');
   }
 
   // Check combined file sizes: current new file sizes + existing new file sizes
@@ -245,9 +240,7 @@ const processFiles = (newFiles) => {
   const sizeFiltered = acceptedFiles.filter((file) => {
     if (file.size > props.maxFileSize) {
       toast.error(
-        `File ${file.name} is too large (max ${Math.round(
-          props.maxFileSize / 1024 / 1024
-        )}MB).`
+        `File ${file.name} is too large (max ${Math.round(props.maxFileSize / 1024 / 1024)}MB).`
       );
       return false;
     }
@@ -262,7 +255,7 @@ const processFiles = (newFiles) => {
   }));
 
   images.value = [...images.value, ...processedImages];
-  emit("update:modelValue", images.value);
+  emit('update:modelValue', images.value);
 };
 
 const deleteImage = (index) => {
@@ -272,8 +265,8 @@ const deleteImage = (index) => {
   }
 
   images.value.splice(index, 1);
-  emit("update:modelValue", images.value);
-  toast.info("Image deleted successfully (will be removed upon save).");
+  emit('update:modelValue', images.value);
+  toast.info('Image deleted successfully (will be removed upon save).');
 };
 </script>
 

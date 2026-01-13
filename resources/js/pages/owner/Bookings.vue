@@ -26,14 +26,14 @@
       title="Bookings Management"
       :columns="tableColumns"
       :rows="bookings"
-      :server-side="true"
+      :server-side
       :per-page="perPage"
       :available-filters="filterConfig"
       :show-delete="false"
       :show-edit="false"
-      :show-search="true"
+      :show-search
       :show-add="false"
-      :show-download="true"
+      :show-download
       :admin-login="false"
       @filter-change="handleFilterChange"
       @search="handleSearch"
@@ -42,10 +42,6 @@
       @sort="handleSort"
       @view="showbookingdata"
       @delete="confirmDelete"
-      :showDelete="false"
-      :showEdit="false"
-      :showAdd="false"
-      :showDownload="true"
     />
   </div>
 
@@ -57,27 +53,41 @@
     @save="handleSave"
   >
     <div class="space-y-6">
-      <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div
+        class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
         <div class="space-y-1">
-          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Property</label>
-          <p class="text-sm font-bold text-blue-900">{{ selectedBooking.property?.propertyName || '-' }}</p>
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Property</label
+          >
+          <p class="text-sm font-bold text-blue-900">
+            {{ selectedBooking.property?.propertyName || '-' }}
+          </p>
         </div>
         <div class="space-y-1">
-          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Resource</label>
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Resource</label
+          >
           <p class="text-sm font-bold text-blue-900">
             {{ selectedBooking.resource_type_name }}
           </p>
         </div>
         <div class="space-y-1">
-          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Booking Status</label>
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Booking Status</label
+          >
           <div class="flex items-center gap-2">
-            <span :class="`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${selectedBooking.status === 'confirm' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`">
+            <span
+              :class="`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${selectedBooking.status === 'confirm' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`"
+            >
               {{ selectedBooking.status }}
             </span>
           </div>
         </div>
         <div class="space-y-1">
-          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Booked On</label>
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Booked On</label
+          >
           <p class="text-sm font-medium text-blue-900">{{ selectedBooking.bookedOn }}</p>
         </div>
       </div>
@@ -85,35 +95,35 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Guest Name</label>
-          <input 
-            v-model="selectedBooking.guestName" 
+          <input
+            v-model="selectedBooking.guestName"
             disabled
             class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
         </div>
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Guest Email</label>
-          <input 
-            v-model="selectedBooking.guestEmail" 
+          <input
+            v-model="selectedBooking.guestEmail"
             disabled
             class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
         </div>
-        
+
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Arrival Date</label>
-          <input 
+          <input
+            v-model="selectedBooking.arrivalDateTime"
             type="text"
-            v-model="selectedBooking.arrivalDateTime" 
             disabled
             class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
         </div>
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Departure Date</label>
-          <input 
+          <input
+            v-model="selectedBooking.departureDateTime"
             type="text"
-            v-model="selectedBooking.departureDateTime" 
             disabled
             class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
@@ -121,8 +131,8 @@
 
         <div class="md:col-span-2 space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Guest Address</label>
-          <textarea 
-            v-model="selectedBooking.guestAddress" 
+          <textarea
+            v-model="selectedBooking.guestAddress"
             disabled
             rows="2"
             class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none resize-none"
@@ -131,25 +141,38 @@
 
         <div class="md:col-span-2 space-y-1">
           <label class="text-xs font-bold text-blue-600 uppercase flex items-center">
-            <Icon icon="mdi:note-edit-outline" class="mr-1" />
+            <Icon
+              icon="mdi:note-edit-outline"
+              class="mr-1"
+            />
             Owner Notes
           </label>
-          <textarea 
-            v-model="selectedBooking.owner_note" 
+          <textarea
+            v-model="selectedBooking.owner_note"
             :disabled="!isBookingDateValid"
-            :placeholder="isBookingDateValid ? 'Add internal notes about this booking here...' : 'Notes cannot be edited for past bookings'"
+            :placeholder="
+              isBookingDateValid
+                ? 'Add internal notes about this booking here...'
+                : 'Notes cannot be edited for past bookings'
+            "
             rows="3"
             class="w-full p-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50/30 disabled:bg-gray-50 disabled:border-gray-200"
           ></textarea>
         </div>
       </div>
 
-      <div v-if="selectedBooking.status === 'confirm' && isBookingDateValid" class="pt-4 border-t border-gray-100">
-        <button 
+      <div
+        v-if="selectedBooking.status === 'confirm' && isBookingDateValid"
+        class="pt-4 border-t border-gray-100"
+      >
+        <button
           class="flex items-center text-red-600 font-bold text-sm hover:underline cursor-pointer group"
           @click="confirmDelete(selectedBooking.id)"
         >
-          <Icon icon="mdi:calendar-remove" class="mr-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+          <Icon
+            icon="mdi:calendar-remove"
+            class="mr-2 w-5 h-5 group-hover:scale-110 transition-transform"
+          />
           Cancel This Booking
         </button>
       </div>
@@ -165,16 +188,16 @@
 </template>
 
 <script setup>
-import Basetable from "../../components/global/Basetable.vue";
-import ConfirmModal from "../../components/owner/ConfirmModal.vue";
-import Basemodal from "../../components/global/BaseModal.vue";
-import { ref, onMounted, computed } from "vue";
-import { Icon } from "@iconify/vue";
-import ownerService from "../../services/ownerService";
+import Basetable from '../../components/global/Basetable.vue';
+import ConfirmModal from '../../components/owner/ConfirmModal.vue';
+import Basemodal from '../../components/global/BaseModal.vue';
+import { ref, onMounted, computed } from 'vue';
+import { Icon } from '@iconify/vue';
+import ownerService from '../../services/ownerService';
 
 // --- 1. STATE MANAGEMENT ---
-const sortBy = ref("id");
-const sortOrder = ref("asc");
+const sortBy = ref('id');
+const sortOrder = ref('asc');
 const actieFilters = ref({});
 const loading = ref(false);
 const error = ref(null);
@@ -182,7 +205,7 @@ const bookings = ref([]);
 const total = ref(0);
 const perPage = ref(10);
 const currentPage = ref(1);
-const currentSearch = ref("");
+const currentSearch = ref('');
 
 // Modal & Selection State
 const isModalVisible = ref(false);
@@ -191,28 +214,46 @@ const isConfirmationModalVisible = ref(false);
 const bookingIdToDelete = ref(null);
 
 const filterConfig = [
-  { label: "Status", key: "status", type: "select", options: [{ label: "Confirmed", value: "confirm" }, { label: "Cancelled", value: "cancelled" }] },
-  { label: "Payment", key: "paymentStatus", type: "select", options: [{ label: "Paid", value: "paid" }, { label: "Unpaid", value: "unpaid" }] },
+  {
+    label: 'Status',
+    key: 'status',
+    type: 'select',
+    options: [
+      { label: 'Confirmed', value: 'confirm' },
+      { label: 'Cancelled', value: 'cancelled' },
+    ],
+  },
+  {
+    label: 'Payment',
+    key: 'paymentStatus',
+    type: 'select',
+    options: [
+      { label: 'Paid', value: 'paid' },
+      { label: 'Unpaid', value: 'unpaid' },
+    ],
+  },
 ];
 
 const tableColumns = [
-  { label: "Property", key: "property.propertyName", sortable: false },
-  { label: "Resource", key: "resource_type_name", sortable: true },
-  { label: "Guest", key: "guestName", sortable: true },
-  { label: "Check-in", key: "arrivalDateTime", sortable: true },
-  { label: "Check-out", key: "departureDateTime", sortable: true },
-  { label: "Price", key: "price", sortable: true },
-  { label: "bookedOn", key: "bookedOn", sortable: true },
-  { label: "FROM-NOW", key: "fromNow", sortable: true },
-  { label: "Price", key: "price", sortable: true },
-  { label: "Status", key: "status", sortable: true },
+  { label: 'Property', key: 'property.propertyName', sortable: false },
+  { label: 'Resource', key: 'resource_type_name', sortable: true },
+  { label: 'Guest', key: 'guestName', sortable: true },
+  { label: 'Check-in', key: 'arrivalDateTime', sortable: true },
+  { label: 'Check-out', key: 'departureDateTime', sortable: true },
+  { label: 'Price', key: 'price', sortable: true },
+  { label: 'bookedOn', key: 'bookedOn', sortable: true },
+  { label: 'FROM-NOW', key: 'fromNow', sortable: true },
+  { label: 'Price', key: 'price', sortable: true },
+  { label: 'Status', key: 'status', sortable: true },
 ];
 
 // --- 2. LOGIC & COMPUTED ---
 
 // Check if booking date is passed or today/future
 const isBookingDateValid = computed(() => {
-  if (!selectedBooking.value.arrivalDateTime) return false;
+  if (!selectedBooking.value.arrivalDateTime) {
+    return false;
+  }
   const bookingDate = new Date(selectedBooking.value.arrivalDateTime);
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset time to compare only dates
@@ -234,7 +275,7 @@ const loadData = async () => {
     bookings.value = data.data || [];
     total.value = data.total || 0;
   } catch (err) {
-    error.value = err.message || "Failed to load bookings";
+    error.value = err.message || 'Failed to load bookings';
   } finally {
     loading.value = false;
   }
@@ -246,30 +287,51 @@ const showbookingdata = (item) => {
 };
 
 const handleSave = async () => {
-  if (!isBookingDateValid.value) return;
+  if (!isBookingDateValid.value) {
+    return;
+  }
 
   loading.value = true;
   try {
     const payload = {
       id: selectedBooking.value.id,
-      owner_note: selectedBooking.value.owner_note
+      owner_note: selectedBooking.value.owner_note,
     };
     await ownerService.updateBooking(selectedBooking.value.id, payload);
     isModalVisible.value = false;
     await loadData();
   } catch (err) {
-    error.value = "Failed to save note";
+    error.value = err;
   } finally {
     loading.value = false;
   }
 };
 
 // Standard Table Handlers
-const handleSort = (sortData) => { sortBy.value = sortData.key; sortOrder.value = sortData.order; loadData(); };
-const handleFilterChange = (filters) => { actieFilters.value = filters; currentPage.value = 1; loadData(); };
-const handleSearch = (term) => { currentSearch.value = term; currentPage.value = 1; loadData(); };
-const handlePageChange = (page) => { currentPage.value = page; loadData(); };
-const handlePerPageChange = (size) => { perPage.value = size; currentPage.value = 1; loadData(); };
+const handleSort = (sortData) => {
+  sortBy.value = sortData.key;
+  sortOrder.value = sortData.order;
+  loadData();
+};
+const handleFilterChange = (filters) => {
+  actieFilters.value = filters;
+  currentPage.value = 1;
+  loadData();
+};
+const handleSearch = (term) => {
+  currentSearch.value = term;
+  currentPage.value = 1;
+  loadData();
+};
+const handlePageChange = (page) => {
+  currentPage.value = page;
+  loadData();
+};
+const handlePerPageChange = (size) => {
+  perPage.value = size;
+  currentPage.value = 1;
+  loadData();
+};
 
 // Cancellation Logic
 const confirmDelete = (id) => {
@@ -285,12 +347,14 @@ const handleDeleteConfirmation = async () => {
       isModalVisible.value = false;
       await loadData();
     } catch (err) {
-      error.value = "Cancellation failed";
+      error.value = err;
     } finally {
       bookingIdToDelete.value = null;
     }
   }
 };
 
-onMounted(() => { loadData(); });
+onMounted(() => {
+  loadData();
+});
 </script>

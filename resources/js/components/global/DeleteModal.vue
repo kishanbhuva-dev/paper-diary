@@ -50,15 +50,11 @@
           @click="confirmDelete"
         >
           <Icon
-            :icon="
-              action === 'deactivate'
-                ? 'mdi:account-off-outline'
-                : 'mdi:trash-can-outline'
-            "
+            :icon="action === 'deactivate' ? 'mdi:account-off-outline' : 'mdi:trash-can-outline'"
             width="18"
             height="18"
           />
-          {{ action === "deactivate" ? "Deactivate" : "Delete" }}
+          {{ action === 'deactivate' ? 'Deactivate' : 'Delete' }}
         </button>
       </div>
     </div>
@@ -66,23 +62,23 @@
 </template>
 
 <script setup>
-import { Icon } from "@iconify/vue";
+import { Icon } from '@iconify/vue';
 
-const props = defineProps({
+defineProps({
   modelValue: Boolean,
-  title: { type: String, default: "Delete Item" },
+  title: { type: String, default: 'Delete Item' },
   message: {
     type: String,
-    default: "Are you sure you want to delete this item?",
+    default: 'Are you sure you want to delete this item?',
   },
-  warning: { type: String, default: "This action cannot be undone." },
+  warning: { type: String, default: 'This action cannot be undone.' },
 
-  action: { type: String, default: "delete" },
+  action: { type: String, default: 'delete' },
 });
 
-const emit = defineEmits(["update:modelValue", "confirm"]);
+const emit = defineEmits(['update:modelValue', 'confirm']);
 
 const confirmDelete = () => {
-  emit("confirm");
+  emit('confirm');
 };
 </script>

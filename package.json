@@ -49,6 +49,7 @@
     "@stripe/stripe-js": "^8.6.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
+    "dompurify": "^3.3.1",
     "sweetalert2": "^11.26.3",
     "vue": "^3.5.22",
     "vue-hotel-booking-calendar": "^1.0.14",

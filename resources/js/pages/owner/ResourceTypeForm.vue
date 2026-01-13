@@ -16,9 +16,7 @@
         </div>
         <div>
           <h3 class="text-xl font-bold text-slate-800">Resource Categories</h3>
-          <p
-            class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
-          >
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
             Define Resource Types
           </p>
         </div>
@@ -87,7 +85,10 @@
                 title="Delete type"
                 @click="openRemoveTypeModal(idx)"
               >
-                <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
+                <Icon
+                  icon="mdi:trash-can-outline"
+                  class="w-5 h-5"
+                />
               </button>
             </div>
           </div>
@@ -96,7 +97,10 @@
     </div>
 
     <div class="flex justify-end mt-10">
-      <div v-if="!props.inWizard" class="flex items-center gap-4">
+      <div
+        v-if="!props.inWizard"
+        class="flex items-center gap-4"
+      >
         <button
           type="button"
           class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
@@ -109,7 +113,7 @@
           class="px-10 py-3 text-sm font-bold text-white bg-blue-600 rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all active:scale-95"
           @click="handleSubmit"
         >
-          {{ submitting ? "Processing..." : "Save & Continue" }}
+          {{ submitting ? 'Processing...' : 'Save & Continue' }}
         </button>
       </div>
     </div>
@@ -129,23 +133,23 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUpdate, computed } from "vue";
-import BaseInput from "../../components/global/BaseInput.vue";
-import DeleteModal from "../../components/global/DeleteModal.vue";
-import { Icon } from "@iconify/vue";
-import ownerService from "../../services/ownerService";
-import { toast } from "vue-sonner";
+import { ref, watch, onMounted, onBeforeUpdate, computed } from 'vue';
+import BaseInput from '../../components/global/BaseInput.vue';
+import DeleteModal from '../../components/global/DeleteModal.vue';
+import { Icon } from '@iconify/vue';
+import ownerService from '../../services/ownerService';
+import { toast } from 'vue-sonner';
 
 const props = defineProps({
   propertyId: { type: [String, Number], required: true },
   inWizard: { type: Boolean, default: false },
   editMode: { type: Boolean, default: false },
 });
-const emits = defineEmits(["success", "cancel"]);
+const emits = defineEmits(['success', 'cancel']);
 
 const types = ref([
   {
-    name: "",
+    name: '',
     price: null,
     capacity: 1,
     slot: null,
@@ -159,15 +163,15 @@ const isConfirmationModalVisible = ref(false);
 const typeIndexToRemove = ref(null);
 const typeNameToRemove = computed(() => {
   const idx = typeIndexToRemove.value;
-  return idx !== null && types.value[idx]?.name
-    ? types.value[idx].name
-    : "this resource type";
+  return idx !== null && types.value[idx]?.name ? types.value[idx].name : 'this resource type';
 });
 
 const initialSnapshot = ref(null);
 const inputRefs = ref([]);
 const setInputRef = (el) => {
-  if (el) {inputRefs.value.push(el);}
+  if (el) {
+    inputRefs.value.push(el);
+  }
 };
 onBeforeUpdate(() => {
   inputRefs.value = [];
@@ -176,7 +180,7 @@ onBeforeUpdate(() => {
 const makeSnapshot = (list) =>
   JSON.stringify(
     (list || []).map((t) => ({
-      name: t.name || "",
+      name: t.name || '',
       price: Number(t.price) || 0,
       capacity: Number(t.capacity) || 0,
       slot: t.slot || null,
@@ -184,18 +188,20 @@ const makeSnapshot = (list) =>
   );
 
 const loadExistingTypes = async () => {
-  if (!props.propertyId) {return;}
+  if (!props.propertyId) {
+    return;
+  }
   try {
     const existing = await ownerService.fetchResourceTypes(props.propertyId);
     if (Array.isArray(existing) && existing.length) {
       types.value = existing.map((r) => ({
-        name: r.name || "",
+        name: r.name || '',
         price: r.price || null,
         capacity: r.capacity || 1,
         id: r.id,
       }));
       types.value.push({
-        name: "",
+        name: '',
         price: null,
         capacity: 1,
         slot: null,
@@ -207,7 +213,7 @@ const loadExistingTypes = async () => {
     } else {
       types.value = [
         {
-          name: "",
+          name: '',
           price: null,
           capacity: 1,
           slot: null,
@@ -217,7 +223,9 @@ const loadExistingTypes = async () => {
         },
       ];
     }
-  } catch (err) {}
+  } catch (err) {
+    toast.error(err);
+  }
 };
 
 onMounted(() => {
@@ -226,13 +234,15 @@ onMounted(() => {
 watch(
   () => props.propertyId,
   (val) => {
-    if (val) {loadExistingTypes();}
+    if (val) {
+      loadExistingTypes();
+    }
   }
 );
 
 const addType = () => {
   types.value.push({
-    name: "",
+    name: '',
     price: null,
     capacity: 1,
     slot: null,
@@ -244,9 +254,10 @@ const addType = () => {
 
 const openRemoveTypeModal = (idx) => {
   const type = types.value[idx];
-  const isDummyOrBlank =
-    !type.id && (!type.name || type.name.toString().trim() === "");
-  if (types.value.length === 1 && !isDummyOrBlank) {return;}
+  const isDummyOrBlank = !type.id && (!type.name || type.name.toString().trim() === '');
+  if (types.value.length === 1 && !isDummyOrBlank) {
+    return;
+  }
   if (isDummyOrBlank) {
     typeIndexToRemove.value = idx;
     confirmRemoval();
@@ -265,7 +276,7 @@ const confirmRemoval = () => {
   const t = types.value[idx];
   if (types.value.length === 1) {
     types.value[0] = {
-      name: "",
+      name: '',
       price: null,
       capacity: 1,
       slot: null,
@@ -288,29 +299,26 @@ const confirmRemoval = () => {
 };
 
 const validate = () => {
-  if (!props.propertyId) {return false;}
+  if (!props.propertyId) {
+    return false;
+  }
   let isInputsValid = true;
   inputRefs.value.forEach((inputComponent) => {
-    if (inputComponent && typeof inputComponent.validate === "function") {
+    if (inputComponent && typeof inputComponent.validate === 'function') {
       const isValid = inputComponent.validate();
-      if (!isValid) {isInputsValid = false;}
+      if (!isValid) {
+        isInputsValid = false;
+      }
     }
   });
-  const filled = (types.value || []).filter(
-    (t) => t.name && t.name.toString().trim() !== ""
-  );
+  const filled = (types.value || []).filter((t) => t.name && t.name.toString().trim() !== '');
   if (filled.length === 0) {
-    toast.error("At least one resource type must be filled.");
+    toast.error('At least one resource type must be filled.');
     return false;
   }
   for (const t of filled) {
-    if (
-      isNaN(t.price) ||
-      t.price === null ||
-      isNaN(t.capacity) ||
-      t.capacity === null
-    ) {
-      toast.error("Price and Capacity must be valid numbers for filled rows.");
+    if (isNaN(t.price) || t.price === null || isNaN(t.capacity) || t.capacity === null) {
+      toast.error('Price and Capacity must be valid numbers for filled rows.');
       return false;
     }
   }
@@ -321,10 +329,12 @@ const submitting = ref(false);
 
 const handleSubmit = async () => {
   if (!validate()) {
-    toast.error("Please ensure all required fields are correctly filled.");
+    toast.error('Please ensure all required fields are correctly filled.');
     return;
   }
-  if (submitting.value) {return;}
+  if (submitting.value) {
+    return;
+  }
   submitting.value = true;
   try {
     const serverList = await ownerService.fetchResourceTypes(props.propertyId);
@@ -333,27 +343,31 @@ const handleSubmit = async () => {
       return acc;
     }, {});
     const serverByName = (serverList || []).reduce((acc, r) => {
-      const key = (r.name || "").toString().trim().toLowerCase();
-      if (key) {acc[key] = r;}
+      const key = (r.name || '').toString().trim().toLowerCase();
+      if (key) {
+        acc[key] = r;
+      }
       return acc;
     }, {});
     const toCreate = [];
     const toUpdate = [];
     for (const t of types.value) {
       const normalized = {
-        name: (t.name || "").toString().trim(),
+        name: (t.name || '').toString().trim(),
         price: Number(t.price) || 0,
         capacity: Number(t.capacity) || 0,
         slot: t.slot || null,
       };
-      if (!normalized.name) {continue;}
+      if (!normalized.name) {
+        continue;
+      }
       if (t.id) {
         const server = serverById[t.id];
         if (!server) {
           toCreate.push(normalized);
         } else {
           const serverNorm = {
-            name: (server.name || "").toString().trim(),
+            name: (server.name || '').toString().trim(),
             price: Number(server.price) || 0,
             capacity: Number(server.capacity) || 0,
             slot: server.slot || null,
@@ -368,11 +382,11 @@ const handleSubmit = async () => {
           }
         }
       } else {
-        const key = (normalized.name || "").toLowerCase();
+        const key = (normalized.name || '').toLowerCase();
         const existingMatch = key ? serverByName[key] : null;
         if (existingMatch) {
           const serverNorm = {
-            name: (existingMatch.name || "").toString().trim(),
+            name: (existingMatch.name || '').toString().trim(),
             price: Number(existingMatch.price) || 0,
             capacity: Number(existingMatch.capacity) || 0,
             slot: existingMatch.slot || null,
@@ -396,8 +410,11 @@ const handleSubmit = async () => {
     if (deletedTypeIds.value && deletedTypeIds.value.length) {
       for (const id of deletedTypeIds.value) {
         try {
+          // eslint-disable-next-line no-await-in-loop
           await ownerService.deleteResourceType(id);
-        } catch (err) {}
+        } catch (err) {
+          throw new Error(err);
+        }
       }
       deletedTypeIds.value = [];
     }
@@ -425,16 +442,16 @@ const handleSubmit = async () => {
     const created = await ownerService.fetchResourceTypes(props.propertyId);
     const ids = (created || []).map((r) => r.id);
     initialSnapshot.value = makeSnapshot(types.value);
-    emits("success", { resourceTypes: ids });
+    emits('success', { resourceTypes: ids });
   } catch (err) {
-    toast.error("An error occurred during submission.");
+    toast.error(err.error || 'An error occurred during submission.');
   } finally {
     submitting.value = false;
   }
 };
 
 const hasChanges = () => initialSnapshot.value !== makeSnapshot(types.value);
-const cancel = () => emits("cancel");
+const cancel = () => emits('cancel');
 defineExpose({ handleSubmit, hasChanges });
 </script>
 

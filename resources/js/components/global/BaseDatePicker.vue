@@ -1,6 +1,9 @@
 <template>
   <div class="w-full max-w-xs min-w-[100px]">
-    <label :for="labelSlug" class="block text-sm font-medium text-gray-500">
+    <label
+      :for="labelSlug"
+      class="block text-sm font-medium text-gray-500"
+    >
       {{ label }}
     </label>
     <input
@@ -15,13 +18,16 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue';
 
 const props = defineProps({
-  label: { type: String, required: false, default: "" },
+  label: { type: String, required: false, default: '' },
 });
 
-const model = defineModel();
+const model = defineModel({
+  type: [String, Number],
+  default: null,
+});
 
-const labelSlug = computed(() => props.label.toLowerCase().replace(/\s+/g, "-"));
+const labelSlug = computed(() => props.label.toLowerCase().replace(/\s+/g, '-'));
 </script>

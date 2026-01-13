@@ -1,14 +1,14 @@
-import api from "./apiClient"; // Assuming your axios instance is in an api.js file
+import api from './apiClient'; // Assuming your axios instance is in an api.js file
 
 export const userService = {
   getPropertyDetails(slug) {
-    return api.get("/property-detail", {
+    return api.get('/property-detail', {
       params: { slug },
     });
   },
 
   getAvailableResourcesTypes(params) {
-    return api.get("/available-resources-types", {
+    return api.get('/available-resources-types', {
       params: {
         slug: params.slug,
         arrivalDateTime: params.arrivalDateTime,
@@ -19,28 +19,28 @@ export const userService = {
   },
 
   createBooking(bookingData) {
-    return api.post("/user/booking", bookingData);
+    return api.post('/user/booking', bookingData);
   },
   deleteBooking(bookingId) {
-    return api.post("/user/booking-delete", { bookingId });
+    return api.post('/user/booking-delete', { bookingId });
   },
 
   getBookings(params) {
-    return api.get("/user/bookings", { params });
+    return api.get('/user/bookings', { params });
   },
 
   createPaymentIntent(data) {
-    return api.post("/user/create-payment-intent", data);
+    return api.post('/user/create-payment-intent', data);
   },
 
   completePayment(data) {
-    return api.post("/user/complete-payment", data);
+    return api.post('/user/complete-payment', data);
   },
   bookingStatusUpdate(data) {
-    return api.post("/user/booking-status-update", data);
+    return api.post('/user/booking-status-update', data);
   },
   cancelBooking(data) {
-    return api.post("/user/booking-cancel", data);
+    return api.post('/user/booking-cancel', data);
   },
 };
 

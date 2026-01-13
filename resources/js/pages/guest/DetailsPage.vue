@@ -1,5 +1,8 @@
 <template>
-  <main v-if="propertyData" class="space-y-8">
+  <main
+    v-if="propertyData"
+    class="space-y-8"
+  >
     <section class="space-y-6 bg-blue-100 py-4 sm:py-6 lg:py-8">
       <div class="container mx-auto">
         <div class="px-4 sm:px-6 lg:px-8 flex justify-center">
@@ -7,11 +10,17 @@
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-fit max-w-full items-end justify-center"
           >
             <div class="w-full sm:w-[180px] lg:w-[220px]">
-              <BaseDatePicker v-model="details.checkIn" label="CHECK-IN" />
+              <BaseDatePicker
+                v-model="details.checkIn"
+                label="CHECK-IN"
+              />
             </div>
 
             <div class="w-full sm:w-[180px] lg:w-[220px]">
-              <BaseDatePicker v-model="details.checkOut" label="CHECK-OUT" />
+              <BaseDatePicker
+                v-model="details.checkOut"
+                label="CHECK-OUT"
+              />
             </div>
 
             <div class="w-full sm:w-[180px] lg:w-[220px]">
@@ -19,9 +28,7 @@
                 v-model="details.roomGuests"
                 label="ROOM & GUESTS"
                 placeholder="Select Room & Guests"
-                :options="[
-                  { value: '1room_3adults', label: '1 Room, 3 Adults' },
-                ]"
+                :options="[{ value: '1room_3adults', label: '1 Room, 3 Adults' }]"
               />
             </div>
 
@@ -33,7 +40,7 @@
                 @click="handleShowResources"
               >
                 <span class="truncate text-center w-full">
-                  {{ fetchingResources ? "..." : "Show Resource Types" }}
+                  {{ fetchingResources ? '...' : 'Show Resource Types' }}
                 </span>
               </button>
             </div>
@@ -46,9 +53,7 @@
         class="bg-red-500 text-white"
         role="alert"
       >
-        <div
-          class="flex-center gap-x-3 px-4 py-1 max-sm:flex-wrap sm:px-6 lg:px-8"
-        >
+        <div class="flex-center gap-x-3 px-4 py-1 max-sm:flex-wrap sm:px-6 lg:px-8">
           <h4 class="font-bold">SOLD OUT</h4>
           <span class="block sm:inline">
             This Property is Sold Out on {{ details.checkIn }} -
@@ -128,7 +133,10 @@
             @click="openCarousel(index)"
             @mouseover="setExpanded(image.id)"
           >
-            <img :src="image.image" class="h-full w-full object-cover" />
+            <img
+              :src="image.image"
+              class="h-full w-full object-cover"
+            />
             <div
               v-if="index === 4 && propertyImages.length > 5"
               class="absolute inset-0 flex-center bg-black/50"
@@ -148,13 +156,14 @@
             <div
               class="mt-4 text-gray-700 transition-all duration-300"
               :class="{ 'line-clamp-3': !isAboutExpanded }"
-              v-html="propertyData.description"
-            ></div>
+            >
+              {{ propertyData.description }}
+            </div>
             <button
               class="mt-2 font-semibold text-primary uppercase text-sm"
               @click="isAboutExpanded = !isAboutExpanded"
             >
-              {{ isAboutExpanded ? "Show Less" : "Show More" }}
+              {{ isAboutExpanded ? 'Show Less' : 'Show More' }}
               <Icon
                 :icon="isAboutExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'"
                 class="inline"
@@ -170,7 +179,10 @@
                 :key="facility.id"
                 class="flex items-center gap-2 rounded-lg border border-gray-400 p-3 text-gray-700 font-semibold text-xs"
               >
-                <Icon :icon="facility.icon" class="text-xl" />
+                <Icon
+                  :icon="facility.icon"
+                  class="text-xl"
+                />
                 <span>{{ facility.name }}</span>
               </div>
             </div>
@@ -181,9 +193,7 @@
             <ul class="mt-4 list-inside list-disc space-y-2 text-gray-700">
               <li>Check-in Time: 2 PM, Check-out Time: 12 PM</li>
               <li>Primary Guest should be at least 18 years of age.</li>
-              <li>
-                Passport, Aadhaar, Driving License and Govt. ID are accepted.
-              </li>
+              <li>Passport, Aadhaar, Driving License and Govt. ID are accepted.</li>
               <li>Pets are not allowed.</li>
             </ul>
           </section>
@@ -194,7 +204,11 @@
           <div class="mt-4 flex items-center gap-4">
             <div class="rounded-lg bg-green-100 p-4 text-center text-green-800">
               <div class="flex-center gap-1 text-3xl font-bold">
-                4.6 <Icon icon="mdi:star" class="text-xl" />
+                4.6
+                <Icon
+                  icon="mdi:star"
+                  class="text-xl"
+                />
               </div>
               <div class="font-semibold">EXCELLENT</div>
               <div class="text-xs text-gray-500">2640 ratings</div>
@@ -255,15 +269,33 @@
           <div class="mt-6 border-t border-gray-400 pt-6">
             <div class="flex-between">
               <div class="flex gap-3">
-                <img src="/public/user-1.jpg" class="h-10 w-10 rounded-full" />
+                <img
+                  src="/public/user-1.jpg"
+                  class="h-10 w-10 rounded-full"
+                />
                 <div>
                   <p class="font-semibold">Brontosaurus</p>
                   <div class="flex items-center text-sm">
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
-                    <Icon icon="mdi:star" class="text-yellow-500" />
+                    <Icon
+                      icon="mdi:star"
+                      class="text-yellow-500"
+                    />
+                    <Icon
+                      icon="mdi:star"
+                      class="text-yellow-500"
+                    />
+                    <Icon
+                      icon="mdi:star"
+                      class="text-yellow-500"
+                    />
+                    <Icon
+                      icon="mdi:star"
+                      class="text-yellow-500"
+                    />
+                    <Icon
+                      icon="mdi:star"
+                      class="text-yellow-500"
+                    />
                   </div>
                 </div>
               </div>
@@ -277,12 +309,10 @@
               </div>
             </div>
             <p class="mt-4 text-gray-600">
-              Every thing is best, no contents to need views Surest I recommend
-              the oberoi properties for holidays
+              Every thing is best, no contents to need views Surest I recommend the oberoi
+              properties for holidays
             </p>
-            <button class="mt-2 font-semibold text-primary">
-              Read More...
-            </button>
+            <button class="mt-2 font-semibold text-primary">Read More...</button>
           </div>
         </aside>
       </div>
@@ -303,8 +333,14 @@
       </div>
     </section>
 
-    <div ref="resourcesSection" class="scroll-mt-24">
-      <div v-if="availableResourceTypes.length > 0" class="bg-stone-100 py-12">
+    <div
+      ref="resourcesSection"
+      class="scroll-mt-24"
+    >
+      <div
+        v-if="availableResourceTypes.length > 0"
+        class="bg-stone-100 py-12"
+      >
         <section class="container mx-auto px-4 sm:px-6 lg:px-8">
           <h5 class="mb-6">Available Resource Types</h5>
           <div class="space-y-6">
@@ -317,9 +353,7 @@
                 :src="propertyImages[0]?.image || '/placeholder.jpg'"
                 class="aspect-video h-full w-full rounded-lg object-cover"
               />
-              <div
-                class="flex flex-col justify-between sm:flex-row md:col-span-2 p-4"
-              >
+              <div class="flex flex-col justify-between sm:flex-row md:col-span-2 p-4">
                 <div class="space-y-4">
                   <h6 class="text-primary font-bold text-xl">
                     {{ roomType.name }}
@@ -328,16 +362,10 @@
                     <p class="text-lg uppercase text-gray-800">
                       {{ propertyData.propertyName }}
                     </p>
-                    <span class="text-gray-500 text-sm">{{
-                      propertyData.address
-                    }}</span>
+                    <span class="text-gray-500 text-sm">{{ propertyData.address }}</span>
                   </div>
-                  <div
-                    class="flex flex-wrap gap-4 text-gray-400 uppercase text-[10px] font-bold"
-                  >
-                    <span class="flex items-center gap-1"
-                      ><Icon icon="mdi:parking" /> Parking</span
-                    >
+                  <div class="flex flex-wrap gap-4 text-gray-400 uppercase text-[10px] font-bold">
+                    <span class="flex items-center gap-1"><Icon icon="mdi:parking" /> Parking</span>
                     <span class="flex items-center gap-1"
                       ><Icon icon="mdi:shower" /> Attached Bathroom</span
                     >
@@ -346,17 +374,12 @@
                     >
                   </div>
                 </div>
-                <div
-                  class="mt-4 flex flex-col items-start justify-between sm:mt-0 sm:items-end"
-                >
+                <div class="mt-4 flex flex-col items-start justify-between sm:mt-0 sm:items-end">
                   <div class="text-right">
-                    <span
-                      class="text-xs text-green-600 font-bold px-2 py-1 bg-green-50 rounded"
+                    <span class="text-xs text-green-600 font-bold px-2 py-1 bg-green-50 rounded"
                       >20% off</span
                     >
-                    <h5 class="ml-2 block mt-2 text-2xl font-bold">
-                      £{{ roomType.price }}
-                    </h5>
+                    <h5 class="ml-2 block mt-2 text-2xl font-bold">£{{ roomType.price }}</h5>
                   </div>
                   <button
                     class="mt-4 w-full btn-primary px-10 py-3 text-sm sm:w-auto uppercase tracking-wider"
@@ -381,13 +404,19 @@
           class="absolute top-6 right-6 text-white hover:text-gray-300 z-[1000]"
           @click="closeCarousel"
         >
-          <Icon icon="mdi:close" class="text-4xl" />
+          <Icon
+            icon="mdi:close"
+            class="text-4xl"
+          />
         </button>
         <button
           class="absolute left-4 text-white hover:bg-white/10 p-2 rounded-full z-[1000]"
           @click="prevImage"
         >
-          <Icon icon="mdi:chevron-left" class="text-5xl" />
+          <Icon
+            icon="mdi:chevron-left"
+            class="text-5xl"
+          />
         </button>
         <div class="max-w-5xl max-h-[80vh] px-4 select-none text-center">
           <img
@@ -402,31 +431,46 @@
           class="absolute right-4 text-white hover:bg-white/10 p-2 rounded-full z-[1000]"
           @click="nextImage"
         >
-          <Icon icon="mdi:chevron-right" class="text-5xl" />
+          <Icon
+            icon="mdi:chevron-right"
+            class="text-5xl"
+          />
         </button>
       </div>
     </Teleport>
   </main>
 
-  <div v-else class="flex items-center justify-center h-screen">
-    <div v-if="loading" class="flex flex-col items-center gap-4">
-      <Icon icon="line-md:loading-twotone-loop" class="text-5xl text-primary" />
+  <div
+    v-else
+    class="flex items-center justify-center h-screen"
+  >
+    <div
+      v-if="loading"
+      class="flex flex-col items-center gap-4"
+    >
+      <Icon
+        icon="line-md:loading-twotone-loop"
+        class="text-5xl text-primary"
+      />
       <p class="font-medium text-gray-500">Loading property details...</p>
     </div>
-    <p v-else class="text-red-500 font-bold text-xl uppercase tracking-widest">
+    <p
+      v-else
+      class="text-red-500 font-bold text-xl uppercase tracking-widest"
+    >
       Property not found.
     </p>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { Icon } from "@iconify/vue";
-import dayjs from "dayjs";
-import { userService } from "../../services/userService";
-import BaseSelect from "../../components/global/BaseSelect.vue";
-import BaseDatePicker from "../../components/global/BaseDatePicker.vue";
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Icon } from '@iconify/vue';
+import dayjs from 'dayjs';
+import { userService } from '../../services/userService';
+import BaseSelect from '../../components/global/BaseSelect.vue';
+import BaseDatePicker from '../../components/global/BaseDatePicker.vue';
 
 // Router & State
 const route = useRoute();
@@ -441,10 +485,10 @@ const isAboutExpanded = ref(false);
 
 // Date & Search Details
 const details = ref({
-  location: "",
-  roomGuests: "1room_3adults",
-  checkIn: dayjs().format("YYYY-MM-DD"),
-  checkOut: dayjs().add(1, "day").format("YYYY-MM-DD"),
+  location: '',
+  roomGuests: '1room_3adults',
+  checkIn: dayjs().format('YYYY-MM-DD'),
+  checkOut: dayjs().add(1, 'day').format('YYYY-MM-DD'),
 });
 
 // Fetch Available Resources & Handle Scroll
@@ -470,14 +514,14 @@ const handleShowResources = async () => {
       setTimeout(() => {
         if (resourcesSection.value && availableResourceTypes.value.length > 0) {
           resourcesSection.value.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
+            behavior: 'smooth',
+            block: 'start',
           });
         }
       }, 150);
     }
   } catch (err) {
-    console.error("Error fetching resources:", err);
+    throw new Error(err);
   } finally {
     fetchingResources.value = false;
   }
@@ -486,7 +530,7 @@ const handleShowResources = async () => {
 // Booking Redirection using simple Query Parameters
 const goToBooking = (resourceType) => {
   router.push({
-    name: "booking-summary",
+    name: 'booking-summary',
     query: {
       slug: route.params.slug,
       r_id: resourceType.id,
@@ -503,34 +547,30 @@ const isCarouselOpen = ref(false);
 const activeImageIndex = ref(0);
 
 const setExpanded = (id) => (expandedImageId.value = id);
-const resetExpanded = () =>
-  (expandedImageId.value = propertyImages.value[0]?.id);
-const getFlexGrowClass = (id) =>
-  id === expandedImageId.value ? "grow-2" : "grow-1";
+const resetExpanded = () => (expandedImageId.value = propertyImages.value[0]?.id);
+const getFlexGrowClass = (id) => (id === expandedImageId.value ? 'grow-2' : 'grow-1');
 
 const openCarousel = (index) => {
   activeImageIndex.value = index;
   isCarouselOpen.value = true;
-  document.body.style.overflow = "hidden";
+  document.body.style.overflow = 'hidden';
 };
 const closeCarousel = () => {
   isCarouselOpen.value = false;
-  document.body.style.overflow = "auto";
+  document.body.style.overflow = 'auto';
 };
 const nextImage = () => {
-  activeImageIndex.value =
-    (activeImageIndex.value + 1) % propertyImages.value.length;
+  activeImageIndex.value = (activeImageIndex.value + 1) % propertyImages.value.length;
 };
 const prevImage = () => {
   activeImageIndex.value =
-    (activeImageIndex.value - 1 + propertyImages.value.length) %
-    propertyImages.value.length;
+    (activeImageIndex.value - 1 + propertyImages.value.length) % propertyImages.value.length;
 };
 
 // Property Details Fetching
 const fetchProperty = async () => {
   try {
-    const {slug} = route.params;
+    const { slug } = route.params;
     const res = await userService.getPropertyDetails(slug);
     if (res.data.status) {
       propertyData.value = res.data.data;
@@ -539,28 +579,27 @@ const fetchProperty = async () => {
       }
     }
   } catch (err) {
-    console.error("Property Fetch Error:", err);
+    throw new Error(err);
   } finally {
     loading.value = false;
   }
 };
 
 // Calendar Helper Logic
-const startDate = ref(dayjs().startOf("day"));
-const selectedDate = ref(dayjs().startOf("day"));
+const startDate = ref(dayjs().startOf('day'));
+const selectedDate = ref(dayjs().startOf('day'));
 const dateList = computed(() =>
   Array.from({ length: 7 }, (_, i) => {
-    const date = startDate.value.add(i, "day");
+    const date = startDate.value.add(i, 'day');
     return {
-      dateString: date.format("YYYY-MM-DD"),
+      dateString: date.format('YYYY-MM-DD'),
       dayNumber: date.date(),
-      dayName: date.format("ddd"),
+      dayName: date.format('ddd'),
     };
   })
 );
-const navigateBackward = () =>
-  (startDate.value = startDate.value.subtract(7, "day"));
-const navigateForward = () => (startDate.value = startDate.value.add(7, "day"));
+const navigateBackward = () => (startDate.value = startDate.value.subtract(7, 'day'));
+const navigateForward = () => (startDate.value = startDate.value.add(7, 'day'));
 const selectDate = (dateString) => (selectedDate.value = dayjs(dateString));
 
 onMounted(fetchProperty);

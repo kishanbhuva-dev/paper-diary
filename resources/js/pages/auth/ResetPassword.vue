@@ -1,11 +1,12 @@
 <template>
   <div class="max-w-lg sm:mx-auto mx-4 my-10 rounded-lg p-6 shadow-md">
     <h2 class="text-2xl font-semibold text-gray-800 mb-1">Reset Password</h2>
-    <p class="text-gray-500 mb-6 text-sm">
-      Enter your new password below to reset your password.
-    </p>
+    <p class="text-gray-500 mb-6 text-sm">Enter your new password below to reset your password.</p>
 
-    <form class="space-y-5" @submit.prevent="handleResetPassword">
+    <form
+      class="space-y-5"
+      @submit.prevent="handleResetPassword"
+    >
       <BaseInput
         ref="passwordInput"
         v-model="form.password"
@@ -32,13 +33,19 @@
         custom-error="Passwords do not match."
       />
 
-      <button type="submit" class="btn-primary w-full py-1.5">
+      <button
+        type="submit"
+        class="btn-primary w-full py-1.5"
+      >
         Reset Password
       </button>
     </form>
     <p class="text-center text-gray-500 text-sm mt-6">
       Back to login?
-      <router-link to="/login" class="text-primary font-medium hover:underline">
+      <router-link
+        to="/login"
+        class="text-primary font-medium hover:underline"
+      >
         Log in
       </router-link>
     </p>
@@ -46,17 +53,17 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import authService from "../../services/authService";
-import BaseInput from "../../components/global/BaseInput.vue";
+import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import authService from '../../services/authService';
+import BaseInput from '../../components/global/BaseInput.vue';
 
 const route = useRoute();
 const router = useRouter();
 
 const form = ref({
-  password: "",
-  confirmPassword: "",
+  password: '',
+  confirmPassword: '',
   token: route.query.token,
 });
 
@@ -67,7 +74,7 @@ const handleResetPassword = async () => {
   if (passwordInput.value.validate() && confirmPasswordInput.value.validate()) {
     const res = await authService.resetPassword(form.value);
     if (res.status) {
-      router.push({ name: "login" });
+      router.push({ name: 'login' });
     }
   }
 };

@@ -108,25 +108,33 @@
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
               <tr v-if="isLoading">
-                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                <td
+                  colspan="6"
+                  class="px-6 py-10 text-center text-gray-500"
+                >
                   Loading bookings...
                 </td>
               </tr>
               <tr v-else-if="bookings.length === 0">
-                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                <td
+                  colspan="6"
+                  class="px-6 py-10 text-center text-gray-500"
+                >
                   No bookings found.
                 </td>
               </tr>
-              <tr v-for="(booking, index) in bookings" v-else :key="booking.id">
+              <tr
+                v-for="(booking, index) in bookings"
+                v-else
+                :key="booking.id"
+              >
                 <td class="px-6 py-4 text-sm whitespace-nowrap">
                   <!-- #{{ booking.id }} -->
                   {{ ++index }}
                 </td>
                 <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                  {{ booking.property?.propertyName || "N/A" }}
-                  <span class="text-xs text-gray-500">
-                    - {{ booking.resource_type?.name }}</span
-                  >
+                  {{ booking.property?.propertyName || 'N/A' }}
+                  <span class="text-xs text-gray-500"> - {{ booking.resource_type?.name }}</span>
                 </td>
                 <td class="px-6 py-4 text-sm whitespace-nowrap">
                   {{ booking.arrivalDateTime }}
@@ -138,8 +146,7 @@
                   <span
                     :class="[
                       'inline-flex rounded-full px-2 text-xs leading-5 font-semibold',
-                      statusClasses[booking.status] ||
-                        'bg-gray-100 text-gray-800',
+                      statusClasses[booking.status] || 'bg-gray-100 text-gray-800',
                     ]"
                   >
                     {{ booking.status }}
@@ -205,7 +212,7 @@
             class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
             @click="confirmCancel"
           >
-            {{ isSubmitting ? "Processing..." : "Confirm Cancellation" }}
+            {{ isSubmitting ? 'Processing...' : 'Confirm Cancellation' }}
           </button>
         </div>
       </div>
@@ -214,39 +221,39 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { Icon } from "@iconify/vue";
-import { userService } from "../../services/userService";
+import { ref, onMounted } from 'vue';
+import { Icon } from '@iconify/vue';
+import { userService } from '../../services/userService';
 // import dayjs from "dayjs";
 
 const tabs = [
-  { name: "Past Bookings", value: "past" },
-  { name: "Upcoming Bookings", value: "upcoming" },
+  { name: 'Past Bookings', value: 'past' },
+  { name: 'Upcoming Bookings', value: 'upcoming' },
 ];
-const activeTab = ref("past");
+const activeTab = ref('past');
 const bookings = ref([]);
 const isLoading = ref(false);
 
 const isModalOpen = ref(false);
 const isSubmitting = ref(false);
 const selectedBooking = ref(null);
-const cancelReason = ref("");
+const cancelReason = ref('');
 
-const tableHeaders = ["ID", "PROPERTY", "ARRIVAL", "DEPARTURE", "STATUS"];
+const tableHeaders = ['ID', 'PROPERTY', 'ARRIVAL', 'DEPARTURE', 'STATUS'];
 
 const filters = ref({
-  status: "",
-  arrivalDateTime: "",
-  departureDateTime: "",
-  search: "",
+  status: '',
+  arrivalDateTime: '',
+  departureDateTime: '',
+  search: '',
   pagination: 10,
 });
 
 const statusClasses = {
-  confirm: "bg-green-100 text-green-800",
-  pending: "bg-yellow-100 text-yellow-800",
-  cancelled: "bg-red-100 text-red-800",
-  completed: "bg-blue-100 text-blue-800",
+  confirm: 'bg-green-100 text-green-800',
+  pending: 'bg-yellow-100 text-yellow-800',
+  cancelled: 'bg-red-100 text-red-800',
+  completed: 'bg-blue-100 text-blue-800',
 };
 
 const fetchBookings = async () => {
@@ -263,7 +270,7 @@ const fetchBookings = async () => {
       bookings.value = res.data.data.data;
     }
   } catch (error) {
-    console.error("Failed to fetch bookings:", error);
+    throw new Error(error);
   } finally {
     isLoading.value = false;
   }
@@ -271,7 +278,7 @@ const fetchBookings = async () => {
 
 const initiateCancel = (booking) => {
   selectedBooking.value = booking;
-  cancelReason.value = "";
+  cancelReason.value = '';
   isModalOpen.value = true;
 };
 
@@ -288,7 +295,7 @@ const confirmCancel = async () => {
       fetchBookings(); // Refresh the list
     }
   } catch (error) {
-    console.error("Cancellation error:", error);
+    throw new Error(error);
   } finally {
     isSubmitting.value = false;
   }
@@ -301,10 +308,10 @@ const handleTabChange = (tabValue) => {
 
 const resetFilters = () => {
   filters.value = {
-    status: "",
-    arrivalDateTime: "",
-    departureDateTime: "",
-    search: "",
+    status: '',
+    arrivalDateTime: '',
+    departureDateTime: '',
+    search: '',
     pagination: 10,
   };
   fetchBookings();

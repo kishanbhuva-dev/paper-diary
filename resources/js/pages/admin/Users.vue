@@ -4,15 +4,15 @@
       title="User Management"
       :columns="tableColumns"
       :rows="users"
-      :server-side="true"
+      :server-side
       :total-items="total"
       :per-page="perPage"
-      :show-delete="true"
-      :show-search="true"
-      :show-add="true"
-      :show-download="true"
-      :show-edit="true"
-      :admin-login="true"
+      :show-delete
+      :show-search
+      :show-add
+      :show-download
+      :show-edit
+      :admin-login
       :show-view="false"
       admin-login-title="Login as User"
       @search="handleSearch"
@@ -143,31 +143,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import Basetable from "../../components/global/Basetable.vue";
-import BaseModal from "../../components/global/BaseModal.vue";
-import BaseInput from "../../components/global/BaseInput.vue";
-import adminService from "../../services/adminService";
-import DeleteModal from "../../components/global/DeleteModal.vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from 'vue';
+import Basetable from '../../components/global/Basetable.vue';
+import BaseModal from '../../components/global/BaseModal.vue';
+import BaseInput from '../../components/global/BaseInput.vue';
+import adminService from '../../services/adminService';
+import DeleteModal from '../../components/global/DeleteModal.vue';
+import { useRouter } from 'vue-router';
 
 const isOpen = ref(false);
 const perPage = ref(10);
 const currentPage = ref(1);
-const currentSearch = ref("");
+const currentSearch = ref('');
 const total = ref(0);
 const users = ref([]);
 const router = useRouter();
-const orderBy = ref("id");
-const orderDirection = ref("asc");
-
+const orderBy = ref('id');
+const orderDirection = ref('asc');
 
 const form = ref({
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-  address: "",
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  address: '',
 });
 
 const firstNameInput = ref(null);
@@ -181,8 +180,8 @@ const fetchAllUsers = async () => {
     page: currentPage.value,
     per_page: perPage.value,
     search: currentSearch.value,
-    descending: orderDirection.value,       
-    sortBy: orderBy.value
+    descending: orderDirection.value,
+    sortBy: orderBy.value,
   });
   if (res.status) {
     users.value = res.data.data;
@@ -194,7 +193,7 @@ const handleSort = (sortData) => {
   orderBy.value = sortData.key;
   orderDirection.value = sortData.order;
   fetchAllUsers();
-}
+};
 
 const handleAdd = () => {
   isOpen.value = true;
@@ -207,17 +206,13 @@ const handleEdit = (user) => {
 };
 
 const handleSubmit = async () => {
-  const inputs = [
-    firstNameInput,
-    lastNameInput,
-    emailInput,
-    passwordInput,
-    addressInput,
-  ];
+  const inputs = [firstNameInput, lastNameInput, emailInput, passwordInput, addressInput];
 
   const allValid = inputs.every((input) => input.value.validate());
 
-  if (!allValid) {return;}
+  if (!allValid) {
+    return;
+  }
 
   let res;
 
@@ -236,7 +231,7 @@ const handleSubmit = async () => {
 const isOpenDelete = ref(false);
 const deleteUser = ref(null);
 
-const handleDelete = async (user) => {
+const handleDelete = (user) => {
   deleteUser.value = user;
   isOpenDelete.value = true;
 };
@@ -266,43 +261,36 @@ const handlePerPageChange = (size) => {
   fetchAllUsers();
 };
 
-
 const tableColumns = [
-  { label: "Name", key: (row) => `${row?.firstName  } ${  row?.lastName}`, sortable: true },
-  { label: "Email", key: "email", ssortable: true },
-  { label: "Address", key: "address", sortable: true },
-  { label: "Phone", key: "phone", sortable: true },
-  { label: "Role", key: "role", sortable: true },
+  { label: 'Name', key: (row) => `${row?.firstName} ${row?.lastName}`, sortable: true },
+  { label: 'Email', key: 'email', ssortable: true },
+  { label: 'Address', key: 'address', sortable: true },
+  { label: 'Phone', key: 'phone', sortable: true },
+  { label: 'Role', key: 'role', sortable: true },
 ];
 
 const handleLoginAsUser = async (item) => {
-      const {email} = item;
+  const { email } = item;
 
-      if (!email) {
-          console.warn("Admin login attempted without email");
-          return;
-      }
+  const adminToken = localStorage.getItem('authToken');
+  const adminUser = localStorage.getItem('user');
 
-      const adminToken = localStorage.getItem('authToken');
-      const adminUser = localStorage.getItem('user');
+  const response = await adminService.loginAsOwner({ email });
 
-      const response = await adminService.loginAsOwner({ email });
+  if (!response?.data?.status) {
+    throw new Error(response);
+  }
 
-      if (!response?.data?.status) {
-      console.warn("Login as user failed", response);
-      return;
-      }
-      
-      const { token, user } = response.data.data;
-      
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('adminToken', adminToken);
-      localStorage.setItem('adminUser', adminUser);
+  const { token, user } = response.data.data;
 
-      router.push({ name: 'home' });
-      setTimeout(() => location.reload(), 1000);
-  };
+  localStorage.setItem('authToken', token);
+  localStorage.setItem('user', JSON.stringify(user));
+  localStorage.setItem('adminToken', adminToken);
+  localStorage.setItem('adminUser', adminUser);
+
+  router.push({ name: 'home' });
+  setTimeout(() => location.reload(), 1000);
+};
 
 onMounted(() => {
   fetchAllUsers();

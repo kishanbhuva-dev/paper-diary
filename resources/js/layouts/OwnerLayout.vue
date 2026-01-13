@@ -1,7 +1,5 @@
 <template>
-  <section
-    class="h-screen w-full flex bg-gray-50 relative overflow-hidden font-sans"
-  >
+  <section class="h-screen w-full flex bg-gray-50 relative overflow-hidden font-sans">
     <div
       class="lg:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-gray-100 fixed top-0 left-0 right-0 z-40 shadow-sm"
     >
@@ -13,7 +11,11 @@
         />
       </button>
 
-      <img src="/public/main_logo.png" class="h-10" alt="Logo" />
+      <img
+        src="/public/main_logo.png"
+        class="h-10"
+        alt="Logo"
+      />
     </div>
 
     <aside
@@ -22,28 +24,28 @@
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       ]"
     >
-      <div
-        class="flex items-center justify-center py-6 border-b border-gray-100"
-      >
-        <img src="/public/main_logo.png" class="h-14" alt="Logo" />
+      <div class="flex items-center justify-center py-6 border-b border-gray-100">
+        <img
+          src="/public/main_logo.png"
+          class="h-14"
+          alt="Logo"
+        />
       </div>
 
-      <nav
-        class="p-4 space-y-3 overflow-y-auto scrollbar-hide h-[calc(100%-12rem)]"
-      >
-        <div
-          class="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2 px-3"
-        >
+      <nav class="p-4 space-y-3 overflow-y-auto scrollbar-hide h-[calc(100%-12rem)]">
+        <div class="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2 px-3">
           Main Navigation
         </div>
 
-        <div v-for="item in mainMenuItems" :key="item.name">
+        <div
+          v-for="item in mainMenuItems"
+          :key="item.name"
+        >
           <router-link
             :to="item.to"
             class="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-2xl transition-all duration-200"
             :class="{
-              'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
-                $route.name === item.name,
+              'bg-blue-600 text-white shadow-sm shadow-blue-500/50': $route.name === item.name,
               'text-gray-700 hover:bg-blue-50': $route.name !== item.name,
             }"
             @click="closeOnMobile"
@@ -55,9 +57,7 @@
               <Icon
                 :icon="item.icon"
                 width="18"
-                :class="
-                  $route.name === item.name ? 'text-white' : 'text-blue-600'
-                "
+                :class="$route.name === item.name ? 'text-white' : 'text-blue-600'"
               />
             </div>
             {{ item.label }}
@@ -82,13 +82,12 @@
           >
             <div
               class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-              :class="
-                isSystemRouteActive
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-100 text-blue-600'
-              "
+              :class="isSystemRouteActive ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'"
             >
-              <Icon :icon="group.icon" width="18" />
+              <Icon
+                :icon="group.icon"
+                width="18"
+              />
             </div>
             <span
               class="flex-1 text-left"
@@ -139,8 +138,10 @@
             </button>
           </div> -->
 
-
-          <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
+          <div
+            v-show="settingsOpen"
+            class="pl-12 space-y-1 mt-1"
+          >
             <component
               :is="subItem.to ? 'router-link' : 'button'"
               v-for="subItem in group.children"
@@ -149,10 +150,8 @@
               :to="subItem.to"
               class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
               :class="{
-                'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
-                  $route.name === subItem.name,
-                'text-gray-700 hover:bg-blue-50':
-                  $route.name !== subItem.name,
+                'bg-blue-600 text-white shadow-sm shadow-blue-500/50': $route.name === subItem.name,
+                'text-gray-700 hover:bg-blue-50': $route.name !== subItem.name,
               }"
               @click="subItem.onClick && subItem.onClick()"
             >
@@ -164,14 +163,10 @@
               {{ subItem.label }}
             </component>
           </div>
-
-
         </div>
       </nav>
 
-      <div
-        class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white z-10"
-      >
+      <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white z-10">
         <div
           class="flex items-center gap-3 p-3 rounded-2xl bg-blue-50 border border-blue-200 shadow-md transition duration-300 hover:shadow-lg"
         >
@@ -212,10 +207,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { Icon } from "@iconify/vue";
-import { useRoute } from "vue-router";
-import { useAuth } from "../../js/composables/useAuth";
+import { ref, computed, onMounted } from 'vue';
+import { Icon } from '@iconify/vue';
+import { useRoute } from 'vue-router';
+import { useAuth } from '../../js/composables/useAuth';
 
 const { logout, user } = useAuth();
 const route = useRoute();
@@ -224,59 +219,59 @@ const settingsOpen = ref(false);
 const showBackButton = ref(false);
 
 const userData = computed(() => ({
-  firstName: user.value?.firstName || "User",
-  email: user.value?.email || "",
-  initials: user.value?.firstName?.charAt(0) || "U",
+  firstName: user.value?.firstName || 'User',
+  email: user.value?.email || '',
+  initials: user.value?.firstName?.charAt(0) || 'U',
 }));
 
 const mainMenuItems = [
   {
-    name: "owner-dashboard",
-    label: "Dashboard",
-    icon: "mdi:view-dashboard-outline",
-    to: { name: "owner-dashboard" },
+    name: 'owner-dashboard',
+    label: 'Dashboard',
+    icon: 'mdi:view-dashboard-outline',
+    to: { name: 'owner-dashboard' },
   },
   {
-    name: "properties",
-    label: "Properties",
-    icon: "mdi:home-city-outline",
-    to: { name: "properties" },
+    name: 'properties',
+    label: 'Properties',
+    icon: 'mdi:home-city-outline',
+    to: { name: 'properties' },
   },
   {
-    name: "bookings",
-    label: "Bookings",
-    icon: "mdi:calendar-check",
-    to: { name: "bookings" },
+    name: 'bookings',
+    label: 'Bookings',
+    icon: 'mdi:calendar-check',
+    to: { name: 'bookings' },
   },
   {
-    name: "owner-subcription-view",
-    label: "Subcription",
-    icon: "heroicons:credit-card-20-solid",
-    to: { name: "owner-subcription-view" },
+    name: 'owner-subcription-view',
+    label: 'Subcription',
+    icon: 'heroicons:credit-card-20-solid',
+    to: { name: 'owner-subcription-view' },
   },
 ];
 
 const systemMenuItems = [
   {
-    label: "Settings",
-    icon: "mdi:cog-outline",
+    label: 'Settings',
+    icon: 'mdi:cog-outline',
     children: [
       {
-        name: "owner-profile",
-        label: "Profile",
-        icon: "mdi:account-circle-outline",
-        to: { name: "owner-profile" },
+        name: 'owner-profile',
+        label: 'Profile',
+        icon: 'mdi:account-circle-outline',
+        to: { name: 'owner-profile' },
       },
       {
-        name: "owner-change-password",
-        label: "Change Password",
-        icon: "mdi:lock-outline",
-        to: { name: "owner-change-password" },
+        name: 'owner-change-password',
+        label: 'Change Password',
+        icon: 'mdi:lock-outline',
+        to: { name: 'owner-change-password' },
       },
       {
-        name: "back-to-admin",
-        label: "Back To Admin",
-        icon: "lucide:step-back",
+        name: 'back-to-admin',
+        label: 'Back To Admin',
+        icon: 'lucide:step-back',
         onClick: backToAdmin,
         show: showBackButton,
       },
@@ -284,27 +279,26 @@ const systemMenuItems = [
   },
 ];
 
-const isSystemRouteActive = computed(() => systemMenuItems.some((group) =>
-    group.children.some((child) => child.name === route.name)
-  ));
-
+const isSystemRouteActive = computed(() =>
+  systemMenuItems.some((group) => group.children.some((child) => child.name === route.name))
+);
 
 function backToAdmin() {
-    const adminToken = localStorage.getItem('adminToken');
-    const adminUser = localStorage.getItem('adminUser');
+  const adminToken = localStorage.getItem('adminToken');
+  const adminUser = localStorage.getItem('adminUser');
 
-    if (adminToken && adminUser) {
-        localStorage.clear();
-        localStorage.setItem('authToken', adminToken);
-        localStorage.setItem('user', adminUser);
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
-        setTimeout(() => {
-            window.location.href = '/admin';
-        }, 500);
-    } else {
-        alert('Admin session not found.');
-    }
+  if (adminToken && adminUser) {
+    localStorage.clear();
+    localStorage.setItem('authToken', adminToken);
+    localStorage.setItem('user', adminUser);
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    setTimeout(() => {
+      window.location.href = '/admin';
+    }, 500);
+  } else {
+    throw new Error('Admin session not found.');
+  }
 }
 
 onMounted(() => {
@@ -317,7 +311,9 @@ onMounted(() => {
 });
 
 function closeOnMobile() {
-  if (window.innerWidth < 1024) {sidebarOpen.value = false;}
+  if (window.innerWidth < 1024) {
+    sidebarOpen.value = false;
+  }
 }
 
 const handleLogout = async () => {

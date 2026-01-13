@@ -1,14 +1,14 @@
 <template>
   <div class="max-w-lg sm:mx-auto mx-4 my-10 rounded-lg p-6 shadow-md">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-1">
-      Forgot your password?
-    </h2>
+    <h2 class="text-2xl font-semibold text-gray-800 mb-1">Forgot your password?</h2>
     <p class="text-gray-500 mb-6 text-sm">
-      Enter your email address and we will send you a link to reset your
-      password.
+      Enter your email address and we will send you a link to reset your password.
     </p>
 
-    <form class="space-y-5" @submit.prevent="handleForgotPassword">
+    <form
+      class="space-y-5"
+      @submit.prevent="handleForgotPassword"
+    >
       <BaseInput
         ref="emailInput"
         v-model="form.email"
@@ -21,14 +21,20 @@
         icon="lucide:mail"
       />
 
-      <button type="submit" class="btn-primary w-full py-1.5">
+      <button
+        type="submit"
+        class="btn-primary w-full py-1.5"
+      >
         Send Password Reset Link
       </button>
     </form>
 
     <p class="text-center text-gray-500 text-sm mt-6">
       Remember your password?
-      <router-link to="/login" class="text-primary font-medium hover:underline">
+      <router-link
+        to="/login"
+        class="text-primary font-medium hover:underline"
+      >
         Log in
       </router-link>
     </p>
@@ -36,14 +42,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import BaseInput from "../../components/global/BaseInput.vue";
-import authService from "../../services/authService";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import BaseInput from '../../components/global/BaseInput.vue';
+import authService from '../../services/authService';
+import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const form = ref({
-  email: "",
+  email: '',
 });
 
 const emailInput = ref(null);
@@ -52,7 +58,7 @@ const handleForgotPassword = async () => {
   if (emailInput.value.validate()) {
     const res = await authService.forgotPassword(form.value);
     if (res.status) {
-      router.push({ name: "login" });
+      router.push({ name: 'login' });
     }
   }
 };
