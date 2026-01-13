@@ -105,7 +105,7 @@
                 <tr>
                   <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Plan</th>
                   <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Period</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Duration</th>
                   <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
                   <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
                   <!-- <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th> -->

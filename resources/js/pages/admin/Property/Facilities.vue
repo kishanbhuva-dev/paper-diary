@@ -142,7 +142,7 @@
             page: currentPage.value,
             per_page: perPage.value,
             search: currentSearch.value,
-            orderBy: orderBy.value,       
+            orderBy: orderBy.value,
             sort: orderDirection.value
         });
         if (res.status) {

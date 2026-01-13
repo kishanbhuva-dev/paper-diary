@@ -73,7 +73,7 @@
                   <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
                   <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status
                   </th>
-                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Period
+                  <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Duration
                   </th>
                   <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Amount
                   </th>
