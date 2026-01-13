@@ -96,12 +96,12 @@ class DashboardController extends Controller
                     ],
                 ],
             ];
-            $topSites = BookingOrder::where('status', 'confirm')
-                ->whereBetween('created_at', [$todayStart, $todayEnd])
-                ->join('properties', 'booking_orders.property_id', '=', 'properties.id')
-                ->join('users', 'properties.owner_id', '=', 'users.id')
-                ->selectRaw('properties.name as property_name, users.name as owner_name, COUNT(booking_orders.id) as booking_count')
-                ->groupBy('properties.id', 'properties.name', 'users.name')
+            $topSites = BookingOrder::where('booking_orders.status', 'confirm')
+                ->whereBetween('booking_orders.created_at', [$todayStart, $todayEnd])
+                ->join('property', 'booking_orders.propertyId', '=', 'property.id')
+                ->join('users', 'property.ownerId', '=', 'users.id')
+                ->selectRaw('property.propertyName as property_name, CONCAT(users.firstName, " ", users.lastName) as owner_name, COUNT(booking_orders.id) as booking_count')
+                ->groupBy('property.id', 'property.propertyName', 'users.firstName', 'users.lastName')
                 ->orderByDesc('booking_count')
                 ->limit(10)
                 ->get();
