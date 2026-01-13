@@ -1,7 +1,5 @@
 <template>
-  <div
-    :class="[!inWizard ? 'px-4 sm:px-6 py-8 bg-gray-50/50 min-h-screen' : '']"
-  >
+  <div :class="[!inWizard ? 'px-4 sm:px-6 py-8 bg-gray-50/50 min-h-screen' : '']">
     <div :class="[!inWizard ? 'max-w-5xl mx-auto' : '']">
       <div
         v-if="!inWizard"
@@ -9,7 +7,7 @@
       >
         <div>
           <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
-            {{ isEditing ? "Edit Property" : "Add New Property" }}
+            {{ isEditing ? 'Edit Property' : 'Add New Property' }}
           </h1>
           <p class="text-slate-500 mt-1 font-medium">
             Configure your property details and public profile.
@@ -29,16 +27,17 @@
               icon="eos-icons:loading"
               class="w-12 h-12 text-blue-600 animate-spin"
             />
-            <div
-              class="absolute inset-0 blur-xl bg-blue-400/20 animate-pulse"
-            ></div>
+            <div class="absolute inset-0 blur-xl bg-blue-400/20 animate-pulse"></div>
           </div>
           <span class="mt-6 text-lg text-slate-600 font-bold tracking-tight"
             >Synchronizing Property Data...</span
           >
         </div>
 
-        <form v-else @submit.prevent="handleSubmit">
+        <form
+          v-else
+          @submit.prevent="handleSubmit"
+        >
           <div class="p-6 md:p-10">
             <div class="flex items-center gap-3 mb-8">
               <div class="p-2.5 bg-blue-50 rounded-xl">
@@ -48,12 +47,8 @@
                 />
               </div>
               <div>
-                <h3 class="text-xl font-bold text-slate-800">
-                  Property Identity
-                </h3>
-                <p
-                  class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
-                >
+                <h3 class="text-xl font-bold text-slate-800">Property Identity</h3>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   General Information
                 </p>
               </div>
@@ -116,12 +111,8 @@
                 />
               </div>
               <div>
-                <h3 class="text-xl font-bold text-slate-800">
-                  Geolocation & Contact
-                </h3>
-                <p
-                  class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
-                >
+                <h3 class="text-xl font-bold text-slate-800">Geolocation & Contact</h3>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   Regional Settings
                 </p>
               </div>
@@ -183,12 +174,8 @@
                 />
               </div>
               <div>
-                <h3 class="text-xl font-bold text-slate-800">
-                  Payment Integration
-                </h3>
-                <p
-                  class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
-                >
+                <h3 class="text-xl font-bold text-slate-800">Payment Integration</h3>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   Stripe Configuration
                 </p>
               </div>
@@ -220,8 +207,8 @@
                   class="text-4xl filter grayscale opacity-50"
                 />
                 <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                  Connect your Stripe account to enable real-time payments.
-                  Ensure your keys match the environment (Test vs Live).
+                  Connect your Stripe account to enable real-time payments. Ensure your keys match
+                  the environment (Test vs Live).
                 </p>
               </div>
             </div>
@@ -238,12 +225,8 @@
                 />
               </div>
               <div>
-                <h3 class="text-xl font-bold text-slate-800">
-                  Features & Availability
-                </h3>
-                <p
-                  class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
-                >
+                <h3 class="text-xl font-bold text-slate-800">Features & Availability</h3>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   Amenities & Status
                 </p>
               </div>
@@ -251,8 +234,7 @@
 
             <div class="space-y-8">
               <div>
-                <label
-                  class="block text-sm font-bold text-slate-700 mb-3 tracking-tight"
+                <label class="block text-sm font-bold text-slate-700 mb-3 tracking-tight"
                   >Property Status</label
                 >
                 <div class="relative max-w-xs">
@@ -272,13 +254,10 @@
               </div>
 
               <div>
-                <label
-                  class="block text-sm font-bold text-slate-700 mb-4 tracking-tight"
+                <label class="block text-sm font-bold text-slate-700 mb-4 tracking-tight"
                   >Included Facilities</label
                 >
-                <div
-                  class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
-                >
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   <label
                     v-for="facility in availableFacilities"
                     :key="facility.id"
@@ -314,9 +293,7 @@
               </div>
               <div>
                 <h3 class="text-xl font-bold text-slate-800">Visual Gallery</h3>
-                <p
-                  class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
-                >
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   High Quality Photos
                 </p>
               </div>
@@ -352,12 +329,12 @@
                 icon="eos-icons:loading"
                 class="w-5 h-5 animate-spin"
               />
-              <Icon v-else icon="ic:round-save" class="w-5 h-5" />
-              {{
-                isEditing
-                  ? "Update Property Information"
-                  : "Finalize & Save Property"
-              }}
+              <Icon
+                v-else
+                icon="ic:round-save"
+                class="w-5 h-5"
+              />
+              {{ isEditing ? 'Update Property Information' : 'Finalize & Save Property' }}
             </button>
           </div>
         </form>
@@ -367,37 +344,37 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUpdate, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { Icon } from "@iconify/vue";
-import BaseInput from "../../components/global/BaseInput.vue";
-import OwnerImageUploader from "../../components/owner/OwnerImageUploader.vue";
-import ownerService from "../../services/ownerService";
+import { ref, computed, onMounted, onBeforeUpdate, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Icon } from '@iconify/vue';
+import BaseInput from '../../components/global/BaseInput.vue';
+import OwnerImageUploader from '../../components/owner/OwnerImageUploader.vue';
+import ownerService from '../../services/ownerService';
 
 const props = defineProps({
   inWizard: { type: Boolean, default: false },
   id: { type: [String, Number], default: null },
   editMode: { type: Boolean, default: false },
 });
-const emits = defineEmits(["success", "cancel"]);
+const emits = defineEmits(['success', 'cancel']);
 
 const route = useRoute();
 const router = useRouter();
 
 const defaultFormData = {
   status: 1,
-  propertyName: "",
-  description: "",
-  email: "",
-  address: "",
-  city: "",
-  country: "",
-  latitude: "",
-  longitude: "",
-  stripePublicKey: "",
-  stripeSecretKey: "",
-  postcode: "",
-  telephone: "",
+  propertyName: '',
+  description: '',
+  email: '',
+  address: '',
+  city: '',
+  country: '',
+  latitude: '',
+  longitude: '',
+  stripePublicKey: '',
+  stripeSecretKey: '',
+  postcode: '',
+  telephone: '',
   images: [],
   facilities: [],
 };
@@ -419,25 +396,32 @@ onBeforeUpdate(() => (inputRefs.value = []));
 const validateForm = () => {
   let ok = true;
   inputRefs.value.forEach((c) => {
-    if (c && typeof c.validate === "function") {
-      if (!c.validate()) {ok = false;}
+    if (c && typeof c.validate === 'function') {
+      if (!c.validate()) {
+        ok = false;
+      }
     }
   });
   return ok;
 };
 
 const decodeId = (val) => {
-  if (!val) {return val;}
-  if (typeof val === "number" || /^\d+$/.test(String(val))) {return Number(val);}
+  if (!val) {
+    return val;
+  }
+  if (typeof val === 'number' || /^\d+$/.test(String(val))) {
+    return Number(val);
+  }
   try {
     const maybe = atob(String(val));
     return !isNaN(Number(maybe)) ? Number(maybe) : val;
-  } catch (e) {
+  } catch {
     return val;
   }
 };
 
-const formatImages = (images = []) => (images || []).map((img) => ({
+const formatImages = (images = []) =>
+  (images || []).map((img) => ({
     id: img.id,
     url: img.url ? img.url : `/storage/property/images/${img.image}`,
     file: null,
@@ -451,7 +435,9 @@ const loadPropertyForEdit = async (id) => {
     const resolved = decodeId(id);
     const item = await ownerService.fetchPropertyById(resolved);
     if (!item) {
-      if (!inWizard.value) {router.push({ name: "properties" });}
+      if (!inWizard.value) {
+        router.push({ name: 'properties' });
+      }
       return;
     }
 
@@ -462,21 +448,19 @@ const loadPropertyForEdit = async (id) => {
     const loadedData = JSON.parse(JSON.stringify(item));
     loadedData.images = loadedImages;
     loadedData.facilities = loadedFacilityIds;
-    if (
-      loadedData.stripePublicKey === null &&
-      loadedData.stripeSecretKey === null
-    ) {
+    if (loadedData.stripePublicKey === null && loadedData.stripeSecretKey === null) {
       const res = await ownerService.getOwnerDetails();
       const ownerData = res.data.data;
-      loadedData.stripePublicKey = ownerData?.stripePublicKey || "";
-      loadedData.stripeSecretKey = ownerData?.stripeSecretKey || "";
+      loadedData.stripePublicKey = ownerData?.stripePublicKey || '';
+      loadedData.stripeSecretKey = ownerData?.stripeSecretKey || '';
     }
 
     initialImageIds.value = loadedImages.map((i) => i.id).filter(Boolean);
     formData.value = loadedData;
-  } catch (err) {
-    console.error("Failed to load property:", err);
-    if (!inWizard.value) {router.push({ name: "properties" });}
+  } catch {
+    if (!inWizard.value) {
+      router.push({ name: 'properties' });
+    }
   } finally {
     loadingItem.value = false;
   }
@@ -489,17 +473,22 @@ onMounted(async () => {
       ? facs.map((f) => ({ id: f.id, name: f.name }))
       : [];
   } catch (e) {
-    console.error("Failed to load facilities:", e);
+    throw new Error(e);
   }
 
-  if (!isEditing.value) {formData.value = { ...defaultFormData };}
+  if (!isEditing.value) {
+    formData.value = { ...defaultFormData };
+  }
 });
 
 watch(
   () => effectiveId.value,
   (val) => {
-    if (val) {loadPropertyForEdit(val);}
-    else {formData.value = { ...defaultFormData };}
+    if (val) {
+      loadPropertyForEdit(val);
+    } else {
+      formData.value = { ...defaultFormData };
+    }
   },
   { immediate: true }
 );
@@ -508,27 +497,19 @@ const processImages = () => {
   const newFiles = formData.value.images
     .filter((img) => img.file instanceof File)
     .map((i) => i.file);
-  const existingIds = formData.value.images
-    .filter((img) => img.id)
-    .map((i) => i.id);
-  const removedIds = initialImageIds.value.filter(
-    (id) => !existingIds.includes(id)
-  );
+  const existingIds = formData.value.images.filter((img) => img.id).map((i) => i.id);
+  const removedIds = initialImageIds.value.filter((id) => !existingIds.includes(id));
   return { newFiles, removedIds };
 };
 
-const handleDependentDataUpdates = async (
-  propertyId,
-  newFiles,
-  removedIds,
-  uiOrder = null
-) => {
+const handleDependentDataUpdates = async (propertyId, newFiles, removedIds, uiOrder = null) => {
   if (removedIds && removedIds.length) {
     for (const id of removedIds) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         await ownerService.deletePropertyImage(id);
       } catch (e) {
-        console.debug("Failed to delete image:", id, e);
+        throw new Error(e);
       }
     }
   }
@@ -538,7 +519,7 @@ const handleDependentDataUpdates = async (
     try {
       uploaded = await ownerService.addPropertyImages(propertyId, newFiles);
     } catch (e) {
-      console.debug("Failed to upload images:", e);
+      throw new Error(e);
     }
   }
 
@@ -546,10 +527,13 @@ const handleDependentDataUpdates = async (
   const uploadedIdsQueue = (uploaded || []).map((u) => u.id || null);
   const orderedIds = [];
   for (const slot of uiOrdered) {
-    if (slot.id) {orderedIds.push(slot.id);}
-    else if (slot.file) {
+    if (slot.id) {
+      orderedIds.push(slot.id);
+    } else if (slot.file) {
       const next = uploadedIdsQueue.shift();
-      if (next) {orderedIds.push(next);}
+      if (next) {
+        orderedIds.push(next);
+      }
     }
   }
 
@@ -557,18 +541,16 @@ const handleDependentDataUpdates = async (
     try {
       await ownerService.changePropertyImagePosition(propertyId, orderedIds);
     } catch (e) {
-      console.debug("Failed to change image positions:", e);
+      throw new Error(e);
     }
   }
 
   try {
     const remote = await ownerService.fetchPropertyImages(propertyId);
     formData.value.images = formatImages(remote);
-    initialImageIds.value = formData.value.images
-      .map((i) => i.id)
-      .filter(Boolean);
+    initialImageIds.value = formData.value.images.map((i) => i.id).filter(Boolean);
   } catch (e) {
-    console.debug("Failed to refresh images:", e);
+    throw new Error(e);
   }
 
   const facilityIds = Array.isArray(formData.value.facilities)
@@ -583,7 +565,7 @@ const handleDependentDataUpdates = async (
         facilityId: facilityIds,
       });
     } catch (e) {
-      console.debug("Failed to sync facilities:", e);
+      throw new Error(e);
     }
   }
 };
@@ -596,7 +578,7 @@ const onImagesReorder = async (newImages) => {
       try {
         await ownerService.changePropertyImagePosition(formData.value.id, ids);
       } catch (e) {
-        console.error("[PropertiesForm] changePropertyImagePosition error:", e);
+        throw new Error(e);
       }
     }
   }
@@ -615,8 +597,12 @@ const savePropertyData = async (apiPayload) => {
 };
 
 const handleSubmit = async () => {
-  if (submitting.value) {return;}
-  if (!validateForm()) {return;}
+  if (submitting.value) {
+    return;
+  }
+  if (!validateForm()) {
+    return;
+  }
   submitting.value = true;
   try {
     const { newFiles, removedIds } = processImages();
@@ -630,9 +616,7 @@ const handleSubmit = async () => {
             .map((id) => parseInt(id, 10))
             .filter((n) => Number.isInteger(n) && n > 0)
         : [];
-      const orderedImageIds = formData.value.images
-        .map((img) => img.id)
-        .filter(Boolean);
+      const orderedImageIds = formData.value.images.map((img) => img.id).filter(Boolean);
       return {
         propertyPayload: apiPayload,
         newFiles,
@@ -643,28 +627,30 @@ const handleSubmit = async () => {
     }
 
     const savedPropertyId = await savePropertyData(apiPayload);
-    if (!savedPropertyId)
-      {throw new Error("Could not determine saved property id");}
+    if (!savedPropertyId) {
+      throw new Error('Could not determine saved property id');
+    }
 
-    await handleDependentDataUpdates(
-      savedPropertyId,
-      newFiles,
-      removedIds,
-      formData.value.images
-    );
+    await handleDependentDataUpdates(savedPropertyId, newFiles, removedIds, formData.value.images);
 
-    if (inWizard.value) {emits("success", { id: savedPropertyId });}
-    else {router.push({ name: "properties" });}
+    if (inWizard.value) {
+      emits('success', { id: savedPropertyId });
+    } else {
+      router.push({ name: 'properties' });
+    }
   } catch (e) {
-    console.error("[PropertiesForm] Submission Error:", e);
+    throw new Error(e);
   } finally {
     submitting.value = false;
   }
 };
 
 const handleCancel = () => {
-  if (inWizard.value) {emits("cancel");}
-  else {router.push({ name: "properties" });}
+  if (inWizard.value) {
+    emits('cancel');
+  } else {
+    router.push({ name: 'properties' });
+  }
 };
 
 defineExpose({ handleSubmit, onImagesReorder });

@@ -21,16 +21,14 @@
       />
     </div>
 
-    <p
-      class="absolute bottom-20 text-white/90 text-lg font-semibold tracking-wide drop-shadow"
-    >
+    <p class="absolute bottom-20 text-white/90 text-lg font-semibold tracking-wide drop-shadow">
       Loading Paper Diary...
     </p>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 
 const visible = ref(false);
 

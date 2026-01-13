@@ -1,13 +1,12 @@
 <template>
   <div class="max-w-lg sm:mx-auto mx-4 my-10 rounded-lg p-6 shadow-md">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-1">
-      Login to your account
-    </h2>
-    <p class="text-gray-500 mb-6 text-sm">
-      Welcome back! Please enter your details.
-    </p>
+    <h2 class="text-2xl font-semibold text-gray-800 mb-1">Login to your account</h2>
+    <p class="text-gray-500 mb-6 text-sm">Welcome back! Please enter your details.</p>
 
-    <form class="space-y-5" @submit.prevent="handleLogin">
+    <form
+      class="space-y-5"
+      @submit.prevent="handleLogin"
+    >
       <BaseInput
         ref="emailInput"
         v-model="form.email"
@@ -33,12 +32,20 @@
       />
 
       <div class="flex justify-between text-sm text-primary">
-        <a href="/forgot-password" class="hover:text-primary hover:underline">
+        <a
+          href="/forgot-password"
+          class="hover:text-primary hover:underline"
+        >
           Forgot password?
         </a>
       </div>
 
-      <button type="submit" class="btn-primary w-full py-1.5">Log In</button>
+      <button
+        type="submit"
+        class="btn-primary w-full py-1.5"
+      >
+        Log In
+      </button>
     </form>
 
     <p class="text-center text-gray-500 text-sm mt-6">
@@ -54,16 +61,16 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 
-import BaseInput from "../../components/global/BaseInput.vue";
-import { useAuth } from "../../composables/useAuth";
+import BaseInput from '../../components/global/BaseInput.vue';
+import { useAuth } from '../../composables/useAuth';
 
 const { login } = useAuth();
 
 const form = ref({
-  email: "",
-  password: "",
+  email: '',
+  password: '',
 });
 
 const emailInput = ref(null);

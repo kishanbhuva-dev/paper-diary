@@ -4,8 +4,8 @@
     class="fixed inset-0 z-50 md:p-0 p-4 flex items-center bg-black/50 backdrop-blur-sm justify-center transition-all duration-300 animate-[fadeIn_0.25s_ease-out]"
   >
     <div
-      :class="`relative ${width} w-full p-7 rounded-2xl shadow-2xl 
-               bg-white border border-white/50 backdrop-blur-xl 
+      :class="`relative ${width} w-full p-7 rounded-2xl shadow-2xl
+               bg-white border border-white/50 backdrop-blur-xl
                transition-all duration-300 space-y-6
                animate-[slideUp_0.3s_ease-out]`"
     >
@@ -21,7 +21,7 @@
       <div
         class="max-h-[65vh] md:max-h-[65vh] overflow-y-auto px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
       >
-        <slot ></slot>
+        <slot></slot>
       </div>
 
       <!-- Actions -->
@@ -51,15 +51,15 @@
 </template>
 
 <script setup>
-import { Icon } from "@iconify/vue";
+import { Icon } from '@iconify/vue';
 
 defineProps({
   modelValue: Boolean,
-  title: String,
-  width: { type: String, default: "max-w-lg" },
+  title: { type: String, default: '' },
+  width: { type: String, default: 'max-w-lg' },
 });
 
-defineEmits(["update:modelValue", "save"]);
+defineEmits(['update:modelValue', 'save']);
 </script>
 
 <style scoped>

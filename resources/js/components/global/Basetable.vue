@@ -6,9 +6,7 @@
       class="table-header flex flex-wrap gap-4 sm:gap-6 justify-between items-center mb-6 border-b border-gray-200 pb-5 sm:flex-nowrap"
     >
       <div class="flex flex-col gap-1">
-        <h2
-          class="text-2xl font-extrabold text-slate-800 tracking-tight shrink-0"
-        >
+        <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight shrink-0">
           {{ title }}
         </h2>
       </div>
@@ -16,7 +14,10 @@
       <div
         class="flex flex-wrap gap-3 w-full sm:w-auto sm:ml-auto items-center order-2 sm:order-none"
       >
-        <div v-if="showSearch" class="order-2 w-full sm:w-64">
+        <div
+          v-if="showSearch"
+          class="order-2 w-full sm:w-64"
+        >
           <div class="relative group">
             <input
               v-model="localSearchTerm"
@@ -46,9 +47,7 @@
               @click="toggleFilterDropdown"
             >
               <Icon
-                :icon="
-                  isFilterDropdownOpen ? 'mdi:filter-off' : 'mdi:filter-variant'
-                "
+                :icon="isFilterDropdownOpen ? 'mdi:filter-off' : 'mdi:filter-variant'"
                 class="w-6 h-6"
               />
               <span
@@ -63,11 +62,8 @@
               v-if="isFilterDropdownOpen"
               class="absolute right-0 mt-3 w-72 sm:w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-[100] p-5 origin-top-right animate-in fade-in zoom-in duration-150"
             >
-              <div
-                class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100"
-              >
-                <span
-                  class="text-sm font-black text-slate-800 uppercase tracking-widest"
+              <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                <span class="text-sm font-black text-slate-800 uppercase tracking-widest"
                   >Filter Options</span
                 >
                 <button
@@ -96,9 +92,7 @@
                     <select
                       :value="appliedFilters[filter.key] || ''"
                       class="appearance-none w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold text-slate-700 focus:ring-4 focus:ring-blue-50 outline-none transition-all cursor-pointer"
-                      @change="
-                        (e) => handleFilterChange(filter.key, e.target.value)
-                      "
+                      @change="(e) => handleFilterChange(filter.key, e.target.value)"
                     >
                       <option value="">All {{ filter.label }}</option>
                       <option
@@ -121,9 +115,7 @@
                     :placeholder="`Enter ${filter.label}...`"
                     :value="appliedFilters[filter.key] || ''"
                     class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold focus:ring-4 focus:ring-blue-50 outline-none transition-all"
-                    @input="
-                      (e) => handleFilterChange(filter.key, e.target.value)
-                    "
+                    @input="(e) => handleFilterChange(filter.key, e.target.value)"
                   />
 
                   <input
@@ -131,9 +123,7 @@
                     type="date"
                     :value="appliedFilters[filter.key] || ''"
                     class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs font-semibold focus:ring-4 focus:ring-blue-50 outline-none transition-all"
-                    @input="
-                      (e) => handleFilterChange(filter.key, e.target.value)
-                    "
+                    @input="(e) => handleFilterChange(filter.key, e.target.value)"
                   />
                 </div>
               </div>
@@ -155,7 +145,10 @@
             title="Add New"
             @click="emit('open-add-modal')"
           >
-            <Icon icon="ic:round-add" class="w-6 h-6" />
+            <Icon
+              icon="ic:round-add"
+              class="w-6 h-6"
+            />
           </button>
 
           <button
@@ -164,7 +157,10 @@
             title="Download"
             @click="exportToExcel"
           >
-            <Icon icon="mdi:microsoft-excel" class="w-6 h-6" />
+            <Icon
+              icon="mdi:microsoft-excel"
+              class="w-6 h-6"
+            />
           </button>
         </div>
       </div>
@@ -174,36 +170,39 @@
       v-if="hasActiveFilters"
       class="mb-6 flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-200"
     >
-      <span
-        class="text-[9px] font-black text-slate-400 uppercase tracking-widest mr-1"
+      <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mr-1"
         >Active:</span
       >
-      <template v-for="(value, key) in appliedFilters" :key="key">
+      <template
+        v-for="(value, key) in appliedFilters"
+        :key="key"
+      >
         <div
           v-if="value"
           class="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-200 text-[10px] font-bold shadow-sm hover:border-blue-300 transition-all"
         >
-          <span class="opacity-50 uppercase text-[8px]"
-            >{{ getFilterLabel(key) }}:</span
-          >
+          <span class="opacity-50 uppercase text-[8px]">{{ getFilterLabel(key) }}:</span>
           <span>{{ getOptionLabel(key, value) }}</span>
           <button
             class="p-0.5 rounded-md hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
             @click="handleFilterChange(key, '')"
           >
-            <Icon icon="mdi:close" class="w-3.5 h-3.5" />
+            <Icon
+              icon="mdi:close"
+              class="w-3.5 h-3.5"
+            />
           </button>
         </div>
       </template>
     </div>
 
-    <div
-      class="overflow-x-auto rounded-xl border border-gray-200 table-wrapper shadow-sm"
-    >
+    <div class="overflow-x-auto rounded-xl border border-gray-200 table-wrapper shadow-sm">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-blue-50/70">
           <tr>
-            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+            <th
+              class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap"
+            >
               No.
             </th>
             <th
@@ -221,15 +220,8 @@
                 {{ col.label }}
                 <template v-if="col.sortable !== false">
                   <Icon
-                    v-if="
-                      sortKey ===
-                      (typeof col.key === 'function' ? col.label : col.key)
-                    "
-                    :icon="
-                      sortOrder === 'asc'
-                        ? 'mdi:sort-ascending'
-                        : 'mdi:sort-descending'
-                    "
+                    v-if="sortKey === (typeof col.key === 'function' ? col.label : col.key)"
+                    :icon="sortOrder === 'asc' ? 'mdi:sort-ascending' : 'mdi:sort-descending'"
                     class="w-4 h-4 text-blue-600"
                   />
                   <Icon
@@ -263,16 +255,26 @@
               class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium"
             >
               <template v-if="$slots[col.key]"
-                ><slot :name="col.key" :row="item"
-              ></slot></template>
+                ><slot
+                  :name="col.key"
+                  :row="item"
+                ></slot
+              ></template>
               <template v-else-if="col.key === 'icon'">
                 <div
-v-if="item[col.key]"
+                  v-if="item[col.key]"
                   class="w-9 h-9 flex items-center justify-center bg-blue-50 rounded-xl border border-blue-100"
                 >
-                  <Icon :icon="item[col.key]" class="w-5 h-5 text-blue-600" />
+                  <Icon
+                    :icon="item[col.key]"
+                    class="w-5 h-5 text-blue-600"
+                  />
                 </div>
-                <span v-else class="text-gray-300">-</span>
+                <span
+                  v-else
+                  class="text-gray-300"
+                  >-</span
+                >
               </template>
               <!-- <template v-else-if="col.key === 'status'">
                 <span
@@ -293,13 +295,27 @@ v-if="item[col.key]"
                 >
                   {{ formatStatusDisplay(getCellValue(item, col)) }}
                 </span>
-                <span v-else class="text-gray-300">-</span>
+                <span
+                  v-else
+                  class="text-gray-300"
+                  >-</span
+                >
               </template>
               <template v-else>
-                <span v-if="getCellValue(item, col) !== null && getCellValue(item, col) !== undefined && getCellValue(item, col) !== ''">
+                <span
+                  v-if="
+                    getCellValue(item, col) !== null &&
+                    getCellValue(item, col) !== undefined &&
+                    getCellValue(item, col) !== ''
+                  "
+                >
                   {{ getCellValue(item, col) }}
                 </span>
-                <span v-else class="text-gray-300">-</span>
+                <span
+                  v-else
+                  class="text-gray-300"
+                  >-</span
+                >
               </template>
             </td>
             <td
@@ -313,7 +329,10 @@ v-if="item[col.key]"
                   title="View Details"
                   @click="emit('view', item)"
                 >
-                  <Icon icon="mdi:eye-outline" class="w-5 h-5" />
+                  <Icon
+                    icon="mdi:eye-outline"
+                    class="w-5 h-5"
+                  />
                 </button>
 
                 <button
@@ -322,7 +341,10 @@ v-if="item[col.key]"
                   title="Edit"
                   @click="emit('open-edit-modal', item)"
                 >
-                  <Icon icon="mdi:pencil-outline" class="w-5 h-5" />
+                  <Icon
+                    icon="mdi:pencil-outline"
+                    class="w-5 h-5"
+                  />
                 </button>
                 <button
                   v-if="showDelete"
@@ -330,7 +352,10 @@ v-if="item[col.key]"
                   title="Delete"
                   @click="emit('delete', item.id)"
                 >
-                  <Icon icon="mdi:delete-forever" class="w-5 h-5" />
+                  <Icon
+                    icon="mdi:delete-forever"
+                    class="w-5 h-5"
+                  />
                 </button>
                 <button
                   v-if="adminLogin"
@@ -338,7 +363,10 @@ v-if="item[col.key]"
                   :title="adminLoginTitle"
                   @click="emit('admin-login', item)"
                 >
-                  <Icon icon="lucide:user-pen" class="w-5 h-5" />
+                  <Icon
+                    icon="lucide:user-pen"
+                    class="w-5 h-5"
+                  />
                 </button>
               </div>
             </td>
@@ -389,12 +417,19 @@ v-if="item[col.key]"
             v-model="perPageRef"
             class="block w-auto px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 shadow-sm outline-none"
           >
-            <option v-for="size in perPageOptions" :key="size" :value="size">
+            <option
+              v-for="size in perPageOptions"
+              :key="size"
+              :value="size"
+            >
               {{ size }}
             </option>
           </select>
         </div>
-        <div v-if="totalPages > 1" class="w-full sm:w-auto">
+        <div
+          v-if="totalPages > 1"
+          class="w-full sm:w-auto"
+        >
           <nav
             aria-label="Pagination"
             class="isolate inline-flex -space-x-px rounded-xl md:shadow-md w-full sm:w-auto justify-center"
@@ -404,9 +439,15 @@ v-if="item[col.key]"
               class="relative inline-flex items-center rounded-l-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
               @click="changePage(currentPage - 1)"
             >
-              <Icon icon="mdi:chevron-left" class="w-5 h-5" />
+              <Icon
+                icon="mdi:chevron-left"
+                class="w-5 h-5"
+              />
             </button>
-            <template v-for="(page, index) in visiblePages" :key="index">
+            <template
+              v-for="(page, index) in visiblePages"
+              :key="index"
+            >
               <span
                 v-if="page === '...'"
                 class="hidden md:inline-flex relative items-center px-4 py-2 text-sm font-semibold text-gray-500 border border-gray-300 bg-white"
@@ -430,7 +471,10 @@ v-if="item[col.key]"
               class="relative inline-flex items-center rounded-r-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
               @click="changePage(currentPage + 1)"
             >
-              <Icon icon="mdi:chevron-right" class="w-5 h-5" />
+              <Icon
+                icon="mdi:chevron-right"
+                class="w-5 h-5"
+              />
             </button>
           </nav>
         </div>
@@ -440,12 +484,12 @@ v-if="item[col.key]"
 </template>
 
 <script setup>
-import { computed, ref, watch, onBeforeUnmount } from "vue";
-import { Icon } from "@iconify/vue";
-import * as XLSX from "xlsx";
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
+import { Icon } from '@iconify/vue';
+import * as XLSX from 'xlsx';
 
 const props = defineProps({
-  title: { type: String, default: "Data Table" },
+  title: { type: String, default: 'Data Table' },
   columns: { type: Array, required: true },
   rows: { type: Array, required: true, default: () => [] },
   perPage: { type: Number, default: 10 },
@@ -455,7 +499,7 @@ const props = defineProps({
   showView: { type: Boolean, default: true },
   showEdit: { type: Boolean, default: true },
   adminLogin: { type: Boolean, default: true },
-  adminLoginTitle: { type: String, default: "Login as User" },
+  adminLoginTitle: { type: String, default: 'Login as User' },
   showDelete: { type: Boolean, default: true },
   showDownload: { type: Boolean, default: true },
   showSearch: { type: Boolean, default: true },
@@ -463,26 +507,24 @@ const props = defineProps({
 });
 
 const emit = defineEmits([
-  "open-add-modal",
-  "download",
-  "delete",
-  "open-edit-modal",
-  "search",
-  "page-change",
-  "per-page-change",
-  "admin-login",
-  "sort",
-  "filter-change",
-  "view",
+  'open-add-modal',
+  'download',
+  'delete',
+  'open-edit-modal',
+  'search',
+  'page-change',
+  'per-page-change',
+  'admin-login',
+  'sort',
+  'filter-change',
+  'view',
 ]);
 
 // --- FILTER UI ---
 const isFilterDropdownOpen = ref(false);
 const appliedFilters = ref({});
 const activeFilterCount = computed(
-  () =>
-    Object.values(appliedFilters.value).filter((v) => v !== "" && v !== null)
-      .length
+  () => Object.values(appliedFilters.value).filter((v) => v !== '' && v !== null).length
 );
 const hasActiveFilters = computed(() => activeFilterCount.value > 0);
 
@@ -493,24 +535,22 @@ const toggleFilterDropdown = () => {
 const handleFilterChange = (key, value) => {
   appliedFilters.value = { ...appliedFilters.value, [key]: value };
   currentPage.value = 1;
-  emit("filter-change", appliedFilters.value);
+  emit('filter-change', appliedFilters.value);
 };
 
 const clearAllFilters = () => {
   appliedFilters.value = {};
   currentPage.value = 1;
-  emit("filter-change", {});
+  emit('filter-change', {});
 };
 
-const getFilterLabel = (key) =>
-  props.availableFilters.find((f) => f.key === key)?.label || key;
+const getFilterLabel = (key) => props.availableFilters.find((f) => f.key === key)?.label || key;
 const getOptionLabel = (key, value) => {
   const filter = props.availableFilters.find((f) => f.key === key);
-  if (!filter || !filter.options) {return value;}
-  return (
-    filter.options.find((o) => String(o.value) === String(value))?.label ||
-    value
-  );
+  if (!filter || !filter.options) {
+    return value;
+  }
+  return filter.options.find((o) => String(o.value) === String(value))?.label || value;
 };
 
 // --- STATUS LOGIC ---
@@ -518,38 +558,49 @@ const getStatusClasses = (val) => {
   // console.log('getStatusClasses val', val);
   const s = String(val).toLowerCase();
   // console.log('getStatusClasses s', s);
-  const success = ["1", "active", "confirm", "paid", "success", "confirmed"];
-  const danger = ["0", "inactive", "cancelled", "unpaid", "failed"];
-  if (success.includes(s)) {return "bg-green-50 text-green-700 border-green-200";}
-  if (danger.includes(s)) {return "bg-red-50 text-red-700 border-red-200";}
-  return "bg-gray-50 text-gray-600 border-gray-200";
+  const success = ['1', 'active', 'confirm', 'paid', 'success', 'confirmed'];
+  const danger = ['0', 'inactive', 'cancelled', 'unpaid', 'failed'];
+  if (success.includes(s)) {
+    return 'bg-green-50 text-green-700 border-green-200';
+  }
+  if (danger.includes(s)) {
+    return 'bg-red-50 text-red-700 border-red-200';
+  }
+  return 'bg-gray-50 text-gray-600 border-gray-200';
 };
 
 const formatStatusDisplay = (val) => {
-  if (val === 1 || String(val).toLowerCase() === "active") {return "Active";}
-  if (val === 0 || String(val).toLowerCase() === "inactive") {return "Inactive";}
+  if (val === 1 || String(val).toLowerCase() === 'active') {
+    return 'Active';
+  }
+  if (val === 0 || String(val).toLowerCase() === 'inactive') {
+    return 'Inactive';
+  }
   return val;
 };
 
 const getCellValue = (item, col) => {
-  if (typeof col.key === "function") {return col.key(item);}
-  if (!col.key) {return "";}
-  return col.key.split(".").reduce((acc, part) => acc && acc[part], item);
+  if (typeof col.key === 'function') {
+    return col.key(item);
+  }
+  if (!col.key) {
+    return '';
+  }
+  return col.key.split('.').reduce((acc, part) => acc && acc[part], item);
 };
 
 // --- SORT, SEARCH & PAGINATION ---
-const sortKey = ref("");
-const sortOrder = ref("asc");
-const localSearchTerm = ref("");
-const debouncedSearchTerm = ref("");
+const sortKey = ref('');
+const sortOrder = ref('asc');
+const localSearchTerm = ref('');
+const debouncedSearchTerm = ref('');
 let debounceTimeout = null;
 
 const handleSort = (col) => {
-  const key = typeof col.key === "function" ? col.label : col.key;
-  sortOrder.value =
-    sortKey.value === key && sortOrder.value === "asc" ? "desc" : "asc";
+  const key = typeof col.key === 'function' ? col.label : col.key;
+  sortOrder.value = sortKey.value === key && sortOrder.value === 'asc' ? 'desc' : 'asc';
   sortKey.value = key;
-  emit("sort", { key: sortKey.value, order: sortOrder.value });
+  emit('sort', { key: sortKey.value, order: sortOrder.value });
 };
 
 watch(localSearchTerm, (newVal) => {
@@ -557,7 +608,9 @@ watch(localSearchTerm, (newVal) => {
   debounceTimeout = setTimeout(() => {
     debouncedSearchTerm.value = newVal;
     currentPage.value = 1;
-    if (props.serverSide) {emit("search", newVal);}
+    if (props.serverSide) {
+      emit('search', newVal);
+    }
   }, 400);
 });
 
@@ -566,13 +619,15 @@ const perPageOptions = [10, 20, 50, 100];
 const currentPage = ref(1);
 
 const processedData = computed(() => {
-  if (props.serverSide) {return props.rows;}
+  if (props.serverSide) {
+    return props.rows;
+  }
   let data = [...props.rows];
 
   Object.keys(appliedFilters.value).forEach((key) => {
     if (appliedFilters.value[key]) {
       data = data.filter((item) => {
-        const itemVal = String(item[key] || "").toLowerCase();
+        const itemVal = String(item[key] || '').toLowerCase();
         const filterVal = String(appliedFilters.value[key]).toLowerCase();
         return itemVal.includes(filterVal);
       });
@@ -582,27 +637,25 @@ const processedData = computed(() => {
   if (sortKey.value) {
     data.sort((a, b) => {
       const col = props.columns.find(
-        (c) => (typeof c.key === "function" ? c.label : c.key) === sortKey.value
+        (c) => (typeof c.key === 'function' ? c.label : c.key) === sortKey.value
       );
-      const vA = String(getCellValue(a, col) || "");
-      const vB = String(getCellValue(b, col) || "");
-      return sortOrder.value === "asc"
-        ? vA.localeCompare(vB)
-        : vB.localeCompare(vA);
+      const vA = String(getCellValue(a, col) || '');
+      const vB = String(getCellValue(b, col) || '');
+      return sortOrder.value === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA);
     });
   }
   return data;
 });
 
 const totalPages = computed(() => {
-  const count = props.serverSide
-    ? props.totalItems
-    : processedData.value.length;
+  const count = props.serverSide ? props.totalItems : processedData.value.length;
   return Math.ceil(count / perPageRef.value) || 0;
 });
 
 const paginatedData = computed(() => {
-  if (props.serverSide) {return props.rows;}
+  if (props.serverSide) {
+    return props.rows;
+  }
   const start = (currentPage.value - 1) * perPageRef.value;
   return processedData.value.slice(start, start + perPageRef.value);
 });
@@ -610,7 +663,9 @@ const paginatedData = computed(() => {
 const changePage = (p) => {
   if (p >= 1 && p <= totalPages.value) {
     currentPage.value = p;
-    if (props.serverSide) {emit("page-change", p);}
+    if (props.serverSide) {
+      emit('page-change', p);
+    }
   }
 };
 
@@ -619,13 +674,16 @@ const visiblePages = computed(() => {
   const current = currentPage.value;
   const range = [];
   for (let i = 1; i <= total; i++) {
-    if (i === 1 || i === total || (i >= current - 1 && i <= current + 1))
-      {range.push(i);}
+    if (i === 1 || i === total || (i >= current - 1 && i <= current + 1)) {
+      range.push(i);
+    }
   }
   const withDots = [];
   let last;
   range.forEach((i) => {
-    if (last && i - last > 1) {withDots.push("...");}
+    if (last && i - last > 1) {
+      withDots.push('...');
+    }
     withDots.push(i);
     last = i;
   });
@@ -636,21 +694,25 @@ const exportToExcel = () => {
   const data = props.rows.map((item) => {
     const row = {};
     props.columns.forEach((col) => {
-      if (col.key !== "icon") {row[col.label] = getCellValue(item, col) || "-";}
+      if (col.key !== 'icon') {
+        row[col.label] = getCellValue(item, col) || '-';
+      }
     });
     return row;
   });
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Data");
-  XLSX.writeFile(wb, `${props.title.replace(/\s+/g, "_")}.xlsx`);
-  emit("download");
+  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  XLSX.writeFile(wb, `${props.title.replace(/\s+/g, '_')}.xlsx`);
+  emit('download');
 };
 
 onBeforeUnmount(() => clearTimeout(debounceTimeout));
 watch(perPageRef, (v) => {
   currentPage.value = 1;
-  if (props.serverSide) {emit("per-page-change", v);}
+  if (props.serverSide) {
+    emit('per-page-change', v);
+  }
 });
 </script>
 
@@ -679,6 +741,8 @@ watch(perPageRef, (v) => {
   }
 }
 .animate-in {
-  animation: fade-in forwards, zoom-in forwards;
+  animation:
+    fade-in forwards,
+    zoom-in forwards;
 }
 </style>

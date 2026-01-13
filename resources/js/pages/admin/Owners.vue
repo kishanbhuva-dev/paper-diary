@@ -4,14 +4,14 @@
       title="Owner Management"
       :columns="tableColumns"
       :rows="owners"
-      :server-side="true"
+      :server-side
       :total-items="total"
       :per-page="perPage"
-      :show-delete="true"
-      :show-search="true"
-      :show-add="true"
-      :show-download="true"
-      :show-edit="true"
+      :show-delete
+      :show-search
+      :show-add
+      :show-download
+      :show-edit
       :show-view="false"
       admin-login-title="Login as Owner"
       @search="handleSearch"
@@ -142,29 +142,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import Basetable from "../../components/global/Basetable.vue";
-import BaseModal from "../../components/global/BaseModal.vue";
-import BaseInput from "../../components/global/BaseInput.vue";
-import adminService from "../../services/adminService";
-import DeleteModal from "../../components/global/DeleteModal.vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from 'vue';
+import Basetable from '../../components/global/Basetable.vue';
+import BaseModal from '../../components/global/BaseModal.vue';
+import BaseInput from '../../components/global/BaseInput.vue';
+import adminService from '../../services/adminService';
+import DeleteModal from '../../components/global/DeleteModal.vue';
+// import { useRouter } from 'vue-router';
 
 const isOpen = ref(false);
 const perPage = ref(10);
 const currentPage = ref(1);
-const currentSearch = ref("");
+const currentSearch = ref('');
 const total = ref(0);
-const router = useRouter();
-const orderBy = ref("id");
-const orderDirection = ref("asc");
+// const router = useRouter();
+const orderBy = ref('id');
+const orderDirection = ref('asc');
 
 const form = ref({
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-  address: "",
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  address: '',
 });
 
 const firstNameInput = ref(null);
@@ -179,7 +179,7 @@ const fetchAllOwners = async () => {
     per_page: perPage.value,
     search: currentSearch.value,
     descending: orderDirection.value,
-    sortBy: orderBy.value
+    sortBy: orderBy.value,
   });
   if (res.status) {
     owners.value = res.data.data;
@@ -191,7 +191,7 @@ const handleSort = (sortData) => {
   orderBy.value = sortData.key;
   orderDirection.value = sortData.order;
   fetchAllOwners();
-}
+};
 
 const handleAdd = () => {
   isOpen.value = true;
@@ -204,17 +204,13 @@ const handleEdit = (owner) => {
 };
 
 const handleSubmit = async () => {
-  const inputs = [
-    firstNameInput,
-    lastNameInput,
-    emailInput,
-    passwordInput,
-    addressInput,
-  ];
+  const inputs = [firstNameInput, lastNameInput, emailInput, passwordInput, addressInput];
 
   const allValid = inputs.every((input) => input.value.validate());
 
-  if (!allValid) {return;}
+  if (!allValid) {
+    return;
+  }
 
   let res;
 
@@ -233,7 +229,7 @@ const handleSubmit = async () => {
 const isOpenDelete = ref(false);
 const deleteOwner = ref(null);
 
-const handleDelete = async (owner) => {
+const handleDelete = (owner) => {
   deleteOwner.value = owner;
   isOpenDelete.value = true;
 };
@@ -266,20 +262,15 @@ const handlePerPageChange = (size) => {
 const owners = ref([]);
 
 const tableColumns = [
-  { label: "Name", key: (row) => `${row?.firstName  } ${  row?.lastName}` },
-  { label: "Email", key: "email" },
-  { label: "Address", key: "address" },
-  { label: "Phone", key: "phone" },
-  { label: "Role", key: "role" },
+  { label: 'Name', key: (row) => `${row?.firstName} ${row?.lastName}` },
+  { label: 'Email', key: 'email' },
+  { label: 'Address', key: 'address' },
+  { label: 'Phone', key: 'phone' },
+  { label: 'Role', key: 'role' },
 ];
 
 const handleLoginAsUser = async (item) => {
-      const {email} = item;
-
-  if (!email) {
-      console.warn("Admin login attempted without email");
-      return;
-  }
+  const { email } = item;
 
   const adminToken = localStorage.getItem('authToken');
   const adminUser = localStorage.getItem('user');
@@ -287,8 +278,7 @@ const handleLoginAsUser = async (item) => {
   const response = await adminService.loginAsOwner({ email });
 
   if (!response?.data?.status) {
-  console.warn("Login as user failed", response);
-  return;
+    throw new Error(response);
   }
 
   const { token, user } = response.data.data;
@@ -300,7 +290,7 @@ const handleLoginAsUser = async (item) => {
 
   // router.push({ name: 'owner-dashboard' });
   // setTimeout(() => location.reload(), 1000);
-   window.location.href = '/owner';
+  window.location.href = '/owner';
 };
 
 onMounted(() => {

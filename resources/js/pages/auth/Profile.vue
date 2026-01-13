@@ -1,13 +1,12 @@
 <template>
   <div class="w-full mx-auto px-4 py-8">
-    <div
-      class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
-    >
-      <div
-        class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-700"
-      >
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-700">
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-          <Icon icon="mdi:account-circle-outline" class="text-2xl" />
+          <Icon
+            icon="mdi:account-circle-outline"
+            class="text-2xl"
+          />
           Personal Information
         </h3>
         <p class="text-blue-100 text-sm mt-1">
@@ -15,11 +14,12 @@
         </p>
       </div>
 
-      <form class="p-6 md:p-10 space-y-8" @submit.prevent="handleUpdateProfile">
+      <form
+        class="p-6 md:p-10 space-y-8"
+        @submit.prevent="handleUpdateProfile"
+      >
         <div class="space-y-2">
-          <div
-            class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
-          >
+          <div class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2">
             <Icon icon="mdi:badge-account-horizontal-outline" />
             <span>Basic Details</span>
           </div>
@@ -55,9 +55,7 @@
         </div>
 
         <div class="space-y-2">
-          <div
-            class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
-          >
+          <div class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2">
             <Icon icon="mdi:phone-outline" />
             <span>Contact Information</span>
           </div>
@@ -83,9 +81,7 @@
         </div>
 
         <div class="space-y-2">
-          <div
-            class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
-          >
+          <div class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2">
             <Icon icon="mdi:map-marker-outline" />
             <span>Address Details</span>
           </div>
@@ -137,10 +133,11 @@
           </div>
         </div>
 
-        <div v-if="userRole === 'owner'" class="space-y-2">
-          <div
-            class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
-          >
+        <div
+          v-if="userRole === 'owner'"
+          class="space-y-2"
+        >
+          <div class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2">
             <Icon icon="mdi:shield-key-outline" />
             <span>Stripe Configuration</span>
           </div>
@@ -172,9 +169,7 @@
           </div>
         </div>
 
-        <div
-          class="flex flex-col sm:flex-row justify-end gap-4 pt-10 border-t border-gray-100"
-        >
+        <div class="flex flex-col sm:flex-row justify-end gap-4 pt-10 border-t border-gray-100">
           <button
             type="button"
             class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
@@ -187,9 +182,15 @@
             :disabled="loading"
             class="px-10 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:transform active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            <Icon v-if="loading" icon="line-md:loading-twotone-loop" />
-            <Icon v-else icon="mdi:check-circle-outline" />
-            {{ loading ? "Updating..." : "Save Changes" }}
+            <Icon
+              v-if="loading"
+              icon="line-md:loading-twotone-loop"
+            />
+            <Icon
+              v-else
+              icon="mdi:check-circle-outline"
+            />
+            {{ loading ? 'Updating...' : 'Save Changes' }}
           </button>
         </div>
       </form>
@@ -198,16 +199,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { Icon } from "@iconify/vue";
-import BaseInput from "../../components/global/BaseInput.vue";
-import authService from "../../services/authService";
-import ownerService from "../../services/ownerService";
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { Icon } from '@iconify/vue';
+import BaseInput from '../../components/global/BaseInput.vue';
+import authService from '../../services/authService';
+import ownerService from '../../services/ownerService';
 
 const router = useRouter();
 const loading = ref(false);
-const userRole = ref("");
+const userRole = ref('');
 
 // Input Refs for Validation
 const input_firstName = ref(null);
@@ -223,49 +224,49 @@ const input_stripePublicKey = ref(null);
 const input_stripeSecretKey = ref(null);
 
 const form = ref({
-  firstName: "",
-  lastName: "",
-  email: "",
-  address: "",
-  address2: "",
-  country: "",
-  city: "",
-  postcode: "",
-  phone: "",
-  telephone: "",
-  stripePublicKey: "",
-  stripeSecretKey: "",
+  firstName: '',
+  lastName: '',
+  email: '',
+  address: '',
+  address2: '',
+  country: '',
+  city: '',
+  postcode: '',
+  phone: '',
+  telephone: '',
+  stripePublicKey: '',
+  stripeSecretKey: '',
 });
 const fetchProfileDetails = async () => {
   try {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem('user');
     const user = JSON.parse(storedUser);
     userRole.value = user.role;
 
     if (storedUser) {
       let ownerData = null;
-      if (userRole.value === "owner") {
+      if (userRole.value === 'owner') {
         const res = await ownerService.getOwnerDetails();
         ownerData = res.data.data;
       }
       form.value = {
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        address: user.address || "",
-        address2: user.address2 || "",
-        country: user.country || "",
-        city: user.city || "",
-        postcode: user.postcode || "",
-        phone: user.phone || "",
-        telephone: user.telephone || "",
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        address: user.address || '',
+        address2: user.address2 || '',
+        country: user.country || '',
+        city: user.city || '',
+        postcode: user.postcode || '',
+        phone: user.phone || '',
+        telephone: user.telephone || '',
 
-        stripePublicKey: ownerData?.stripePublicKey || "",
-        stripeSecretKey: ownerData?.stripeSecretKey || "",
+        stripePublicKey: ownerData?.stripePublicKey || '',
+        stripeSecretKey: ownerData?.stripeSecretKey || '',
       };
     }
   } catch (error) {
-    console.error("Error fetching owner details:", error);
+    throw new Error(error);
   }
 };
 
@@ -286,11 +287,8 @@ const handleUpdateProfile = async () => {
     input_country.value,
   ];
 
-  if (userRole.value === "owner") {
-    inputsToValidate.push(
-      input_stripePublicKey.value,
-      input_stripeSecretKey.value
-    );
+  if (userRole.value === 'owner') {
+    inputsToValidate.push(input_stripePublicKey.value, input_stripeSecretKey.value);
   }
 
   const isFormValid = inputsToValidate
@@ -306,28 +304,28 @@ const handleUpdateProfile = async () => {
   try {
     const payload = { ...form.value };
 
-    if (userRole.value !== "owner") {
+    if (userRole.value !== 'owner') {
       delete payload.stripePublicKey;
       delete payload.stripeSecretKey;
     }
     const response = await authService.updateProfile(payload);
 
     if (response.status) {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const { stripePublicKey, stripeSecretKey, ...safeUserData } = form.value;
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const { ...safeUserData } = form.value;
       const updatedUser = { ...storedUser, ...safeUserData };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      if (userRole.value === "admin") {
-        router.push({ name: "admin-dashboard" });
-      } else if (userRole.value === "owner") {
-        router.push({ name: "owner-dashboard" });
+      if (userRole.value === 'admin') {
+        router.push({ name: 'admin-dashboard' });
+      } else if (userRole.value === 'owner') {
+        router.push({ name: 'owner-dashboard' });
       } else {
-        router.push({ name: "home" });
+        router.push({ name: 'home' });
       }
     }
   } catch (error) {
-    console.error("Update failed", error);
+    throw new Error(error);
   } finally {
     loading.value = false;
   }

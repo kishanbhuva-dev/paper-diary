@@ -4,8 +4,14 @@
       <div class="grid grid-cols-1 lg:grid-cols-5 gap-y-12 lg:gap-x-16">
         <div class="flex flex-col space-y-4 lg:col-span-3">
           <div class="flex flex-col space-y-4">
-            <router-link to="/" class="w-16">
-              <img src="/public/main_logo.png" alt="Paper Diary" />
+            <router-link
+              to="/"
+              class="w-16"
+            >
+              <img
+                src="/public/main_logo.png"
+                alt="Paper Diary"
+              />
             </router-link>
 
             <h2 class="text-3xl font-extrabold text-gray-900 leading-tight">
@@ -15,9 +21,8 @@
           </div>
 
           <p class="text-base text-gray-500 max-w-xl">
-            With WeWork India, you can find what your business needs to thrive,
-            whether it's ready-to-move-in or customisable commercial office
-            space for rent in Chennai.
+            With WeWork India, you can find what your business needs to thrive, whether it's
+            ready-to-move-in or customisable commercial office space for rent in Chennai.
           </p>
 
           <div class="flex space-x-3 pt-2">
@@ -28,16 +33,17 @@
               target="_blank"
               class="p-2 rounded-full text-primary bg-white hover:bg-primary hover:text-white shadow-md transition duration-300 ease-in-out transform hover:scale-105"
             >
-              <Icon :icon="social.icon" class="w-5 h-5" />
+              <Icon
+                :icon="social.icon"
+                class="w-5 h-5"
+              />
             </a>
           </div>
         </div>
 
         <div class="flex flex-col space-y-6 lg:col-span-2 lg:mt-3">
           <div class="flex flex-col space-y-4">
-            <h3
-              class="text-lg font-semibold text-gray-900 border-b border-blue-200 pb-2"
-            >
+            <h3 class="text-lg font-semibold text-gray-900 border-b border-blue-200 pb-2">
               Contact Us
             </h3>
 
@@ -105,19 +111,19 @@
 </template>
 
 <script setup>
-import { Icon } from "@iconify/vue";
+import { Icon } from '@iconify/vue';
 
 const footerLinks = [
-  { text: "Home", href: "/" },
-  { text: "About us", href: "/" },
-  { text: "Blog", href: "/" },
-  { text: "Center", href: "/" },
+  { text: 'Home', href: '/' },
+  { text: 'About us', href: '/' },
+  { text: 'Blog', href: '/' },
+  { text: 'Center', href: '/' },
 ];
 
 const socialLinks = [
-  { icon: "lucide:twitter", href: "https://twitter.com" },
-  { icon: "lucide:facebook", href: "https://facebook.com" },
-  { icon: "lucide:instagram", href: "https://instagram.com" },
-  { icon: "lucide:github", href: "https://github.com" },
+  { icon: 'lucide:twitter', href: 'https://twitter.com' },
+  { icon: 'lucide:facebook', href: 'https://facebook.com' },
+  { icon: 'lucide:instagram', href: 'https://instagram.com' },
+  { icon: 'lucide:github', href: 'https://github.com' },
 ];
 </script>

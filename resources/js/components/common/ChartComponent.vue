@@ -187,7 +187,7 @@ const chartOptions = computed(() => {
         fontFamily: 'Inter, sans-serif',
       },
       y: {
-        formatter: function (val) {
+        formatter(val) {
           return val ? val.toLocaleString() : '0';
         },
       },
@@ -216,7 +216,7 @@ const chartOptions = computed(() => {
             fontSize: '12px',
             fontFamily: 'Inter, sans-serif',
           },
-          formatter: function (val) {
+          formatter(val) {
             return val ? val.toLocaleString() : '0';
           },
         },
@@ -238,7 +238,7 @@ const chartOptions = computed(() => {
             total: {
               show: true,
               label: 'Total',
-              formatter: function (w) {
+              formatter(w) {
                 return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
               },
             },
@@ -267,6 +267,48 @@ const chartOptions = computed(() => {
 </script>
 
 <style scoped>
+.chart-container {
+  border-radius: 0.5rem;
+  box-shadow: none;
+  border: none;
+  padding: 1rem;
+}
+
+.chart-header {
+  border-bottom: none;
+  padding-bottom: 0.75rem;
+}
+
+.chart-wrapper {
+  width: 100%;
+}
+
+/* Custom ApexCharts styling */
+:deep(.apexcharts-legend) {
+  justify-content: center;
+}
+
+:deep(.apexcharts-tooltip) {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 0;
+}
+
+:deep(.apexcharts-gridline) {
+  opacity: 0.3;
+}
+
+:deep(.apexcharts-xaxis-label) {
+  color: #6b7280;
+}
+
+:deep(.apexcharts-yaxis-label) {
+  color: #6b7280;
+}
+</style>
+
+<!-- <style scoped>
 .chart-container {
   @apply rounded-lg shadow-none border border-none p-4;
 }
@@ -299,4 +341,4 @@ const chartOptions = computed(() => {
 :deep(.apexcharts-yaxis-label) {
   @apply text-gray-500;
 }
-</style>
+</style> -->

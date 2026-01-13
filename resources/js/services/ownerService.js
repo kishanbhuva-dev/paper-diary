@@ -19,12 +19,12 @@ Methods included:
  - deleteBooking(id)
 */
 
-import apiClient from "./apiClient";
+import apiClient from './apiClient';
 
 const ownerService = {
   // ------ Owner DETAILS ------
   async getOwnerDetails() {
-    const response = await apiClient.get("/owner/owner-details");
+    const response = await apiClient.get('/owner/owner-details');
     return response;
   },
 
@@ -32,11 +32,11 @@ const ownerService = {
 
   // Fetch all properties for the owner
   async fetchProperties(params = {}) {
-    const res = await apiClient.get("/owner/property", { params });
+    const res = await apiClient.get('/owner/property', { params });
     return res.data.data;
   },
   async fetchPropertiesdropdown() {
-    const res = await apiClient.get("/owner/property-dropdown");
+    const res = await apiClient.get('/owner/property-dropdown');
     return res;
   },
 
@@ -50,7 +50,7 @@ const ownerService = {
 
   // Create a new property
   async createProperty(payload) {
-    const res = await apiClient.post("/owner/property", payload);
+    const res = await apiClient.post('/owner/property', payload);
     return res.data;
   },
 
@@ -68,13 +68,13 @@ const ownerService = {
 
   // Delete multiple property images by ids
   async deletePropertyImages(ids = []) {
-    const res = await apiClient.post("/owner/property-image-delete", { ids });
+    const res = await apiClient.post('/owner/property-image-delete', { ids });
     return res.data.data;
   },
 
   // Fetch images for a property
   async fetchPropertyImages(propertyId) {
-    const res = await apiClient.get("/owner/property-wise-image", {
+    const res = await apiClient.get('/owner/property-wise-image', {
       params: { propertyId },
     });
 
@@ -87,10 +87,11 @@ const ownerService = {
     const created = [];
     for (const file of files) {
       const form = new FormData();
-      form.append("propertyId", propertyId);
-      form.append("images[]", file);
-      const res = await apiClient.post("/owner/property-image-store", form, {
-        headers: { "Content-Type": "multipart/form-data" },
+      form.append('propertyId', propertyId);
+      form.append('images[]', file);
+      // eslint-disable-next-line no-await-in-loop
+      const res = await apiClient.post('/owner/property-image-store', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       created.push(res.data.data);
     }
@@ -100,7 +101,7 @@ const ownerService = {
   // Sync property facilities (POST the selected facility IDs)
   async setPropertyFacilities(payload) {
     // Backend expects { data: { propertyId, facilityId } }
-    const res = await apiClient.post("/owner/add-facility-property", {
+    const res = await apiClient.post('/owner/add-facility-property', {
       data: payload,
     });
     return res.data.data;
@@ -108,13 +109,13 @@ const ownerService = {
 
   // Fetch all available facilities
   async fetchFacilities(params = {}) {
-    const res = await apiClient.get("/owner/facility", { params });
+    const res = await apiClient.get('/owner/facility', { params });
     return res.data.data;
   },
 
   // Delete a property image
   async deletePropertyImage(imageId) {
-    const res = await apiClient.post("/owner/single-property-image-delete", {
+    const res = await apiClient.post('/owner/single-property-image-delete', {
       id: imageId,
     });
 
@@ -123,7 +124,7 @@ const ownerService = {
 
   // Change property image position/order
   async changePropertyImagePosition(propertyId, imageIds = []) {
-    const res = await apiClient.post("/owner/property-image-position-change", {
+    const res = await apiClient.post('/owner/property-image-position-change', {
       ids: imageIds, // Backend expects 'ids', not 'imageIds'
     });
 
@@ -134,26 +135,20 @@ const ownerService = {
 
   // Create multiple resource types (room types) in bulk
   async resourceTypeMultipleStore(payload) {
-    const res = await apiClient.post(
-      "/owner/resource-type-multiple-store",
-      payload
-    );
+    const res = await apiClient.post('/owner/resource-type-multiple-store', payload);
     return res.data;
   },
 
   // Update multiple resource types in bulk
   async resourceTypeMultipleUpdate(payload) {
-    const res = await apiClient.post(
-      "/owner/resource-type-multiple-update",
-      payload
-    );
+    const res = await apiClient.post('/owner/resource-type-multiple-update', payload);
     return res.data;
   },
 
   // Fetch resource types for a property
   async fetchResourceTypes(propertyId) {
     // Controller expects query param 'id' containing property id
-    const res = await apiClient.get("/owner/resource-type", {
+    const res = await apiClient.get('/owner/resource-type', {
       params: { id: propertyId },
     });
     return res.data.data;
@@ -169,7 +164,7 @@ const ownerService = {
 
   // Create multiple resources (rooms) in bulk
   async resourceList(payload) {
-    const res = await apiClient.get("/owner/resource-wise-list", {
+    const res = await apiClient.get('/owner/resource-wise-list', {
       params: payload,
     });
     return res.data.data;
@@ -177,22 +172,19 @@ const ownerService = {
 
   // Create multiple resources (rooms) in bulk
   async resourceMultipleStore(payload) {
-    const res = await apiClient.post("/owner/resource-multiple-store", payload);
+    const res = await apiClient.post('/owner/resource-multiple-store', payload);
     return res.data;
   },
 
   // Update multiple resources in bulk
   async resourceMultipleUpdate(payload) {
-    const res = await apiClient.post(
-      "/owner/resource-multiple-update",
-      payload
-    );
+    const res = await apiClient.post('/owner/resource-multiple-update', payload);
     return res.data;
   },
 
   // Fetch resources for a property
   async fetchResources(propertyId) {
-    const res = await apiClient.get("/owner/resource", {
+    const res = await apiClient.get('/owner/resource', {
       params: { propertyId },
     });
     return res.data.data;
@@ -208,7 +200,7 @@ const ownerService = {
 
   // Fetch all bookings for the owner's properties
   async fetchBookings(params = {}) {
-    const res = await apiClient.get("/owner/bookings", { params });
+    const res = await apiClient.get('/owner/bookings', { params });
     return res.data.data;
   },
 
@@ -220,9 +212,7 @@ const ownerService = {
   },
   async cancelBooking(id) {
     // Corresponds to the route: GET /owner/bookings/{id}
-    const res = await apiClient.post(`/owner/booking-cancel`,
-       { bookingId: id }
-    );
+    const res = await apiClient.post(`/owner/booking-cancel`, { bookingId: id });
     return res.data;
   },
 
@@ -231,7 +221,7 @@ const ownerService = {
     // Corresponds to the route: PUT/PATCH /owner/bookings/{id}
     const res = await apiClient.put(`/owner/bookings/${id}`, payload);
     return res.data.data;
-  },  
+  },
 
   // Delete a booking
   async deleteBooking(id) {
@@ -241,7 +231,7 @@ const ownerService = {
   },
 
   async fetchSubscriptionDetails() {
-    const res = await apiClient.get("/stripe/subscription-data");
+    const res = await apiClient.get('/stripe/subscription-data');
     return res.data;
   },
 };

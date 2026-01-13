@@ -9,13 +9,14 @@
     <div class="flex items-center justify-between mb-8">
       <div class="flex items-center gap-3">
         <div class="p-2.5 bg-indigo-50 rounded-xl">
-          <Icon icon="mdi:door-open" class="text-2xl text-indigo-600" />
+          <Icon
+            icon="mdi:door-open"
+            class="text-2xl text-indigo-600"
+          />
         </div>
         <div>
           <h3 class="text-xl font-bold text-slate-800">Individual Units</h3>
-          <p
-            class="text-xs font-semibold text-slate-400 uppercase tracking-widest"
-          >
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
             Inventory & Specific Resources
           </p>
         </div>
@@ -75,7 +76,10 @@
                 title="Remove resource"
                 @click="openRemoveResourceItemModal(idx)"
               >
-                <Icon icon="mdi:trash-can-outline" class="w-5 h-5" />
+                <Icon
+                  icon="mdi:trash-can-outline"
+                  class="w-5 h-5"
+                />
               </button>
             </div>
           </div>
@@ -84,7 +88,10 @@
     </div>
 
     <div class="flex justify-end mt-10">
-      <div v-if="!props.inWizard" class="flex items-center gap-3">
+      <div
+        v-if="!props.inWizard"
+        class="flex items-center gap-3"
+      >
         <button
           type="button"
           class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
@@ -103,7 +110,7 @@
             icon="eos-icons:loading"
             class="w-5 h-5 animate-spin"
           />
-          {{ submitting ? "Saving..." : "Finalize & Submit" }}
+          {{ submitting ? 'Saving...' : 'Finalize & Submit' }}
         </button>
       </div>
     </div>
@@ -114,8 +121,7 @@
     title="Remove Individual Unit"
     :message="`Are you sure you want to remove '${resourceItemNameToRemove}'?`"
     :warning="
-      resourceItemIndexToRemove !== null &&
-      resourceItems[resourceItemIndexToRemove]?.id
+      resourceItemIndexToRemove !== null && resourceItems[resourceItemIndexToRemove]?.id
         ? 'This unit will be permanently removed from the server.'
         : 'This will remove the draft unit from your list.'
     "
@@ -124,13 +130,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from "vue";
-import { Icon } from "@iconify/vue";
-import BaseInput from "../../components/global/BaseInput.vue";
-import BaseSelect from "../../components/global/BaseSelect.vue";
-import DeleteModal from "../../components/global/DeleteModal.vue";
-import ownerService from "../../services/ownerService";
-import { toast } from "vue-sonner";
+import { ref, onMounted, watch, computed } from 'vue';
+import { Icon } from '@iconify/vue';
+import BaseInput from '../../components/global/BaseInput.vue';
+import BaseSelect from '../../components/global/BaseSelect.vue';
+import DeleteModal from '../../components/global/DeleteModal.vue';
+import ownerService from '../../services/ownerService';
+import { toast } from 'vue-sonner';
 
 const props = defineProps({
   propertyId: { type: [String, Number], required: true },
@@ -138,15 +144,15 @@ const props = defineProps({
   inWizard: { type: Boolean, default: false },
   editMode: { type: Boolean, default: false },
 });
-const emits = defineEmits(["success", "cancel"]);
+const emits = defineEmits(['success', 'cancel']);
 
 const availableTypes = ref([]);
-const resourceItems = ref([{ name: "", resourceTypeId: "", status: 1 }]);
+const resourceItems = ref([{ name: '', resourceTypeId: '', status: 1 }]);
 const deletedResourceItemIds = ref([]);
 const submitting = ref(false);
 const statusOptions = ref([
-  { label: "Active", value: 1 },
-  { label: "Inactive", value: 0 },
+  { label: 'Active', value: 1 },
+  { label: 'Inactive', value: 0 },
 ]);
 const availableTypeOptions = computed(() =>
   availableTypes.value.map((rt) => ({ label: rt.name, value: rt.id }))
@@ -158,28 +164,32 @@ const resourceItemNameToRemove = computed(() => {
   const idx = resourceItemIndexToRemove.value;
   return idx !== null && resourceItems.value[idx]?.name
     ? resourceItems.value[idx].name
-    : "this resource";
+    : 'this resource';
 });
 
 const loadData = async () => {
   try {
     const fetched = await ownerService.fetchResourceTypes(props.propertyId);
     availableTypes.value = fetched || [];
-  } catch (err) {}
+  } catch (err) {
+    throw new Error(err);
+  }
   try {
     const existing = await ownerService.fetchResources(props.propertyId);
     if (Array.isArray(existing) && existing.length) {
       resourceItems.value = existing.map((r) => ({
         id: r.id,
-        name: r.name || "",
+        name: r.name || '',
         resourceTypeId: r.resourceTypeId,
-        status: typeof r.status !== "undefined" ? Number(r.status) : 1,
+        status: typeof r.status !== 'undefined' ? Number(r.status) : 1,
       }));
-      resourceItems.value.push({ name: "", resourceTypeId: "", status: 1 });
+      resourceItems.value.push({ name: '', resourceTypeId: '', status: 1 });
     } else {
-      resourceItems.value = [{ name: "", resourceTypeId: "", status: 1 }];
+      resourceItems.value = [{ name: '', resourceTypeId: '', status: 1 }];
     }
-  } catch (err) {}
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 onMounted(() => {
@@ -188,20 +198,23 @@ onMounted(() => {
 watch(
   () => props.propertyId,
   (val) => {
-    if (val) {loadData();}
+    if (val) {
+      loadData();
+    }
   }
 );
 
 const addResourceItem = () => {
-  resourceItems.value.push({ name: "", resourceTypeId: "", status: 1 });
+  resourceItems.value.push({ name: '', resourceTypeId: '', status: 1 });
 };
 
 const openRemoveResourceItemModal = (idx) => {
   const resourceItem = resourceItems.value[idx];
   const isDummyOrBlank =
-    !resourceItem.id &&
-    (!resourceItem.name || resourceItem.name.toString().trim() === "");
-  if (resourceItems.value.length === 1 && !isDummyOrBlank) {return;}
+    !resourceItem.id && (!resourceItem.name || resourceItem.name.toString().trim() === '');
+  if (resourceItems.value.length === 1 && !isDummyOrBlank) {
+    return;
+  }
   if (isDummyOrBlank) {
     resourceItemIndexToRemove.value = idx;
     confirmRemoval();
@@ -219,7 +232,7 @@ const confirmRemoval = () => {
   }
   const r = resourceItems.value[idx];
   if (resourceItems.value.length === 1) {
-    resourceItems.value[0] = { name: "", resourceTypeId: "", status: 1 };
+    resourceItems.value[0] = { name: '', resourceTypeId: '', status: 1 };
     isConfirmationModalVisible.value = false;
     resourceItemIndexToRemove.value = null;
     return;
@@ -235,12 +248,14 @@ const confirmRemoval = () => {
 };
 
 const validate = () => {
-  if (!props.propertyId) {return false;}
+  if (!props.propertyId) {
+    return false;
+  }
   const filled = (resourceItems.value || []).filter(
-    (r) => r.name && r.name.toString().trim() !== ""
+    (r) => r.name && r.name.toString().trim() !== ''
   );
   if (filled.length === 0) {
-    toast.error("At least one resource must be filled.");
+    toast.error('At least one resource must be filled.');
     return false;
   }
   for (const r of filled) {
@@ -253,8 +268,12 @@ const validate = () => {
 };
 
 const handleSubmit = async () => {
-  if (!validate()) {return;}
-  if (submitting.value) {return;}
+  if (!validate()) {
+    return;
+  }
+  if (submitting.value) {
+    return;
+  }
   submitting.value = true;
   try {
     const serverList = await ownerService.fetchResources(props.propertyId);
@@ -263,28 +282,31 @@ const handleSubmit = async () => {
       return acc;
     }, {});
     const serverByName = (serverList || []).reduce((acc, r) => {
-      const key = (r.name || "").toString().trim().toLowerCase();
-      if (key) {acc[key] = r;}
+      const key = (r.name || '').toString().trim().toLowerCase();
+      if (key) {
+        acc[key] = r;
+      }
       return acc;
     }, {});
     const toCreate = [];
     const toUpdate = [];
     for (const rm of resourceItems.value) {
       const normalized = {
-        name: (rm.name || "").toString().trim(),
-        status: typeof rm.status !== "undefined" ? Number(rm.status) : 1,
+        name: (rm.name || '').toString().trim(),
+        status: typeof rm.status !== 'undefined' ? Number(rm.status) : 1,
         resourceTypeId: parseInt(rm.resourceTypeId, 10) || null,
       };
-      if (!normalized.name) {continue;}
+      if (!normalized.name) {
+        continue;
+      }
       if (rm.id) {
         const server = serverById[rm.id];
         if (!server) {
           toCreate.push(normalized);
         } else {
           const serverNorm = {
-            name: (server.name || "").toString().trim(),
-            status:
-              typeof server.status !== "undefined" ? Number(server.status) : 1,
+            name: (server.name || '').toString().trim(),
+            status: typeof server.status !== 'undefined' ? Number(server.status) : 1,
             resourceTypeId: server.resourceTypeId,
           };
           if (
@@ -300,11 +322,8 @@ const handleSubmit = async () => {
         const existingMatch = key ? serverByName[key] : null;
         if (existingMatch) {
           const serverNorm = {
-            name: (existingMatch.name || "").toString().trim(),
-            status:
-              typeof existingMatch.status !== "undefined"
-                ? Number(existingMatch.status)
-                : 1,
+            name: (existingMatch.name || '').toString().trim(),
+            status: typeof existingMatch.status !== 'undefined' ? Number(existingMatch.status) : 1,
             resourceTypeId: existingMatch.resourceTypeId,
           };
           if (
@@ -329,8 +348,11 @@ const handleSubmit = async () => {
     if (deletedResourceItemIds.value && deletedResourceItemIds.value.length) {
       for (const id of deletedResourceItemIds.value) {
         try {
+          // eslint-disable-next-line no-await-in-loop
           await ownerService.deleteResource(id);
-        } catch (err) {}
+        } catch (err) {
+          toast.error(err);
+        }
       }
       deletedResourceItemIds.value = [];
     }
@@ -351,16 +373,16 @@ const handleSubmit = async () => {
       };
       await ownerService.resourceMultipleStore(payload);
     }
-    emits("success");
+    emits('success');
   } catch (err) {
-    toast.error("An error occurred during submission.");
+    toast.error(err || 'An error occurred during submission.');
   } finally {
     submitting.value = false;
   }
 };
 
 defineExpose({ handleSubmit });
-const cancel = () => emits("cancel");
+const cancel = () => emits('cancel');
 </script>
 
 <style scoped>

@@ -21,9 +21,9 @@
       type="bar"
       :height="400"
       :colors="['#8B5CF6']"
-      :showLegend="false"
-      :showDataLabels="false"
-      :animated="true"
+      :show-legend="false"
+      :show-data-labels="false"
+      animated="true"
     />
   </div>
 </template>
@@ -85,8 +85,6 @@ const totalAmount = computed(() => {
     return 0;
   }
 
-  return props.chartData.reduce((total, item) => {
-    return total + (parseFloat(item.y) || 0);
-  }, 0);
+  return props.chartData.reduce((total, item) => total + (parseFloat(item.y) || 0), 0);
 });
 </script>

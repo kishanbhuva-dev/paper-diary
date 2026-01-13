@@ -127,7 +127,7 @@ class DashboardController extends Controller
             }
 
             $details['bookingTotalPerMonth'] = [
-                'data' => $monthlyBookingData,
+                'data'       => $monthlyBookingData,
                 'grandTotal' => $grandTotal,
             ];
 

@@ -1,25 +1,23 @@
 <template>
   <div class="max-w-6xl mx-auto px-4 py-8">
-    <div
-      class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
-    >
-      <div
-        class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-700"
-      >
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-indigo-700">
         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-          <Icon icon="mdi:lock-reset" class="text-2xl" />
+          <Icon
+            icon="mdi:lock-reset"
+            class="text-2xl"
+          />
           Security Settings
         </h3>
-        <p class="text-blue-100 text-sm mt-1">
-          Update your password to keep your account secure
-        </p>
+        <p class="text-blue-100 text-sm mt-1">Update your password to keep your account secure</p>
       </div>
 
-      <form class="p-6 md:p-10 space-y-8" @submit.prevent="openConfirmation">
+      <form
+        class="p-6 md:p-10 space-y-8"
+        @submit.prevent="openConfirmation"
+      >
         <div class="space-y-2">
-          <div
-            class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2"
-          >
+          <div class="flex items-center gap-2 text-blue-600 font-bold border-b border-gray-50 pb-2">
             <Icon icon="mdi:shield-key-outline" />
             <span>Change Password</span>
           </div>
@@ -55,9 +53,7 @@
                   @click="showPass1 = !showPass1"
                 >
                   <Icon
-                    :icon="
-                      showPass1 ? 'mdi:eye-off-outline' : 'mdi:eye-outline'
-                    "
+                    :icon="showPass1 ? 'mdi:eye-off-outline' : 'mdi:eye-outline'"
                     class="text-lg"
                   />
                 </button>
@@ -66,16 +62,12 @@
               <div class="flex justify-between items-start mt-1">
                 <span
                   class="text-xs font-medium"
-                  :class="
-                    touched.password && errors.password
-                      ? 'text-red-500'
-                      : 'text-slate-500'
-                  "
+                  :class="touched.password && errors.password ? 'text-red-500' : 'text-slate-500'"
                 >
                   {{
                     touched.password && errors.password
                       ? errors.password
-                      : "Minimum 8 characters required"
+                      : 'Minimum 8 characters required'
                   }}
                 </span>
               </div>
@@ -111,9 +103,7 @@
                   @click="showPass2 = !showPass2"
                 >
                   <Icon
-                    :icon="
-                      showPass2 ? 'mdi:eye-off-outline' : 'mdi:eye-outline'
-                    "
+                    :icon="showPass2 ? 'mdi:eye-off-outline' : 'mdi:eye-outline'"
                     class="text-lg"
                   />
                 </button>
@@ -131,23 +121,18 @@
           </div>
         </div>
 
-        <div
-          class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3"
-        >
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3">
           <Icon
             icon="mdi:information-outline"
             class="text-blue-600 text-xl shrink-0 mt-0.5"
           />
           <p class="text-sm text-blue-700 leading-relaxed">
-            Changing your password will sign you out of all other active
-            sessions. Make sure your new password is <strong>unique</strong> and
-            not used for other services.
+            Changing your password will sign you out of all other active sessions. Make sure your
+            new password is <strong>unique</strong> and not used for other services.
           </p>
         </div>
 
-        <div
-          class="flex flex-col sm:flex-row justify-end gap-4 pt-10 border-t border-gray-100"
-        >
+        <div class="flex flex-col sm:flex-row justify-end gap-4 pt-10 border-t border-gray-100">
           <button
             type="button"
             class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
@@ -161,9 +146,15 @@
             :disabled="loading"
             class="px-10 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:transform active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            <Icon v-if="loading" icon="line-md:loading-twotone-loop" />
-            <Icon v-else icon="mdi:update" />
-            {{ loading ? "Update Password" : "Update Password" }}
+            <Icon
+              v-if="loading"
+              icon="line-md:loading-twotone-loop"
+            />
+            <Icon
+              v-else
+              icon="mdi:update"
+            />
+            {{ loading ? 'Update Password' : 'Update Password' }}
           </button>
         </div>
       </form>
@@ -173,9 +164,7 @@
       v-if="showModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
     >
-      <div
-        class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl border border-gray-100"
-      >
+      <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl border border-gray-100">
         <div class="text-center">
           <div
             class="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -185,12 +174,10 @@
               class="text-3xl text-blue-600"
             />
           </div>
-          <h4 class="text-lg font-bold text-gray-800">
-            Confirm Password Change
-          </h4>
+          <h4 class="text-lg font-bold text-gray-800">Confirm Password Change</h4>
           <p class="text-gray-500 mt-2 text-sm leading-relaxed">
-            Are you sure you want to update your password? You will need to use
-            this new password for your next login.
+            Are you sure you want to update your password? You will need to use this new password
+            for your next login.
           </p>
         </div>
 
@@ -206,7 +193,7 @@
             class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow-md transition-all disabled:opacity-50"
             @click="handlePasswordUpdate"
           >
-            {{ loading ? "Updating..." : "Yes, Update" }}
+            {{ loading ? 'Updating...' : 'Yes, Update' }}
           </button>
         </div>
       </div>
@@ -215,10 +202,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { Icon } from "@iconify/vue";
-import authService from "../../services/authService";
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { Icon } from '@iconify/vue';
+import authService from '../../services/authService';
 
 const router = useRouter();
 const loading = ref(false);
@@ -228,8 +215,8 @@ const showPass1 = ref(false);
 const showPass2 = ref(false);
 
 const form = ref({
-  password: "",
-  confirmPassword: "",
+  password: '',
+  confirmPassword: '',
 });
 
 const touched = ref({
@@ -239,28 +226,28 @@ const touched = ref({
 
 // Logic to replace BaseInput validation
 const errors = computed(() => {
-  const errs = { password: "", confirmPassword: "" };
+  const errs = { password: '', confirmPassword: '' };
 
   // New Password Validation
   if (!form.value.password) {
-    errs.password = "This field is required";
+    errs.password = 'This field is required';
   } else if (form.value.password.length < 8) {
-    errs.password = "Minimum 8 characters required";
+    errs.password = 'Minimum 8 characters required';
   }
 
   // Confirm Password & Mismatch Validation
   if (!form.value.confirmPassword) {
-    errs.confirmPassword = "This field is required";
+    errs.confirmPassword = 'This field is required';
   } else if (form.value.password !== form.value.confirmPassword) {
-    errs.confirmPassword = "Passwords do not match";
+    errs.confirmPassword = 'Passwords do not match';
   }
 
   return errs;
 });
 
 const resetForm = () => {
-  form.value.password = "";
-  form.value.confirmPassword = "";
+  form.value.password = '';
+  form.value.confirmPassword = '';
   touched.value.password = false;
   touched.value.confirmPassword = false;
 };
@@ -286,21 +273,22 @@ const handlePasswordUpdate = async () => {
       showModal.value = false;
       resetForm();
 
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const {role} = storedUser;
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const { role } = storedUser;
 
-      if (role === "admin") {
-        router.push({ name: "admin-dashboard" });
-      } else if (role === "owner") {
-        router.push({ name: "owner-dashboard" });
+      if (role === 'admin') {
+        router.push({ name: 'admin-dashboard' });
+      } else if (role === 'owner') {
+        router.push({ name: 'owner-dashboard' });
       } else {
-        router.push({ name: "home" });
+        router.push({ name: 'home' });
       }
     } else {
       showModal.value = false;
     }
   } catch (error) {
     showModal.value = false;
+    throw new Error(error);
   } finally {
     loading.value = false;
   }

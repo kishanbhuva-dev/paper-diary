@@ -114,15 +114,15 @@ class BookingsController extends Controller
 
             // Map frontend field names to actual database column names
             $columnMap = [
-                'propertyName' => 'property.propertyName',
-                'guestName' => 'booking_orders.guestFullName',
+                'propertyName'       => 'property.propertyName',
+                'guestName'          => 'booking_orders.guestFullName',
                 'resource_type_name' => 'resource_types.name',
-                'arrivalDateTime' => 'booking_orders.arrivalDateTime',
-                'departureDateTime' => 'booking_orders.departureDateTime',
-                'price' => 'booking_orders.price',
-                'status' => 'booking_orders.status',
-                'paymentStatus' => 'booking_orders.paymentStatus',
-                'bookedOn' => 'booking_orders.created_at'
+                'arrivalDateTime'    => 'booking_orders.arrivalDateTime',
+                'departureDateTime'  => 'booking_orders.departureDateTime',
+                'price'              => 'booking_orders.price',
+                'status'             => 'booking_orders.status',
+                'paymentStatus'      => 'booking_orders.paymentStatus',
+                'bookedOn'           => 'booking_orders.created_at',
             ];
 
             $sortColumn = $columnMap[$sortBy] ?? 'booking_orders.' . $sortBy;

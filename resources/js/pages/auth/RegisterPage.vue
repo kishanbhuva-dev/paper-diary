@@ -1,11 +1,12 @@
 <template>
   <div class="max-w-3xl shadow-md rounded-lg p-6 my-10 mx-4 sm:mx-auto">
     <h2 class="text-2xl font-semibold text-gray-800 mb-1">Create an Account</h2>
-    <p class="text-gray-500 mb-8 text-sm">
-      Register now to access your Paper Diary account.
-    </p>
+    <p class="text-gray-500 mb-8 text-sm">Register now to access your Paper Diary account.</p>
 
-    <form class="grid grid-cols-2 gap-5" @submit.prevent="handleRegister">
+    <form
+      class="grid grid-cols-2 gap-5"
+      @submit.prevent="handleRegister"
+    >
       <BaseInput
         ref="firstNameInput"
         v-model="form.firstName"
@@ -36,9 +37,7 @@
         placeholder="name@example.com"
       />
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">
-          Role
-        </label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"> Role </label>
         <div class="relative">
           <Icon
             icon="lucide:users"
@@ -48,7 +47,12 @@
             v-model="form.role"
             class="w-full appearance-none rounded-lg border border-gray-300 py-[8.3px] pl-10 pr-4 text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-sm"
           >
-            <option class="" value="user">User</option>
+            <option
+              class=""
+              value="user"
+            >
+              User
+            </option>
             <option value="owner">Owner</option>
           </select>
           <Icon
@@ -150,14 +154,20 @@
       />
 
       <div class="col-span-2 pt-1">
-        <button type="submit" class="btn-primary w-full py-1.5">
+        <button
+          type="submit"
+          class="btn-primary w-full py-1.5"
+        >
           Register
         </button>
       </div>
     </form>
     <p class="text-center text-gray-500 text-sm mt-6">
       Already have an account?
-      <router-link to="/login" class="text-primary font-medium hover:underline">
+      <router-link
+        to="/login"
+        class="text-primary font-medium hover:underline"
+      >
         Log in
       </router-link>
     </p>
@@ -165,27 +175,27 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { Icon } from "@iconify/vue";
-import authService from "../../services/authService";
-import BaseInput from "../../components/global/BaseInput.vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { Icon } from '@iconify/vue';
+import authService from '../../services/authService';
+import BaseInput from '../../components/global/BaseInput.vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 const form = ref({
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-  confirm_password: "",
-  role: "user",
-  address: "",
-  address2: "",
-  city: "",
-  country: "",
-  postcode: "",
-  phone: "",
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  confirm_password: '',
+  role: 'user',
+  address: '',
+  address2: '',
+  city: '',
+  country: '',
+  postcode: '',
+  phone: '',
 });
 
 const firstNameInput = ref(null);
@@ -198,6 +208,7 @@ const cityInput = ref(null);
 const countryInput = ref(null);
 const postcodeInput = ref(null);
 const phoneInput = ref(null);
+const telephoneInput = ref(null);
 
 const handleRegister = async () => {
   const inputs = [
@@ -218,7 +229,7 @@ const handleRegister = async () => {
   if (allValid) {
     const res = await authService.register(form.value);
     if (res.status) {
-      router.push({ name: "login" });
+      router.push({ name: 'login' });
     }
   }
 };

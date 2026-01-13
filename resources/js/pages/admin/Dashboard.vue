@@ -360,7 +360,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <TotalBookingPerMonthChart :chartData="totalBookingPerMonthChartData" />
+        <TotalBookingPerMonthChart :chart-data="totalBookingPerMonthChartData" />
       </div>
     </div>
   </div>
@@ -415,7 +415,6 @@ const dashboardData = async () => {
   error.value = null;
   try {
     const response = await adminService.adminDashboard();
-    console.log('response', response);
 
     if (response.data.status === true) {
       dashboardDetail.value = response.data.data;
@@ -425,7 +424,7 @@ const dashboardData = async () => {
         y: item.total,
       }));
     }
-  } catch {
+  } catch (err) {
     error.value = err.message || 'Failed to load dashboard data';
   } finally {
     loading.value = false;
