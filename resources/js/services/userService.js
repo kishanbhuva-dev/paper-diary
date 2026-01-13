@@ -21,6 +21,9 @@ export const userService = {
   createBooking(bookingData) {
     return api.post("/user/booking", bookingData);
   },
+  deleteBooking(bookingId) {
+    return api.post("/user/booking-delete", { bookingId });
+  },
 
   getBookings(params) {
     return api.get("/user/bookings", { params });

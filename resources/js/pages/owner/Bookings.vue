@@ -40,16 +40,20 @@
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
       @sort="handleSort"
-      @open-edit-modal="openEditModal"
       @view="showbookingdata"
       @delete="confirmDelete"
+      :showDelete="false"
+      :showEdit="false"
+      :showAdd="false"
+      :showDownload="true"
     />
   </div>
 
   <Basemodal
     v-model="isModalVisible"
-    :title="isEditMode ? 'Edit Booking' : 'Booking Details'"
+    title="Booking Details"
     width="max-w-3xl"
+    :show-save="isBookingDateValid"
     @save="handleSave"
   >
     <div class="space-y-6">
@@ -59,7 +63,7 @@
           <p class="text-sm font-bold text-blue-900">{{ selectedBooking.property?.propertyName || '-' }}</p>
         </div>
         <div class="space-y-1">
-          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Resource Type</label>
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Resource</label>
           <p class="text-sm font-bold text-blue-900">
             {{ selectedBooking.resource_type_name }}
           </p>
@@ -83,69 +87,64 @@
           <label class="text-xs font-bold text-gray-500 uppercase">Guest Name</label>
           <input 
             v-model="selectedBooking.guestName" 
-            :disabled="!isEditMode"
-            placeholder="Full Name"
-            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+            disabled
+            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
         </div>
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Guest Email</label>
           <input 
             v-model="selectedBooking.guestEmail" 
-            :disabled="!isEditMode"
-            placeholder="email@example.com"
-            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+            disabled
+            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
         </div>
         
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Arrival Date</label>
           <input 
-            v-model="editableDates.arrival"
-            type="date" 
-            :disabled="!isEditMode"
-            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+            type="text"
+            v-model="selectedBooking.arrivalDateTime" 
+            disabled
+            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
         </div>
         <div class="space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Departure Date</label>
           <input 
-            v-model="editableDates.departure"
-            type="date" 
-            :disabled="!isEditMode"
-            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+            type="text"
+            v-model="selectedBooking.departureDateTime" 
+            disabled
+            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
           />
         </div>
-
-        <!-- <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-500 uppercase">Adults</label>
-          <div class="flex items-center gap-3">
-            <button @click="updateCount('adults', -1)" :disabled="!isEditMode || selectedBooking.adults <= 1" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">-</button>
-            <span class="text-lg font-bold w-8 text-center">{{ selectedBooking.adults || 1 }}</span>
-            <button @click="updateCount('adults', 1)" :disabled="!isEditMode" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">+</button>
-          </div>
-        </div>
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-500 uppercase">Children</label>
-          <div class="flex items-center gap-3">
-            <button @click="updateCount('children', -1)" :disabled="!isEditMode || selectedBooking.children <= 0" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">-</button>
-            <span class="text-lg font-bold w-8 text-center">{{ selectedBooking.children || 0 }}</span>
-            <button @click="updateCount('children', 1)" :disabled="!isEditMode" class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 cursor-pointer">+</button>
-          </div>
-        </div> -->
 
         <div class="md:col-span-2 space-y-1">
           <label class="text-xs font-bold text-gray-500 uppercase">Guest Address</label>
           <textarea 
             v-model="selectedBooking.guestAddress" 
-            :disabled="!isEditMode"
+            disabled
             rows="2"
-            class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-50"
+            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none resize-none"
+          ></textarea>
+        </div>
+
+        <div class="md:col-span-2 space-y-1">
+          <label class="text-xs font-bold text-blue-600 uppercase flex items-center">
+            <Icon icon="mdi:note-edit-outline" class="mr-1" />
+            Owner Notes
+          </label>
+          <textarea 
+            v-model="selectedBooking.owner_note" 
+            :disabled="!isBookingDateValid"
+            :placeholder="isBookingDateValid ? 'Add internal notes about this booking here...' : 'Notes cannot be edited for past bookings'"
+            rows="3"
+            class="w-full p-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50/30 disabled:bg-gray-50 disabled:border-gray-200"
           ></textarea>
         </div>
       </div>
 
-      <div v-if="!isEditMode && selectedBooking.status === 'confirm'" class="pt-4 border-t border-gray-100">
+      <div v-if="selectedBooking.status === 'confirm' && isBookingDateValid" class="pt-4 border-t border-gray-100">
         <button 
           class="flex items-center text-red-600 font-bold text-sm hover:underline cursor-pointer group"
           @click="confirmDelete(selectedBooking.id)"
@@ -169,17 +168,14 @@
 import Basetable from "../../components/global/Basetable.vue";
 import ConfirmModal from "../../components/owner/ConfirmModal.vue";
 import Basemodal from "../../components/global/BaseModal.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { Icon } from "@iconify/vue";
 import ownerService from "../../services/ownerService";
-import { useRouter } from "vue-router";
 
 // --- 1. STATE MANAGEMENT ---
-const router = useRouter();
 const sortBy = ref("id");
 const sortOrder = ref("asc");
 const actieFilters = ref({});
-
 const loading = ref(false);
 const error = ref(null);
 const bookings = ref([]);
@@ -188,39 +184,21 @@ const perPage = ref(10);
 const currentPage = ref(1);
 const currentSearch = ref("");
 
+// Modal & Selection State
+const isModalVisible = ref(false);
+const selectedBooking = ref({});
 const isConfirmationModalVisible = ref(false);
 const bookingIdToDelete = ref(null);
 
 const filterConfig = [
-  {
-    label: "Status",
-    key: "status",
-    type: "select",
-    options: [
-      { label: "Confirmed", value: "Confirmed" },
-      { label: "Cancelled", value: "Cancelled" },
-    ],
-  },
-  {
-    label: "Payment",
-    key: "paymentStatus",
-    type: "select",
-    options: [
-      { label: "Paid", value: "paid" },
-      { label: "Unpaid", value: "unpaid" },
-    ],
-  },
-  { label: "Guest Name", key: "guestName", type: "text" },
-  { label: "Check-in Date", key: "arrivalDateTime", type: "date" },
-  { label: "Check-out Date", key: "departureDateTime", type: "date" },
-  { label: "From Now", key: "fromNow", type: "date" },
+  { label: "Status", key: "status", type: "select", options: [{ label: "Confirmed", value: "confirm" }, { label: "Cancelled", value: "cancelled" }] },
+  { label: "Payment", key: "paymentStatus", type: "select", options: [{ label: "Paid", value: "paid" }, { label: "Unpaid", value: "unpaid" }] },
 ];
 
 const tableColumns = [
-  { label: "Property", key: "property.propertyName", sortable: true },
-  { label: "Resource Type", key: "resource_type_name", sortable: true },
-  { label: "Guest Name", key: "guestName", sortable: true },
-  { label: "Guest Email", key: "guestEmail", sortable: true },
+  { label: "Property", key: "property.propertyName", sortable: false },
+  { label: "Resource", key: "resource_type_name", sortable: true },
+  { label: "Guest", key: "guestName", sortable: true },
   { label: "Check-in", key: "arrivalDateTime", sortable: true },
   { label: "Check-out", key: "departureDateTime", sortable: true },
   { label: "Price", key: "price", sortable: true },
@@ -230,103 +208,89 @@ const tableColumns = [
   { label: "Status", key: "status", sortable: true },
 ];
 
-// --- 2. DATA FETCHING LOGIC ---
+// --- 2. LOGIC & COMPUTED ---
+
+// Check if booking date is passed or today/future
+const isBookingDateValid = computed(() => {
+  if (!selectedBooking.value.arrivalDateTime) return false;
+  const bookingDate = new Date(selectedBooking.value.arrivalDateTime);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to compare only dates
+  return bookingDate >= today;
+});
+
 const loadData = async () => {
   error.value = null;
   loading.value = true;
-  
-  // CLEANING LOGIC: Strip "property." from the sortBy key if it exists
-  const cleanSortBy = sortBy.value.includes(".") 
-    ? sortBy.value.split(".").pop() 
-    : sortBy.value;
-
   try {
     const data = await ownerService.fetchBookings({
       page: currentPage.value,
       perPage: perPage.value,
       search: currentSearch.value,
-      sortBy: cleanSortBy, // Send the flattened key to API
+      sortBy: sortBy.value,
       sortOrder: sortOrder.value,
       ...actieFilters.value,
     });
     bookings.value = data.data || [];
-    console.log(bookings.value);
-    
     total.value = data.total || 0;
   } catch (err) {
-    const errorMessage = err.response?.status === 401
-        ? "Unauthorized. Please log in again."
-        : err.message || "Failed to load bookings";
-    error.value = errorMessage;
+    error.value = err.message || "Failed to load bookings";
   } finally {
     loading.value = false;
   }
 };
 
-const handleSort = (sortData) => {
-  // Capture the key exactly as it comes from Basetable
-  sortBy.value = sortData.key;
-  sortOrder.value = sortData.order;
-  loadData();
+const showbookingdata = (item) => {
+  selectedBooking.value = { ...item };
+  isModalVisible.value = true;
 };
 
-const handleFilterChange = (filters) => {
-  actieFilters.value = filters;
-  currentPage.value = 1;
-  loadData();
-};
+const handleSave = async () => {
+  if (!isBookingDateValid.value) return;
 
-const handleSearch = (term) => {
-  currentSearch.value = term;
-  currentPage.value = 1;
-  loadData();
-};
-
-const handlePageChange = (page) => {
-  currentPage.value = page;
-  loadData();
-};
-
-const handlePerPageChange = (size) => {
-  perPage.value = size;
-  currentPage.value = 1;
-  loadData();
-};
-
-// --- 3. NAVIGATION & DELETION ---
-const navigateToViewEdit = (item) => {
-  if (item && item.id) {
-    router.push({ name: "owner-booking-detail", params: { id: btoa(item.id) } });
-  }
-};
-
-const handleDeleteConfirmation = async () => {
-  isConfirmationModalVisible.value = false;
-  if (bookingIdToDelete.value !== null) {
-    await handleDelete(bookingIdToDelete.value);
-    bookingIdToDelete.value = null;
-  }
-};
-
-const handleDelete = async (id) => {
-  error.value = null;
+  loading.value = true;
   try {
-    await ownerService.deleteBooking(id);
-    if (bookings.value.length === 1 && currentPage.value > 1) {
-      currentPage.value--;
-    }
+    const payload = {
+      id: selectedBooking.value.id,
+      owner_note: selectedBooking.value.owner_note
+    };
+    await ownerService.updateBooking(selectedBooking.value.id, payload);
+    isModalVisible.value = false;
     await loadData();
   } catch (err) {
-    error.value = err.message || "Cancellation failed";
+    error.value = "Failed to save note";
+  } finally {
+    loading.value = false;
   }
 };
 
+// Standard Table Handlers
+const handleSort = (sortData) => { sortBy.value = sortData.key; sortOrder.value = sortData.order; loadData(); };
+const handleFilterChange = (filters) => { actieFilters.value = filters; currentPage.value = 1; loadData(); };
+const handleSearch = (term) => { currentSearch.value = term; currentPage.value = 1; loadData(); };
+const handlePageChange = (page) => { currentPage.value = page; loadData(); };
+const handlePerPageChange = (size) => { perPage.value = size; currentPage.value = 1; loadData(); };
+
+// Cancellation Logic
 const confirmDelete = (id) => {
   bookingIdToDelete.value = id;
   isConfirmationModalVisible.value = true;
 };
 
-onMounted(() => {
-  loadData();
-});
+const handleDeleteConfirmation = async () => {
+  isConfirmationModalVisible.value = false;
+  if (bookingIdToDelete.value !== null) {
+    try {
+      await ownerService.deleteBooking(bookingIdToDelete.value);
+      isModalVisible.value = false;
+      await loadData();
+    } catch (err) {
+      error.value = "Cancellation failed";
+    } finally {
+      bookingIdToDelete.value = null;
+    }
+  }
+};
+
+onMounted(() => { loadData(); });
 </script>
