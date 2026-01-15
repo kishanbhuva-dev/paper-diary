@@ -19,6 +19,9 @@ class BookingsController extends Controller
     {
         try {
             $propertyIds = Property::where('ownerId', Auth::user()->id)->pluck('id');
+            if (count($propertyIds) > 0) {
+                return response()->json(['status' => false, 'message' => 'Property and Resource Type and resource add first after you can see calender and dashboard data', 'data' => []]);
+            }
             $bookings = BookingOrder::selectRaw("booking_orders.id,booking_orders.resourceTypeId,booking_orders.userId,booking_orders.propertyId,date_format(booking_orders.arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(booking_orders.departureDateTime,'%d %b %Y') as departureDateTime,booking_orders.status,booking_orders.guestFullName as guestName,booking_orders.paymentStatus,booking_orders.price,booking_orders.guestEmail,booking_orders.guestAddress, booking_orders.created_at, date_format(booking_orders.created_at,'%d %b %Y') as bookedOn, resource_types.name as resource_type_name, property.propertyName as propertyName")->leftJoin('resource_types', 'booking_orders.resourceTypeId', '=', 'resource_types.id')->leftJoin('users', 'booking_orders.userId', '=', 'users.id')->leftJoin('property', 'booking_orders.propertyId', '=', 'property.id')->whereRaw('booking_orders.propertyId IN (' . implode(',', $propertyIds->toArray()) . ')')->with(['property' => function ($query) {
                 $query->select('id', 'propertyName');
             }]);
@@ -114,7 +117,6 @@ class BookingsController extends Controller
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'desc';
 
-            // Map frontend field names to actual database column names
             $columnMap = [
                 'propertyName'       => 'property.propertyName',
                 'guestName'          => 'booking_orders.guestFullName',
@@ -129,7 +131,6 @@ class BookingsController extends Controller
 
             $sortColumn = $columnMap[$sortBy] ?? 'booking_orders.' . $sortBy;
 
-            // Special handling for fromNow sorting since it's calculated in transform
             if ($sortBy === 'fromNow') {
                 $sortColumn = 'booking_orders.created_at';
             }
