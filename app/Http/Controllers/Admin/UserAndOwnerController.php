@@ -10,6 +10,7 @@ use App\Models\PropertyImage;
 use App\Models\Resource;
 use App\Models\ResourceType;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +18,7 @@ use Throwable;
 
 class UserAndOwnerController extends Controller
 {
-    public function emailWiseLogin(Request $request)
+    public function emailWiseLogin(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make(
@@ -46,7 +47,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function fetchAllUser(Request $request)
+    public function fetchAllUser(Request $request): JsonResponse
     {
         try {
             return $this->fetchAll($request, 'user');
@@ -55,7 +56,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function fetchAllOwner(Request $request)
+    public function fetchAllOwner(Request $request): JsonResponse
     {
         try {
             return $this->fetchAll($request, 'owner');
@@ -66,7 +67,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function createUser(Request $request)
+    public function createUser(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make(
@@ -95,7 +96,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function updateUser(Request $request)
+    public function updateUser(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make(
@@ -125,7 +126,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function deleteUser(Request $request)
+    public function deleteUser(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make(
@@ -144,7 +145,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function createOwner(Request $request)
+    public function createOwner(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make(
@@ -173,7 +174,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function updateOwner(Request $request)
+    public function updateOwner(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make(
@@ -202,7 +203,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    public function deleteOwner(Request $request)
+    public function deleteOwner(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make(
@@ -221,7 +222,7 @@ class UserAndOwnerController extends Controller
         }
     }
 
-    private function fetchAll($request, $role)
+    private function fetchAll(Request $request, string $role): JsonResponse
     {
         $data = User::where('role', $role);
 
@@ -255,7 +256,7 @@ class UserAndOwnerController extends Controller
         return response()->json($response);
     }
 
-    private function store($request, $role)
+    private function store(Request $request, string $role): JsonResponse
     {
         $user = new User;
         $user->firstName = $request->firstName;
@@ -279,7 +280,7 @@ class UserAndOwnerController extends Controller
         return response()->json($response);
     }
 
-    private function update($request, $role)
+    private function update(Request $request, string $role): JsonResponse
     {
         $user = User::where('id', $request->id)->where('role', $role)->first();
         if (empty($user)) {
@@ -303,11 +304,9 @@ class UserAndOwnerController extends Controller
         }
 
         return response()->json(['status' => false, 'message' => ucwords($role) . ' not updated Something went wrong', 'data' => '']);
-
-        return response()->json($response);
     }
 
-    private function delete($request, $role)
+    private function delete(Request $request, string $role): JsonResponse
     {
         $user = User::where('id', $request->id)->where('role', $role)->first();
         if ($role == 'owner') {
@@ -330,7 +329,5 @@ class UserAndOwnerController extends Controller
         }
 
         return response()->json(['status' => false, 'message' => ucwords($role) . ' not deleted Something went wrong', 'data' => '']);
-
-        return response()->json($response);
     }
 }

@@ -116,7 +116,7 @@
       :rooms="rooms"
       :bookings="bookings"
       :status-config="customStatuses"
-      :allow-previous-month-navigation
+      allow-previous-month-navigation
       :text-labels="{
         room: 'Resources',
         available: 'Free',

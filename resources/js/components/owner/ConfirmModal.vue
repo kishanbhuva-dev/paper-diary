@@ -37,6 +37,20 @@
 
 <script setup>
 import { Icon } from '@iconify/vue';
-// defineProps(['modelValue', 'title', 'message']);
+defineProps({
+  modelValue: {
+    type: Boolean,
+    required: true,
+  },
+  title: {
+    type: String,
+    default: '',
+  },
+  message: {
+    type: String,
+    default: '',
+  },
+});
+
 defineEmits(['update:modelValue', 'confirm']);
 </script>

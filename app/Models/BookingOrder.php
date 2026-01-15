@@ -3,31 +3,48 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BookingOrder extends Model
 {
-    public function property()
+    /**
+     * @return BelongsTo<Property, $this>
+     */
+    public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class, 'propertyId');
     }
 
-    public function resourceType()
+    /**
+     * @return BelongsTo<ResourceType, $this>
+     */
+    public function resourceType(): BelongsTo
     {
         return $this->belongsTo(ResourceType::class, 'resourceTypeId');
     }
 
-    public function user()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userId');
     }
 
-    public function resource()
+    /**
+     * @return BelongsTo<\App\Models\Resource, $this>
+     */
+    public function resource(): BelongsTo
     {
         return $this->belongsTo(Resource::class, 'resourceId');
     }
 
-    public function booking()
+    /**
+     * @return HasMany<Bookings, $this>
+     */
+    public function booking(): HasMany
     {
-        return $this->HasMany(Bookings::class, 'bookingOrderId', 'id');
+        return $this->hasMany(Bookings::class, 'bookingOrderId', 'id');
     }
 }

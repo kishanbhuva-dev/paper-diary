@@ -2,7 +2,9 @@
 
 ## Executive Summary
 
-This document provides a comprehensive code review of the Paper Diary Vue.js 3 frontend application. The application is a Single Page Application (SPA) built with Vue 3, Vue Router, Tailwind CSS, and various third-party libraries for property booking management.
+This document provides a comprehensive code review of the Paper Diary Vue.js 3 frontend application.
+The application is a Single Page Application (SPA) built with Vue 3, Vue Router, Tailwind CSS, and
+various third-party libraries for property booking management.
 
 ---
 
@@ -25,12 +27,12 @@ This document provides a comprehensive code review of the Paper Diary Vue.js 3 f
 ## 1. Security Issues
 
 ### 1.1 Token Storage in LocalStorage
-**File:** `resources/js/composables/useAuth.js`
-**Lines:** 5-6, 29-50
+
+**File:** `resources/js/composables/useAuth.js` **Lines:** 5-6, 29-50
 
 ```javascript
-const TOKEN_KEY = "authToken";
-const USER_KEY = "user";
+const TOKEN_KEY = 'authToken';
+const USER_KEY = 'user';
 
 function persistAuth(newToken, newUser) {
   if (newToken) {
@@ -40,11 +42,13 @@ function persistAuth(newToken, newUser) {
 }
 ```
 
-**Issue:** Storing authentication tokens in localStorage is vulnerable to XSS attacks. If any XSS vulnerability exists, attackers can steal auth tokens.
+**Issue:** Storing authentication tokens in localStorage is vulnerable to XSS attacks. If any XSS
+vulnerability exists, attackers can steal auth tokens.
 
 **Severity:** 🟡 HIGH
 
 **Recommendation:**
+
 - Consider using httpOnly cookies for token storage
 - If localStorage must be used, implement token rotation and short expiration
 - Add Content Security Policy headers
@@ -53,8 +57,8 @@ function persistAuth(newToken, newUser) {
 ---
 
 ### 1.2 Sensitive Data Logged to Console
-**File:** `resources/js/composables/useAuth.js`
-**Lines:** 13-14, 43-45
+
+**File:** `resources/js/composables/useAuth.js` **Lines:** 13-14, 43-45
 
 ```javascript
 } catch (e) {
@@ -63,40 +67,42 @@ function persistAuth(newToken, newUser) {
 }
 ```
 
-**File:** `resources/js/services/apiClient.js`
-**Line:** 72
+**File:** `resources/js/services/apiClient.js` **Line:** 72
 
 ```javascript
-console.error("API error:", error);
+console.error('API error:', error);
 ```
 
-**Issue:** Console logging in production can expose sensitive data. Error objects may contain tokens, user data, or internal details.
+**Issue:** Console logging in production can expose sensitive data. Error objects may contain
+tokens, user data, or internal details.
 
-**Recommendation:** 
+**Recommendation:**
+
 - Remove console logs in production builds
 - Use proper error tracking service (Sentry, LogRocket)
 
 ---
 
 ### 1.3 Admin Token Stored Alongside Regular Token
-**File:** `resources/js/layouts/OwnerLayout.vue`
-**Lines:** 294-310
+
+**File:** `resources/js/layouts/OwnerLayout.vue` **Lines:** 294-310
 
 ```javascript
 function backToAdmin() {
-    const adminToken = localStorage.getItem('adminToken');
-    const adminUser = localStorage.getItem('adminUser');
+  const adminToken = localStorage.getItem('adminToken');
+  const adminUser = localStorage.getItem('adminUser');
 
-    if (adminToken && adminUser) {
-        localStorage.clear();
-        localStorage.setItem('authToken', adminToken);
-        localStorage.setItem('user', adminUser);
-        // ...
-    }
+  if (adminToken && adminUser) {
+    localStorage.clear();
+    localStorage.setItem('authToken', adminToken);
+    localStorage.setItem('user', adminUser);
+    // ...
+  }
 }
 ```
 
-**Issue:** 
+**Issue:**
+
 1. Storing admin credentials separately creates privilege escalation risk
 2. `localStorage.clear()` may clear other application data unexpectedly
 3. 500ms setTimeout before redirect creates race condition
@@ -106,6 +112,7 @@ function backToAdmin() {
 ---
 
 ### 1.4 Base64 Encoded Keys Not Security
+
 **File:** Backend sends `base64_encode($ownerStripePublicKey)` but this is NOT encryption.
 
 **Issue:** Base64 is encoding, not encryption. Anyone can decode it.
@@ -113,26 +120,32 @@ function backToAdmin() {
 ---
 
 ### 1.5 No CSRF Protection Verification
+
 **File:** `resources/js/services/apiClient.js`
 
-**Issue:** No CSRF token handling. While Sanctum handles this for same-domain, the implementation should explicitly verify.
+**Issue:** No CSRF token handling. While Sanctum handles this for same-domain, the implementation
+should explicitly verify.
 
 ---
 
 ## 2. Architecture & Design Issues
 
 ### 2.1 No Centralized State Management
+
 **Issue:** Application state is scattered across:
+
 - `useAuth.js` composable (auth state)
 - Individual component `ref()` declarations
 - LocalStorage
 
 **Impact:**
+
 - State synchronization issues between components
 - Difficult to debug state changes
 - No single source of truth
 
 **Recommendation:** Implement Pinia or Vuex for centralized state:
+
 ```javascript
 // stores/auth.js
 export const useAuthStore = defineStore('auth', {
@@ -151,14 +164,15 @@ export const useAuthStore = defineStore('auth', {
 ---
 
 ### 2.2 Service Layer Naming Inconsistency
+
 **Files:**
+
 - `services/authService.js` - Authentication
 - `services/adminService.js` - Named `authService` inside but handles admin operations
 - `services/ownerService.js` - Owner operations
 - `services/userService.js` - User booking operations
 
-**File:** `resources/js/services/adminService.js`
-**Line:** 3
+**File:** `resources/js/services/adminService.js` **Line:** 3
 
 ```javascript
 const authService = {  // Wrong! Should be adminService
@@ -170,6 +184,7 @@ const authService = {  // Wrong! Should be adminService
 ---
 
 ### 2.3 Mixed API Response Handling
+
 **File:** `resources/js/services/ownerService.js`
 
 ```javascript
@@ -189,9 +204,11 @@ async getOwnerDetails() {
 ---
 
 ### 2.4 No TypeScript
+
 **Issue:** Entire codebase uses plain JavaScript without type definitions.
 
 **Impact:**
+
 - No compile-time type checking
 - Poor IDE autocompletion
 - Runtime type errors possible
@@ -201,9 +218,11 @@ async getOwnerDetails() {
 ---
 
 ### 2.5 Missing Error Boundary
+
 **Issue:** No global error handling component. Unhandled errors crash the entire app.
 
 **Recommendation:** Implement Vue error boundary:
+
 ```vue
 <template>
   <ErrorBoundary>
@@ -217,13 +236,15 @@ async getOwnerDetails() {
 ## 3. Component Issues
 
 ### 3.1 Oversized Components
-**File:** `resources/js/pages/owner/OwnerDashboard.vue` - 493 lines
-**File:** `resources/js/layouts/AdminLayout.vue` - 251 lines
-**File:** `resources/js/layouts/OwnerLayout.vue` - 339 lines
+
+**File:** `resources/js/pages/owner/OwnerDashboard.vue` - 493 lines **File:**
+`resources/js/layouts/AdminLayout.vue` - 251 lines **File:**
+`resources/js/layouts/OwnerLayout.vue` - 339 lines
 
 **Issue:** Components exceeding 200-300 lines should be split.
 
 **Recommendation:** Extract into smaller components:
+
 - `DashboardStats.vue`
 - `PropertyFilter.vue`
 - `RecentBookings.vue`
@@ -232,17 +253,16 @@ async getOwnerDetails() {
 ---
 
 ### 3.2 Duplicate Layout Code
+
 **Files:** `AdminLayout.vue` and `OwnerLayout.vue` share ~80% identical code.
 
 **Issue:** Violates DRY principle. Changes must be made in both files.
 
 **Recommendation:** Create a base `DashboardLayout.vue` with slots:
+
 ```vue
 <template>
-  <DashboardLayout 
-    :menu-items="ownerMenuItems"
-    :user="currentUser"
-  >
+  <DashboardLayout :menu-items="ownerMenuItems" :user="currentUser">
     <template #sidebar-header>
       <!-- Custom header -->
     </template>
@@ -256,8 +276,8 @@ async getOwnerDetails() {
 ---
 
 ### 3.3 Hardcoded Strings in Templates
-**File:** `resources/js/layouts/AdminLayout.vue`
-**Lines:** Multiple
+
+**File:** `resources/js/layouts/AdminLayout.vue` **Lines:** Multiple
 
 ```vue
 <div class="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2 px-3">
@@ -274,6 +294,7 @@ async getOwnerDetails() {
 **Issue:** No internationalization (i18n). All strings hardcoded.
 
 **Recommendation:** Implement Vue I18n:
+
 ```vue
 {{ $t('navigation.main') }}
 ```
@@ -281,34 +302,38 @@ async getOwnerDetails() {
 ---
 
 ### 3.4 Props Not Validated
+
 **File:** Multiple components lack proper prop validation.
 
 **Example - Missing validation:**
+
 ```javascript
 const props = defineProps({
-  booking: Object,  // No required, no default, no validator
-  canCancel: Boolean
-})
+  booking: Object, // No required, no default, no validator
+  canCancel: Boolean,
+});
 ```
 
 **Should be:**
+
 ```javascript
 const props = defineProps({
   booking: {
     type: Object,
     required: true,
-    validator: (v) => v && typeof v.id !== 'undefined'
+    validator: (v) => v && typeof v.id !== 'undefined',
   },
   canCancel: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 ```
 
 ---
 
 ### 3.5 Missing Component Loading States
+
 **File:** `resources/js/pages/owner/OwnerDashboard.vue`
 
 ```vue
@@ -320,11 +345,13 @@ const props = defineProps({
 ```
 
 **Issue:** No distinction between:
+
 1. Loading state (data being fetched)
 2. Empty state (no data exists)
 3. Error state (fetch failed)
 
 **Recommendation:**
+
 ```vue
 <div v-if="isLoading">Loading...</div>
 <div v-else-if="error">{{ error.message }}</div>
@@ -335,11 +362,11 @@ const props = defineProps({
 ---
 
 ### 3.6 Event Handler Naming
+
 **File:** `resources/js/layouts/AdminLayout.vue`
 
 ```vue
-@click="closeOnMobile"
-@click="handleLogout"
+@click="closeOnMobile" @click="handleLogout"
 ```
 
 **Issue:** Inconsistent naming: `closeOnMobile` vs `handleLogout`.
@@ -349,8 +376,8 @@ const props = defineProps({
 ---
 
 ### 3.7 Template Complexity
-**File:** `resources/js/layouts/OwnerLayout.vue`
-**Lines:** 143-166
+
+**File:** `resources/js/layouts/OwnerLayout.vue` **Lines:** 143-166
 
 ```vue
 <component
@@ -373,8 +400,8 @@ const props = defineProps({
 ## 4. Service Layer Issues
 
 ### 4.1 No Request/Response Interceptor Separation
-**File:** `resources/js/App.vue`
-**Lines:** 41-69
+
+**File:** `resources/js/App.vue` **Lines:** 41-69
 
 ```javascript
 apiClient.interceptors.request.use(...);
@@ -388,10 +415,12 @@ apiClient.interceptors.response.use(...);
 ---
 
 ### 4.2 Duplicate Interceptor Registration
-**File:** `resources/js/services/apiClient.js` has interceptors
-**File:** `resources/js/App.vue` also adds interceptors
+
+**File:** `resources/js/services/apiClient.js` has interceptors **File:** `resources/js/App.vue`
+also adds interceptors
 
 **Issue:** Double interceptor registration can cause:
+
 - Duplicate toast notifications
 - Incorrect request counting
 - Memory leaks
@@ -399,8 +428,8 @@ apiClient.interceptors.response.use(...);
 ---
 
 ### 4.3 Silent Error Swallowing
-**File:** `resources/js/composables/useAuth.js`
-**Lines:** 112-117
+
+**File:** `resources/js/composables/useAuth.js` **Lines:** 112-117
 
 ```javascript
 async function logout() {
@@ -418,12 +447,15 @@ async function logout() {
 ---
 
 ### 4.4 Missing Request Cancellation
+
 **Issue:** No AbortController usage for cancelling in-flight requests when:
+
 - Component unmounts
 - User navigates away
 - New search replaces old search
 
 **Example fix:**
+
 ```javascript
 const controller = new AbortController();
 
@@ -437,9 +469,11 @@ await apiClient.get('/data', { signal: controller.signal });
 ---
 
 ### 4.5 No Retry Logic
+
 **Issue:** Failed requests are not retried, even for transient errors.
 
 **Recommendation:** Implement retry logic for 5xx errors:
+
 ```javascript
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -450,42 +484,46 @@ axiosRetry(apiClient, { retries: 3 });
 ---
 
 ### 4.6 Inconsistent Error Message Handling
+
 **File:** `resources/js/services/apiClient.js`
 
 ```javascript
-if (message !== undefined && message !== "") {
-  toast(message, { type: status ? "success" : "error" });
+if (message !== undefined && message !== '') {
+  toast(message, { type: status ? 'success' : 'error' });
 }
 ```
 
-**Issue:** Toast shown for all responses with messages, even when component wants to handle error itself.
+**Issue:** Toast shown for all responses with messages, even when component wants to handle error
+itself.
 
 ---
 
 ## 5. Router Issues
 
 ### 5.1 Route Guard Race Condition
-**File:** `resources/js/router/index.js`
-**Lines:** 17-49
+
+**File:** `resources/js/router/index.js` **Lines:** 17-49
 
 ```javascript
 router.beforeEach((to, from, next) => {
   const { isAuthenticated, isAdmin, isOwner } = useAuth();
 
   if (to.meta.requiresAuth && !isAuthenticated.value) {
-    return next({ name: "login", query: { redirect: to.fullPath } });
+    return next({ name: 'login', query: { redirect: to.fullPath } });
   }
   // ...
 });
 ```
 
-**Issue:** `useAuth()` composable relies on localStorage which may not be immediately available on page load.
+**Issue:** `useAuth()` composable relies on localStorage which may not be immediately available on
+page load.
 
 **Recommendation:** Add auth check await or initial loading state.
 
 ---
 
 ### 5.2 Duplicate Role Checks
+
 **File:** `resources/js/router/index.js`
 
 ```javascript
@@ -502,6 +540,7 @@ if (path.startsWith("/admin")) {
 ---
 
 ### 5.3 Missing Lazy Load Error Handling
+
 **File:** `resources/js/router/routes.js`
 
 ```javascript
@@ -511,6 +550,7 @@ component: () => import("../../js/pages/owner/OwnerDashboard.vue"),
 **Issue:** No error handling for failed chunk loads.
 
 **Recommendation:**
+
 ```javascript
 component: () => import("./pages/Component.vue").catch(() => {
   return import("./pages/ChunkLoadError.vue");
@@ -520,8 +560,8 @@ component: () => import("./pages/Component.vue").catch(() => {
 ---
 
 ### 5.4 Typo in Route Path
-**File:** `resources/js/router/routes.js`
-**Line:** 88
+
+**File:** `resources/js/router/routes.js` **Line:** 88
 
 ```javascript
 {
@@ -535,6 +575,7 @@ component: () => import("./pages/Component.vue").catch(() => {
 ---
 
 ### 5.5 Inconsistent Path Patterns
+
 ```javascript
 // Relative paths
 { path: "profile", ... }
@@ -550,6 +591,7 @@ component: () => import("./pages/Component.vue").catch(() => {
 ---
 
 ### 5.6 Route Meta Inconsistency
+
 **File:** `resources/js/router/routes.js`
 
 ```javascript
@@ -568,11 +610,12 @@ component: () => import("./pages/Component.vue").catch(() => {
 ---
 
 ### 5.7 Duplicate Component Imports
+
 ```javascript
 // Pattern 1
 component: () => import("../../js/pages/owner/Properties.vue"),
 
-// Pattern 2  
+// Pattern 2
 component: () => import("../pages/owner/OwnerDashboard.vue"),
 ```
 
@@ -583,8 +626,8 @@ component: () => import("../pages/owner/OwnerDashboard.vue"),
 ## 6. State Management Issues
 
 ### 6.1 Composable Creates Global State
-**File:** `resources/js/composables/useAuth.js`
-**Lines:** 19-25
+
+**File:** `resources/js/composables/useAuth.js` **Lines:** 19-25
 
 ```javascript
 const token = ref(localStorage.getItem(TOKEN_KEY) || null);
@@ -592,13 +635,14 @@ const user = ref(loadStoredUser());
 const isAuthenticated = computed(() => !!token.value);
 ```
 
-**Issue:** These refs are module-level singletons. While this works, it's implicit global state without proper store semantics.
+**Issue:** These refs are module-level singletons. While this works, it's implicit global state
+without proper store semantics.
 
 ---
 
 ### 6.2 Router Instance Stored in Module
-**File:** `resources/js/composables/useAuth.js`
-**Lines:** 27, 54
+
+**File:** `resources/js/composables/useAuth.js` **Lines:** 27, 54
 
 ```javascript
 let routerInstance = null;
@@ -612,15 +656,15 @@ export function useAuth() {
 ---
 
 ### 6.3 Duplicate Login Logic
-**File:** `resources/js/composables/useAuth.js`
-**Lines:** 76-106
+
+**File:** `resources/js/composables/useAuth.js` **Lines:** 76-106
 
 ```javascript
 async function login(credentials) {
   // ...
   const role = res.data.user.role?.toLowerCase();
   let routeName;
-  
+
   if (role === "owner") {
     routeName = res.data.subscription.is_active ? "owner-dashboard" : "subscription";
   } else if (role === "admin") {
@@ -628,28 +672,31 @@ async function login(credentials) {
   } else {
     routeName = "home";
   }
-  
+
   // ... redirect logic ...
-  
+
   // Then AGAIN:
   const role = res.data.user.role?.toLowerCase();  // Duplicate declaration!
   let routeName;  // Duplicate declaration!
-  
+
   if (role === "owner") {
     routeName = res.data.subscription ? "owner-dashboard" : "subscription";  // Different logic!
   }
 ```
 
-**Issue:** 
+**Issue:**
+
 1. Variable `role` and `routeName` declared twice
 2. Second declaration has different logic (`subscription.is_active` vs just `subscription`)
 
 ---
 
 ### 6.4 LocalStorage Used Directly Throughout
+
 Multiple components access localStorage directly instead of through auth composable:
 
 **File:** `resources/js/layouts/OwnerLayout.vue`
+
 ```javascript
 const adminToken = localStorage.getItem('adminToken');
 ```
@@ -659,46 +706,51 @@ const adminToken = localStorage.getItem('adminToken');
 ## 7. Code Quality Issues
 
 ### 7.1 Console Statements in Production Code
+
 **Files:** Multiple
 
 ```javascript
-console.error("[useAuth] Invalid user JSON:", e);
-console.warn("[logout] API failed:", e);
-console.error("API error:", error);
-console.error("Error fetching recent bookings:", error);
-console.error("Error loading resources:", error);
+console.error('[useAuth] Invalid user JSON:', e);
+console.warn('[logout] API failed:', e);
+console.error('API error:', error);
+console.error('Error fetching recent bookings:', error);
+console.error('Error loading resources:', error);
 ```
 
 ---
 
 ### 7.2 Unused Imports
+
 **File:** `resources/js/layouts/AdminLayout.vue`
 
 ```javascript
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted } from 'vue';
 // onMounted is imported but defined separately
 ```
 
 **File:** `resources/js/pages/owner/OwnerDashboard.vue`
+
 ```javascript
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch } from 'vue';
 // Missing: computed (if needed)
 ```
 
 ---
 
 ### 7.3 Inconsistent Import Aliases
+
 **File:** `resources/js/pages/owner/OwnerDashboard.vue`
 
 ```javascript
-import ownerService from "@/services/ownerService";
-import BookingDetailModal from "@/components/modals/BookingDetailModal.vue";
+import ownerService from '@/services/ownerService';
+import BookingDetailModal from '@/components/modals/BookingDetailModal.vue';
 ```
 
 **Other files:**
+
 ```javascript
-import { useAuth } from "../../composables/useAuth";
-import BaseInput from "../../components/global/BaseInput.vue";
+import { useAuth } from '../../composables/useAuth';
+import BaseInput from '../../components/global/BaseInput.vue';
 ```
 
 **Issue:** Mix of `@/` alias and relative paths.
@@ -706,10 +758,11 @@ import BaseInput from "../../components/global/BaseInput.vue";
 ---
 
 ### 7.4 Magic Numbers
+
 **File:** `resources/js/pages/owner/OwnerDashboard.vue`
 
 ```javascript
-recentBookings.value = (res.data || res).slice(0, 10);  // Why 10?
+recentBookings.value = (res.data || res).slice(0, 10); // Why 10?
 ```
 
 **File:** `resources/js/services/apiClient.js`
@@ -721,7 +774,9 @@ timeout: 30000,  // 30 seconds - not documented why
 ---
 
 ### 7.5 Inconsistent Async/Await Patterns
+
 **Pattern 1:**
+
 ```javascript
 const handleLogin = async () => {
   await login(form.value);
@@ -729,6 +784,7 @@ const handleLogin = async () => {
 ```
 
 **Pattern 2:**
+
 ```javascript
 const getResources = async () => {
   try {
@@ -745,8 +801,8 @@ const getResources = async () => {
 ---
 
 ### 7.6 Commented Out Code
-**File:** `resources/js/router/index.js`
-**Lines:** 8-13
+
+**File:** `resources/js/router/index.js` **Lines:** 8-13
 
 ```javascript
 scrollBehavior(to, from, savedPosition) {
@@ -758,14 +814,13 @@ scrollBehavior(to, from, savedPosition) {
 },
 ```
 
-**File:** `resources/js/layouts/OwnerLayout.vue`
-**Lines:** 109-140 (commented menu code)
+**File:** `resources/js/layouts/OwnerLayout.vue` **Lines:** 109-140 (commented menu code)
 
 ---
 
 ### 7.7 Incorrect Date Parsing
-**File:** `resources/js/pages/owner/OwnerDashboard.vue`
-**Lines:** 364-374
+
+**File:** `resources/js/pages/owner/OwnerDashboard.vue` **Lines:** 364-374
 
 ```javascript
 const isFutureBooking = (checkInStr) => {
@@ -780,11 +835,13 @@ const isFutureBooking = (checkInStr) => {
 ```
 
 **Issues:**
+
 1. Complex date parsing without library
 2. Assumes specific date formats
 3. No timezone handling
 
 **Recommendation:** Use dayjs (already installed):
+
 ```javascript
 import dayjs from 'dayjs';
 
@@ -798,6 +855,7 @@ const isFutureBooking = (checkInStr) => {
 ### 7.8 Variable Naming Issues
 
 **Non-descriptive names:**
+
 ```javascript
 const res = await apiClient.get(...)  // What kind of response?
 const q = useRoute().query  // What query?
@@ -805,6 +863,7 @@ const s = status?.toLowerCase()  // What status?
 ```
 
 **Inconsistent casing:**
+
 ```javascript
 const ResourcesData = await ownerService.resourceList(...)  // PascalCase variable
 const recentBookings = ref([])  // camelCase variable
@@ -815,25 +874,28 @@ const recentBookings = ref([])  // camelCase variable
 ## 8. Performance Issues
 
 ### 8.1 No Component Lazy Loading for Heavy Components
+
 **File:** `resources/js/pages/owner/OwnerDashboard.vue`
 
 ```javascript
-import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
-import "vue-hotel-booking-calendar/dist/style.css";
+import { HotelDashboardCalendar } from 'vue-hotel-booking-calendar';
+import 'vue-hotel-booking-calendar/dist/style.css';
 ```
 
 **Issue:** Heavy calendar component loaded synchronously.
 
 **Recommendation:**
+
 ```javascript
-const HotelDashboardCalendar = defineAsyncComponent(() => 
-  import('vue-hotel-booking-calendar').then(m => m.HotelDashboardCalendar)
+const HotelDashboardCalendar = defineAsyncComponent(() =>
+  import('vue-hotel-booking-calendar').then((m) => m.HotelDashboardCalendar)
 );
 ```
 
 ---
 
 ### 8.2 Watchers Without Debounce
+
 **File:** `resources/js/pages/owner/OwnerDashboard.vue`
 
 ```javascript
@@ -846,46 +908,50 @@ watch(selectedProperties, () => {
 **Issue:** Every property selection triggers two API calls immediately.
 
 **Recommendation:**
+
 ```javascript
 import { watchDebounced } from '@vueuse/core';
 
-watchDebounced(selectedProperties, () => {
-  getResources();
-  getRecentBookings();
-}, { debounce: 300 });
+watchDebounced(
+  selectedProperties,
+  () => {
+    getResources();
+    getRecentBookings();
+  },
+  { debounce: 300 }
+);
 ```
 
 ---
 
 ### 8.3 Multiple API Calls on Mount
-**File:** `resources/js/pages/owner/OwnerDashboard.vue`
-**Lines:** 487-491
+
+**File:** `resources/js/pages/owner/OwnerDashboard.vue` **Lines:** 487-491
 
 ```javascript
 onMounted(() => {
-  fetchPropertiesdropdown();  // API call 1
-  getResources();             // API call 2
-  getRecentBookings();        // API call 3
+  fetchPropertiesdropdown(); // API call 1
+  getResources(); // API call 2
+  getRecentBookings(); // API call 3
 });
 ```
 
 **Recommendation:** Use `Promise.all()` or combine into single endpoint:
+
 ```javascript
 onMounted(async () => {
-  await Promise.all([
-    fetchPropertiesdropdown(),
-    getResources(),
-    getRecentBookings()
-  ]);
+  await Promise.all([fetchPropertiesdropdown(), getResources(), getRecentBookings()]);
 });
 ```
 
 ---
 
 ### 8.4 No Virtual Scrolling for Lists
+
 **Issue:** Long lists (bookings, properties) rendered entirely in DOM.
 
 **Recommendation:** Use virtual scrolling for lists > 50 items:
+
 ```javascript
 import { VirtualList } from '@vueuse/components';
 ```
@@ -893,6 +959,7 @@ import { VirtualList } from '@vueuse/components';
 ---
 
 ### 8.5 Large Bundle - All Icons Imported
+
 **File:** `resources/js/app.js`
 
 ```javascript
@@ -906,6 +973,7 @@ library.add(fas, far, fab);
 **Issue:** All FontAwesome icons imported (~1.5MB+), but only few are used.
 
 **Recommendation:** Import only used icons:
+
 ```javascript
 import { faHome, faUser, faCalendar } from '@fortawesome/free-solid-svg-icons';
 library.add(faHome, faUser, faCalendar);
@@ -914,6 +982,7 @@ library.add(faHome, faUser, faCalendar);
 ---
 
 ### 8.6 CSS Not Purged
+
 **Issue:** Using Tailwind without apparent PurgeCSS configuration in production.
 
 ---
@@ -921,6 +990,7 @@ library.add(faHome, faUser, faCalendar);
 ## 9. Accessibility Issues
 
 ### 9.1 Missing ARIA Labels
+
 **File:** `resources/js/layouts/AdminLayout.vue`
 
 ```vue
@@ -932,8 +1002,9 @@ library.add(faHome, faUser, faCalendar);
 **Issue:** No accessible label for screen readers.
 
 **Fix:**
+
 ```vue
-<button 
+<button
   @click="sidebarOpen = !sidebarOpen"
   aria-label="Toggle navigation menu"
   :aria-expanded="sidebarOpen"
@@ -943,15 +1014,11 @@ library.add(faHome, faUser, faCalendar);
 ---
 
 ### 9.2 Missing Form Labels
+
 **File:** `resources/js/pages/owner/OwnerDashboard.vue`
 
 ```vue
-<input
-  type="checkbox"
-  :value="item.id"
-  v-model="selectedProperties"
-  class="w-4 h-4 ..."
-/>
+<input type="checkbox" :value="item.id" v-model="selectedProperties" class="w-4 h-4 ..." />
 ```
 
 **Issue:** Checkboxes lack proper `id` and associated `<label for="">`.
@@ -959,11 +1026,13 @@ library.add(faHome, faUser, faCalendar);
 ---
 
 ### 9.3 No Focus Management
+
 **Issue:** After modal close or navigation, focus is not returned to triggering element.
 
 ---
 
 ### 9.4 Color Contrast Issues
+
 ```vue
 <p class="text-gray-400 text-sm">...</p>
 ```
@@ -973,15 +1042,17 @@ library.add(faHome, faUser, faCalendar);
 ---
 
 ### 9.5 No Skip Links
+
 **Issue:** No "skip to main content" link for keyboard users.
 
 ---
 
 ### 9.6 Missing Alt Text
+
 **File:** `resources/js/layouts/AdminLayout.vue`
 
 ```vue
-<img src="/public/main_logo.png" class="h-14" alt="Logo" />
+<img src="/main_logo.png" class="h-14" alt="Logo" />
 ```
 
 **Issue:** Generic "Logo" alt text. Should be descriptive: "Paper Diary Logo".
@@ -991,9 +1062,11 @@ library.add(faHome, faUser, faCalendar);
 ## 10. Best Practice Violations
 
 ### 10.1 Direct DOM Manipulation
+
 **Issue:** Using `window.location.href` instead of Vue Router:
 
 **File:** `resources/js/layouts/OwnerLayout.vue`
+
 ```javascript
 setTimeout(() => {
   window.location.href = '/admin';
@@ -1001,6 +1074,7 @@ setTimeout(() => {
 ```
 
 **Recommendation:**
+
 ```javascript
 router.push('/admin');
 ```
@@ -1008,8 +1082,8 @@ router.push('/admin');
 ---
 
 ### 10.2 setTimeout for Flow Control
-**File:** `resources/js/layouts/OwnerLayout.vue`
-**Line:** 304
+
+**File:** `resources/js/layouts/OwnerLayout.vue` **Line:** 304
 
 ```javascript
 setTimeout(() => {
@@ -1022,9 +1096,11 @@ setTimeout(() => {
 ---
 
 ### 10.3 No Environment Configuration
+
 **Issue:** No `.env` variables used in frontend. API base URL hardcoded as `/api`.
 
 **Recommendation:**
+
 ```javascript
 baseURL: import.meta.env.VITE_API_URL || "/api",
 ```
@@ -1032,7 +1108,9 @@ baseURL: import.meta.env.VITE_API_URL || "/api",
 ---
 
 ### 10.4 Missing Loading/Error States
+
 Most data-fetching components don't show:
+
 - Loading spinners
 - Error messages
 - Empty states
@@ -1040,7 +1118,9 @@ Most data-fetching components don't show:
 ---
 
 ### 10.5 No Form Validation Library
+
 Each form validates manually:
+
 ```javascript
 const isEmailValid = emailInput.value.validate();
 const isPasswordValid = passwordInput.value.validate();
@@ -1051,6 +1131,7 @@ const isPasswordValid = passwordInput.value.validate();
 ---
 
 ### 10.6 No Unit Tests
+
 **Issue:** No frontend test files exist.
 
 **Recommendation:** Add Vitest for unit tests, Cypress for E2E.
@@ -1058,22 +1139,26 @@ const isPasswordValid = passwordInput.value.validate();
 ---
 
 ### 10.7 Asset Path Issues
+
 **File:** `resources/js/layouts/AdminLayout.vue`
 
 ```vue
-<img src="/public/main_logo.png" class="h-10" alt="Logo" />
+<img src="/main_logo.png" class="h-10" alt="Logo" />
 ```
 
-**Issue:** `/public/` prefix is incorrect. Should be just `/main_logo.png` as Vite serves from public folder.
+**Issue:** `/public/` prefix is incorrect. Should be just `/main_logo.png` as Vite serves from
+public folder.
 
 ---
 
 ### 10.8 No Error Tracking
+
 **Issue:** No integration with error tracking services (Sentry, Bugsnag).
 
 ---
 
 ### 10.9 Missing SEO Meta Tags
+
 **Issue:** SPA with no dynamic meta tag management.
 
 **Recommendation:** Add `@vueuse/head` or similar for meta management.
@@ -1188,27 +1273,29 @@ resources/js/
 
 ## File-by-File Issue Summary
 
-| File | Critical | High | Medium | Low |
-|------|----------|------|--------|-----|
-| composables/useAuth.js | 1 | 2 | 3 | 2 |
-| services/apiClient.js | 0 | 1 | 2 | 1 |
-| services/adminService.js | 0 | 1 | 1 | 0 |
-| services/ownerService.js | 0 | 0 | 2 | 1 |
-| router/index.js | 0 | 1 | 2 | 2 |
-| router/routes.js | 0 | 0 | 3 | 3 |
-| layouts/AdminLayout.vue | 0 | 0 | 3 | 4 |
-| layouts/OwnerLayout.vue | 1 | 1 | 3 | 4 |
-| pages/owner/OwnerDashboard.vue | 0 | 0 | 4 | 5 |
-| pages/auth/LoginPage.vue | 0 | 0 | 1 | 2 |
-| App.vue | 0 | 1 | 1 | 0 |
-| app.js | 0 | 1 | 1 | 0 |
+| File                           | Critical | High | Medium | Low |
+| ------------------------------ | -------- | ---- | ------ | --- |
+| composables/useAuth.js         | 1        | 2    | 3      | 2   |
+| services/apiClient.js          | 0        | 1    | 2      | 1   |
+| services/adminService.js       | 0        | 1    | 1      | 0   |
+| services/ownerService.js       | 0        | 0    | 2      | 1   |
+| router/index.js                | 0        | 1    | 2      | 2   |
+| router/routes.js               | 0        | 0    | 3      | 3   |
+| layouts/AdminLayout.vue        | 0        | 0    | 3      | 4   |
+| layouts/OwnerLayout.vue        | 1        | 1    | 3      | 4   |
+| pages/owner/OwnerDashboard.vue | 0        | 0    | 4      | 5   |
+| pages/auth/LoginPage.vue       | 0        | 0    | 1      | 2   |
+| App.vue                        | 0        | 1    | 1      | 0   |
+| app.js                         | 0        | 1    | 1      | 0   |
 
 ---
 
 ## 12. File Location & Organization Issues
 
 ### 12.1 Current File Structure Analysis
+
 **Current Structure:**
+
 ```
 resources/js/
 ├── app.js                    # Main entry - has icon imports issue
@@ -1254,6 +1341,7 @@ resources/js/
 ```
 
 **Issues Identified:**
+
 1. `components/admin/` and `components/common/` have only 1 file each
 2. `components/global/Basetable.vue` is 641 lines - violates single responsibility
 3. No separation between feature-based and shared components
@@ -1266,6 +1354,7 @@ resources/js/
 **File:** `components/global/BaseInput.vue` - 315 lines
 
 **Issue:** Single component handles:
+
 - Text input
 - Number input
 - Email input
@@ -1275,6 +1364,7 @@ resources/js/
 - Theming
 
 **Recommendation:** Split into focused components:
+
 ```
 components/
 ├── inputs/
@@ -1292,6 +1382,7 @@ components/
 ### 12.3 Page Component Naming Inconsistencies
 
 **Current Naming:**
+
 ```
 pages/
 ├── admin/
@@ -1315,11 +1406,13 @@ pages/
 ```
 
 **Issues:**
+
 1. Inconsistent "Page" suffix (some have it, some don't)
 2. Redundant prefixes (`OwnerDashboard` in `owner/` folder)
 3. `PropertiesForm.vue` location ambiguous - is it a page or component?
 
 **Recommendation:**
+
 ```
 pages/
 ├── admin/
@@ -1344,16 +1437,19 @@ components/
 ---
 
 ### 12.4 Missing Index Files
+
 **Issue:** No `index.js` barrel files for clean imports.
 
 **Current Import:**
+
 ```javascript
-import BaseInput from "../../components/global/BaseInput.vue";
-import BaseSelect from "../../components/global/BaseSelect.vue";
-import DeleteModal from "../../components/global/DeleteModal.vue";
+import BaseInput from '../../components/global/BaseInput.vue';
+import BaseSelect from '../../components/global/BaseSelect.vue';
+import DeleteModal from '../../components/global/DeleteModal.vue';
 ```
 
 **With index.js:**
+
 ```javascript
 // components/global/index.js
 export { default as BaseInput } from './BaseInput.vue';
@@ -1369,33 +1465,24 @@ import { BaseInput, BaseSelect, DeleteModal } from '@/components/global';
 ## 13. Additional Code Optimizations
 
 ### 13.1 Basetable Component Refactoring
+
 **File:** `components/global/Basetable.vue` - 641 lines
 
 **Issues:**
+
 1. Too many responsibilities (filtering, sorting, pagination, export)
 2. 15+ props - prop drilling
 3. Mixed template logic
 
 **Recommendation:** Split into composable parts:
+
 ```vue
 <!-- Basetable.vue (simplified) -->
 <template>
   <div class="base-table">
-    <TableHeader 
-      :title="title"
-      :show-search="showSearch"
-      @search="handleSearch"
-    />
-    <TableFilters 
-      v-if="hasFilters"
-      :filters="filters"
-      @change="handleFilterChange"
-    />
-    <TableBody 
-      :columns="columns"
-      :rows="paginatedData"
-      :loading="loading"
-    />
+    <TableHeader :title="title" :show-search="showSearch" @search="handleSearch" />
+    <TableFilters v-if="hasFilters" :filters="filters" @change="handleFilterChange" />
+    <TableBody :columns="columns" :rows="paginatedData" :loading="loading" />
     <TablePagination
       :current-page="currentPage"
       :total-pages="totalPages"
@@ -1408,7 +1495,9 @@ import { BaseInput, BaseSelect, DeleteModal } from '@/components/global';
 ---
 
 ### 13.2 Form Validation Pattern
+
 **Current Pattern (repeated in many components):**
+
 ```javascript
 const firstNameInput = ref(null);
 const lastNameInput = ref(null);
@@ -1424,25 +1513,26 @@ const handleSubmit = () => {
 ```
 
 **Optimized Pattern with composable:**
+
 ```javascript
 // composables/useFormValidation.js
 export function useFormValidation() {
   const inputRefs = ref([]);
-  
+
   const registerInput = (el) => {
     if (el) inputRefs.value.push(el);
   };
-  
+
   const validateAll = () => {
-    return inputRefs.value.every(input => 
+    return inputRefs.value.every(input =>
       typeof input.validate === 'function' ? input.validate() : true
     );
   };
-  
+
   const resetValidation = () => {
     inputRefs.value.forEach(input => input.resetValidation?.());
   };
-  
+
   return { registerInput, validateAll, resetValidation };
 }
 
@@ -1460,21 +1550,24 @@ const handleSubmit = () => {
 ---
 
 ### 13.3 Date Handling Optimization
+
 **File:** `pages/guest/DetailsPage.vue`
 
 **Current:**
+
 ```javascript
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
 const details = ref({
-  checkIn: dayjs().format("YYYY-MM-DD"),
-  checkOut: dayjs().add(1, "day").format("YYYY-MM-DD"),
+  checkIn: dayjs().format('YYYY-MM-DD'),
+  checkOut: dayjs().add(1, 'day').format('YYYY-MM-DD'),
 });
 ```
 
 **Issue:** dayjs imported in multiple components. Should be centralized.
 
 **Recommendation:**
+
 ```javascript
 // utils/date.js
 import dayjs from 'dayjs';
@@ -1484,14 +1577,11 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(relativeTime);
 dayjs.extend(customParseFormat);
 
-export const formatDate = (date, format = 'YYYY-MM-DD') => 
-  dayjs(date).format(format);
+export const formatDate = (date, format = 'YYYY-MM-DD') => dayjs(date).format(format);
 
-export const isAfter = (date1, date2) => 
-  dayjs(date1).isAfter(date2);
+export const isAfter = (date1, date2) => dayjs(date1).isAfter(date2);
 
-export const addDays = (date, days) => 
-  dayjs(date).add(days, 'day').format('YYYY-MM-DD');
+export const addDays = (date, days) => dayjs(date).add(days, 'day').format('YYYY-MM-DD');
 
 export { dayjs };
 ```
@@ -1499,9 +1589,11 @@ export { dayjs };
 ---
 
 ### 13.4 API Response Standardization
+
 **File:** `services/ownerService.js`
 
 **Current (inconsistent):**
+
 ```javascript
 async fetchProperties(params) {
   const res = await apiClient.get("/owner/property", { params });
@@ -1515,6 +1607,7 @@ async getOwnerDetails() {
 ```
 
 **Recommendation:**
+
 ```javascript
 // All service methods should return consistent structure
 async fetchProperties(params) {
@@ -1531,9 +1624,11 @@ async getOwnerDetails() {
 ---
 
 ### 13.5 Component Communication Patterns
+
 **File:** `pages/owner/PropertyWizard.vue`
 
 **Current (tight coupling):**
+
 ```javascript
 const handleStep1Success = async (data) => {
   if (!startedWithId.value) {
@@ -1545,13 +1640,14 @@ const handleStep1Success = async (data) => {
 ```
 
 **Recommendation:** Use provide/inject for wizard state:
+
 ```javascript
 // PropertyWizard.vue
 const wizardState = reactive({
   currentStep: 1,
   propertyId: null,
   resourceTypes: [],
-  isEditing: false
+  isEditing: false,
 });
 
 provide('wizardState', wizardState);
@@ -1566,21 +1662,25 @@ const nextStep = inject('nextStep');
 ---
 
 ### 13.6 Image Loading Optimization
+
 **File:** `pages/guest/DetailsPage.vue`
 
 **Current:**
+
 ```vue
 <img :src="image.image" class="h-full w-full object-cover" />
 ```
 
 **Issues:**
+
 1. No lazy loading
 2. No placeholder
 3. No error handling
 
 **Recommendation:**
+
 ```vue
-<img 
+<img
   v-lazy="image.image"
   class="h-full w-full object-cover"
   loading="lazy"
@@ -1592,11 +1692,13 @@ const nextStep = inject('nextStep');
 ---
 
 ### 13.7 Modal Component Reusability
+
 **File:** `components/global/DeleteModal.vue`
 
 **Current:** Specific to delete/deactivate actions.
 
 **Recommendation:** Create generic `ConfirmationModal.vue`:
+
 ```vue
 <template>
   <BaseModal v-model="modelValue" :title="title">
@@ -1622,7 +1724,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'danger',
-    validator: v => ['danger', 'warning', 'info'].includes(v)
+    validator: (v) => ['danger', 'warning', 'info'].includes(v),
   },
   // ...
 });
@@ -1632,18 +1734,20 @@ const props = defineProps({
 ---
 
 ### 13.8 Dynamic Import for Heavy Components
+
 **File:** `pages/owner/OwnerDashboard.vue`
 
 **Current:**
+
 ```javascript
-import { HotelDashboardCalendar } from "vue-hotel-booking-calendar";
+import { HotelDashboardCalendar } from 'vue-hotel-booking-calendar';
 ```
 
 **Optimized:**
+
 ```javascript
 const HotelDashboardCalendar = defineAsyncComponent({
-  loader: () => import('vue-hotel-booking-calendar')
-    .then(m => m.HotelDashboardCalendar),
+  loader: () => import('vue-hotel-booking-calendar').then((m) => m.HotelDashboardCalendar),
   loadingComponent: LoadingSpinner,
   delay: 200,
   errorComponent: ErrorComponent,
@@ -1653,30 +1757,31 @@ const HotelDashboardCalendar = defineAsyncComponent({
 ---
 
 ### 13.9 Consistent Error Handling
+
 **Current (scattered):**
+
 ```javascript
 try {
   const res = await service.getData();
 } catch (error) {
-  console.error("Error:", error);
+  console.error('Error:', error);
 }
 ```
 
 **Recommendation:** Create error handling utility:
+
 ```javascript
 // utils/errorHandler.js
 export function handleApiError(error, context = '') {
-  const message = error.response?.data?.message 
-    || error.message 
-    || 'An unexpected error occurred';
-    
+  const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+
   if (import.meta.env.DEV) {
     console.error(`[${context}]`, error);
   }
-  
+
   // Could integrate with error tracking here
   // Sentry.captureException(error);
-  
+
   return { success: false, message };
 }
 
@@ -1692,9 +1797,11 @@ try {
 ---
 
 ### 13.10 Computed Properties for Complex Template Logic
+
 **File:** `pages/admin/Dashboard.vue`
 
 **Current:**
+
 ```vue
 <p class="text-lg font-bold text-gray-900">
   £{{ formatCurrency(dashboardDetail?.details?.revenue?.today) }}
@@ -1704,6 +1811,7 @@ try {
 **Issue:** Repetitive optional chaining in template.
 
 **Recommendation:**
+
 ```javascript
 const revenue = computed(() => ({
   today: formatCurrency(dashboardDetail.value?.details?.revenue?.today),
@@ -1720,42 +1828,51 @@ const revenue = computed(() => ({
 ## 14. Component-Specific Issues
 
 ### 14.1 BaseInput Component Issues
+
 **File:** `components/global/BaseInput.vue`
 
 **Issues Found:**
 
 1. **Unique ID Generation Not Truly Unique:**
+
 ```javascript
 const uniqueId = `input-${Math.random().toString(36).toLowerCase().substring(2, 10)}`;
 ```
+
 Risk of collision. Use `crypto.randomUUID()` or counter.
 
 2. **Theme Object Recreated on Every Render:**
+
 ```javascript
 const themes = {
   light: { bg: "bg-white", ... },
   // ...
 };
 ```
+
 Move outside component or use `Object.freeze()`.
 
 3. **Validation on Every Input:**
+
 ```javascript
 const handleInput = (event) => {
   // ...
   if (touched.value) validateInput();
 };
 ```
+
 Should debounce validation for performance.
 
 ---
 
 ### 14.2 Loader Component Issues
+
 **File:** `components/global/Loader.vue`
 
 **Issue:** Hardcoded image path:
+
 ```vue
-<img src="/public/main_logo.png" alt="Paper Diary" />
+<img src="/main_logo.png" alt="Paper Diary" />
 ```
 
 Should be `/main_logo.png` (Vite serves public folder at root).
@@ -1763,31 +1880,35 @@ Should be `/main_logo.png` (Vite serves public folder at root).
 ---
 
 ### 14.3 RegisterPage Issues
+
 **File:** `pages/auth/RegisterPage.vue`
 
 **Issues:**
 
 1. **Untracked Ref:**
+
 ```javascript
 const form = ref({
-  firstName: "",
+  firstName: '',
   // ...
-  phone: "",
+  phone: '',
 });
 // But `telephone` field exists in form
 ```
 
 2. **Telephone Label Lowercase:**
+
 ```vue
-<BaseInput label="telephone" ... />  <!-- Should be "Telephone" -->
+<BaseInput label="telephone" ... />
+<!-- Should be "Telephone" -->
 ```
 
-3. **No Loading State:**
-No indication when registration is in progress.
+3. **No Loading State:** No indication when registration is in progress.
 
 ---
 
 ### 14.4 Admin Dashboard Error Handling
+
 **File:** `pages/admin/Dashboard.vue`
 
 ```javascript
@@ -1797,6 +1918,7 @@ No indication when registration is in progress.
 ```
 
 **Issue:** `err` is not defined in catch block! Should be:
+
 ```javascript
 } catch (err) {
   error.value = err.message || 'Failed to load dashboard data';
@@ -1808,12 +1930,14 @@ No indication when registration is in progress.
 ## 15. Asset & Path Issues
 
 ### 15.1 Inconsistent Asset Paths
+
 **Files with incorrect paths:**
+
 ```vue
 <!-- Incorrect - /public/ should not be in path -->
-<img src="/public/main_logo.png" />
-<img src="/public/user-1.jpg" />
-<img src="/public/map.png" />
+<img src="/main_logo.png" />
+<img src="/user-1.jpg" />
+<img src="/map.png" />
 
 <!-- Correct -->
 <img src="/main_logo.png" />
@@ -1822,6 +1946,7 @@ No indication when registration is in progress.
 ```
 
 **Files affected:**
+
 - `components/global/Loader.vue`
 - `layouts/AdminLayout.vue`
 - `layouts/OwnerLayout.vue`
@@ -1831,6 +1956,7 @@ No indication when registration is in progress.
 ---
 
 ### 15.2 Missing Fallback Images
+
 **File:** `pages/guest/BookingPage.vue`
 
 ```vue
@@ -1846,19 +1972,22 @@ No indication when registration is in progress.
 **File:** `pages/guest/BookingPage.vue`
 
 ```javascript
-stripe.value = await loadStripe("pk_test_51RvEjJ7fYIrC7aOkBuyFRaQM8EH4P3nCf8sW5BEFVufQaLOlM2ZNk8lRDNh7uCtm6sVV2Wa2dhIVbIwI6P2q2xQx00PpDGeuDB");
+stripe.value = await loadStripe(
+  'pk_test_51RvEjJ7fYIrC7aOkBuyFRaQM8EH4P3nCf8sW5BEFVufQaLOlM2ZNk8lRDNh7uCtm6sVV2Wa2dhIVbIwI6P2q2xQx00PpDGeuDB'
+);
 ```
 
 **Issue:** 🔴 CRITICAL - Hardcoded Stripe publishable key. Should come from:
+
 1. Environment variable
 2. Backend API endpoint
 3. Property-specific key from backend
 
 **Recommendation:**
+
 ```javascript
 // Get key from property or backend
-const stripeKey = bookingInfo.value?.property?.stripePublicKey 
-  || import.meta.env.VITE_STRIPE_KEY;
+const stripeKey = bookingInfo.value?.property?.stripePublicKey || import.meta.env.VITE_STRIPE_KEY;
 stripe.value = await loadStripe(stripeKey);
 ```
 
@@ -1866,46 +1995,46 @@ stripe.value = await loadStripe(stripeKey);
 
 ## File-by-File Issue Summary (Updated)
 
-| File | Critical | High | Medium | Low |
-|------|----------|------|--------|-----|
-| composables/useAuth.js | 1 | 2 | 3 | 2 |
-| services/apiClient.js | 0 | 1 | 2 | 1 |
-| services/adminService.js | 0 | 1 | 1 | 0 |
-| services/ownerService.js | 0 | 0 | 2 | 1 |
-| router/index.js | 0 | 1 | 2 | 2 |
-| router/routes.js | 0 | 0 | 3 | 3 |
-| layouts/AdminLayout.vue | 0 | 0 | 3 | 4 |
-| layouts/OwnerLayout.vue | 1 | 1 | 3 | 4 |
-| layouts/AppHeader.vue | 0 | 0 | 2 | 3 |
-| pages/owner/OwnerDashboard.vue | 0 | 0 | 4 | 5 |
-| pages/owner/Properties.vue | 0 | 0 | 1 | 2 |
-| pages/owner/PropertyWizard.vue | 0 | 0 | 2 | 3 |
-| pages/owner/PropertiesForm.vue | 0 | 0 | 2 | 3 |
-| pages/guest/DetailsPage.vue | 0 | 0 | 3 | 4 |
-| pages/guest/BookingPage.vue | 1 | 1 | 3 | 3 |
-| pages/admin/Dashboard.vue | 0 | 1 | 2 | 2 |
-| pages/admin/Users.vue | 0 | 0 | 2 | 2 |
-| pages/auth/LoginPage.vue | 0 | 0 | 1 | 2 |
-| pages/auth/RegisterPage.vue | 0 | 0 | 2 | 3 |
-| pages/auth/Profile.vue | 0 | 0 | 1 | 2 |
-| pages/auth/ChangePassword.vue | 0 | 0 | 1 | 2 |
-| components/global/BaseInput.vue | 0 | 0 | 2 | 3 |
-| components/global/Basetable.vue | 0 | 0 | 3 | 4 |
-| components/global/Loader.vue | 0 | 0 | 1 | 1 |
-| App.vue | 0 | 1 | 1 | 0 |
-| app.js | 0 | 1 | 1 | 0 |
+| File                            | Critical | High | Medium | Low |
+| ------------------------------- | -------- | ---- | ------ | --- |
+| composables/useAuth.js          | 1        | 2    | 3      | 2   |
+| services/apiClient.js           | 0        | 1    | 2      | 1   |
+| services/adminService.js        | 0        | 1    | 1      | 0   |
+| services/ownerService.js        | 0        | 0    | 2      | 1   |
+| router/index.js                 | 0        | 1    | 2      | 2   |
+| router/routes.js                | 0        | 0    | 3      | 3   |
+| layouts/AdminLayout.vue         | 0        | 0    | 3      | 4   |
+| layouts/OwnerLayout.vue         | 1        | 1    | 3      | 4   |
+| layouts/AppHeader.vue           | 0        | 0    | 2      | 3   |
+| pages/owner/OwnerDashboard.vue  | 0        | 0    | 4      | 5   |
+| pages/owner/Properties.vue      | 0        | 0    | 1      | 2   |
+| pages/owner/PropertyWizard.vue  | 0        | 0    | 2      | 3   |
+| pages/owner/PropertiesForm.vue  | 0        | 0    | 2      | 3   |
+| pages/guest/DetailsPage.vue     | 0        | 0    | 3      | 4   |
+| pages/guest/BookingPage.vue     | 1        | 1    | 3      | 3   |
+| pages/admin/Dashboard.vue       | 0        | 1    | 2      | 2   |
+| pages/admin/Users.vue           | 0        | 0    | 2      | 2   |
+| pages/auth/LoginPage.vue        | 0        | 0    | 1      | 2   |
+| pages/auth/RegisterPage.vue     | 0        | 0    | 2      | 3   |
+| pages/auth/Profile.vue          | 0        | 0    | 1      | 2   |
+| pages/auth/ChangePassword.vue   | 0        | 0    | 1      | 2   |
+| components/global/BaseInput.vue | 0        | 0    | 2      | 3   |
+| components/global/Basetable.vue | 0        | 0    | 3      | 4   |
+| components/global/Loader.vue    | 0        | 0    | 1      | 1   |
+| App.vue                         | 0        | 1    | 1      | 0   |
+| app.js                          | 0        | 1    | 1      | 0   |
 
 ---
 
 ## Summary Statistics
 
-| Category | Count |
-|----------|-------|
-| **Critical Issues** | 3 |
-| **High Priority Issues** | 12 |
-| **Medium Priority Issues** | 52 |
-| **Low Priority Issues** | 60 |
-| **Total Issues Found** | 127 |
+| Category                   | Count |
+| -------------------------- | ----- |
+| **Critical Issues**        | 3     |
+| **High Priority Issues**   | 12    |
+| **Medium Priority Issues** | 52    |
+| **Low Priority Issues**    | 60    |
+| **Total Issues Found**     | 127   |
 
 ### Priority Actions
 
@@ -1922,6 +2051,5 @@ stripe.value = await loadStripe(stripeKey);
 
 ---
 
-*Review completed: January 12, 2026*
-*Reviewer: Senior Developer Code Review*
-*Updated: January 12, 2026 - Added file location, organization, and optimization sections*
+_Review completed: January 12, 2026_ _Reviewer: Senior Developer Code Review_ _Updated: January 12,
+2026 - Added file location, organization, and optimization sections_

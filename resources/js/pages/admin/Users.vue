@@ -4,15 +4,15 @@
       title="User Management"
       :columns="tableColumns"
       :rows="users"
-      :server-side
+      server-side
       :total-items="total"
       :per-page="perPage"
-      :show-delete
-      :show-search
-      :show-add
-      :show-download
-      :show-edit
-      :admin-login
+      show-delete
+      show-search
+      show-add
+      show-download
+      show-edit
+      admin-login
       :show-view="false"
       admin-login-title="Login as User"
       @search="handleSearch"

@@ -3,15 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Bookings extends Model
 {
-    public function resource()
+    /**
+     * @return HasMany<\App\Models\Resource, $this>
+     */
+    public function resource(): HasMany
     {
-        return $this->hasOne(Resource::class, 'id', 'resourceId');
+        return $this->hasMany(Resource::class, 'id', 'resource_id');
     }
 
-    public function bookingOrder()
+    /**
+     * @return HasMany<BookingOrder, $this>
+     */
+    public function bookingOrder(): HasMany
     {
         return $this->hasMany(BookingOrder::class, 'id', 'bookingOrderId');
     }

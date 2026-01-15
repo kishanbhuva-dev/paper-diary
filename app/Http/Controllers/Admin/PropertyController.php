@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Property;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class PropertyController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
             $search = $request->search;
@@ -58,7 +59,7 @@ class PropertyController extends Controller
             } else {
                 $property->orderBy($sortBy, $sortOrder);
             }
-            $property = $property->paginate($perPage)->through(function ($property) {
+            $property = $property->paginate($perPage)->each(function (Property $property) {
                 return [
                     'id'             => $property->id,
                     'ownerId'        => $property->ownerId,
@@ -82,7 +83,7 @@ class PropertyController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [

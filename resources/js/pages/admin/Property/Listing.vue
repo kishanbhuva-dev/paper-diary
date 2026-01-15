@@ -4,16 +4,16 @@
       title="Lisings"
       :columns="tableColumns"
       :rows="propertLisings"
-      :server-side
       :total-items="total"
       :per-page="perPage"
-      :show-search
       :show-add="false"
-      :show-download
       :show-edit="false"
       :show-delete="false"
       :show-view="false"
-      :admin-login
+      admin-login
+      show-download
+      server-side
+      show-search
       admin-login-title="Login as User"
       @search="handleSearch"
       @page-change="handlePageChange"

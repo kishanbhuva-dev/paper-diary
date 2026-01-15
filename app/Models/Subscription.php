@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Subscription extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'type',
@@ -26,12 +23,15 @@ class Subscription extends Model
         'ends_at'       => 'datetime',
     ];
 
-    public function user(): BelongsTo
+    /**
+     * @return HasOne<User, $this>
+     */
+    public function user(): HasOne
     {
-        return $this->belongsTo(User::class);
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 
-    public function isActive()
+    public function isActive(): bool
     {
         return $this->stripe_status === 'active' &&
                ($this->ends_at === null || $this->ends_at->isFuture());

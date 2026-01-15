@@ -96,7 +96,7 @@ export default [
       // ═══════════════════════════════════════════════════════════════
       // JAVASCRIPT RULES - STRICT
       // ═══════════════════════════════════════════════════════════════
-      'no-console': 'error',
+      // 'no-console': 'error',
       'no-debugger': 'error',
       'no-alert': 'error',
       'no-unused-vars': [

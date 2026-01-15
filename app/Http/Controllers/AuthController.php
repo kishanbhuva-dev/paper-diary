@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\SendMail;
 use App\Models\User;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ use Throwable;
 
 class AuthController extends Controller
 {
-    public function checkSubscription()
+    public function checkSubscription(): JsonResponse
     {
         $user = Auth::user();
 
@@ -27,7 +28,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $subscriptionDetails = getSubscriptionDetails($user);
+        $subscriptionDetails = getSubscriptionDetails($user->id);
 
         return response()->json([
             'status'          => true,
@@ -36,7 +37,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -57,7 +58,7 @@ class AuthController extends Controller
             // Get detailed subscription information for owners
             $subscription = null;
             if ($user->role === 'owner') {
-                $subscriptionDetails = getSubscriptionDetails($user);
+                $subscriptionDetails = getSubscriptionDetails($user->id);
                 if ($subscriptionDetails) {
                     $subscription = [
                         'has_subscription'     => true,
@@ -107,7 +108,7 @@ class AuthController extends Controller
         }
     }
 
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -155,7 +156,7 @@ class AuthController extends Controller
         }
     }
 
-    public function profileUpdate(Request $request)
+    public function profileUpdate(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -205,7 +206,7 @@ class AuthController extends Controller
         }
     }
 
-    public function logOut(Request $request)
+    public function logOut(Request $request): JsonResponse
     {
         try {
             $request->user()->currentAccessToken()->delete();
@@ -217,7 +218,7 @@ class AuthController extends Controller
         return response()->json($response);
     }
 
-    public function forgetPassword(Request $request)
+    public function forgetPassword(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -233,7 +234,7 @@ class AuthController extends Controller
                 $data = [
                     'name'  => $user->firstName . ' ' . $user->lastName,
                     'token' => $token,
-                    'url'   => env('FRONTEND_URL'),
+                    'url'   => config('app.frontend_url'),
                     'year'  => date('Y'),
                 ];
                 $existing = DB::table('password_reset_tokens')
@@ -267,7 +268,7 @@ class AuthController extends Controller
         }
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -282,12 +283,12 @@ class AuthController extends Controller
             $password_reset = DB::table('password_reset_tokens')->select('*')->where('token', $request->token)->first();
 
             if (empty($password_reset)) {
-                return $response = ['status' => false, 'message' => 'Invalid token', 'data' => ''];
+                return response()->json(['status' => false, 'message' => 'Invalid token', 'data' => ''], 400);
             }
 
             $user = User::where('email', $password_reset->email)->first();
             $expireMinutes = config('auth.passwords.users.expire');
-            if ($password_reset && now()->diffInMinutes($password_reset->created_at) <= $expireMinutes) {
+            if (now()->diffInMinutes($password_reset->created_at) <= $expireMinutes) {
                 $user->password = Hash::make($request->password);
                 if ($user->save()) {
                     $response = ['status' => true, 'message' => 'Password reset successfully', 'data' => ''];
@@ -299,13 +300,13 @@ class AuthController extends Controller
                 return response()->json($response);
             }
 
-            return $response = ['status' => false, 'message' => 'Token expired', 'data' => ''];
+            return response()->json(['status' => false, 'message' => 'Token expired', 'data' => ''], 400);
         } catch (Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => null]);
         }
     }
 
-    public function changePassword(Request $request)
+    public function changePassword(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -332,7 +333,7 @@ class AuthController extends Controller
         }
     }
 
-    public function checkEmail(Request $request)
+    public function checkEmail(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [

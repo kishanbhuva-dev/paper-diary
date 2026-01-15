@@ -6,18 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use App\Models\Property;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
 
 class FacilityController extends Controller
 {
-    public function getFacility(Request $request)
+    public function getFacility(Request $request): JsonResponse
     {
         try {
             $facilities = Facility::where('status', true)->get();
-            if (empty($facilities)) {
-                return response()->json(['status' => false, 'message' => 'No facility found']);
-            }
 
             return response()->json(['status' => true, 'message' => '', 'data' => $facilities]);
         } catch (Exception $e) {
@@ -25,7 +23,7 @@ class FacilityController extends Controller
         }
     }
 
-    public function addFacilityProperty(Request $request)
+    public function addFacilityProperty(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'data.propertyId'   => 'required|integer|exists:property,id',
@@ -33,14 +31,24 @@ class FacilityController extends Controller
             'data.facilityId.*' => 'required|integer|exists:facilities,id',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()->first()]);
+            return response()->json([
+                'status'  => false,
+                'message' => $validator->errors()->first(),
+            ]);
         }
-        $propertyId = $request->data['propertyId'];
-        $facilityIds = $request->data['facilityId'];
-        $property = Property::where('id', $propertyId)->firstOrFail();
-        $property->facilities()->sync($facilityIds);
-        $property->load('facilities');
 
-        return response()->json(['status' => true, 'message' => 'Property facilities updated successfully', 'data' => '']);
+        $propertyId = $request->input('data.propertyId');
+        $facilityIds = $request->input('data.facilityId');
+
+        $property = Property::findOrFail($propertyId);
+        if (! empty($facilityIds)) {
+            $property->facilities()->sync($facilityIds);
+        }
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Property facilities updated successfully',
+            'data'    => $property->load('facilities'),
+        ]);
     }
 }
