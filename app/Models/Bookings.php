@@ -12,7 +12,7 @@ class Bookings extends Model
      */
     public function resource(): HasMany
     {
-        return $this->hasMany(Resource::class, 'id', 'resource_id');
+        return $this->hasMany(Resource::class, 'id', 'resourceId');
     }
 
     /**
