@@ -101,8 +101,8 @@ class DashboardController extends Controller
                 ->whereBetween('booking_orders.created_at', [$todayStart, $todayEnd])
                 ->join('property', 'booking_orders.propertyId', '=', 'property.id')
                 ->join('users', 'property.ownerId', '=', 'users.id')
-                ->selectRaw('property.propertyName as property_name, CONCAT(users.firstName, " ", users.lastName) as owner_name, COUNT(booking_orders.id) as booking_count')
-                ->groupBy('property.id', 'property.propertyName', 'users.firstName', 'users.lastName')
+                ->selectRaw('property.propertyName as property_name, CONCAT(users.firstName, " ", users.lastName) as owner_name, COUNT(booking_orders.id) as booking_count,booking_orders.cost as totalAmount')
+                ->groupBy('property.id', 'property.propertyName', 'users.firstName', 'users.lastName', 'booking_orders.cost')
                 ->orderByDesc('booking_count')
                 ->limit(10)
                 ->get();
