@@ -3,38 +3,60 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Property extends Model
 {
     protected $table = 'property';
 
-    public function owner()
+    /**
+     * @return HasOne<User, $this>
+     */
+    public function owner(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'ownerId');
     }
 
-    public function resourceType()
+    /**
+     * @return BelongsTo<ResourceType, $this>
+     */
+    public function resourceType(): BelongsTo
     {
         return $this->belongsTo(ResourceType::class, 'propertyId', 'id');
     }
 
-    public function resourceTypes()
+    /**
+     * @return HasMany<ResourceType, $this>
+     */
+    public function resourceTypes(): HasMany
     {
         return $this->hasMany(ResourceType::class, 'propertyId', 'id');
     }
 
-    public function propertyImage()
+    /**
+     * @return HasMany<PropertyImage, $this>
+     */
+    public function propertyImage(): HasMany
     {
         return $this->hasMany(PropertyImage::class, 'propertyId', 'id');
     }
 
-    public function facilities()
+    /**
+     * @return BelongsToMany<Facility, $this>
+     */
+    public function facilities(): BelongsToMany
     {
         return $this->belongsToMany(Facility::class, 'facility_property', 'propertyId', 'facilityId');
     }
 
-    public function bookings()
+    /**
+     * @return HasMany<BookingOrder, $this>
+     */
+    public function bookings(): HasMany
     {
         return $this->hasMany(BookingOrder::class, 'propertyId', 'id');
     }
@@ -56,7 +78,7 @@ class Property extends Model
         });
     }
 
-    private static function generateSlug($name)
+    private static function generateSlug(string $name): string
     {
         $slug = Str::slug($name);
 

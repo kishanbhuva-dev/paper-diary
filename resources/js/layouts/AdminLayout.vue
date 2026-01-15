@@ -12,7 +12,7 @@
       </button>
 
       <img
-        src="/public/main_logo.png"
+        src="/main_logo.png"
         class="h-10"
         alt="Logo"
       />
@@ -26,7 +26,7 @@
     >
       <div class="flex items-center justify-center py-6 border-b border-gray-100">
         <img
-          src="/public/main_logo.png"
+          src="/main_logo.png"
           class="h-14"
           alt="Logo"
         />

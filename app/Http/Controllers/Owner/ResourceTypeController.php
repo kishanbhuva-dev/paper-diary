@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\ResourceType;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
 use Validator;
 
 class ResourceTypeController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
             $resourceTypes = ResourceType::where('propertyId', $request->id)->with('property')->get();
@@ -24,7 +25,7 @@ class ResourceTypeController extends Controller
         }
     }
 
-    public function multipleStore(Request $request)
+    public function multipleStore(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -114,7 +115,7 @@ class ResourceTypeController extends Controller
         // }
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -155,7 +156,7 @@ class ResourceTypeController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -196,7 +197,7 @@ class ResourceTypeController extends Controller
         }
     }
 
-    public function multipleUpdate(Request $request)
+    public function multipleUpdate(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -305,7 +306,7 @@ class ResourceTypeController extends Controller
         //     }
     }
 
-    public function show($id)
+    public function show(string $id): JsonResponse
     {
         try {
             $resourceType = ResourceType::where('id', $id)->with('property')->first();
@@ -324,7 +325,7 @@ class ResourceTypeController extends Controller
         }
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         try {
             $resourceType = ResourceType::where('id', $id)->first();

@@ -270,7 +270,7 @@
             <div class="flex-between">
               <div class="flex gap-3">
                 <img
-                  src="/public/user-1.jpg"
+                  src="/user-1.jpg"
                   class="h-10 w-10 rounded-full"
                 />
                 <div>
@@ -326,7 +326,7 @@
       </div>
       <div class="mt-4 flex-center rounded-lg overflow-hidden">
         <img
-          src="/public/map.png"
+          src="/map.png"
           alt="Map Image"
           class="h-full w-full object-cover"
         />

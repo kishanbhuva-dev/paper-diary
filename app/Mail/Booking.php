@@ -14,11 +14,21 @@ class Booking extends Mailable
     use SerializesModels;
 
     /**
+     * @var array<string, mixed>
+     */
+    public $data;
+
+    /**
+     * @var string
+     */
+    public $recipientType;
+
+    /**
      * Create a new message instance.
      *
-     * @param mixed $data
+     * @param array<string, mixed> $data
      */
-    public function __construct($data, string $recipientType)
+    public function __construct(array $data, string $recipientType)
     {
         $this->data = $data;
         $this->recipientType = $recipientType;

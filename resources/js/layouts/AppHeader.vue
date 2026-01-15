@@ -8,7 +8,7 @@
             class="flex items-center space-x-2 transition-opacity hover:opacity-90"
           >
             <img
-              src="/public/main_logo.png"
+              src="/main_logo.png"
               alt="Paper Diary"
               class="h-8 lg:h-10 w-auto"
             />
@@ -129,6 +129,26 @@
                     </div>
                     <span class="font-medium">{{ link.label }}</span>
                   </router-link>
+                  <button
+                    v-if="showBackButton"
+                    class="w-full cursor-pointer flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors group"
+                    @click="
+                      () => {
+                        backToAdmin();
+                        openDropdown = null;
+                      }
+                    "
+                  >
+                    <div
+                      class="w-8 h-8 rounded-lg bg-gray-50 group-hover:bg-blue-100 flex items-center justify-center mr-3 transition-colors"
+                    >
+                      <Icon
+                        icon="lucide:step-back"
+                        class="h-4 w-4 text-gray-500 group-hover:text-blue-600"
+                      />
+                    </div>
+                    <span class="font-medium">Back To Admin</span>
+                  </button>
                 </div>
 
                 <div class="p-2 bg-gray-50/50 border-t border-gray-100">
@@ -179,7 +199,7 @@
       >
         <div class="flex justify-between items-center mb-8">
           <img
-            src="/public/main_logo.png"
+            src="/main_logo.png"
             alt="Logo"
             class="h-8"
           />
@@ -301,6 +321,7 @@ const { user, isAuthenticated, isAdmin, isOwner, logout } = useAuth();
 
 const openDropdown = ref(null);
 const isMobileMenuOpen = ref(false);
+const showBackButton = ref(false);
 
 const toggleDropdown = (label) => {
   openDropdown.value = openDropdown.value === label ? null : label;
@@ -316,6 +337,9 @@ const closeAllDropdowns = () => {
 
 onMounted(() => {
   window.addEventListener('click', closeAllDropdowns);
+
+  const adminToken = localStorage.getItem('adminToken');
+  showBackButton.value = !!adminToken;
 });
 
 onUnmounted(() => {
@@ -344,6 +368,13 @@ const authLinks = computed(() => {
   const links = [
     { name: `${role}-profile`, label: 'My Profile', icon: 'lucide:user-circle' },
     { name: `${role}-change-password`, label: 'Change password', icon: 'lucide:shield-check' },
+    // {
+    //   // name: 'back-to-admin',
+    //   label: 'Back To Admin',
+    //   icon: 'lucide:step-back',
+    //   onClick: backToAdmin,
+    //   show: showBackButton,
+    // },
   ];
 
   if (isAdmin.value) {
@@ -380,6 +411,25 @@ const navigationMenu = [
     ],
   },
 ];
+
+function backToAdmin() {
+  console.log('backToAdmin');
+  const adminToken = localStorage.getItem('adminToken');
+  const adminUser = localStorage.getItem('adminUser');
+
+  if (adminToken && adminUser) {
+    localStorage.clear();
+    localStorage.setItem('authToken', adminToken);
+    localStorage.setItem('user', adminUser);
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    setTimeout(() => {
+      window.location.href = '/admin';
+    }, 500);
+  } else {
+    throw new Error('Admin session not found.');
+  }
+}
 </script>
 
 <style scoped>

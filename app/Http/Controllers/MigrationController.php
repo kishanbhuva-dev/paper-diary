@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 
 class MigrationController extends Controller
 {
-    public function runMigrations(Request $request)
+    public function runMigrations(Request $request): JsonResponse
     {
         try {
             Artisan::call('migrate', ['--force' => true]);
@@ -30,7 +31,7 @@ class MigrationController extends Controller
         }
     }
 
-    public function checkMigrationStatus()
+    public function checkMigrationStatus(): JsonResponse
     {
         try {
             Artisan::call('migrate:status');

@@ -4,11 +4,11 @@
       title="Booking Management"
       :columns="tableColumns"
       :rows="bookings"
-      :server-side
+      server-side
       :per-page="perPage"
       :show-delete="false"
       :show-edit="false"
-      :show-search
+      show-search
       :show-add="false"
       :show-download="false"
       :admin-login="false"

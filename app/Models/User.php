@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -40,32 +40,14 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    public function properties()
+    /**
+     * @return HasMany<Property, $this>
+     */
+    public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'ownerId', 'id');
     }
 
-    public function subscriptions()
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    public function hasActiveSubscription()
-    {
-        return $this->subscriptions()
-            ->where('stripe_status', 'active')
-            ->where(function ($query) {
-                $query->whereNull('ends_at')
-                    ->orWhere('ends_at', '>', now());
-            })
-            ->exists();
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [

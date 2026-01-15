@@ -13,7 +13,7 @@
           </p>
           <div class="flex items-center space-x-3 text-sm">
             <img
-              src="/public/avatar_group.png"
+              src="/avatar_group.png"
               alt="Avatar Group"
               class="h-8"
             />
@@ -33,7 +33,7 @@
         </div>
         <div class="flex justify-center lg:justify-end">
           <img
-            src="/public/hero1.png"
+            src="/hero1.png"
             alt="Hero Image"
           />
         </div>
@@ -44,7 +44,7 @@
       <div class="grid items-center gap-12 lg:grid-cols-2">
         <div class="flex justify-center lg:justify-start">
           <img
-            src="/public/hero2.png"
+            src="/hero2.png"
             alt="Hero Image"
           />
         </div>
@@ -84,7 +84,7 @@
         </div>
         <div class="flex justify-center lg:justify-end">
           <img
-            src="/public/hero3.png"
+            src="/hero3.png"
             alt="Hero Image"
           />
         </div>
@@ -106,7 +106,7 @@
       </div>
       <div class="-mt-24 flex-center">
         <img
-          src="/public/hero4.png"
+          src="/hero4.png"
           alt="Hero Image"
         />
       </div>

@@ -4,7 +4,7 @@
 
   <Toaster
     position="top-right"
-    expand="true"
+    expand
     rich-colors
     :style="{ zIndex: 99999 }"
   />

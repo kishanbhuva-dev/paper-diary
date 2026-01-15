@@ -13,6 +13,7 @@ use App\Models\ResourceType;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -26,7 +27,7 @@ use Throwable;
 
 class BookingsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
             $bookings = BookingOrder::selectRaw("id,propertyId,resourceTypeId,userId,adult,children,price,status,paymentStatus,date_format(arrivalDateTime,'%d-%m-%Y %H:%i') as arrivalDateTime,date_format(departureDateTime,'%d-%m-%Y %H:%i') as departureDateTime,created_at")->where('userId', Auth::user()->id)->with(['property', 'resourceType' => function ($query) {
@@ -72,7 +73,7 @@ class BookingsController extends Controller
         }
     }
 
-    public function booking(Request $request)
+    public function booking(Request $request): JsonResponse
     {
         $bookingOrder = BookingOrder::selectRaw("id,userId,propertyId,resourceTypeId,status,date_format(arrivalDateTime,'%d %b %Y') as arrivalDateTime,date_format(departureDateTime,'%d %b %Y') as departureDateTime")->where('userId', Auth::user()->id);
         if ($request->type == 'past') {
@@ -114,7 +115,7 @@ class BookingsController extends Controller
         return response()->json(['status' => true, 'message' => '', 'data' => $bookingOrder]);
     }
 
-    public function bookingStatusUpdate(Request $request)
+    public function bookingStatusUpdate(Request $request): JsonResponse
     {
         // try {
         $validator = Validator::make($request->all(), [
@@ -152,12 +153,70 @@ class BookingsController extends Controller
             $bookingOrder->status = 'confirm';
             $bookingOrder->paymentStatus = 'paid';
             $bookingOrder->save();
+
+            $userData = [];
+            $userData['bookingId'] = $bookingOrder->id;
+            $userData['userName'] = Auth::user()->firstName . ' ' . Auth::user()->lastName;
+            $userData['arrivalDateTime'] = date('d M Y', strtotime($bookingOrder->arrivalDateTime));
+            $userData['departureDateTime'] = date('d M Y', strtotime($bookingOrder->departureDateTime));
+            $userData['propertyName'] = getPropertyName($bookingOrder->propertyId);
+            $userData['resourceTypeName'] = getResourceTypeName($bookingOrder->resourceTypeId);
+            $userData['totalAdults'] = $bookingOrder->adult;
+            $userData['totalChildren'] = $bookingOrder->children ?? 0;
+            $userData['totalGuests'] = $bookingOrder->adult + ($bookingOrder->children ?? 0);
+            $userData['totalPrice'] = $bookingOrder->price;
+            $userData['guestEmail'] = $bookingOrder->guestEmail;
+            $userData['guestPhone'] = $bookingOrder->guestPhone;
+            $userData['guestAddress'] = $bookingOrder->guestAddress;
+            $userData['additionalInformation'] = $bookingOrder->additionalInformation ?? '';
+            $arrival = Carbon::parse($bookingOrder->arrivalDateTime);
+            $departure = Carbon::parse($bookingOrder->departureDateTime);
+            $interval = $arrival->diffInDays($departure);
+            $userData['totalNights'] = $interval;
+
+            $existingBookings = Bookings::where('bookingOrderId', $bookingOrder->id)->with('resource')->get();
+            $userData['resourceNames'] = $existingBookings->pluck('resource.name')->implode(', ');
+
+            $property = Property::where('id', $bookingOrder->propertyId)->with('owner')->first();
+            $userData['ownerName'] = $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
+
+            $ownerData = [];
+            $ownerData['bookingId'] = $bookingOrder->id;
+            $ownerData['bookingOrderId'] = $bookingOrder->Id;
+            $ownerData['userName'] = $bookingOrder->guestFullName;
+            $ownerData['guestEmail'] = $bookingOrder->guestEmail;
+            $ownerData['guestPhone'] = $bookingOrder->guestPhone;
+            $ownerData['arrivalDateTime'] = date('d M Y', strtotime($bookingOrder->arrivalDateTime));
+            $ownerData['departureDateTime'] = date('d M Y', strtotime($bookingOrder->departureDateTime));
+            $ownerData['propertyName'] = getPropertyName($bookingOrder->propertyId);
+            $ownerData['resourceTypeName'] = getResourceTypeName($bookingOrder->resourceTypeId);
+            $ownerData['totalAdults'] = $bookingOrder->adult;
+            $ownerData['totalChildren'] = $bookingOrder->children ?? 0;
+            $ownerData['totalGuests'] = $bookingOrder->adult + ($bookingOrder->children ?? 0);
+            $ownerData['totalPrice'] = $bookingOrder->price;
+            $ownerData['bookingUser'] = Auth::user()->firstName . ' ' . Auth::user()->lastName;
+            $ownerData['bookingUserEmail'] = Auth::user()->email;
+            $ownerData['totalNights'] = $interval;
+            $ownerData['resourceNames'] = $existingBookings->pluck('resource.name')->implode(', ');
+            $ownerData['ownerName'] = $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
+
+            if (config('mail.default') && config('mail.mailers.' . config('mail.default'))) {
+                $userEmail = Auth::user()->email;
+                $ownerEmail = getPropertyOwnerEmail($bookingOrder->propertyId);
+
+                if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+                    Mail::to($userEmail)->send(new BookingMail($userData, 'user'));
+                }
+                if ($ownerEmail && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
+                    Mail::to($ownerEmail)->send(new BookingMail($ownerData, 'owner'));
+                }
+            }
         } else {
             $bookingOrder->paymentStatus = 'cancelled';
             $bookingOrder->status = 'cancelled';
             $bookingOrder->save();
         }
-        $bookingOrderId = $bookingOrder->propertyId;
+        $bookingOrderId = $bookingOrder->id;
 
         $stripe = new StripeClient($ownerStripeSecret);
         $paymentDetail = $stripe->paymentIntents->retrieve($request->token);
@@ -165,7 +224,7 @@ class BookingsController extends Controller
             $payment = new Payment;
             $payment->transaction_id = $paymentDetail->id;
             $payment->userId = Auth::user()->id;
-            $payment->bookingOrderId = $request->bookingId;
+            $payment->bookingOrderId = $bookingOrderId;
             $payment->save();
         }
 
@@ -175,7 +234,7 @@ class BookingsController extends Controller
         // }
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -257,61 +316,7 @@ class BookingsController extends Controller
                     $bookingItem->price = $resourcePrice;
                     $bookingItem->save();
                 }
-                $userData = [];
-                $userData['bookingId'] = $bookingOrderId;
-                $userData['userName'] = Auth::user()->firstName . ' ' . Auth::user()->lastName;
-                $userData['arrivalDateTime'] = date('d M Y', strtotime($request->arrivalDateTime));
-                $userData['departureDateTime'] = date('d M Y', strtotime($request->departureDateTime));
-                $userData['propertyName'] = getPropertyName($request->propertyId);
-                $userData['resourceTypeName'] = getResourceTypeName($request->resourceTypeId);
-                $userData['totalAdults'] = $request->adults;
-                $userData['totalChildren'] = $request->children ?? 0;
-                $userData['totalGuests'] = $request->adults + ($request->children ?? 0);
-                $userData['totalPrice'] = $resourcePriceTotal;
-                $userData['guestEmail'] = $request->guestEmail;
-                $userData['guestPhone'] = $request->guestPhone;
-                $userData['guestAddress'] = $request->guestAddress;
-                $userData['additionalInformation'] = $request->additionalInformation;
-                $arrival = Carbon::parse($request->arrivalDateTime);
-                $departure = Carbon::parse($request->departureDateTime);
-                $interval = $arrival->diffInDays($departure);
-                $userData['totalNights'] = $interval;
 
-                $resourceNames = $resourcesToBook->pluck('name')->implode(', ');
-                $userData['resourceNames'] = $resourceNames;
-
-                $property = Property::where('id', $request->propertyId)->with('owner')->first();
-                $userData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
-
-                $ownerData = [];
-                $ownerData['bookingId'] = $bookingOrderId;
-                $ownerData['userName'] = $request->guestFullName;
-                $ownerData['guestEmail'] = $request->guestEmail;
-                $ownerData['guestPhone'] = $request->guestPhone;
-                $ownerData['arrivalDateTime'] = date('d M Y', strtotime($request->arrivalDateTime));
-                $ownerData['departureDateTime'] = date('d M Y', strtotime($request->departureDateTime));
-                $ownerData['propertyName'] = getPropertyName($request->propertyId);
-                $ownerData['resourceTypeName'] = getResourceTypeName($request->resourceTypeId);
-                $ownerData['totalAdults'] = $request->adults;
-                $ownerData['totalChildren'] = $request->children ?? 0;
-                $ownerData['totalGuests'] = $request->adults + ($request->children ?? 0);
-                $ownerData['totalPrice'] = $resourcePriceTotal;
-                $ownerData['bookingUser'] = Auth::user()->firstName . ' ' . Auth::user()->lastName;
-                $ownerData['bookingUserEmail'] = Auth::user()->email;
-                $ownerData['totalNights'] = $interval;
-                $ownerData['resourceNames'] = $resourceNames;
-                $ownerData['ownerName'] = $property && $property->owner ? $property->owner->firstName . ' ' . $property->owner->lastName : 'Property Owner';
-                if (config('mail.default') && config('mail.mailers.' . config('mail.default'))) {
-                    $userEmail = Auth::user()->email;
-                    $ownerEmail = getPropertyOwnerEmail($request->propertyId);
-
-                    if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-                        Mail::to($userEmail)->send(new BookingMail($userData, 'user'));
-                    }
-                    if ($ownerEmail && filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
-                        Mail::to($ownerEmail)->send(new BookingMail($ownerData, 'owner'));
-                    }
-                }
                 if ($property->stripeSecretKey) {
                     $ownerStripeSecret = $property->stripeSecretKey;
                 } else {
@@ -338,21 +343,24 @@ class BookingsController extends Controller
                 Stripe::setApiKey($ownerStripeSecret);
 
                 $paymentIntent = PaymentIntent::create([
-                    'amount'                    => $bookingOrder->price * 100,
+                    'amount'                    => (int) ($bookingOrder->price * 100),
                     'currency'                  => 'GBP',
                     'customer'                  => $customer->id,
                     'automatic_payment_methods' => [
                         'enabled' => true,
                     ],
-                    'metadata' => ['registrationId' => $bookingOrderId],
+                    'metadata' => [
+                        'registrationId' => (string) $bookingOrderId,
+                    ],
                 ]);
+
                 $response = [
                     'status'       => true,
                     'bookingId'    => $bookingOrderId,
                     'token'        => (string) $paymentIntent->id,
                     'clientSecret' => $paymentIntent->client_secret,
                     'publishable'  => base64_encode($ownerStripePublicKey),
-                    'total'        => $bookingOrder->price,
+                    'total'        => $bookingOrder->cost * 100,
                 ];
 
                 return response()->json($response);
@@ -364,7 +372,7 @@ class BookingsController extends Controller
         }
     }
 
-    public function propertyDetails(Request $request)
+    public function propertyDetails(Request $request): JsonResponse
     {
         $property = Property::selectRaw('id,ownerId,propertyName,address,address2,city,country,postcode,telephone,phone,latitude,longitude,description,slug,county')->where('slug', $request->slug)->with(['owner', 'resourceTypes', 'facilities', 'propertyImage' => function ($query) {
             $query->orderBy('position', 'asc');
@@ -386,7 +394,7 @@ class BookingsController extends Controller
         return response()->json(['status' => false, 'message' => 'Property not found', 'data' => []]);
     }
 
-    public function getAvailableResourcesTypes(Request $request)
+    public function getAvailableResourcesTypes(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -419,7 +427,7 @@ class BookingsController extends Controller
         }
     }
 
-    public function bookingCancel(Request $request)
+    public function bookingCancel(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -447,7 +455,7 @@ class BookingsController extends Controller
         }
     }
 
-    public function bookingDelete(Request $request)
+    public function bookingDelete(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -469,7 +477,7 @@ class BookingsController extends Controller
         }
     }
 
-    public function createPaymentIntent(Request $request)
+    public function createPaymentIntent(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'amount'   => 'required|integer|min:1',
@@ -516,7 +524,7 @@ class BookingsController extends Controller
         ]);
     }
 
-    public function completePayment(Request $request)
+    public function completePayment(Request $request): JsonResponse
     {
         if (empty($request->payment_intent_id)) {
             return response()->json([

@@ -23,7 +23,7 @@
       :colors="['#8B5CF6']"
       :show-legend="false"
       :show-data-labels="false"
-      animated="true"
+      animated
     />
   </div>
 </template>

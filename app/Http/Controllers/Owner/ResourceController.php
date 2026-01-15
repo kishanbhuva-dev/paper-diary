@@ -8,13 +8,14 @@ use App\Models\Property;
 use App\Models\Resource;
 use App\Models\ResourceType;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class ResourceController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -42,7 +43,7 @@ class ResourceController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -72,7 +73,7 @@ class ResourceController extends Controller
         }
     }
 
-    public function multipleStore(Request $request)
+    public function multipleStore(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -107,7 +108,7 @@ class ResourceController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         try {
             $resources = Resource::where('id', $id)->with('resourceType.property')->first();
@@ -125,7 +126,7 @@ class ResourceController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -159,7 +160,7 @@ class ResourceController extends Controller
         }
     }
 
-    public function multipleUpdate(Request $request)
+    public function multipleUpdate(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -197,7 +198,7 @@ class ResourceController extends Controller
         }
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         try {
             $resources = Resource::where('id', $id)->first();
@@ -219,7 +220,7 @@ class ResourceController extends Controller
         }
     }
 
-    public function resourceWiseList(Request $request)
+    public function resourceWiseList(Request $request): JsonResponse
     {
         try {
             $propertyIds = $request->propertyIds;
@@ -269,25 +270,28 @@ class ResourceController extends Controller
                     $ownerPropertyIds = Property::where('ownerId', $ownerId)->pluck('id');
                     $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $ownerPropertyIds)->pluck('id');
                 }
-                $bookings = BookingOrder::selectRaw('id,guestFullName,guestEmail,guestPhone,resourceTypeId,arrivalDateTime,departureDateTime,status,adult,children')
+                $bookings = BookingOrder::selectRaw('booking_orders.id,guestFullName,guestEmail,guestPhone,booking_orders.resourceTypeId,arrivalDateTime,departureDateTime,booking_orders.status,adult,children')
                     ->whereIn('resourceTypeId', $selectedResourceTypeIds)
                     ->with([
                         'booking' => function ($query) use ($resourcesid) {
                             $query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);
-                        }, 'booking.resource:id,name'])->get();
+                        },
+                        'booking.resource:id,name',
+                    ])->get();
                 $bookings = $bookings->map(function ($order) {
                     return [
                         'id'                => $order->id,
                         'guestFullName'     => $order->guestFullName,
                         'guestEmail'        => $order->guestEmail,
                         'guestPhone'        => $order->guestPhone,
-                        'resourceTypeId'    => $order->resourceTypeId,
+                        'resourceTypeId'    => $order->resourceTypeId, // This is from BookingOrder
                         'arrivalDateTime'   => Carbon::parse($order->arrivalDateTime)->format('d-m-Y'),
                         'departureDateTime' => Carbon::parse($order->departureDateTime)->format('d-m-Y'),
                         'status'            => $order->status,
                         'adult'             => $order->adult,
                         'children'          => $order->children,
-                        'resource_name'     => optional(optional($order->booking->first())->resource)->name ?? 'N/A',
+                        // Access the first booking, then its resource, then the name.
+                        'resource_name' => optional(optional(optional($order->booking)->first())->resource)->first()->name ?? 'N/A',
                     ];
                 });
             }

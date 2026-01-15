@@ -4,14 +4,14 @@
       title="Facilites"
       :columns="tableColumns"
       :rows="facilites"
-      :server-side
+      server-side
       :total-items="total"
       :per-page="perPage"
-      :show-delete
-      :show-search
-      :show-add
-      :show-download
-      :show-edit
+      show-delete
+      show-search
+      show-add
+      show-download
+      show-edit
       :admin-login="false"
       :show-view="false"
       @search="handleSearch"

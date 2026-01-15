@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Resource extends Model
 {
@@ -11,12 +13,18 @@ class Resource extends Model
         'updated_at',
     ];
 
-    public function resourceType()
+    /**
+     * @return HasOne<ResourceType, $this>
+     */
+    public function resourceType(): HasOne
     {
-        return $this->belongsTo(ResourceType::class, 'resourceTypeId', 'id');
+        return $this->hasOne(ResourceType::class, 'id', 'resourceTypeId');
     }
 
-    public function bookings()
+    /**
+     * @return HasMany<Bookings, $this>
+     */
+    public function bookings(): HasMany
     {
         return $this->hasMany(Bookings::class, 'resourceId', 'id');
     }

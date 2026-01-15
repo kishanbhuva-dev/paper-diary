@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
 use Validator;
 
 class FacilityController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
             // $facilities = Facility::where(function ($query) use ($request) {
@@ -38,7 +39,7 @@ class FacilityController extends Controller
             $pagination = $request->pagination ?? 10;
             $facilities = $facility->orderBy($order, $sort)->paginate($pagination);
 
-            if (! empty($facilities)) {
+            if ($facilities->isNotEmpty()) {
                 $response = ['status' => true, 'message' => '', 'data' => $facilities];
             } else {
                 $response = ['status' => false, 'message' => 'No facilities found', 'data' => []];
@@ -50,7 +51,7 @@ class FacilityController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -78,7 +79,7 @@ class FacilityController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         try {
             $facility = Facility::where('id', $id)->first();
@@ -93,7 +94,7 @@ class FacilityController extends Controller
         }
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -128,7 +129,7 @@ class FacilityController extends Controller
         }
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         try {
             $facility = Facility::where('id', $id)->first();

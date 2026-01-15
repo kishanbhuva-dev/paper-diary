@@ -15,7 +15,7 @@
       ></div>
 
       <img
-        src="/public/main_logo.png"
+        src="/main_logo.png"
         alt="Paper Diary"
         class="w-14 animate-[logoPulse_1.8s_ease-in-out_infinite]"
       />

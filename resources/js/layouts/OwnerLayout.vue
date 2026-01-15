@@ -12,7 +12,7 @@
       </button>
 
       <img
-        src="/public/main_logo.png"
+        src="main_logo.png"
         class="h-10"
         alt="Logo"
       />
@@ -26,7 +26,7 @@
     >
       <div class="flex items-center justify-center py-6 border-b border-gray-100">
         <img
-          src="/public/main_logo.png"
+          src="/main_logo.png"
           class="h-14"
           alt="Logo"
         />
@@ -148,7 +148,7 @@
               v-show="!subItem.show || subItem.show.value"
               :key="subItem.name"
               :to="subItem.to"
-              class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
+              class="w-full cursor-pointer flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
               :class="{
                 'bg-blue-600 text-white shadow-sm shadow-blue-500/50': $route.name === subItem.name,
                 'text-gray-700 hover:bg-blue-50': $route.name !== subItem.name,

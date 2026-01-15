@@ -9,7 +9,7 @@
               class="w-16"
             >
               <img
-                src="/public/main_logo.png"
+                src="/main_logo.png"
                 alt="Paper Diary"
               />
             </router-link>

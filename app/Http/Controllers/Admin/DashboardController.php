@@ -6,11 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\BookingOrder;
 use App\Models\Property;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Throwable;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         try {
             $liveProperties = Property::where('status', 1)->count();

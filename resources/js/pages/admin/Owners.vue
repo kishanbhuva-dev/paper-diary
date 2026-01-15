@@ -4,14 +4,14 @@
       title="Owner Management"
       :columns="tableColumns"
       :rows="owners"
-      :server-side
+      server-side
       :total-items="total"
       :per-page="perPage"
-      :show-delete
-      :show-search
-      :show-add
-      :show-download
-      :show-edit
+      show-delete
+      show-search
+      show-add
+      show-download
+      show-edit
       :show-view="false"
       admin-login-title="Login as Owner"
       @search="handleSearch"
