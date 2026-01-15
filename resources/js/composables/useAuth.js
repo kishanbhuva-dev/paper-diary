@@ -67,46 +67,32 @@ export function useAuth() {
   };
 
   async function login(credentials) {
-    const res = await authService.login(credentials);
+    const { data } = await authService.login(credentials);
 
-    if (!res?.data?.token || !res?.data?.user) {
+    if (!data?.token || !data?.user) {
       throw new Error('Login failed: Invalid response from server.');
     }
 
-    persistAuth(res.data.token, res.data.user);
+    persistAuth(data.token, data.user);
 
-    const role = res.data.user.role?.toLowerCase();
-    let routeName;
-
-    if (role === 'owner') {
-      routeName = res.data.subscription.is_active ? 'owner-dashboard' : 'subscription';
-    } else if (role === 'admin') {
-      routeName = 'admin-dashboard';
-    } else {
-      // eslint-disable-next-line no-unused-vars
-      routeName = 'home';
-    }
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectPath = urlParams.get('redirect');
-
+    const redirectPath = new URLSearchParams(window.location.search).get('redirect');
     if (redirectPath) {
       routerInstance.push(redirectPath);
-    } else {
-      const role = res.data.user.role?.toLowerCase();
-      let routeName;
-
-      if (role === 'owner') {
-        routeName = res.data.subscription ? 'owner-dashboard' : 'subscription';
-      } else if (role === 'admin') {
-        routeName = 'admin-dashboard';
-      } else {
-        routeName = 'home';
-      }
-
-      routerInstance.push({ name: routeName });
+      return { success: true, data };
     }
 
-    return { success: true, data: res.data };
+    const role = data.user.role?.toLowerCase();
+    let routeName = 'home';
+
+    if (role === 'owner') {
+      routeName = data.subscription?.is_active ? 'owner-dashboard' : 'subscription';
+    } else if (role === 'admin') {
+      routeName = 'admin-dashboard';
+    }
+
+    routerInstance.push({ name: routeName });
+
+    return { success: true, data };
   }
 
   async function logout() {
