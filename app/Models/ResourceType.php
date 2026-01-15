@@ -26,6 +26,6 @@ class ResourceType extends Model
      */
     public function property(): HasOne
     {
-        return $this->hasOne(Property::class, 'id', 'property_Id');
+        return $this->hasOne(Property::class, 'id', 'propertyId');
     }
 }
