@@ -311,7 +311,7 @@
         <div class="p-4">
           <!-- No Data State -->
           <div
-            v-if="!dashboardDetail?.performance_stats?.todaysTopSites?.length"
+            v-if="!dashboardDetail?.details?.topSites?.length"
             class="flex flex-col items-center justify-center py-12 text-center"
           >
             <div class="p-4 bg-gray-100 rounded-full mb-4">
@@ -330,7 +330,7 @@
             class="space-y-3"
           >
             <div
-              v-for="(site, index) in dashboardDetail?.performance_stats?.todaysTopSites || []"
+              v-for="(site, index) in dashboardDetail?.details?.topSites || []"
               :key="index"
               class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
             >
@@ -342,15 +342,15 @@
                   />
                 </div>
                 <div>
-                  <p class="font-medium text-gray-900 text-sm">{{ site.site_name }}</p>
-                  <p class="text-xs text-gray-600">{{ site.first_name }} {{ site.last_name }}</p>
+                  <p class="font-medium text-gray-900 text-sm">{{ site.property_name }}</p>
+                  <p class="text-xs text-gray-600">{{ site.owner_name }}</p>
                 </div>
               </div>
               <div class="text-right">
                 <p class="font-bold text-gray-900 text-sm">
-                  £{{ formatCurrency(site.total_price) }}
+                  £{{ formatCurrency(site.totalAmount) }}
                 </p>
-                <p class="text-xs text-gray-500">{{ site.room_booking_count }} bookings</p>
+                <p class="text-xs text-gray-500">{{ site.booking_count }} bookings</p>
               </div>
             </div>
           </div>
