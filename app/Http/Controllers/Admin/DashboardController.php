@@ -101,15 +101,15 @@ class DashboardController extends Controller
                 ->whereBetween('booking_orders.created_at', [$todayStart, $todayEnd])
                 ->join('property', 'booking_orders.propertyId', '=', 'property.id')
                 ->join('users', 'property.ownerId', '=', 'users.id')
-                ->selectRaw('property.propertyName as property_name, CONCAT(users.firstName, " ", users.lastName) as owner_name, COUNT(booking_orders.id) as booking_count,booking_orders.cost as totalAmount')
-                ->groupBy('property.id', 'property.propertyName', 'users.firstName', 'users.lastName', 'booking_orders.cost')
+                ->selectRaw('property.propertyName as property_name, CONCAT(users.firstName, " ", users.lastName) as owner_name, COUNT(booking_orders.id) as booking_count, SUM(booking_orders.price) as totalAmount')
+                ->groupBy('property.id', 'property.propertyName', 'users.firstName', 'users.lastName')
                 ->orderByDesc('booking_count')
                 ->limit(10)
                 ->get();
             $details['topSites'] = $topSites;
 
             $bookingTotalPerMonth = BookingOrder::where('status', 'confirm')
-                ->selectRaw('DATE_FORMAT(created_at, "%b-%Y") as month, SUM(price) as total')
+                ->selectRaw('DATE_FORMAT(arrivalDateTime, "%b-%Y") as month, SUM(price) as total, COUNT(*) as count')
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -124,6 +124,7 @@ class DashboardController extends Controller
                 $monthlyBookingData[] = [
                     'month' => $booking->month,
                     'total' => $total,
+                    'count' => $booking->count,
                 ];
             }
 

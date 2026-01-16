@@ -38,76 +38,103 @@ class BookingsController extends Controller
                 $bookings->where('booking_orders.guestEmail', 'like', '%' . $request->guestEmail . '%');
             }
 
-            if ($request->bookedDate) {
-                $bookedDate = Carbon::parse($request->bookedDate)->format('Y-m-d');
+            if ($request->bookedOn) {
+                $bookedDate = Carbon::parse($request->bookedOn)->format('Y-m-d');
                 $bookings->whereDate('booking_orders.created_at', $bookedDate);
-            }
-
-            if ($request->arrivalDateTime && $request->departureDateTime) {
-                $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
-                $endDate = Carbon::parse($request->departureDateTime)->endOfDay();
-
-                $bookings->whereBetween('arrivalDateTime', [$startDate, $endDate]);
-            }
-
-            if ($request->status && $request->status !== 'all') {
-                $valid = ['confirm', 'cancelled'];
-                $filtered = array_intersect(explode(',', $request->status), $valid);
-                if (! empty($filtered)) {
-                    $bookings->whereIn('status', $filtered);
-                } else {
-                    $bookings->whereRaw('1 = 0');
-                }
-            }
-
-            if ($request->paymentstatus && $request->paymentstatus !== 'all') {
-                $valid = ['paid', 'failed'];
-                $filtered = array_intersect(explode(',', $request->paymentstatus), $valid);
-                if (! empty($filtered)) {
-                    $bookings->whereIn('paymentStatus', $filtered);
-                } else {
-                    $bookings->whereRaw('1 = 0');
-                }
             }
 
             if ($request->fromNow) {
                 $now = Carbon::now();
 
                 switch ($request->fromNow) {
-                    case 'hour':
-                        $from = $now->copy()->subHour();
+                    case '1year':
+                        $from = $now->copy()->subYear();
                         $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+
+                        break;
+
+                    case '6months':
+                        $from = $now->copy()->subMonths(6);
+                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+
+                        break;
+
+                    case '4months':
+                        $from = $now->copy()->subMonths(4);
+                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+
+                        break;
+
+                    case '2months':
+                        $from = $now->copy()->subMonths(2);
+                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+
+                        break;
+
+                    case '1month':
+                        $from = $now->copy()->subMonth();
+                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+
+                        break;
+
+                    case '2weeks':
+                        $from = $now->copy()->subWeeks(2);
+                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+
+                        break;
+
+                    case '1week':
+                        $from = $now->copy()->subWeek();
+                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+
+                        break;
+
+                    case 'yesterday':
+                        $bookings->whereDate('booking_orders.created_at', Carbon::yesterday());
 
                         break;
 
                     case 'today':
-                        $from = Carbon::today();
-                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
-
-                        break;
-
-                    case 'week':
-                        $from = $now->copy()->startOfWeek();
-                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
-
-                        break;
-
-                    case 'month':
-                        $from = $now->copy()->startOfMonth();
-                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
-
-                        break;
-
-                    case 'year':
-                        $from = $now->copy()->startOfYear();
-                        $bookings->whereBetween('booking_orders.created_at', [$from, $now]);
+                        $bookings->whereDate('booking_orders.created_at', Carbon::today());
 
                         break;
                 }
-
-                $bookings->orderBy('booking_orders.created_at', 'desc');
             }
 
+            if ($request->arrivalDateTime || $request->departureDateTime) {
+                if ($request->arrivalDateTime && $request->departureDateTime) {
+                    $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
+                    $endDate = Carbon::parse($request->departureDateTime)->endOfDay();
+                    $bookings->whereBetween('arrivalDateTime', [$startDate, $endDate]);
+                } elseif ($request->arrivalDateTime) {
+                    $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
+                    $endDate = Carbon::parse($request->arrivalDateTime)->endOfDay();
+                    $bookings->whereBetween('arrivalDateTime', [$startDate, $endDate]);
+                } elseif ($request->departureDateTime) {
+                    $startDate = Carbon::parse($request->departureDateTime)->startOfDay();
+                    $endDate = Carbon::parse($request->departureDateTime)->endOfDay();
+                    $bookings->whereBetween('departureDateTime', [$startDate, $endDate]);
+                }
+            }
+            if ($request->status && $request->status !== 'all') {
+                $valid = ['confirm', 'cancelled'];
+                $filtered = array_intersect(explode(',', $request->status), $valid);
+                if (! empty($filtered)) {
+                    $bookings->whereIn('booking_orders.status', $filtered);
+                } else {
+                    $bookings->whereRaw('1 = 0');
+                }
+            }
+
+            if ($request->paymentStatus && $request->paymentStatus !== 'all') {
+                $valid = ['paid', 'failed', 'unpaid'];
+                $filtered = array_intersect(explode(',', $request->paymentStatus), $valid);
+                if (! empty($filtered)) {
+                    $bookings->whereIn('booking_orders.paymentStatus', $filtered);
+                } else {
+                    $bookings->whereRaw('1 = 0');
+                }
+            }
             $bookings->with(['user' => function ($query) {
                 $query->select('id', 'firstName', 'lastName', 'email');
             }, 'resourceType.resources' => function ($query) {
@@ -129,13 +156,13 @@ class BookingsController extends Controller
                 'bookedOn'           => 'booking_orders.created_at',
             ];
 
-            $sortColumn = $columnMap[$sortBy] ?? 'booking_orders.' . $sortBy;
+            $sortColumn = $columnMap[$sortBy] ?? 'booking_orders.id';
 
             if ($sortBy === 'fromNow') {
                 $sortColumn = 'booking_orders.created_at';
             }
 
-            $bookings = $bookings->orderBy($sortBy, $sortOrder)->paginate($perPage);
+            $bookings = $bookings->orderBy($sortColumn, $sortOrder)->paginate($perPage);
             $bookings->getCollection()->transform(function ($booking) {
                 $booking->fromNow = Carbon::parse($booking->created_at)->diffForHumans();
 
