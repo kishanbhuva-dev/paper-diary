@@ -16,70 +16,64 @@ class PropertyController extends Controller
         try {
             $search = $request->search;
             $perPage = $request->perPage ?? 10;
-
-            $property = Property::selectRaw('id,ownerId,propertyName,status, 
-                (SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status = "confirm") AS totalRevenue,
-                (SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status != "confirm") AS lostAmount')
-                ->with(['owner' => function ($query) {
-                    $query->select('id', 'firstName', 'lastName', 'email', 'phone', 'telephone');
-                }]);
-
-            if ($search) {
-                $property->where(function ($query) use ($search) {
-                    $query->whereHas('owner', function ($ownerQuery) use ($search) {
-                        $ownerQuery->where('firstName', 'LIKE', "%{$search}%")
-                            ->orWhere('lastName', 'LIKE', "%{$search}%")
-                            ->orWhere('email', 'LIKE', "%{$search}%")
-                            ->orWhere('phone', 'LIKE', "%{$search}%")
-                            ->orWhere('telephone', 'LIKE', "%{$search}%");
-                    })->orWhere('propertyName', 'LIKE', "%{$search}%")
-                        ->orWhereRaw('(SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status = "confirm") LIKE ?', ["%{$search}%"])
-                        ->orWhereRaw('(SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status != "confirm") LIKE ?', ["%{$search}%"]);
-                });
-            }
             $sortBy = $request->sortBy ?? 'id';
             $sortOrder = $request->sortOrder ?? 'asc';
+            $totalRevenueQuery = '(SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status = "confirm")';
+            $lostAmountQuery = '(SELECT COALESCE(SUM(price), 0) FROM `booking_orders` WHERE propertyId = property.id AND status != "confirm")';
+            $query = Property::join('users', 'property.ownerId', '=', 'users.id')
+                ->selectRaw("
+                property.id,
+                property.ownerId,
+                property.propertyName,
+                property.status,
+                CONCAT(users.firstName, ' ', users.lastName) as ownerName,
+                users.email as ownerEmail,
+                users.phone as ownerPhone,
+                users.telephone as ownerTelephone,
+                {$totalRevenueQuery} as totalRevenue,
+                {$lostAmountQuery} as lostAmount
+            ");
+            if ($search) {
+                $query->where(function ($q) use ($search, $totalRevenueQuery, $lostAmountQuery) {
+                    $q->where('users.firstName', 'LIKE', "%{$search}%")
+                        ->orWhere('users.lastName', 'LIKE', "%{$search}%")
+                        ->orWhere('users.email', 'LIKE', "%{$search}%")
+                        ->orWhere('users.phone', 'LIKE', "%{$search}%")
+                        ->orWhere('users.telephone', 'LIKE', "%{$search}%")
+                        ->orWhere('property.propertyName', 'LIKE', "%{$search}%")
+                        ->orWhereRaw("{$totalRevenueQuery} LIKE ?", ["%{$search}%"])
+                        ->orWhereRaw("{$lostAmountQuery} LIKE ?", ["%{$search}%"]);
+                });
+            }
 
             if ($sortBy === 'ownerName') {
-                $property->join('users', 'property.ownerId', '=', 'users.id')
-                    ->orderByRaw("CONCAT(users.firstName, ' ', users.lastName) {$sortOrder}")
-                    ->select('property.*');
-            } elseif ($sortBy === 'ownerEmail') {
-                $property->join('users', 'property.ownerId', '=', 'users.id')
-                    ->orderBy('users.email', $sortOrder)
-                    ->select('property.*');
-            } elseif ($sortBy === 'ownerPhone') {
-                $property->join('users', 'property.ownerId', '=', 'users.id')
-                    ->orderBy('users.phone', $sortOrder)
-                    ->select('property.*');
-            } elseif ($sortBy === 'ownerTelephone') {
-                $property->join('users', 'property.ownerId', '=', 'users.id')
-                    ->orderBy('users.telephone', $sortOrder)
-                    ->select('property.*');
-            } else {
-                $property->orderBy($sortBy, $sortOrder);
-            }
-            $property = $property->paginate($perPage)->each(function (Property $property) {
-                return [
-                    'id'             => $property->id,
-                    'ownerId'        => $property->ownerId,
-                    'propertyName'   => $property->propertyName,
-                    'status'         => $property->status,
-                    'totalRevenue'   => $property->totalRevenue,
-                    'lostAmount'     => $property->lostAmount,
-                    'ownerName'      => $property->owner->firstName . ' ' . $property->owner->lastName,
-                    'ownerEmail'     => $property->owner->email,
-                    'ownerPhone'     => $property->owner->phone,
-                    'ownerTelephone' => $property->owner->telephone,
+                $query->orderByRaw("CONCAT(users.firstName, ' ', users.lastName) {$sortOrder}");
+            } elseif (in_array($sortBy, ['ownerEmail', 'ownerPhone', 'ownerTelephone'])) {
+                $columnMap = [
+                    'ownerEmail'     => 'users.email',
+                    'ownerPhone'     => 'users.phone',
+                    'ownerTelephone' => 'users.telephone',
                 ];
-            });
-            $response = ['status' => true, 'message' => '', 'data' => $property];
+                $query->orderBy($columnMap[$sortBy], $sortOrder);
+            } elseif (in_array($sortBy, ['totalRevenue', 'lostAmount'])) {
+                $query->orderBy($sortBy, $sortOrder);
+            } else {
+                $query->orderBy("property.{$sortBy}", $sortOrder);
+            }
 
-            return response()->json($response);
+            $property = $query->paginate($perPage);
+
+            return response()->json([
+                'status'  => true,
+                'message' => '',
+                'data'    => $property,
+            ]);
         } catch (Throwable $th) {
-            $response = ['status' => false, 'message' => $th->getMessage(), 'data' => []];
-
-            return response()->json($response);
+            return response()->json([
+                'status'  => false,
+                'message' => $th->getMessage(),
+                'data'    => [],
+            ]);
         }
     }
 
