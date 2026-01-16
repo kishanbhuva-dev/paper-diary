@@ -61,9 +61,9 @@
           </div>
         </div>
 
-        <div class="absolute top-5 left-0 w-full h-1 bg-gray-200 -z-0 rounded-full"></div>
+        <div class="absolute top-5 left-0 w-full h-1 bg-gray-200 z-0 rounded-full"></div>
         <div
-          class="absolute top-5 left-0 h-1 bg-blue-600 transition-all duration-500 ease-in-out rounded-full -z-0"
+          class="absolute top-5 left-0 h-1 bg-blue-600 transition-all duration-500 ease-in-out rounded-full z-0"
           :style="{ width: ((currentStep - 1) / 2) * 100 + '%' }"
         ></div>
       </div>
@@ -82,7 +82,7 @@
                   v-if="currentStep === 1"
                   :id="normalizedPropertyId"
                   ref="step1Ref"
-                  :in-wizard
+                  in-wizard
                   :edit-mode="startedWithId"
                   @success="handleStep1Success"
                 />
@@ -91,7 +91,7 @@
                   v-if="currentStep === 2"
                   ref="step2Ref"
                   :property-id="normalizedPropertyId"
-                  :in-wizard
+                  in-wizard
                   :edit-mode="startedWithId"
                   @success="handleStep2Success"
                 />
@@ -101,7 +101,7 @@
                   ref="step3Ref"
                   :property-id="normalizedPropertyId"
                   :resource-types="resourceTypes"
-                  :in-wizard
+                  in-wizard
                   :edit-mode="startedWithId"
                   @success="handleStep3Success"
                 />
@@ -194,7 +194,6 @@ const pendingChanges = ref({
   resources: null,
 });
 
-// Component Refs
 const step1Ref = ref(null);
 const step2Ref = ref(null);
 const step3Ref = ref(null);
@@ -207,7 +206,6 @@ onMounted(() => {
 });
 
 // --- COMPUTED ---
-
 const normalizedPropertyId = computed(() => {
   if (!propertyId.value) {
     return null;
@@ -239,42 +237,6 @@ const stepTitle = computed(() => {
 });
 
 // --- NAVIGATION ---
-const submitCurrentStep = async () => {
-  if (!currentStepRef.value?.handleSubmit) {
-    return;
-  }
-
-  loading.value = true;
-  try {
-    const result = await currentStepRef.value.handleSubmit();
-
-    // If in Edit mode, we collect the returned payload for final batch update
-    if (startedWithId.value) {
-      if (currentStep.value === 1) {
-        pendingChanges.value.property = result;
-      }
-      if (currentStep.value === 2) {
-        pendingChanges.value.resourceTypes = result;
-      }
-      if (currentStep.value === 3) {
-        pendingChanges.value.resources = result;
-      }
-
-      if (currentStep.value === 3) {
-        await applyEdits();
-      } else {
-        nextStep();
-      }
-    } else {
-      // Create mode: Success is handled by child success emits
-    }
-  } catch (e) {
-    throw new Error(e);
-  } finally {
-    loading.value = false;
-  }
-};
-
 const nextStep = () => {
   if (currentStep.value < 3) {
     currentStep.value++;
@@ -285,6 +247,43 @@ const nextStep = () => {
 const prevStep = () => {
   if (currentStep.value > 1) {
     currentStep.value--;
+  }
+};
+
+const submitCurrentStep = async () => {
+  if (!currentStepRef.value?.handleSubmit) {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const result = await currentStepRef.value.handleSubmit();
+
+    if (startedWithId.value) {
+      if (currentStep.value === 1) {
+        pendingChanges.value.property = result;
+      }
+      if (currentStep.value === 2) {
+        pendingChanges.value.resourceTypes = result;
+      }
+      if (currentStep.value === 3) {
+        pendingChanges.value.resources = result;
+      }
+    }
+
+    if (currentStep.value === 3) {
+      if (startedWithId.value) {
+        await applyEdits();
+      } else {
+        router.push({ name: 'properties' });
+      }
+    } else {
+      nextStep();
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -311,7 +310,7 @@ const loadResourceTypes = async (id) => {
     const types = await ownerService.fetchResourceTypes(id);
     resourceTypes.value = (types || []).map((t) => t.id);
   } catch (e) {
-    throw new Error(e);
+    console.error(e);
   }
 };
 
@@ -323,22 +322,17 @@ const handleStep1Success = (data) => {
     }
     propertyId.value = data.id;
   }
-  nextStep();
 };
 
 const handleStep2Success = (data) => {
   if (data?.resourceTypes) {
     resourceTypes.value = data.resourceTypes;
   }
-  nextStep();
 };
 
-const handleStep3Success = async (data) => {
+const handleStep3Success = (data) => {
   if (startedWithId.value) {
     pendingChanges.value.resources = data;
-    await applyEdits();
-  } else {
-    router.push({ name: 'properties' });
   }
 };
 
@@ -352,7 +346,7 @@ const cancelWizard = async () => {
       }
       await ownerService.deleteProperty(normalizedPropertyId.value);
     } catch (err) {
-      throw new Error(err);
+      console.error(err);
     }
   }
   router.push({ name: 'properties' });
@@ -371,7 +365,6 @@ const applyEdits = async () => {
   try {
     const numericId = normalizedPropertyId.value;
 
-    // 1. Process Property Changes
     if (pendingChanges.value.property) {
       const p = pendingChanges.value.property;
       if (p.propertyPayload) {
@@ -380,13 +373,11 @@ const applyEdits = async () => {
       if (p.removedImageIds?.length) {
         await ownerService.deletePropertyImages(p.removedImageIds);
       }
-
       let uploadedNewIds = [];
       if (p.newFiles?.length) {
         const uploaded = await ownerService.addPropertyImages(numericId, p.newFiles);
         uploadedNewIds = (uploaded || []).map((u) => u.id).filter(Boolean);
       }
-
       const finalOrder = [...(p.orderedImageIds || [])];
       if (uploadedNewIds.length) {
         finalOrder.push(...uploadedNewIds);
@@ -394,7 +385,6 @@ const applyEdits = async () => {
       if (finalOrder.length > 0) {
         await ownerService.changePropertyImagePosition(numericId, finalOrder).catch(() => {});
       }
-
       if (Array.isArray(p.facilityIds)) {
         await ownerService.setPropertyFacilities({
           propertyId: numericId,
@@ -403,14 +393,10 @@ const applyEdits = async () => {
       }
     }
 
-    // 2. Process Resource Types
     if (pendingChanges.value.resourceTypes) {
       const rt = pendingChanges.value.resourceTypes;
       if (rt.deleted?.length) {
-        for (const id of rt.deleted) {
-          // eslint-disable-next-line no-await-in-loop
-          await ownerService.deleteResourceType(id);
-        }
+        await Promise.all(rt.deleted.map((id) => ownerService.deleteResourceType(id)));
       }
       if (rt.toUpdate?.length) {
         await ownerService.resourceTypeMultipleUpdate({
@@ -433,14 +419,10 @@ const applyEdits = async () => {
       }
     }
 
-    // 3. Process Resources
     if (pendingChanges.value.resources) {
       const rs = pendingChanges.value.resources;
       if (rs.deleted?.length) {
-        for (const id of rs.deleted) {
-          // eslint-disable-next-line no-await-in-loop
-          await ownerService.deleteResource(id);
-        }
+        await Promise.all(rs.deleted.map((id) => ownerService.deleteResource(id)));
       }
       if (rs.toUpdate?.length) {
         await ownerService.resourceMultipleUpdate({
@@ -458,10 +440,9 @@ const applyEdits = async () => {
         });
       }
     }
-
     router.push({ name: 'properties' });
   } catch (err) {
-    throw new Error(err);
+    console.error(err);
   } finally {
     loading.value = false;
   }

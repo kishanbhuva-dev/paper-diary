@@ -17,7 +17,7 @@
     >
       <Icon
         icon="mdi:alert-circle"
-        class="w-6 h-6 mr-3 flex-shrink-0 text-red-500"
+        class="w-6 h-6 mr-3 shrink-0 text-red-500"
       />
       <span class="whitespace-pre-wrap text-base">{{ error }}</span>
     </div>
@@ -26,7 +26,7 @@
       title="Bookings Management"
       :columns="tableColumns"
       :rows="bookings"
-      :server-side
+      server-side
       :per-page="perPage"
       :available-filters="filterConfig"
       :show-delete="false"
@@ -215,6 +215,48 @@ const bookingIdToDelete = ref(null);
 
 const filterConfig = [
   {
+    label: 'Guest Name',
+    key: 'guestName',
+    type: 'text',
+  },
+  {
+    label: 'Guest Email',
+    key: 'guestEmail',
+    type: 'text',
+  },
+  {
+    label: 'Arrival Date',
+    key: 'arrivalDateTime',
+    type: 'date',
+  },
+  {
+    label: 'Departure Date',
+    key: 'departureDateTime',
+    type: 'date',
+  },
+  {
+    label: 'Booked On',
+    key: 'bookedOn',
+    type: 'date',
+  },
+  {
+    label: 'From Now',
+    key: 'fromNow',
+    type: 'select',
+    options: [
+      { label: 'All From now', value: 'all' },
+      { label: '1 Year ago', value: '1year' },
+      { label: '6 Months ago', value: '6months' },
+      { label: '4 Months ago', value: '4months' },
+      { label: '2 Month ago', value: '2month' },
+      { label: '1 Month ago', value: '1month' },
+      { label: '2 Weeks ago', value: '2weeks' },
+      { label: '1 Week ago', value: '1week' },
+      { label: 'Yesterday', value: 'yesterday' },
+      { label: 'Today', value: 'today' },
+    ],
+  },
+  {
     label: 'Status',
     key: 'status',
     type: 'select',
@@ -229,15 +271,16 @@ const filterConfig = [
     type: 'select',
     options: [
       { label: 'Paid', value: 'paid' },
-      { label: 'Unpaid', value: 'unpaid' },
+      { label: 'Unpaid', value: 'failed' },
     ],
   },
 ];
 
 const tableColumns = [
-  { label: 'Property', key: 'property.propertyName', sortable: false },
+  { label: 'Property', key: 'property.propertyName', sortable: true },
   { label: 'Resource', key: 'resource_type_name', sortable: true },
-  { label: 'Guest', key: 'guestName', sortable: true },
+  { label: 'Guest Name', key: 'guestName', sortable: true },
+  { label: 'Guest Email', key: 'guestEmail', sortable: true },
   { label: 'Check-in', key: 'arrivalDateTime', sortable: true },
   { label: 'Check-out', key: 'departureDateTime', sortable: true },
   { label: 'Price', key: 'price', sortable: true },
@@ -295,7 +338,7 @@ const handleSave = async () => {
   try {
     const payload = {
       id: selectedBooking.value.id,
-      owner_note: selectedBooking.value.owner_note,
+      ownerNotes: selectedBooking.value.owner_note,
     };
     await ownerService.updateBooking(selectedBooking.value.id, payload);
     isModalVisible.value = false;
@@ -323,6 +366,7 @@ const handleSearch = (term) => {
   currentPage.value = 1;
   loadData();
 };
+
 const handlePageChange = (page) => {
   currentPage.value = page;
   loadData();
