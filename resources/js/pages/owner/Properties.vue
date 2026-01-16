@@ -26,14 +26,14 @@
       title="Property Management"
       :columns="tableColumns"
       :rows="properties"
-      :server-side
+      server-side
       :per-page="perPage"
-      :show-delete
+      show-delete
       :show-view="false"
-      :show-search
-      :show-add
-      :show-download
-      :show-edit
+      show-search
+      show-add
+      show-download
+      show-edit
       :admin-login="false"
       @search="handleSearch"
       @page-change="handlePageChange"
@@ -92,7 +92,7 @@ const tableColumns = [
   {
     label: 'Address',
     key: (item) => truncateString(item.address, 15),
-    sortable: false,
+    sortable: true,
   },
   { label: 'City', key: 'city', sortable: true },
   { label: 'Country', key: 'country', sortable: true },

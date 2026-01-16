@@ -57,6 +57,8 @@ class PropertyController extends Controller
                 $query->orderBy($columnMap[$sortBy], $sortOrder);
             } elseif (in_array($sortBy, ['totalRevenue', 'lostAmount'])) {
                 $query->orderBy($sortBy, $sortOrder);
+            } elseif ($sortBy === 'toggle-status') {
+                $query->orderBy('property.status', $sortOrder);
             } else {
                 $query->orderBy("property.{$sortBy}", $sortOrder);
             }

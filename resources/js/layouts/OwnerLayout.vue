@@ -11,11 +11,13 @@
         />
       </button>
 
-      <img
-        src="main_logo.png"
-        class="h-10"
-        alt="Logo"
-      />
+      <a href="/owner">
+        <img
+          src="main_logo.png"
+          class="h-10"
+          alt="Logo"
+        />
+      </a>
     </div>
 
     <aside
@@ -25,11 +27,13 @@
       ]"
     >
       <div class="flex items-center justify-center py-6 border-b border-gray-100">
-        <img
-          src="/main_logo.png"
-          class="h-14"
-          alt="Logo"
-        />
+        <a href="/owner">
+          <img
+            src="/main_logo.png"
+            class="h-14"
+            alt="Logo"
+          />
+        </a>
       </div>
 
       <nav class="p-4 space-y-3 overflow-y-auto scrollbar-hide h-[calc(100%-12rem)]">

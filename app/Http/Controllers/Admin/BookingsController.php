@@ -46,8 +46,6 @@ class BookingsController extends Controller
                 $bookings->where(function ($query) use ($searchTerm, $rawSearch) {
                     $query->where('property.propertyName', 'like', $searchTerm)
                         ->orWhereRaw("CONCAT(users.firstName, ' ', users.lastName) LIKE ?", [$searchTerm])
-                        ->orWhere('users.firstName', 'like', $searchTerm)
-                        ->orWhere('users.lastName', 'like', $searchTerm)
                         ->orWhere('users.email', 'like', $searchTerm)
                         ->orWhere('booking_orders.status', 'like', $searchTerm)
                         ->orWhere('booking_orders.id', 'like', $searchTerm)

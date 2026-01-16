@@ -166,7 +166,7 @@
 
     <div
       v-if="hasActiveFilters"
-      class="mb-6 flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-200"
+      class="p-3 flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-200"
     >
       <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mr-1"
         >Active:</span
