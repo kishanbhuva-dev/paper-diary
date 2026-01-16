@@ -10,7 +10,7 @@
       :show-edit="false"
       show-search
       :show-add="false"
-      :show-download="false"
+      :show-download
       :admin-login="false"
       :show-view="false"
       @filter-change="handleFilterChange"
