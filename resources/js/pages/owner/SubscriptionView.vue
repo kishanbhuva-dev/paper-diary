@@ -345,7 +345,7 @@
                 <div>
                   <label class="text-sm font-medium text-slate-600">Amount</label>
                   <p class="text-slate-900 font-medium">
-                    ${{ selectedSubscription.amount || '12.00' }}
+                    £{{ selectedSubscription.amount || '12.00' }}
                   </p>
                 </div>
                 <div>
