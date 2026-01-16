@@ -214,9 +214,8 @@ function getSubscriptionDetails(int $user_id): array
                 'refund_status'        => 'not_refunded',
             ],
 
-            'is_active' => $isDbActive,
-
-            'user' => [
+            'is_active' => $stripeSub->status,
+            'user'      => [
                 'id'    => $user->id,
                 'name'  => $user->firstName . ' ' . $user->lastName,
                 'email' => $user->email,

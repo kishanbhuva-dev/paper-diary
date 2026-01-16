@@ -18,21 +18,21 @@ class BookingsController extends Controller
     {
         try {
             $bookings = BookingOrder::selectRaw("
-                booking_orders.id, 
-                booking_orders.propertyId, 
-                booking_orders.resourceTypeId, 
-                booking_orders.userId, 
+                booking_orders.id,
+                booking_orders.propertyId,
+                booking_orders.resourceTypeId,
+                booking_orders.userId,
                 booking_orders.status,
                 booking_orders.guestFullName,
                 booking_orders.guestEmail,
                 DATE_FORMAT(booking_orders.created_at, '%d %b %Y') as bookedOn,
-                DATE_FORMAT(booking_orders.arrivalDateTime, '%d-%m-%Y') as arrivalDateTime, 
-                DATE_FORMAT(booking_orders.departureDateTime, '%d-%m-%Y') as departureDateTime, 
-                booking_orders.status, 
-                DATE_FORMAT(booking_orders.arrivalDateTime, '%d %b %Y') as arrivalDateTime, 
-                DATE_FORMAT(booking_orders.departureDateTime, '%d %b %Y') as departureDateTime, 
-                COALESCE(property.propertyName, 'N/A') as propertyName, 
-                COALESCE(CONCAT(users.firstName, ' ', users.lastName), 'N/A') as ownerName, 
+                DATE_FORMAT(booking_orders.arrivalDateTime, '%d-%m-%Y') as arrivalDateTime,
+                DATE_FORMAT(booking_orders.departureDateTime, '%d-%m-%Y') as departureDateTime,
+                booking_orders.status,
+                DATE_FORMAT(booking_orders.arrivalDateTime, '%d %b %Y') as arrivalDateTime,
+                DATE_FORMAT(booking_orders.departureDateTime, '%d %b %Y') as departureDateTime,
+                COALESCE(property.propertyName, 'N/A') as propertyName,
+                COALESCE(CONCAT(users.firstName, ' ', users.lastName), 'N/A') as ownerName,
                 COALESCE(users.email, 'N/A') as ownerEmail
             ")
                 ->leftJoin('property', 'booking_orders.propertyId', '=', 'property.id')
@@ -45,6 +45,7 @@ class BookingsController extends Controller
 
                 $bookings->where(function ($query) use ($searchTerm, $rawSearch) {
                     $query->where('property.propertyName', 'like', $searchTerm)
+                        ->orWhereRaw("CONCAT(users.firstName, ' ', users.lastName) LIKE ?", [$searchTerm])
                         ->orWhere('users.firstName', 'like', $searchTerm)
                         ->orWhere('users.lastName', 'like', $searchTerm)
                         ->orWhere('users.email', 'like', $searchTerm)
