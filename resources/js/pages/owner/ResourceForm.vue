@@ -1,10 +1,7 @@
 <template>
   <div
-    :class="[
-      !inWizard
-        ? 'p-8 bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50'
-        : '',
-    ]"
+    class="p-8 bg-white rounded-3xl"
+    :class="[inWizard ? '' : 'border border-gray-100 shadow-xl shadow-gray-200/50']"
   >
     <div class="flex items-center justify-between mb-8">
       <div class="flex items-center gap-3">
@@ -69,7 +66,7 @@
               />
             </div>
 
-            <div class="md:col-span-1 flex justify-end mt-[28px]">
+            <div class="md:col-span-1 flex justify-end mt-7">
               <button
                 type="button"
                 class="w-11 h-11 cursor-pointer text-slate-300 bg-slate-50 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center border border-transparent hover:border-red-100"
@@ -85,34 +82,6 @@
           </div>
         </div>
       </transition-group>
-    </div>
-
-    <div class="flex justify-end mt-10">
-      <div
-        v-if="!props.inWizard"
-        class="flex items-center gap-3"
-      >
-        <button
-          type="button"
-          class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors"
-          @click="cancel"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          :disabled="submitting"
-          class="px-10 py-3 text-sm font-bold text-white bg-indigo-600 rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95 flex items-center gap-2"
-          @click="handleSubmit"
-        >
-          <Icon
-            v-if="submitting"
-            icon="eos-icons:loading"
-            class="w-5 h-5 animate-spin"
-          />
-          {{ submitting ? 'Saving...' : 'Finalize & Submit' }}
-        </button>
-      </div>
     </div>
   </div>
 
@@ -382,7 +351,6 @@ const handleSubmit = async () => {
 };
 
 defineExpose({ handleSubmit });
-const cancel = () => emits('cancel');
 </script>
 
 <style scoped>

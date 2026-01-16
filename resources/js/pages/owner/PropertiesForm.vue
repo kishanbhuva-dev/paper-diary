@@ -1,5 +1,5 @@
 <template>
-  <div :class="[!inWizard ? 'px-4 sm:px-6 py-8 bg-gray-50/50 min-h-screen' : '']">
+  <div :class="[!inWizard ? 'px-4 sm:px-6 py-8 min-h-screen' : '']">
     <div :class="[!inWizard ? 'max-w-5xl mx-auto' : '']">
       <div
         v-if="!inWizard"
@@ -16,7 +16,8 @@
       </div>
 
       <div
-        class="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/40 overflow-hidden"
+        class="bg-white rounded-3xl overflow-hidden"
+        :class="[inWizard ? '' : 'border border-gray-100 shadow-xl shadow-gray-200/40 ']"
       >
         <div
           v-if="loadingItem"
@@ -188,7 +189,6 @@
                   v-model="formData.stripePublicKey"
                   label="Stripe Public Key"
                   placeholder="pk_test_..."
-                  :pattern="/^pk_(test|live)_[A-Za-z0-9]{24,}$/"
                 />
                 <BaseInput
                   :ref="setInputRef"
@@ -196,7 +196,6 @@
                   label="Stripe Secret Key"
                   type="password"
                   placeholder="sk_test_..."
-                  :pattern="/^sk_(test|live)_[A-Za-z0-9]{24,}$/"
                 />
               </div>
               <div
@@ -307,36 +306,6 @@
               />
             </div>
           </div>
-
-          <div
-            v-if="!inWizard"
-            class="flex items-center justify-between p-8 bg-slate-900 border-t border-slate-800 mt-4"
-          >
-            <button
-              type="button"
-              class="px-8 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors"
-              @click="handleCancel"
-            >
-              Discard Changes
-            </button>
-            <button
-              type="submit"
-              :disabled="submitting"
-              class="px-10 py-4 bg-blue-600 text-white text-sm font-bold rounded-2xl hover:bg-blue-500 transition-all flex items-center gap-3 shadow-lg shadow-blue-500/20 disabled:opacity-50"
-            >
-              <Icon
-                v-if="submitting"
-                icon="eos-icons:loading"
-                class="w-5 h-5 animate-spin"
-              />
-              <Icon
-                v-else
-                icon="ic:round-save"
-                class="w-5 h-5"
-              />
-              {{ isEditing ? 'Update Property Information' : 'Finalize & Save Property' }}
-            </button>
-          </div>
         </form>
       </div>
     </div>
@@ -345,7 +314,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUpdate, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import BaseInput from '../../components/global/BaseInput.vue';
 import OwnerImageUploader from '../../components/owner/OwnerImageUploader.vue';
@@ -359,7 +328,6 @@ const props = defineProps({
 const emits = defineEmits(['success', 'cancel']);
 
 const route = useRoute();
-const router = useRouter();
 
 const defaultFormData = {
   status: 1,
@@ -387,7 +355,6 @@ const availableFacilities = ref([]);
 
 const effectiveId = computed(() => props.id || route.params.id || null);
 const isEditing = computed(() => !!effectiveId.value);
-const inWizard = computed(() => !!props.inWizard);
 
 const inputRefs = ref([]);
 const setInputRef = (el) => el && inputRefs.value.push(el);
@@ -435,32 +402,26 @@ const loadPropertyForEdit = async (id) => {
     const resolved = decodeId(id);
     const item = await ownerService.fetchPropertyById(resolved);
     if (!item) {
-      if (!inWizard.value) {
-        router.push({ name: 'properties' });
-      }
       return;
     }
 
     const remoteImages = await ownerService.fetchPropertyImages(item.id);
     const loadedImages = formatImages(remoteImages);
-    const loadedFacilityIds = (item.facilities || []).map((f) => f.id);
+
+    const res = await ownerService.getOwnerDetails();
+    const ownerData = res.data.data;
 
     const loadedData = JSON.parse(JSON.stringify(item));
     loadedData.images = loadedImages;
-    loadedData.facilities = loadedFacilityIds;
-    if (loadedData.stripePublicKey === null && loadedData.stripeSecretKey === null) {
-      const res = await ownerService.getOwnerDetails();
-      const ownerData = res.data.data;
+    loadedData.facilities = (item.facilities || []).map((f) => f.id);
+
+    if (loadedData.stripePublicKey === null || !loadedData.stripePublicKey) {
       loadedData.stripePublicKey = ownerData?.stripePublicKey || '';
       loadedData.stripeSecretKey = ownerData?.stripeSecretKey || '';
     }
 
     initialImageIds.value = loadedImages.map((i) => i.id).filter(Boolean);
     formData.value = loadedData;
-  } catch {
-    if (!inWizard.value) {
-      router.push({ name: 'properties' });
-    }
   } finally {
     loadingItem.value = false;
   }
@@ -469,13 +430,10 @@ const loadPropertyForEdit = async (id) => {
 onMounted(async () => {
   try {
     const facs = await ownerService.fetchFacilities();
-    availableFacilities.value = Array.isArray(facs)
-      ? facs.map((f) => ({ id: f.id, name: f.name }))
-      : [];
+    availableFacilities.value = Array.isArray(facs) ? facs : [];
   } catch (e) {
-    throw new Error(e);
+    console.error(e);
   }
-
   if (!isEditing.value) {
     formData.value = { ...defaultFormData };
   }
@@ -493,163 +451,94 @@ watch(
   { immediate: true }
 );
 
-const processImages = () => {
+const onImagesReorder = (newImages) => {
+  formData.value.images = [...newImages];
+};
+
+const handleDependentDataUpdates = async (propertyId, newFiles, removedIds) => {
+  // Batch deletions in parallel
+  if (removedIds.length) {
+    await Promise.all(removedIds.map((id) => ownerService.deletePropertyImage(id)));
+  }
+
+  let uploaded = [];
+  if (newFiles.length) {
+    uploaded = await ownerService.addPropertyImages(propertyId, newFiles);
+  }
+
+  // Calculate final order using uploaded IDs
+  const uploadedQueue = [...(uploaded || [])];
+  const orderedIds = formData.value.images
+    .map((img) => {
+      if (img.id) {
+        return img.id;
+      }
+      const next = uploadedQueue.shift();
+      return next ? next.id : null;
+    })
+    .filter(Boolean);
+
+  const tasks = [];
+  if (orderedIds.length) {
+    tasks.push(ownerService.changePropertyImagePosition(propertyId, orderedIds));
+  }
+
+  const facilityIds = Array.isArray(formData.value.facilities)
+    ? formData.value.facilities.map((id) => parseInt(id, 10)).filter((n) => n > 0)
+    : [];
+  if (facilityIds.length) {
+    tasks.push(ownerService.setPropertyFacilities({ propertyId, facilityId: facilityIds }));
+  }
+
+  await Promise.all(tasks);
+};
+
+const handleSubmit = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
   const newFiles = formData.value.images
     .filter((img) => img.file instanceof File)
     .map((i) => i.file);
   const existingIds = formData.value.images.filter((img) => img.id).map((i) => i.id);
   const removedIds = initialImageIds.value.filter((id) => !existingIds.includes(id));
-  return { newFiles, removedIds };
-};
 
-const handleDependentDataUpdates = async (propertyId, newFiles, removedIds, uiOrder = null) => {
-  if (removedIds && removedIds.length) {
-    for (const id of removedIds) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await ownerService.deletePropertyImage(id);
-      } catch (e) {
-        throw new Error(e);
-      }
-    }
-  }
+  const apiPayload = JSON.parse(JSON.stringify(formData.value));
+  delete apiPayload.images;
+  delete apiPayload.facilities;
 
-  let uploaded = [];
-  if (newFiles && newFiles.length) {
-    try {
-      uploaded = await ownerService.addPropertyImages(propertyId, newFiles);
-    } catch (e) {
-      throw new Error(e);
-    }
+  // Wizard Logic for applyEdits
+  if (props.inWizard && props.editMode) {
+    return {
+      propertyPayload: apiPayload,
+      newFiles,
+      removedImageIds: removedIds,
+      orderedImageIds: formData.value.images.map((img) => img.id).filter(Boolean),
+      facilityIds: formData.value.facilities.map((id) => parseInt(id, 10)).filter((n) => n > 0),
+    };
   }
 
-  const uiOrdered = uiOrder || formData.value.images;
-  const uploadedIdsQueue = (uploaded || []).map((u) => u.id || null);
-  const orderedIds = [];
-  for (const slot of uiOrdered) {
-    if (slot.id) {
-      orderedIds.push(slot.id);
-    } else if (slot.file) {
-      const next = uploadedIdsQueue.shift();
-      if (next) {
-        orderedIds.push(next);
-      }
-    }
-  }
-
-  if (orderedIds.length > 1) {
-    try {
-      await ownerService.changePropertyImagePosition(propertyId, orderedIds);
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  try {
-    const remote = await ownerService.fetchPropertyImages(propertyId);
-    formData.value.images = formatImages(remote);
-    initialImageIds.value = formData.value.images.map((i) => i.id).filter(Boolean);
-  } catch (e) {
-    throw new Error(e);
-  }
-
-  const facilityIds = Array.isArray(formData.value.facilities)
-    ? formData.value.facilities
-        .map((id) => parseInt(id, 10))
-        .filter((n) => Number.isInteger(n) && n > 0)
-    : [];
-  if (facilityIds.length) {
-    try {
-      await ownerService.setPropertyFacilities({
-        propertyId,
-        facilityId: facilityIds,
-      });
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-};
-
-const onImagesReorder = async (newImages) => {
-  formData.value.images = [...newImages];
-  if (isEditing.value && formData.value.id && !inWizard.value) {
-    const ids = formData.value.images.map((i) => i.id).filter(Boolean);
-    if (ids.length > 1) {
-      try {
-        await ownerService.changePropertyImagePosition(formData.value.id, ids);
-      } catch (e) {
-        throw new Error(e);
-      }
-    }
-  }
-};
-
-const savePropertyData = async (apiPayload) => {
-  let savedPropertyId = null;
-  if (isEditing.value) {
-    await ownerService.updateProperty(formData.value.id, apiPayload);
-    savedPropertyId = formData.value.id;
-  } else {
-    const response = await ownerService.createProperty(apiPayload);
-    savedPropertyId = response?.data;
-  }
-  return savedPropertyId;
-};
-
-const handleSubmit = async () => {
-  if (submitting.value) {
-    return;
-  }
-  if (!validateForm()) {
-    return;
-  }
+  // Logic for direct Create or Wizard Step 1 Success
   submitting.value = true;
   try {
-    const { newFiles, removedIds } = processImages();
-    const apiPayload = JSON.parse(JSON.stringify(formData.value));
-    delete apiPayload.images;
-    delete apiPayload.facilities;
-
-    if (inWizard.value && props.editMode) {
-      const facilityIds = Array.isArray(formData.value.facilities)
-        ? formData.value.facilities
-            .map((id) => parseInt(id, 10))
-            .filter((n) => Number.isInteger(n) && n > 0)
-        : [];
-      const orderedImageIds = formData.value.images.map((img) => img.id).filter(Boolean);
-      return {
-        propertyPayload: apiPayload,
-        newFiles,
-        removedImageIds: removedIds,
-        orderedImageIds,
-        facilityIds,
-      };
+    let savedId = formData.value.id;
+    if (isEditing.value) {
+      await ownerService.updateProperty(savedId, apiPayload);
+    } else {
+      const response = await ownerService.createProperty(apiPayload);
+      savedId = response?.data;
     }
 
-    const savedPropertyId = await savePropertyData(apiPayload);
-    if (!savedPropertyId) {
+    if (!savedId) {
       throw new Error('Could not determine saved property id');
     }
 
-    await handleDependentDataUpdates(savedPropertyId, newFiles, removedIds, formData.value.images);
-
-    if (inWizard.value) {
-      emits('success', { id: savedPropertyId });
-    } else {
-      router.push({ name: 'properties' });
-    }
-  } catch (e) {
-    throw new Error(e);
+    await handleDependentDataUpdates(savedId, newFiles, removedIds);
+    emits('success', { id: savedId });
+    return { id: savedId };
   } finally {
     submitting.value = false;
-  }
-};
-
-const handleCancel = () => {
-  if (inWizard.value) {
-    emits('cancel');
-  } else {
-    router.push({ name: 'properties' });
   }
 };
 
