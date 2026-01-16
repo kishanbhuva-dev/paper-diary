@@ -31,9 +31,9 @@
       :available-filters="filterConfig"
       :show-delete="false"
       :show-edit="false"
-      :show-search
+      show-search
       :show-add="false"
-      :show-download
+      show-download
       :admin-login="false"
       @filter-change="handleFilterChange"
       @search="handleSearch"
@@ -186,7 +186,7 @@ import ownerService from '../../services/ownerService';
 // --- 1. STATE MANAGEMENT ---
 const sortBy = ref('id');
 const sortOrder = ref('asc');
-const actieFilters = ref({});
+const activeFilters = ref({});
 const loading = ref(false);
 const error = ref(null);
 const bookings = ref([]);
@@ -280,7 +280,7 @@ const loadData = async () => {
       search: currentSearch.value,
       sortBy: sortBy.value,
       sortOrder: sortOrder.value,
-      ...actieFilters.value,
+      ...activeFilters.value,
     });
     bookings.value = data.data || [];
     total.value = data.total || 0;
@@ -304,7 +304,7 @@ const handleSave = async () => {
   try {
     const payload = {
       id: selectedBooking.value.id,
-      ownerNotes: selectedBooking.value.owner_note,
+      ownerNotes: selectedBooking.value.ownerNotes,
     };
     await ownerService.updateBooking(selectedBooking.value.id, payload);
     isModalVisible.value = false;
@@ -322,7 +322,7 @@ const handleSort = (sortData) => {
   loadData();
 };
 const handleFilterChange = (filters) => {
-  actieFilters.value = filters;
+  activeFilters.value = filters;
   currentPage.value = 1;
   loadData();
 };

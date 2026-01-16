@@ -30,8 +30,8 @@ import { ref, onMounted } from 'vue';
 import adminService from '../../services/adminService';
 
 const sortBy = ref('id');
-const sortOrder = ref('asc');
-const actieFilters = ref({});
+const sortOrder = ref('desc');
+const activeFilters = ref({});
 
 const bookings = ref([]);
 const perPage = ref(10);
@@ -101,6 +101,7 @@ const fetchAdminBookings = async () => {
     search: currentSearch.value,
     sortBy: sortBy.value,
     sortOrder: sortOrder.value,
+    ...activeFilters.value,
   });
 
   if (res.status) {
@@ -116,7 +117,7 @@ const handleSort = (sortData) => {
 };
 
 const handleFilterChange = (filters) => {
-  actieFilters.value = filters;
+  activeFilters.value = filters;
   currentPage.value = 1;
   fetchAdminBookings();
 };

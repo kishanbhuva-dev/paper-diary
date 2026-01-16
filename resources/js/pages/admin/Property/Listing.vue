@@ -74,13 +74,13 @@ const orderDirection = ref('asc');
 
 const tableColumns = [
   // { label: 'S.N', key: 'id', sortable: true },
-  { label: 'propertyName', key: 'propertyName', sortable: true },
-  { label: 'ownerName', key: 'ownerName', sortable: true },
-  { label: 'ownerEmail', key: 'ownerEmail', sortable: true },
-  { label: 'ownerPhone', key: 'ownerPhone', sortable: true },
-  { label: 'ownerTelephone', key: 'ownerTelephone', sortable: true },
-  { label: 'totalRevenue', key: 'totalRevenue', sortable: true },
-  { label: 'lostAmount', key: 'lostAmount', sortable: true },
+  { label: 'property Name', key: 'propertyName', sortable: true },
+  { label: 'owner Name', key: 'ownerName', sortable: true },
+  { label: 'owner Email', key: 'ownerEmail', sortable: true },
+  { label: 'owner Phone', key: 'ownerPhone', sortable: true },
+  { label: 'owner Telephone', key: 'ownerTelephone', sortable: true },
+  { label: 'total Revenue', key: 'totalRevenue', sortable: true },
+  { label: 'lost Amount', key: 'lostAmount', sortable: true },
   { label: 'status', key: 'status', sortable: true },
   { label: 'CHANGE STATUS', key: 'toggle-status' },
 ];
