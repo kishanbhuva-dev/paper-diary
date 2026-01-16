@@ -1,9 +1,7 @@
 <template>
-  <div
-    class="base-table bg-white rounded-2xl p-6 w-full box-border border border-slate-100 shadow-sm"
-  >
+  <div class="base-table bg-white rounded-2xl w-full box-border border border-slate-100 shadow-sm">
     <div
-      class="table-header flex flex-wrap gap-4 sm:gap-6 justify-between items-center mb-6 border-b border-gray-200 pb-5 sm:flex-nowrap"
+      class="table-header p-6 flex flex-wrap gap-4 sm:gap-6 justify-between items-center border-b border-gray-200 pb-5 sm:flex-nowrap"
     >
       <div class="flex flex-col gap-1">
         <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight shrink-0">
@@ -196,7 +194,7 @@
       </template>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-gray-200 table-wrapper shadow-sm">
+    <div class="overflow-x-auto table-wrapper mb-2">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-blue-50/70">
           <tr>
@@ -209,7 +207,7 @@
               v-for="col in columns"
               :key="col.key"
               :class="[
-                'px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap',
+                'px-2 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap',
                 col.sortable !== false
                   ? 'cursor-pointer hover:bg-blue-100 transition duration-150'
                   : '',
@@ -252,7 +250,7 @@
             <td
               v-for="col in columns"
               :key="col.key"
-              class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium"
+              class="px-2 py-4 whitespace-nowrap text-sm text-gray-700 font-medium"
             >
               <template v-if="$slots[col.key]"
                 ><slot
@@ -390,13 +388,12 @@
         </tbody>
       </table>
     </div>
-
     <div
       v-if="totalPages > 0"
-      class="pagination flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200 px-1 sm:px-0 mb-2"
+      class="pagination flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 border-t border-gray-200 px-1 sm:px-0 mb-2"
     >
       <div
-        class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto mt-2 sm:mt-0"
+        class="ml-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto mt-2 sm:mt-0"
       >
         <p class="text-sm text-gray-700 whitespace-nowrap font-medium">
           Page <span class="font-bold">{{ currentPage }}</span> of
@@ -404,7 +401,7 @@
         </p>
       </div>
       <div
-        class="flex flex-col md:flex-col lg:flex-row items-center gap-4 sm:mt-0 w-full justify-center sm:justify-end"
+        class="mr-4 flex flex-col md:flex-col lg:flex-row items-center gap-4 sm:mt-0 w-full justify-center sm:justify-end"
       >
         <div class="flex items-center">
           <label

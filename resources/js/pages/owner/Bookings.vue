@@ -1,5 +1,5 @@
 <template>
-  <div class="px-2 sm:px-3 py-4 bg-gray-50 min-h-screen">
+  <div class="px-2 sm:px-3 py-4 mb-10 bg-gray-50 min-h-screen">
     <div
       v-if="loading && !bookings.length"
       class="fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center backdrop-blur-sm transition-opacity duration-300"
@@ -54,7 +54,7 @@
   >
     <div class="space-y-6">
       <div
-        class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-4"
+        class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5"
       >
         <div class="space-y-1">
           <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
@@ -72,6 +72,33 @@
             {{ selectedBooking.resource_type_name }}
           </p>
         </div>
+
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Guest Name</label
+          >
+          <p class="text-sm font-bold text-blue-900">{{ selectedBooking.guestName }}</p>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Guest Email</label
+          >
+          <p class="text-sm font-bold text-blue-900">{{ selectedBooking.guestEmail }}</p>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Arrival Date</label
+          >
+          <p class="text-sm font-bold text-blue-900">{{ selectedBooking.arrivalDateTime }}</p>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Departure Date</label
+          >
+          <p class="text-sm font-bold text-blue-900">{{ selectedBooking.departureDateTime }}</p>
+        </div>
+
         <div class="space-y-1">
           <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
             >Booking Status</label
@@ -90,75 +117,36 @@
           >
           <p class="text-sm font-medium text-blue-900">{{ selectedBooking.bookedOn }}</p>
         </div>
+
+        <div class="md:col-span-2 space-y-1 pt-2 border-t border-blue-100">
+          <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest"
+            >Guest Address</label
+          >
+          <p class="text-sm font-medium text-blue-900 leading-relaxed">
+            {{ selectedBooking.guestAddress || 'No address provided' }}
+          </p>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-500 uppercase">Guest Name</label>
-          <input
-            v-model="selectedBooking.guestName"
-            disabled
-            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
+      <div class="space-y-1">
+        <label class="text-xs font-bold text-blue-600 uppercase flex items-center">
+          <Icon
+            icon="mdi:note-edit-outline"
+            class="mr-1"
           />
-        </div>
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-500 uppercase">Guest Email</label>
-          <input
-            v-model="selectedBooking.guestEmail"
-            disabled
-            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
-          />
-        </div>
-
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-500 uppercase">Arrival Date</label>
-          <input
-            v-model="selectedBooking.arrivalDateTime"
-            type="text"
-            disabled
-            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
-          />
-        </div>
-        <div class="space-y-1">
-          <label class="text-xs font-bold text-gray-500 uppercase">Departure Date</label>
-          <input
-            v-model="selectedBooking.departureDateTime"
-            type="text"
-            disabled
-            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none"
-          />
-        </div>
-
-        <div class="md:col-span-2 space-y-1">
-          <label class="text-xs font-bold text-gray-500 uppercase">Guest Address</label>
-          <textarea
-            v-model="selectedBooking.guestAddress"
-            disabled
-            rows="2"
-            class="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 outline-none resize-none"
-          ></textarea>
-        </div>
-
-        <div class="md:col-span-2 space-y-1">
-          <label class="text-xs font-bold text-blue-600 uppercase flex items-center">
-            <Icon
-              icon="mdi:note-edit-outline"
-              class="mr-1"
-            />
-            Owner Notes
-          </label>
-          <textarea
-            v-model="selectedBooking.owner_note"
-            :disabled="!isBookingDateValid"
-            :placeholder="
-              isBookingDateValid
-                ? 'Add internal notes about this booking here...'
-                : 'Notes cannot be edited for past bookings'
-            "
-            rows="3"
-            class="w-full p-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50/30 disabled:bg-gray-50 disabled:border-gray-200"
-          ></textarea>
-        </div>
+          Owner Notes
+        </label>
+        <textarea
+          v-model="selectedBooking.ownerNotes"
+          :disabled="!isBookingDateValid"
+          :placeholder="
+            isBookingDateValid
+              ? 'Add internal notes about this booking here...'
+              : 'Notes cannot be edited for past bookings'
+          "
+          rows="3"
+          class="w-full p-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50/30 disabled:bg-gray-50 disabled:border-gray-200"
+        ></textarea>
       </div>
 
       <div
@@ -214,31 +202,11 @@ const isConfirmationModalVisible = ref(false);
 const bookingIdToDelete = ref(null);
 
 const filterConfig = [
-  {
-    label: 'Guest Name',
-    key: 'guestName',
-    type: 'text',
-  },
-  {
-    label: 'Guest Email',
-    key: 'guestEmail',
-    type: 'text',
-  },
-  {
-    label: 'Arrival Date',
-    key: 'arrivalDateTime',
-    type: 'date',
-  },
-  {
-    label: 'Departure Date',
-    key: 'departureDateTime',
-    type: 'date',
-  },
-  {
-    label: 'Booked On',
-    key: 'bookedOn',
-    type: 'date',
-  },
+  { label: 'Guest Name', key: 'guestName', type: 'text' },
+  { label: 'Guest Email', key: 'guestEmail', type: 'text' },
+  { label: 'Arrival Date', key: 'arrivalDateTime', type: 'date' },
+  { label: 'Departure Date', key: 'departureDateTime', type: 'date' },
+  { label: 'Booked On', key: 'bookedOn', type: 'date' },
   {
     label: 'From Now',
     key: 'fromNow',
@@ -292,14 +260,13 @@ const tableColumns = [
 
 // --- 2. LOGIC & COMPUTED ---
 
-// Check if booking date is passed or today/future
 const isBookingDateValid = computed(() => {
   if (!selectedBooking.value.arrivalDateTime) {
     return false;
   }
   const bookingDate = new Date(selectedBooking.value.arrivalDateTime);
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time to compare only dates
+  today.setHours(0, 0, 0, 0);
   return bookingDate >= today;
 });
 
@@ -333,7 +300,6 @@ const handleSave = async () => {
   if (!isBookingDateValid.value) {
     return;
   }
-
   loading.value = true;
   try {
     const payload = {
@@ -350,7 +316,6 @@ const handleSave = async () => {
   }
 };
 
-// Standard Table Handlers
 const handleSort = (sortData) => {
   sortBy.value = sortData.key;
   sortOrder.value = sortData.order;
@@ -366,7 +331,6 @@ const handleSearch = (term) => {
   currentPage.value = 1;
   loadData();
 };
-
 const handlePageChange = (page) => {
   currentPage.value = page;
   loadData();
@@ -377,7 +341,6 @@ const handlePerPageChange = (size) => {
   loadData();
 };
 
-// Cancellation Logic
 const confirmDelete = (id) => {
   bookingIdToDelete.value = id;
   isConfirmationModalVisible.value = true;

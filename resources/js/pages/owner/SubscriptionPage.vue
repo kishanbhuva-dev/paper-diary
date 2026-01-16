@@ -73,7 +73,7 @@
             </p>
 
             <div class="mt-8 flex items-baseline gap-1">
-              <span class="text-4xl font-black text-slate-900">${{ plan.display_amount }}</span>
+              <span class="text-4xl font-black text-slate-900">£{{ plan.display_amount }}</span>
               <span class="text-slate-400 font-medium">/{{ plan.display_interval }}</span>
             </div>
 
@@ -185,7 +185,7 @@
               </div>
               <div class="text-right">
                 <div class="flex items-baseline justify-end gap-1">
-                  <span class="text-xs font-medium text-blue-100">$</span>
+                  <span class="text-xs font-medium text-blue-100">£</span>
                   <span class="text-3xl font-black">{{ selectedPlanDetails?.display_amount }}</span>
                 </div>
                 <span
@@ -297,7 +297,7 @@
                     <span>{{
                       isSubmitting
                         ? 'Processing...'
-                        : `Confirm & Pay $${selectedPlanDetails?.display_amount}`
+                        : `Confirm & Pay ${selectedPlanDetails?.display_amount}`
                     }}</span>
                   </div>
                   <div
