@@ -73,7 +73,7 @@ const orderBy = ref('id');
 const orderDirection = ref('asc');
 
 const tableColumns = [
-  { label: 'S.N', key: 'id', sortable: true },
+  // { label: 'S.N', key: 'id', sortable: true },
   { label: 'propertyName', key: 'propertyName', sortable: true },
   { label: 'ownerName', key: 'ownerName', sortable: true },
   { label: 'ownerEmail', key: 'ownerEmail', sortable: true },
