@@ -117,18 +117,14 @@ class BookingsController extends Controller
                 }
             }
             if ($request->arrivalDateTime || $request->departureDateTime) {
+                 $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
+                    $endDate = Carbon::parse($request->departureDateTime)->endOfDay();
                 if ($request->arrivalDateTime && $request->departureDateTime) {
-                    $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
-                    $endDate = Carbon::parse($request->departureDateTime)->endOfDay();
-                    $bookings->whereBetween('booking_orders.arrivalDateTime', [$startDate, $endDate]);
+                    $bookings->whereRaw('booking_orders.arrivalDateTime >= "'.$startDate.'"')->whereRaw('booking_orders.departureDateTime <= "'.$endDate.'"');
                 } elseif ($request->arrivalDateTime) {
-                    $startDate = Carbon::parse($request->arrivalDateTime)->startOfDay();
-                    $endDate = Carbon::parse($request->arrivalDateTime)->endOfDay();
-                    $bookings->whereBetween('booking_orders.arrivalDateTime', [$startDate, $endDate]);
+                    $bookings->whereRaw('booking_orders.arrivalDateTime >= "'.$startDate.'"');
                 } elseif ($request->departureDateTime) {
-                    $startDate = Carbon::parse($request->departureDateTime)->startOfDay();
-                    $endDate = Carbon::parse($request->departureDateTime)->endOfDay();
-                    $bookings->whereBetween('booking_orders.departureDateTime', [$startDate, $endDate]);
+                    $bookings->whereRaw('booking_orders.departureDateTime <= "'.$endDate.'"');
                 }
             }
             if ($request->status && $request->status !== 'all') {
