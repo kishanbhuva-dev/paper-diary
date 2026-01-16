@@ -85,7 +85,7 @@ export function useAuth() {
     let routeName = 'home';
 
     if (role === 'owner') {
-      routeName = data.subscription?.is_active ? 'owner-dashboard' : 'subscription';
+      routeName = data.subscription?.is_active === 'active' ? 'owner-dashboard' : 'subscription';
     } else if (role === 'admin') {
       routeName = 'admin-dashboard';
     }
