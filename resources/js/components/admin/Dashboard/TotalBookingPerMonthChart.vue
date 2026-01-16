@@ -24,6 +24,7 @@
       :show-legend="false"
       :show-data-labels="false"
       animated
+      :width="chartCategories.length === 1 ? '10%' : '100%'"
     />
   </div>
 </template>

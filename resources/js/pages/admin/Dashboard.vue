@@ -348,7 +348,7 @@
               </div>
               <div class="text-right">
                 <p class="font-bold text-gray-900 text-sm">
-                  £{{ formatCurrency(site.total_price) }}
+                  £{{ formatCurrency(site.totalAmount) }}
                 </p>
                 <p class="text-xs text-gray-500">{{ site.booking_count }} bookings</p>
               </div>
