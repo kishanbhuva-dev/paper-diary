@@ -5,12 +5,14 @@
       :columns="tableColumns"
       :rows="bookings"
       server-side
+      :total-items="total"
       :per-page="perPage"
+      :available-filters="filterConfig"
       :show-delete="false"
       :show-edit="false"
       show-search
       :show-add="false"
-      :show-download
+      show-download
       :admin-login="false"
       :show-view="false"
       @filter-change="handleFilterChange"
@@ -34,7 +36,51 @@ const actieFilters = ref({});
 const bookings = ref([]);
 const perPage = ref(10);
 const currentPage = ref(1);
+const total = ref(0);
 const currentSearch = ref('');
+
+const filterConfig = [
+  { label: 'Guest Name', key: 'guestName', type: 'text' },
+  { label: 'Guest Email', key: 'guestEmail', type: 'text' },
+  { label: 'Arrival Date', key: 'arrivalDateTime', type: 'date' },
+  { label: 'Departure Date', key: 'departureDateTime', type: 'date' },
+  { label: 'Booked On', key: 'bookedOn', type: 'date' },
+  {
+    label: 'From Now',
+    key: 'fromNow',
+    type: 'select',
+    options: [
+      { label: 'All From now', value: 'all' },
+      { label: '1 Year ago', value: '1year' },
+      { label: '6 Months ago', value: '6months' },
+      { label: '4 Months ago', value: '4months' },
+      { label: '2 Month ago', value: '2month' },
+      { label: '1 Month ago', value: '1month' },
+      { label: '2 Weeks ago', value: '2weeks' },
+      { label: '1 Week ago', value: '1week' },
+      { label: 'Yesterday', value: 'yesterday' },
+      { label: 'Today', value: 'today' },
+    ],
+  },
+  {
+    label: 'Status',
+    key: 'status',
+    type: 'select',
+    options: [
+      { label: 'Confirmed', value: 'confirm' },
+      { label: 'Cancelled', value: 'cancelled' },
+    ],
+  },
+  {
+    label: 'Payment',
+    key: 'paymentStatus',
+    type: 'select',
+    options: [
+      { label: 'Paid', value: 'paid' },
+      { label: 'Unpaid', value: 'failed' },
+    ],
+  },
+];
 
 const tableColumns = [
   { label: 'Property', key: 'propertyName', sortable: true },
@@ -59,6 +105,7 @@ const fetchAdminBookings = async () => {
 
   if (res.status) {
     bookings.value = res.data.data;
+    total.value = res.data.total || 0;
   }
 };
 
