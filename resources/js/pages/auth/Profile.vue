@@ -150,7 +150,7 @@
               width="full"
               icon="mdi:key"
               placeholder="pk_test_..."
-              :pattern="/^pk_(test|live)_[A-Za-z0-9]{24,}$/"
+              :pattern="/^pk_(test|live)_[A-Za-z0-9]+$/"
               custom-error="Invalid public key"
               required
             />
@@ -162,7 +162,7 @@
               icon="mdi:lock-outline"
               type="password"
               placeholder="sk_test_..."
-              :pattern="/^sk_(test|live)_[A-Za-z0-9]{24,}$/"
+              :pattern="/^sk_(test|live)_[A-Za-z0-9]+$/"
               custom-error="Invalid secret key"
               required
             />

@@ -59,7 +59,7 @@
                 width="full"
                 placeholder="0.00"
                 :min="0"
-                prefix="$"
+                prefix="£"
               />
             </div>
 
