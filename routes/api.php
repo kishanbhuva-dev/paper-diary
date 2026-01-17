@@ -13,7 +13,7 @@ Route::get('available-resources-types', [App\Http\Controllers\User\BookingsContr
 Route::get('products', [App\Http\Controllers\StripeController::class, 'getProducts']);
 Route::get('stripe/config', [App\Http\Controllers\StripeController::class, 'getStripeConfig']);
 Route::post('stripe/webhook', [App\Http\Controllers\StripeWebhookController::class, 'handleWebhook']);
-Route::get('icalendar', [App\Http\Controllers\IcalController::class, 'index']);
+Route::get('icalendar/{resourceId}', [App\Http\Controllers\IcalController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('stripe/subscription', [App\Http\Controllers\StripeController::class, 'createSubscription']);
