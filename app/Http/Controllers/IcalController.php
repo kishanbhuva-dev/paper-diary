@@ -14,17 +14,19 @@ class IcalController extends Controller
     public function index(string $resourceId): Response
     {
         $query = Bookings::with('bookingOrder');
-        
+
         if ($resourceId) {
             $query->where('resourceId', $resourceId);
         }
-        
+
         $bookings = $query->get();
         $calendar = Calendar::create('Paper Diary Bookings');
         foreach ($bookings as $booking) {
             $bookingOrder = $booking->bookingOrder->first();
-            if (!$bookingOrder) continue;
-            
+            if (! $bookingOrder) {
+                continue;
+            }
+
             $start = $bookingOrder->arrivalDateTime ? Carbon::parse($bookingOrder->arrivalDateTime) : null;
             $end = $bookingOrder->departureDateTime ? Carbon::parse($bookingOrder->departureDateTime) : null;
             if ($start) {
