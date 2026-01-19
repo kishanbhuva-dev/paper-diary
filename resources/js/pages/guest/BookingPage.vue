@@ -487,6 +487,7 @@ const stripe = ref(null);
 const elements = ref(null);
 const paymentElement = ref(null);
 const clientSecret = ref(null);
+const publishableKey = ref(null);
 const pendingBookingId = ref(null);
 
 // --- New Requirements Logic ---
@@ -637,7 +638,6 @@ onMounted(async () => {
 
   await refreshAvailability(slug);
   loadingInitial.value = false;
-  stripe.value = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 });
 
 onBeforeUnmount(() => {
@@ -690,12 +690,19 @@ const initiateBooking = async () => {
     pendingBookingId.value = bookingRes.data?.bookingId;
     bookingToken.value = bookingRes.data?.token;
     clientSecret.value = bookingRes.data?.clientSecret || bookingRes.data?.data?.clientSecret;
+    publishableKey.value = bookingRes.data?.publishable ? atob(bookingRes.data.publishable) : null;
+    if (!stripe.value) {
+      stripe.value = await loadStripe(publishableKey.value);
+    }
     showPaymentArea.value = true;
+
     await nextTick();
-    const options = { clientSecret: clientSecret.value, appearance: { theme: 'stripe' } };
-    elements.value = stripe.value.elements(options);
-    paymentElement.value = elements.value.create('payment');
-    paymentElement.value.mount('#payment-element');
+    if (!elements.value) {
+      const options = { clientSecret: clientSecret.value, appearance: { theme: 'stripe' } };
+      elements.value = stripe.value.elements(options);
+      paymentElement.value = elements.value.create('payment');
+      paymentElement.value.mount('#payment-element');
+    }
   } catch (err) {
     toast.error(err.message || 'Failed to initiate booking.');
   } finally {
