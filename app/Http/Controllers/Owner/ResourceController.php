@@ -271,7 +271,7 @@ class ResourceController extends Controller
                     $selectedResourceTypeIds = ResourceType::whereIn('propertyId', $ownerPropertyIds)->pluck('id');
                 }
                 $bookings = BookingOrder::selectRaw('booking_orders.id,guestFullName,guestEmail,guestPhone,booking_orders.resourceTypeId,arrivalDateTime,departureDateTime,booking_orders.status,adult,children')
-                    ->whereIn('resourceTypeId', $selectedResourceTypeIds)
+                    ->whereIn('resourceTypeId', $selectedResourceTypeIds)->where('status', 'confirm')
                     ->with([
                         'booking' => function ($query) use ($resourcesid) {
                             $query->select('id', 'resourceId', 'bookingOrderId')->whereIn('resourceId', $resourcesid);
