@@ -26,7 +26,6 @@ class IcalController extends Controller
             if (! $bookingOrder) {
                 continue;
             }
-
             $start = $bookingOrder->arrivalDateTime ? Carbon::parse($bookingOrder->arrivalDateTime) : null;
             $end = $bookingOrder->departureDateTime ? Carbon::parse($bookingOrder->departureDateTime) : null;
             if ($start) {
@@ -35,12 +34,17 @@ class IcalController extends Controller
                 $event->appendProperty(TextProperty::create('X-SOURCE', 'DIRECT'))->appendProperty(TextProperty::create('X-CHANNEL', 'N/A'))->appendProperty(TextProperty::create('X-CHANNEL-REF', 'N/A'));
                 $calendar->event($event);
             }
-        } if (ob_get_length()) {
-            ob_clean();
+        }
+        $content = $calendar->get();
+        while (ob_get_level() > 0) {
+            ob_end_clean();
         }
 
-        return response(trim($calendar->get()))
-            ->header('Content-Type', 'text/plain; charset=utf-8')
-            ->header('Content-Disposition', 'inline; filename="bookings.ics"');
+        return response($content, 200, [
+            'Content-Type'        => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="bookings.ics"',
+            'Content-Length'      => strlen($content),
+            'Connection'          => 'close',
+        ]);
     }
 }

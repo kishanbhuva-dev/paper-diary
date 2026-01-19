@@ -23,7 +23,8 @@ function getResourcesAvailable(int $resourceTypesId, string $arrivalDateTime, st
         return collect();
     }
 
-    $bookedResourceIdsQuery = Bookings::where('resourceTypeId', $resourceTypesId);
+    $bookedResourceIdsQuery = Bookings::where('resourceTypeId', $resourceTypesId)
+        ->where('status', 'confirmed');
 
     if ($resourceType->slot === 'hourly') {
         $bookedResourceIdsQuery->where('arrivalDateTime', '<=', $departureDateTime)
