@@ -13,7 +13,7 @@ class IcalController extends Controller
 {
     public function index(string $resourceId): Response
     {
-        $query = Bookings::with('bookingOrder');
+        $query = Bookings::with('bookingOrder')->where('status', 'confirmed');
 
         if ($resourceId) {
             $query->where('resourceId', $resourceId);
