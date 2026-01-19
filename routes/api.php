@@ -81,6 +81,7 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth:sanctum', 'user']], fun
     Route::apiResource('booking', App\Http\Controllers\User\BookingsController::class);
     Route::get('bookings', [App\Http\Controllers\User\BookingsController::class, 'booking']);
     Route::post('booking-cancel', [App\Http\Controllers\User\BookingsController::class, 'bookingCancel']);
+    Route::post('booking-cancel-delete', [App\Http\Controllers\User\BookingsController::class, 'bookingCancelDelete']);
     Route::post('booking-delete', [App\Http\Controllers\User\BookingsController::class, 'bookingDelete']);
     Route::post('booking-status-update', [App\Http\Controllers\User\BookingsController::class, 'bookingStatusUpdate']);
     Route::get('property-details', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);

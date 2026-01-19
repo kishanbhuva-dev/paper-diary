@@ -106,9 +106,15 @@ class BookingsController extends Controller
             $departureDate = Carbon::parse($request->departureDateTime)->format('Y-m-d');
             $bookingOrder->where('arrivalDateTime', '>=', $arrivalDate)
                 ->where('departureDateTime', '<=', $departureDate);
+        } elseif ($request->arrivalDateTime) {
+            $arrivalDate = Carbon::parse($request->arrivalDateTime)->format('Y-m-d');
+            $bookingOrder->where('arrivalDateTime', '>=', $arrivalDate);
+        } elseif ($request->departureDateTime) {
+            $departureDate = Carbon::parse($request->departureDateTime)->format('Y-m-d');
+            $bookingOrder->where('departureDateTime', '<=', $departureDate);
         }
         $pagination = $request->pagination ?? 10;
-        $sortBy = $request->sortBy ?? 'id';
+        $sortBy = $request->sortBy ?? 'arrivalDateTime';
         $sortOrder = $request->sortOrder ?? 'desc';
         $bookingOrder = $bookingOrder->orderBy($sortBy, $sortOrder)->paginate($pagination);
 
@@ -556,6 +562,31 @@ class BookingsController extends Controller
                 'message' => $e->getMessage(),
                 'data'    => [],
             ]);
+        }
+    }
+
+    public function bookingCancelDelete(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'bookingId' => 'required|exists:booking_orders,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
+            }
+            $bookingOrder = BookingOrder::where('id', $request->bookingId)->where('userId', Auth::user()->id)->where('status', 'cancelled')->first();
+            if ($bookingOrder->userId != Auth::user()->id) {
+                return response()->json(['status' => false, 'message' => 'you are not authorized to delete this booking', 'data' => []]);
+            }
+            Bookings::where('bookingOrderId', $request->bookingId)->delete();
+            $bookingOrder->delete();
+            if ($bookingOrder) {
+                return response()->json(['status' => true, 'message' => 'Booking deleted successfully', 'data' => []]);
+            }
+
+            return response()->json(['status' => false, 'message' => 'Booking not found', 'data' => []]);
+        } catch (Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
     }
 }
