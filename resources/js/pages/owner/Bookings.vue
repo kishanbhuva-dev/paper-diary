@@ -27,6 +27,7 @@
       :columns="tableColumns"
       :rows="bookings"
       server-side
+      :total-items="total"
       :per-page="perPage"
       :available-filters="filterConfig"
       :show-delete="false"

@@ -17,7 +17,7 @@
     >
       <Icon
         icon="mdi:alert-circle"
-        class="w-6 h-6 mr-3 flex-shrink-0 text-red-500"
+        class="w-6 h-6 mr-3 shrink-0 text-red-500"
       />
       <span class="whitespace-pre-wrap text-base">{{ error }}</span>
     </div>
@@ -27,6 +27,7 @@
       :columns="tableColumns"
       :rows="properties"
       server-side
+      :total-items="total"
       :per-page="perPage"
       show-delete
       :show-view="false"
@@ -77,6 +78,7 @@ const orderDirection = ref('asc');
 const isConfirmationModalVisible = ref(false);
 const propertyIdToDelete = ref(null);
 const propertyNameToDelete = ref('');
+const total = ref(0);
 
 const truncateString = (str, maxLen = 15) => {
   if (!str) {
@@ -114,6 +116,7 @@ const loadData = async () => {
       orderBy: orderBy.value,
       orderDirection: orderDirection.value,
     });
+    total.value = data.total || 0;
 
     properties.value = data.data || [];
   } catch (err) {
