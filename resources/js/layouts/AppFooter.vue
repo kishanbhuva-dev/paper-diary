@@ -21,8 +21,9 @@
           </div>
 
           <p class="text-base text-gray-500 max-w-xl">
-            With WeWork India, you can find what your business needs to thrive, whether it's
-            ready-to-move-in or customisable commercial office space for rent in Chennai.
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ab nam quae ipsa ad est
+            provident veritatis laboriosam eveniet ipsum aut, consectetur ratione, reiciendis
+            aspernatur! Sapiente totam sed molestias ullam atque beatae voluptatibus nemo soluta?
           </p>
 
           <div class="flex space-x-3 pt-2">
@@ -67,7 +68,7 @@
                 href="mailto:support@fintech.co"
                 class="text-base text-gray-700 hover:text-primary font-medium transition"
               >
-                support@fintech.co
+                support@paperdiary.co
               </a>
             </div>
           </div>
@@ -104,7 +105,7 @@
           </a>
         </nav>
 
-        <p class="text-gray-500">© Copyright 2024. All rights reserved.</p>
+        <p class="text-gray-500">© Copyright 2026. All rights reserved.</p>
       </div>
     </div>
   </footer>
