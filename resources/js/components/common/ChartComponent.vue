@@ -52,6 +52,12 @@ const props = defineProps({
     default: () => [],
   },
 
+  // Booking count data for tooltip
+  bookingCountData: {
+    type: Array,
+    default: () => [],
+  },
+
   // Chart title
   title: {
     type: String,
@@ -186,9 +192,21 @@ const chartOptions = computed(() => {
         fontSize: '12px',
         fontFamily: 'Inter, sans-serif',
       },
+      // y: {
+      //   formatter(val) {
+      //     return val ? val.toLocaleString() : '0';
+      //   },
+      // },
       y: {
-        formatter(val) {
-          return val ? val.toLocaleString() : '0';
+        formatter(val, opts) {
+          // Get booking count for this data point
+          const bookingCount =
+            props.bookingCountData && props.bookingCountData[opts.dataPointIndex]
+              ? props.bookingCountData[opts.dataPointIndex]
+              : 0;
+
+          // Return exactly the format you want
+          return `Total Booking: ${bookingCount}<br>Total Amount: £${val.toLocaleString()}`;
         },
       },
     },
