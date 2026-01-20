@@ -16,6 +16,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -240,6 +241,143 @@ class BookingsController extends Controller
         // }
     }
 
+    // public function store(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $validator = Validator::make($request->all(), [
+    //             'propertyId'            => 'required|exists:property,id',
+    //             'resourceTypeId'        => 'required|exists:resource_types,id',
+    //             'arrivalDateTime'       => 'required|date',
+    //             'departureDateTime'     => 'required|date|after:arrivalDateTime',
+    //             'adults'                => 'required|integer',
+    //             'children'              => 'nullable|integer',
+    //             'status'                => 'nullable|in:pending,cancelled,confirm',
+    //             'paymentStatus'         => 'nullable|in:paid,unpaid,failed,cancelled,confirm',
+    //             'resources'             => 'required|integer',
+    //             'guestFullName'         => 'required|string',
+    //             'guestEmail'            => 'required|email',
+    //             'guestPhone'            => 'required|string',
+    //             'guestAddress'          => 'required|string',
+    //             'additionalInformation' => 'nullable|string',
+    //         ]);
+    //         if ($validator->fails()) {
+    //             return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
+    //         }
+    //         $property = Property::where('id', $request->propertyId)->first();
+    //         if ($property->stripePublicKey) {
+    //             $ownerStripePublicKey = $property->stripePublicKey;
+    //         } else {
+    //             $ownerStripePublicKey = User::where('id', $property->ownerId)->value('stripePublicKey');
+    //         }
+    //         if (empty($property->stripePublicKey) && empty($ownerStripePublicKey)) {
+    //             return response()->json([
+    //                 'status'  => false,
+    //                 'message' => 'You can not book this property',
+    //                 'data'    => [],
+    //             ]);
+    //         }
+    //         $availableResourcesData = getResourcesAvailable($request->resourceTypeId, $request->arrivalDateTime, $request->departureDateTime);
+    //         if ($availableResourcesData->count() < $request->resources) {
+    //             return response()->json(['status' => false, 'message' => 'Resources not available for the selected dates and quantity', 'data' => []]);
+    //         }
+    //         $resourcesToBookIds = $availableResourcesData->take((int) $request->resources);
+    //         $resourcesToBook = Resource::whereIn('id', $resourcesToBookIds)->get();
+    //         $resourceType = ResourceType::where('id', $request->resourceTypeId)->first();
+    //         $resourcePriceTotal = 0;
+    //         foreach ($resourcesToBook as $resource) {
+    //             $resourcePriceTotal += $resource->customPrice ?? $resourceType->price;
+    //         }
+    //         $bookingOrder = new BookingOrder;
+    //         $bookingOrder->propertyId = $request->propertyId;
+    //         $bookingOrder->resourceTypeId = $request->resourceTypeId;
+    //         $bookingOrder->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
+    //         $bookingOrder->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
+    //         $bookingOrder->adult = $request->adults;
+    //         $bookingOrder->guestFullName = $request->guestFullName;
+    //         $bookingOrder->guestEmail = $request->guestEmail;
+    //         $bookingOrder->guestPhone = $request->guestPhone;
+    //         $bookingOrder->guestAddress = $request->guestAddress;
+    //         $bookingOrder->additionalInformation = $request->additionalInformation;
+    //         if (isset($request->children)) {
+    //             $bookingOrder->children = $request->children;
+    //         }
+    //         $bookingOrder->price = $resourcePriceTotal;
+    //         $bookingOrder->cost = $resourceType->price * $request->nightsCount;
+    //         $bookingOrder->userId = Auth::user()->id;
+    //         if (isset($request->status)) {
+    //             $bookingOrder->status = $request->status;
+    //         }
+    //         if (isset($request->paymentStatus)) {
+    //             $bookingOrder->paymentStatus = $request->paymentStatus;
+    //         }
+    //         if ($bookingOrder->save()) {
+    //             $bookingOrderId = $bookingOrder->id;
+    //             foreach ($resourcesToBook as $resource) {
+    //                 $resourcePrice = $resource->customPrice ?? $resourceType->price;
+    //                 $bookingItem = new Bookings;
+    //                 $bookingItem->bookingOrderId = $bookingOrderId;
+    //                 $bookingItem->resourceId = $resource->id;
+    //                 $bookingItem->resourceTypeId = $request->resourceTypeId;
+    //                 $bookingItem->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
+    //                 $bookingItem->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
+    //                 $bookingItem->price = $resourcePrice;
+    //                 $bookingItem->save();
+    //             }
+
+    //             if ($property->stripeSecretKey) {
+    //                 $ownerStripeSecret = $property->stripeSecretKey;
+    //             } else {
+    //                 $ownerStripeSecret = User::where('id', $property->ownerId)->value('stripeSecretKey');
+    //             }
+    //             if (empty($property->stripeSecretKey) && empty($ownerStripeSecret)) {
+    //                 return response()->json([
+    //                     'status'  => false,
+    //                     'message' => 'You can not book this property',
+    //                     'data'    => [],
+    //                 ]);
+    //             }
+    //             Stripe::setApiKey($ownerStripeSecret);
+    //             $existingCustomers = Customer::all(['email' => Auth::user()->email]);
+    //             if (count($existingCustomers->data) > 0) {
+    //                 $customer = $existingCustomers->data[0];
+    //             } else {
+    //                 // Create a new customer if not exists
+    //                 $customer = Customer::create([
+    //                     'email' => Auth::user()->email,
+    //                     'name'  => Auth::user()->name,
+    //                 ]);
+    //             }
+    //             Stripe::setApiKey($ownerStripeSecret);
+
+    //             $paymentIntent = PaymentIntent::create([
+    //                 'amount'                    => (int) ($bookingOrder->price * 100),
+    //                 'currency'                  => 'GBP',
+    //                 'customer'                  => $customer->id,
+    //                 'automatic_payment_methods' => [
+    //                     'enabled' => true,
+    //                 ],
+    //                 'metadata' => [
+    //                     'registrationId' => (string) $bookingOrderId,
+    //                 ],
+    //             ]);
+
+    //             $response = [
+    //                 'status'       => true,
+    //                 'bookingId'    => $bookingOrderId,
+    //                 'token'        => (string) $paymentIntent->id,
+    //                 'clientSecret' => $paymentIntent->client_secret,
+    //                 'publishable'  => base64_encode($ownerStripePublicKey),
+    //                 'total'        => $bookingOrder->cost * 100,
+    //             ];
+
+    //             return response()->json($response);
+    //         }
+
+    //         return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
+    //     } catch (Throwable $th) {
+    //         return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+    //     }
+    // }
     public function store(Request $request): JsonResponse
     {
         try {
@@ -262,119 +400,123 @@ class BookingsController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'data' => []]);
             }
-            $property = Property::where('id', $request->propertyId)->first();
-            if ($property->stripePublicKey) {
-                $ownerStripePublicKey = $property->stripePublicKey;
-            } else {
-                $ownerStripePublicKey = User::where('id', $property->ownerId)->value('stripePublicKey');
-            }
-            if (empty($property->stripePublicKey) && empty($ownerStripePublicKey)) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => 'You can not book this property',
-                    'data'    => [],
-                ]);
-            }
-            $availableResourcesData = getResourcesAvailable($request->resourceTypeId, $request->arrivalDateTime, $request->departureDateTime);
-            if ($availableResourcesData->count() < $request->resources) {
-                return response()->json(['status' => false, 'message' => 'Resources not available for the selected dates and quantity', 'data' => []]);
-            }
-            $resourcesToBookIds = $availableResourcesData->take((int) $request->resources);
-            $resourcesToBook = Resource::whereIn('id', $resourcesToBookIds)->get();
-            $resourceType = ResourceType::where('id', $request->resourceTypeId)->first();
-            $resourcePriceTotal = 0;
-            foreach ($resourcesToBook as $resource) {
-                $resourcePriceTotal += $resource->customPrice ?? $resourceType->price;
-            }
-            $bookingOrder = new BookingOrder;
-            $bookingOrder->propertyId = $request->propertyId;
-            $bookingOrder->resourceTypeId = $request->resourceTypeId;
-            $bookingOrder->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
-            $bookingOrder->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
-            $bookingOrder->adult = $request->adults;
-            $bookingOrder->guestFullName = $request->guestFullName;
-            $bookingOrder->guestEmail = $request->guestEmail;
-            $bookingOrder->guestPhone = $request->guestPhone;
-            $bookingOrder->guestAddress = $request->guestAddress;
-            $bookingOrder->additionalInformation = $request->additionalInformation;
-            if (isset($request->children)) {
-                $bookingOrder->children = $request->children;
-            }
-            $bookingOrder->price = $resourcePriceTotal;
-            $bookingOrder->cost = $resourceType->price * $request->nightsCount;
-            $bookingOrder->userId = Auth::user()->id;
-            if (isset($request->status)) {
-                $bookingOrder->status = $request->status;
-            }
-            if (isset($request->paymentStatus)) {
-                $bookingOrder->paymentStatus = $request->paymentStatus;
-            }
-            if ($bookingOrder->save()) {
-                $bookingOrderId = $bookingOrder->id;
-                foreach ($resourcesToBook as $resource) {
-                    $resourcePrice = $resource->customPrice ?? $resourceType->price;
-                    $bookingItem = new Bookings;
-                    $bookingItem->bookingOrderId = $bookingOrderId;
-                    $bookingItem->resourceId = $resource->id;
-                    $bookingItem->resourceTypeId = $request->resourceTypeId;
-                    $bookingItem->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
-                    $bookingItem->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
-                    $bookingItem->price = $resourcePrice;
-                    $bookingItem->save();
-                }
 
-                if ($property->stripeSecretKey) {
-                    $ownerStripeSecret = $property->stripeSecretKey;
+            // Use database transaction to ensure data integrity
+            return DB::transaction(function () use ($request) {
+                $property = Property::where('id', $request->propertyId)->first();
+                if ($property->stripePublicKey) {
+                    $ownerStripePublicKey = $property->stripePublicKey;
                 } else {
-                    $ownerStripeSecret = User::where('id', $property->ownerId)->value('stripeSecretKey');
+                    $ownerStripePublicKey = User::where('id', $property->ownerId)->value('stripePublicKey');
                 }
-                if (empty($property->stripeSecretKey) && empty($ownerStripeSecret)) {
+                if (empty($property->stripePublicKey) && empty($ownerStripePublicKey)) {
                     return response()->json([
                         'status'  => false,
                         'message' => 'You can not book this property',
                         'data'    => [],
                     ]);
                 }
-                Stripe::setApiKey($ownerStripeSecret);
-                $existingCustomers = Customer::all(['email' => Auth::user()->email]);
-                if (count($existingCustomers->data) > 0) {
-                    $customer = $existingCustomers->data[0];
-                } else {
-                    // Create a new customer if not exists
-                    $customer = Customer::create([
-                        'email' => Auth::user()->email,
-                        'name'  => Auth::user()->name,
-                    ]);
+                $availableResourcesData = getResourcesAvailable($request->resourceTypeId, $request->arrivalDateTime, $request->departureDateTime);
+                if ($availableResourcesData->count() < $request->resources) {
+                    return response()->json(['status' => false, 'message' => 'Resources not available for the selected dates and quantity', 'data' => []]);
                 }
-                Stripe::setApiKey($ownerStripeSecret);
+                $resourcesToBookIds = $availableResourcesData->take((int) $request->resources);
+                $resourcesToBook = Resource::whereIn('id', $resourcesToBookIds)->get();
+                $resourceType = ResourceType::where('id', $request->resourceTypeId)->first();
+                $resourcePriceTotal = 0;
+                foreach ($resourcesToBook as $resource) {
+                    $resourcePriceTotal += $resource->customPrice ?? $resourceType->price;
+                }
+                $bookingOrder = new BookingOrder;
+                $bookingOrder->propertyId = $request->propertyId;
+                $bookingOrder->resourceTypeId = $request->resourceTypeId;
+                $bookingOrder->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
+                $bookingOrder->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
+                $bookingOrder->adult = $request->adults;
+                $bookingOrder->guestFullName = $request->guestFullName;
+                $bookingOrder->guestEmail = $request->guestEmail;
+                $bookingOrder->guestPhone = $request->guestPhone;
+                $bookingOrder->guestAddress = $request->guestAddress;
+                $bookingOrder->additionalInformation = $request->additionalInformation;
+                if (isset($request->children)) {
+                    $bookingOrder->children = $request->children;
+                }
+                $bookingOrder->price = $resourcePriceTotal;
+                $bookingOrder->cost = $resourceType->price * $request->nightsCount;
+                $bookingOrder->userId = Auth::user()->id;
+                if (isset($request->status)) {
+                    $bookingOrder->status = $request->status;
+                }
+                if (isset($request->paymentStatus)) {
+                    $bookingOrder->paymentStatus = $request->paymentStatus;
+                }
+                if ($bookingOrder->save()) {
+                    $bookingOrderId = $bookingOrder->id;
+                    foreach ($resourcesToBook as $resource) {
+                        $resourcePrice = $resource->customPrice ?? $resourceType->price;
+                        $bookingItem = new Bookings;
+                        $bookingItem->bookingOrderId = $bookingOrderId;
+                        $bookingItem->resourceId = $resource->id;
+                        $bookingItem->resourceTypeId = $request->resourceTypeId;
+                        $bookingItem->arrivalDateTime = $request->arrivalDateTime ? date('Y-m-d', strtotime($request->arrivalDateTime)) : null;
+                        $bookingItem->departureDateTime = $request->departureDateTime ? date('Y-m-d', strtotime($request->departureDateTime)) : null;
+                        $bookingItem->price = $resourcePrice;
+                        $bookingItem->save();
+                    }
 
-                $paymentIntent = PaymentIntent::create([
-                    'amount'                    => (int) ($bookingOrder->price * 100),
-                    'currency'                  => 'GBP',
-                    'customer'                  => $customer->id,
-                    'automatic_payment_methods' => [
-                        'enabled' => true,
-                    ],
-                    'metadata' => [
-                        'registrationId' => (string) $bookingOrderId,
-                    ],
-                ]);
+                    if ($property->stripeSecretKey) {
+                        $ownerStripeSecret = $property->stripeSecretKey;
+                    } else {
+                        $ownerStripeSecret = User::where('id', $property->ownerId)->value('stripeSecretKey');
+                    }
+                    if (empty($property->stripeSecretKey) && empty($ownerStripeSecret)) {
+                        return response()->json([
+                            'status'  => false,
+                            'message' => 'You can not book this property',
+                            'data'    => [],
+                        ]);
+                    }
+                    Stripe::setApiKey($ownerStripeSecret);
+                    $existingCustomers = Customer::all(['email' => Auth::user()->email]);
+                    if (count($existingCustomers->data) > 0) {
+                        $customer = $existingCustomers->data[0];
+                    } else {
+                        // Create a new customer if not exists
+                        $customer = Customer::create([
+                            'email' => Auth::user()->email,
+                            'name'  => Auth::user()->name,
+                        ]);
+                    }
+                    Stripe::setApiKey($ownerStripeSecret);
 
-                $response = [
-                    'status'       => true,
-                    'bookingId'    => $bookingOrderId,
-                    'token'        => (string) $paymentIntent->id,
-                    'clientSecret' => $paymentIntent->client_secret,
-                    'publishable'  => base64_encode($ownerStripePublicKey),
-                    'total'        => $bookingOrder->cost * 100,
-                ];
+                    $paymentIntent = PaymentIntent::create([
+                        'amount'                    => (int) ($bookingOrder->price * 100),
+                        'currency'                  => 'GBP',
+                        'customer'                  => $customer->id,
+                        'automatic_payment_methods' => [
+                            'enabled' => true,
+                        ],
+                        'metadata' => [
+                            'registrationId' => (string) $bookingOrderId,
+                        ],
+                    ]);
 
-                return response()->json($response);
-            }
+                    $response = [
+                        'status'       => true,
+                        'bookingId'    => $bookingOrderId,
+                        'token'        => (string) $paymentIntent->id,
+                        'clientSecret' => $paymentIntent->client_secret,
+                        'publishable'  => base64_encode($ownerStripePublicKey),
+                        'total'        => $bookingOrder->cost * 100,
+                    ];
 
-            return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
+                    return response()->json($response);
+                }
+
+                return response()->json(['status' => false, 'message' => 'Failed to your booking', 'data' => []], 500);
+            });
         } catch (Throwable $th) {
-            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+            return response()->json(['status' => false, 'message' => 'Unable to process booking at this time. Please try again later.', 'data' => []]);
         }
     }
 

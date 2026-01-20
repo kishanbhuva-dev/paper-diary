@@ -704,7 +704,7 @@ const initiateBooking = async () => {
       paymentElement.value.mount('#payment-element');
     }
   } catch (err) {
-    toast.error(err.message || 'Failed to initiate booking.');
+    console.log(err);
   } finally {
     isSubmitting.value = false;
   }
