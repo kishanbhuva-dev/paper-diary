@@ -18,6 +18,7 @@
     <ChartComponent
       :series="chartSeries"
       :categories="chartCategories"
+      :booking-count-data="bookingCountData"
       type="bar"
       :height="400"
       :colors="['#8B5CF6']"
@@ -49,20 +50,39 @@ const chartSeries = computed(() => {
   const sortedCategories = chartCategories.value;
 
   // Create data map for easy lookup
-  const dataMap = {};
+  const amountDataMap = {};
   props.chartData.forEach((item) => {
-    dataMap[item.x] = item.y;
+    amountDataMap[item.x] = item.y;
   });
 
   // Map data according to sorted categories
-  const chartData = sortedCategories.map((date) => dataMap[date] || 0);
+  const chartData = sortedCategories.map((date) => amountDataMap[date] || 0);
 
   return [
     {
-      name: 'Total Bookings',
+      name: '',
       data: chartData,
     },
   ];
+});
+
+// Add this computed property after chartSeries
+const bookingCountData = computed(() => {
+  if (!props.chartData || !Array.isArray(props.chartData)) {
+    return [];
+  }
+
+  // Get sorted categories first
+  const sortedCategories = chartCategories.value;
+
+  // Create data map for booking counts
+  const countDataMap = {};
+  props.chartData.forEach((item) => {
+    countDataMap[item.x] = item.z;
+  });
+
+  // Map data according to sorted categories
+  return sortedCategories.map((date) => countDataMap[date] || 0);
 });
 
 const chartCategories = computed(() => {
