@@ -317,7 +317,10 @@
               class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
             >
               <div class="flex items-center justify-center gap-1">
-                <slot name="actions" :row="item"></slot>
+                <slot
+                  name="actions"
+                  :row="item"
+                ></slot>
 
                 <button
                   v-if="showView"
@@ -374,7 +377,9 @@
           <tr v-if="!paginatedData.length">
             <td
               :colspan="
-                columns.length + 1 + (showView || showEdit || showDelete || adminLogin || $slots.actions ? 1 : 0)
+                columns.length +
+                1 +
+                (showView || showEdit || showDelete || adminLogin || $slots.actions ? 1 : 0)
               "
               class="no-data px-6 py-12 text-center text-gray-500 italic"
             >
