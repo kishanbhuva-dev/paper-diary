@@ -188,7 +188,7 @@
             </div>
           </section>
 
-          <section>
+          <!-- <section>
             <h5>Property Policies</h5>
             <ul class="mt-4 list-inside list-disc space-y-2 text-gray-700">
               <li>Check-in Time: 2 PM, Check-out Time: 12 PM</li>
@@ -196,7 +196,7 @@
               <li>Passport, Aadhaar, Driving License and Govt. ID are accepted.</li>
               <li>Pets are not allowed.</li>
             </ul>
-          </section>
+          </section> -->
         </div>
 
         <aside class="h-fit rounded-lg border border-gray-400 p-6">
@@ -325,11 +325,16 @@
         <span> {{ propertyData.address }} </span>
       </div>
       <div class="mt-4 flex-center rounded-lg overflow-hidden">
-        <img
-          src="/map.png"
-          alt="Map Image"
-          class="h-full w-full object-cover"
-        />
+        <iframe
+          v-if="mapCoordinates.lat && mapCoordinates.lng"
+          :src="`https://maps.google.com/maps?q=${mapCoordinates.lat},${mapCoordinates.lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`"
+          width="100%"
+          height="450"
+          style="border: 0"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
       </div>
     </section>
 
@@ -601,6 +606,14 @@ const dateList = computed(() =>
 const navigateBackward = () => (startDate.value = startDate.value.subtract(7, 'day'));
 const navigateForward = () => (startDate.value = startDate.value.add(7, 'day'));
 const selectDate = (dateString) => (selectedDate.value = dayjs(dateString));
+
+// Remove the geocodeAddress function and replace with:
+const mapCoordinates = computed(() => ({
+  lat: propertyData.value?.latitude,
+  lng: propertyData.value?.longitude,
+}));
+
+// Remove the watch function entirely
 
 onMounted(fetchProperty);
 </script>
