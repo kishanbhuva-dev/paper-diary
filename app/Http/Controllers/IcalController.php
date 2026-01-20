@@ -42,7 +42,7 @@ class IcalController extends Controller
 
         return response($content, 200, [
             'Content-Type'        => 'text/calendar; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="bookings.ics"',
+            'Content-Disposition' => 'attachment; filename="feed.ics"',
             'Content-Length'      => strlen($content),
             'Connection'          => 'close',
         ]);

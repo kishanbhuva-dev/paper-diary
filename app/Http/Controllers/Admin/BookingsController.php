@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BookingOrder;
+use App\Models\Bookings;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -184,6 +185,26 @@ class BookingsController extends Controller
                 'message' => '',
                 'data'    => $paginatedData,
             ]);
+        } catch (Throwable $th) {
+            return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
+        }
+    }
+
+    public function bookingCancel(): JsonResponse
+    {
+        try {
+            $bookingOrder = BookingOrder::where('created_at', '<', now()->startOfDay())
+                ->where('status', 'pending')->get();
+            foreach ($bookingOrder as $bookingOrders) {
+                $booking = Bookings::where('bookingOrderId', $bookingOrders->id)->first();
+                $booking->status = 'cancelled';
+                $booking->save();
+                $bookingOrders->status = 'cancelled';
+                $bookingOrders->paymentStatus = 'cancelled';
+                $bookingOrders->save();
+            }
+
+            return response()->json(['status' => true, 'message' => 'Bookings cancelled successfully', 'data' => []]);
         } catch (Throwable $th) {
             return response()->json(['status' => false, 'message' => $th->getMessage(), 'data' => []]);
         }
