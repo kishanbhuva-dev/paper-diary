@@ -422,6 +422,7 @@ const dashboardData = async () => {
       totalBookingPerMonthChartData.value = bookingData.map((item) => ({
         x: item.month,
         y: item.total,
+        z: item.count,
       }));
     }
   } catch (err) {
