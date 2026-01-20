@@ -34,7 +34,15 @@ class BookingsController extends Controller
                 DATE_FORMAT(booking_orders.departureDateTime, '%d %b %Y') as departureDateTime,
                 COALESCE(property.propertyName, 'N/A') as propertyName,
                 COALESCE(CONCAT(users.firstName, ' ', users.lastName), 'N/A') as ownerName,
-                COALESCE(users.email, 'N/A') as ownerEmail
+                COALESCE(users.email, 'N/A') as ownerEmail,
+                CASE 
+                    WHEN booking_orders.created_at >= NOW() - INTERVAL 1 HOUR THEN CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, booking_orders.created_at, NOW())), ' minutes ago')
+                    WHEN booking_orders.created_at >= NOW() - INTERVAL 1 DAY THEN CONCAT(FLOOR(TIMESTAMPDIFF(HOUR, booking_orders.created_at, NOW())), ' hours ago')
+                    WHEN booking_orders.created_at >= NOW() - INTERVAL 7 DAY THEN CONCAT(FLOOR(TIMESTAMPDIFF(DAY, booking_orders.created_at, NOW())), ' days ago')
+                    WHEN booking_orders.created_at >= NOW() - INTERVAL 30 DAY THEN CONCAT(FLOOR(TIMESTAMPDIFF(DAY, booking_orders.created_at, NOW())), ' days ago')
+                    WHEN booking_orders.created_at >= NOW() - INTERVAL 12 MONTH THEN CONCAT(FLOOR(TIMESTAMPDIFF(MONTH, booking_orders.created_at, NOW())), ' months ago')
+                    ELSE CONCAT(FLOOR(TIMESTAMPDIFF(YEAR, booking_orders.created_at, NOW())), ' years ago')
+                END as fromNow
             ")
                 ->leftJoin('property', 'booking_orders.propertyId', '=', 'property.id')
                 ->leftJoin('users', 'property.ownerId', '=', 'users.id');
