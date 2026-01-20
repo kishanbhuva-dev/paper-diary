@@ -12,7 +12,6 @@ Route::get('migrations/status', [App\Http\Controllers\MigrationController::class
 Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
 Route::get('products', [App\Http\Controllers\StripeController::class, 'getProducts']);
 Route::get('stripe/config', [App\Http\Controllers\StripeController::class, 'getStripeConfig']);
-Route::post('stripe/webhook', [App\Http\Controllers\StripeWebhookController::class, 'handleWebhook']);
 Route::get('icalendar/{resourceId}/feed.ics', [App\Http\Controllers\IcalController::class, 'index']);
 Route::get('cancel-pending-bookings', [App\Http\Controllers\Admin\BookingsController::class, 'bookingCancel']);
 

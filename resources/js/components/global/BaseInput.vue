@@ -130,6 +130,7 @@ const props = defineProps({
   showCount: { type: Boolean, default: false },
   multiline: { type: Boolean, default: false },
   rows: { type: Number, default: 3 },
+  restrict: { type: String, default: '' },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -204,7 +205,17 @@ watch(
 );
 
 const handleInput = (event) => {
-  const val = event.target.value;
+  let val = event.target.value;
+  if (props.restrict === 'phone') {
+    val = val.replace(/[^\d+]/g, '');
+  } else if (props.restrict === 'numeric') {
+    val = val.replace(/[^\d]/g, '');
+  } else if (props.restrict === 'decimal') {
+    // Allows numbers, one decimal, and one minus sign
+    val = val.replace(/[^0-9.-]/g, '').replace(/(\..*)\./g, '$1');
+  }
+
+  event.target.value = val;
   if (props.type === 'number') {
     if (val === '') {
       innerValue.value = null;

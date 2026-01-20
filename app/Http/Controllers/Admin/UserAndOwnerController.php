@@ -233,7 +233,9 @@ class UserAndOwnerController extends Controller
                     ->orWhere('lastName', 'LIKE', '%' . $search . '%')
                     ->orWhere('email', 'LIKE', '%' . $search . '%')
                     ->orWhere('phone', 'LIKE', '%' . $search . '%')
-                    ->orWhere('address', 'LIKE', '%' . $search . '%');
+                    ->orWhere('address', 'LIKE', '%' . $search . '%')
+                    ->orWhere('city', 'LIKE', '%' . $search . '%')
+                    ->orWhere('country', 'LIKE', '%' . $search . '%');
             });
             $search = explode(' ', $search);
             if (count($search) > 1) {

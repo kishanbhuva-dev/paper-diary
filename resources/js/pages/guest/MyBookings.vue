@@ -1,215 +1,105 @@
 <template>
-  <main class="container mx-auto py-12">
-    <div class="px-4 sm:px-6 lg:px-8">
-      <div
-        class="mb-3 flex flex-col justify-between gap-3 text-sm font-semibold text-gray-600 md:flex-row"
-      >
-        <div
-          class="grid divide-gray-300 overflow-hidden rounded-md border border-gray-300 max-md:divide-y md:grid-cols-4 md:divide-x"
+  <main class="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="mb-6 border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          v-for="tab in tabs"
+          :key="tab.value"
+          type="button"
+          :class="[
+            activeTab === tab.value
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+            'cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap transition-colors',
+          ]"
+          @click="handleTabChange(tab.value)"
         >
-          <div class="relative transition-colors hover:bg-gray-50">
-            <select
-              v-model="filters.status"
-              class="mr-6 w-full cursor-pointer appearance-none p-2 outline-0"
-              @change="fetchBookings"
-            >
-              <option value="">Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirm">Confirmed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            <Icon
-              icon="mdi:chevron-up-down"
-              class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
-            />
-          </div>
-          <div class="relative transition-colors hover:bg-gray-50">
-            <input
-              v-model="filters.arrivalDateTime"
-              type="date"
-              class="w-full cursor-pointer p-2 outline-0"
-              onclick="this.showPicker()"
-              @change="fetchBookings"
-            />
-          </div>
-          <div class="relative transition-colors hover:bg-gray-50">
-            <input
-              v-model="filters.departureDateTime"
-              type="date"
-              class="w-full cursor-pointer p-2 outline-0"
-              onclick="this.showPicker()"
-              @change="fetchBookings"
-            />
-          </div>
-          <div>
-            <button
-              class="flex-center w-full cursor-pointer gap-1 p-2 text-red-600 outline-0 transition-colors hover:bg-red-50"
-              @click="resetFilters"
-            >
-              <Icon icon="mdi:refresh" />
-              Reset Filter
-            </button>
-          </div>
-        </div>
-        <div class="relative transition-colors hover:bg-gray-50">
-          <input
-            v-model="filters.search"
-            type="text"
-            placeholder="Search property or status"
-            class="w-full rounded-md border border-gray-300 p-2 pr-10 outline-0"
-            @keyup.enter="fetchBookings"
-          />
-          <button
-            class="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer rounded bg-primary p-2 text-white"
-            @click="fetchBookings"
-          >
-            <Icon icon="mdi:search" />
-          </button>
-        </div>
-      </div>
-
-      <div class="mb-6 border-b border-gray-200">
-        <nav class="-mb-px flex space-x-8">
-          <button
-            v-for="tab in tabs"
-            :key="tab.value"
-            :class="[
-              activeTab === tab.value
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-              'cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap',
-            ]"
-            @click="handleTabChange(tab.value)"
-          >
-            {{ tab.name }}
-          </button>
-        </nav>
-      </div>
-
-      <div class="overflow-hidden rounded-lg border border-gray-300">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th
-                  v-for="header in tableHeaders"
-                  :key="header"
-                  class="px-6 py-3 text-left text-xs font-semibold tracking-wider uppercase"
-                >
-                  {{ header }}
-                </th>
-                <th
-                  v-if="activeTab === 'upcoming'"
-                  class="px-6 py-3 text-left text-xs font-semibold tracking-wider uppercase"
-                >
-                  ACTION
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-              <tr v-if="isLoading">
-                <td
-                  colspan="6"
-                  class="px-6 py-10 text-center text-gray-500"
-                >
-                  Loading bookings...
-                </td>
-              </tr>
-              <tr v-else-if="bookings.length === 0">
-                <td
-                  colspan="6"
-                  class="px-6 py-10 text-center text-gray-500"
-                >
-                  No bookings found.
-                </td>
-              </tr>
-              <tr
-                v-for="(booking, index) in bookings"
-                v-else
-                :key="booking.id"
-              >
-                <td class="px-6 py-4 text-sm whitespace-nowrap">
-                  <!-- #{{ booking.id }} -->
-                  {{ ++index }}
-                </td>
-                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                  {{ booking.property?.propertyName || 'N/A' }}
-                  <span class="text-xs text-gray-500"> - {{ booking.resource_type?.name }}</span>
-                </td>
-                <td class="px-6 py-4 text-sm whitespace-nowrap">
-                  {{ booking.arrivalDateTime }}
-                </td>
-                <td class="px-6 py-4 text-sm whitespace-nowrap">
-                  {{ booking.departureDateTime }}
-                </td>
-                <td class="px-6 py-4 text-sm whitespace-nowrap">
-                  <span
-                    :class="[
-                      'inline-flex rounded-full px-2 text-xs leading-5 font-semibold',
-                      statusClasses[booking.status] || 'bg-gray-100 text-gray-800',
-                    ]"
-                  >
-                    {{ booking.status }}
-                  </span>
-                </td>
-                <td
-                  v-if="activeTab === 'upcoming'"
-                  class="px-6 py-4 text-sm whitespace-nowrap"
-                >
-                  <button
-                    v-if="booking.status !== 'cancelled'"
-                    class="text-red-600 hover:text-red-900 font-bold transition-colors cursor-pointer"
-                    @click="initiateCancel(booking)"
-                  >
-                    Cancel
-                  </button>
-                  <!-- <span v-else class="text-gray-400">N/A</span> -->
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+          {{ tab.name }}
+        </button>
+      </nav>
     </div>
+
+    <Basetable
+      title="My Bookings"
+      :columns="tableColumns"
+      :rows="bookings"
+      server-side
+      :total-items="totalItems"
+      :per-page="filters.pagination"
+      :show-add="false"
+      :show-edit="false"
+      :show-delete="false"
+      :show-view="false"
+      :show-download="false"
+      :admin-login="false"
+      :available-filters="filterConfig"
+      @search="handleSearch"
+      @page-change="handlePageChange"
+      @per-page-change="handlePerPageChange"
+      @sort="handleSort"
+      @filter-change="handleFilterChange"
+    >
+      <template #actions="{ row }">
+        <div class="flex items-center gap-1">
+          <button
+            v-if="row.status === 'cancelled'"
+            type="button"
+            class="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-all duration-200 font-bold text-xs cursor-pointer shadow-sm active:scale-95"
+            @click="openDeleteModal(row.id)"
+          >
+            <Icon
+              icon="mdi:delete-outline"
+              class="w-4 h-4"
+            />
+            Delete
+          </button>
+
+          <button
+            v-else-if="activeTab === 'upcoming' && row.status !== 'cancelled'"
+            type="button"
+            class="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-all duration-200 font-bold text-xs border border-red-100 cursor-pointer"
+            @click="initiateCancel(row)"
+          >
+            <Icon
+              icon="mdi:close-circle-outline"
+              class="w-4 h-4"
+            />
+            Cancel
+          </button>
+
+          <span
+            v-else
+            class="text-gray-300"
+            >-</span
+          >
+        </div>
+      </template>
+    </Basetable>
 
     <div
       v-if="isModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
     >
-      <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <h3 class="mb-4 text-lg font-bold text-gray-900">Cancel Booking</h3>
-        <p class="mb-4 text-sm text-gray-600">
+      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl scale-in-center">
+        <h3 class="mb-4 text-xl font-extrabold text-slate-800">Cancel Booking</h3>
+        <p class="mb-6 text-sm text-gray-600 leading-relaxed">
           Are you sure you want to cancel your booking for
-          <strong>{{ selectedBooking?.property?.propertyName }}</strong
-          >? This will initiate a refund through Stripe.
+          <strong class="text-slate-900">{{ selectedBooking?.property?.propertyName }}</strong
+          >?
         </p>
-
-        <div class="mb-4">
-          <label class="mb-2 block text-sm font-medium text-gray-700"
-            >Reason for cancellation</label
-          >
-          <select
-            v-model="cancelReason"
-            class="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-primary focus:outline-none"
-          >
-            <option value="">Select a reason</option>
-            <option value="Change of plans">Change of plans</option>
-            <option value="Found a better deal">Found a better deal</option>
-            <option value="Personal emergency">Personal emergency</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
 
         <div class="flex justify-end gap-3">
           <button
-            class="rounded-md px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+            type="button"
+            class="rounded-xl px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
             @click="isModalOpen = false"
           >
             Keep Booking
           </button>
           <button
-            :disabled="!cancelReason || isSubmitting"
-            class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+            type="button"
+            :disabled="isSubmitting"
+            class="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-all cursor-pointer shadow-lg shadow-red-200 active:scale-95"
             @click="confirmCancel"
           >
             {{ isSubmitting ? 'Processing...' : 'Confirm Cancellation' }}
@@ -217,104 +107,162 @@
         </div>
       </div>
     </div>
+
+    <DeleteModal
+      v-model="isDeleteModalOpen"
+      title="Delete Cancelled Booking"
+      message="Are you sure you want to delete this cancelled booking record? This will remove it from your history."
+      warning="This action is permanent and cannot be undone."
+      action="delete"
+      @confirm="handleDeleteConfirm"
+    />
   </main>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { Icon } from '@iconify/vue';
+import Basetable from '../../components/global/Basetable.vue';
+import DeleteModal from '../../components/global/DeleteModal.vue';
 import { userService } from '../../services/userService';
-// import dayjs from "dayjs";
 
 const tabs = [
   { name: 'Past Bookings', value: 'past' },
   { name: 'Upcoming Bookings', value: 'upcoming' },
 ];
+
 const activeTab = ref('past');
 const bookings = ref([]);
-const isLoading = ref(false);
-
+const totalItems = ref(0);
 const isModalOpen = ref(false);
+const isDeleteModalOpen = ref(false);
 const isSubmitting = ref(false);
 const selectedBooking = ref(null);
-const cancelReason = ref('');
-
-const tableHeaders = ['ID', 'PROPERTY', 'ARRIVAL', 'DEPARTURE', 'STATUS'];
+const bookingToDeleteId = ref(null);
 
 const filters = ref({
   status: '',
+  resourceTypeId: '',
   arrivalDateTime: '',
   departureDateTime: '',
   search: '',
   pagination: 10,
+  page: 1,
+  sortBy: 'id', // Replaced orderBy with sortBy for PHP
+  sortOrder: 'desc', // Replaced orderDirection with sortOrder for PHP
 });
 
-const statusClasses = {
-  confirm: 'bg-green-100 text-green-800',
-  pending: 'bg-yellow-100 text-yellow-800',
-  cancelled: 'bg-red-100 text-red-800',
-  completed: 'bg-blue-100 text-blue-800',
-};
+const tableColumns = [
+  { label: 'Property', key: 'property.propertyName', sortable: true },
+  { label: 'Resource Type', key: 'resource_type.name', sortable: true }, // Added Column
+  { label: 'Arrival', key: 'arrivalDateTime', sortable: true },
+  { label: 'Departure', key: 'departureDateTime', sortable: true },
+  { label: 'Status', key: 'status', sortable: true },
+];
+
+const filterConfig = [
+  {
+    label: 'Status',
+    key: 'status',
+    type: 'select',
+    options: [
+      { label: 'Pending', value: 'pending' },
+      { label: 'Confirmed', value: 'confirm' },
+      { label: 'Cancelled', value: 'cancelled' },
+    ],
+  },
+  { label: 'Arrival Date', key: 'arrivalDateTime', type: 'date' },
+  { label: 'Departure Date', key: 'departureDateTime', type: 'date' },
+];
 
 const fetchBookings = async () => {
-  isLoading.value = true;
   try {
-    const params = {
+    const res = await userService.getBookings({
       type: activeTab.value,
       ...filters.value,
-    };
-
-    const res = await userService.getBookings(params);
-
-    if (res.data.status) {
-      bookings.value = res.data.data.data;
+    });
+    if (res.data?.status) {
+      bookings.value = res.data.data.data || [];
+      totalItems.value = res.data.data.total || 0;
     }
   } catch (error) {
-    throw new Error(error);
-  } finally {
-    isLoading.value = false;
+    console.error('Error:', error);
   }
+};
+
+const handleSearch = (term) => {
+  filters.value.search = term;
+  filters.value.page = 1;
+  fetchBookings();
+};
+
+const handlePageChange = (page) => {
+  filters.value.page = page;
+  fetchBookings();
+};
+
+const handlePerPageChange = (size) => {
+  filters.value.pagination = size;
+  filters.value.page = 1;
+  fetchBookings();
+};
+
+const handleSort = (sortData) => {
+  // Mapping the frontend key to what the PHP backend expects in its query
+  filters.value.sortBy = sortData.key;
+  filters.value.sortOrder = sortData.order;
+  fetchBookings();
+};
+
+const handleFilterChange = (applied) => {
+  filters.value.status = applied.status || '';
+  filters.value.resourceTypeId = applied.resourceTypeId || '';
+  filters.value.arrivalDateTime = applied.arrivalDateTime || '';
+  filters.value.departureDateTime = applied.departureDateTime || '';
+  filters.value.page = 1;
+  fetchBookings();
+};
+
+const handleTabChange = (tabValue) => {
+  activeTab.value = tabValue;
+  filters.value.page = 1;
+  fetchBookings();
 };
 
 const initiateCancel = (booking) => {
   selectedBooking.value = booking;
-  cancelReason.value = '';
   isModalOpen.value = true;
 };
 
 const confirmCancel = async () => {
   isSubmitting.value = true;
   try {
-    const res = await userService.cancelBooking({
-      bookingId: selectedBooking.value.id,
-      reason: cancelReason.value,
-    });
-
-    if (res.data.status) {
+    const res = await userService.cancelBooking({ bookingId: selectedBooking.value.id });
+    if (res.data?.status) {
       isModalOpen.value = false;
-      fetchBookings(); // Refresh the list
+      fetchBookings();
     }
-  } catch (error) {
-    throw new Error(error);
   } finally {
     isSubmitting.value = false;
   }
 };
 
-const handleTabChange = (tabValue) => {
-  activeTab.value = tabValue;
-  fetchBookings();
+// Modal handlers for Delete
+const openDeleteModal = (id) => {
+  bookingToDeleteId.value = id;
+  isDeleteModalOpen.value = true;
 };
 
-const resetFilters = () => {
-  filters.value = {
-    status: '',
-    arrivalDateTime: '',
-    departureDateTime: '',
-    search: '',
-    pagination: 10,
-  };
-  fetchBookings();
+const handleDeleteConfirm = async () => {
+  try {
+    const res = await userService.deleteCancelledBooking(bookingToDeleteId.value);
+    if (res.data?.status) {
+      isDeleteModalOpen.value = false;
+      fetchBookings();
+    }
+  } catch (error) {
+    console.error('Delete failed:', error);
+  }
 };
 
 onMounted(() => {

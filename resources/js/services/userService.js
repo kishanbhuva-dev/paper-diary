@@ -24,6 +24,9 @@ export const userService = {
   deleteBooking(bookingId) {
     return api.post('/user/booking-delete', { bookingId });
   },
+  deleteCancelledBooking(bookingId) {
+    return api.post('/user/booking-cancel-delete', { bookingId });
+  },
 
   getBookings(params) {
     return api.get('/user/bookings', { params });

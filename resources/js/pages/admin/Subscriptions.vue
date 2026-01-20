@@ -75,8 +75,8 @@
         class="mt-12"
       >
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-slate-900 mb-2">Owner Subscriptions</h2>
-          <!-- <p class="text-slate-500">View your subscription history and past billing cycles</p> -->
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">Subscriptions History</h2>
+          <p class="text-slate-500">View subscription history and past billing cycles</p>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -87,12 +87,22 @@
                   <th
                     class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                   >
+                    NO.
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                  >
                     Plan
                   </th>
                   <th
                     class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                   >
-                    Email
+                    Owner Name
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                  >
+                    Owner Email
                   </th>
                   <th
                     class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
@@ -112,24 +122,41 @@
                   <th
                     class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                   >
-                    Created
+                    Purchased On
                   </th>
-                  <!-- <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th> -->
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-200">
                 <tr
-                  v-for="sub in subscriptions"
+                  v-for="(sub, index) in subscriptions"
                   :key="sub.id"
                   class="hover:bg-slate-50 transition-colors"
                 >
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                       <div>
+                        <div class="text-sm font-medium text-slate-600 bold italic">
+                          {{ index + 1 }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div>
                         <div class="text-sm font-medium text-slate-900">
                           {{ sub.plan_name || 'Professional Plan' }}
                         </div>
-                        <div class="text-xs text-slate-500 font-mono">{{ sub.owner_name }}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div>
+                        <div class="text-sm font-medium text-slate-900">
+                          {{ sub.owner_name || '-' }}
+                        </div>
                       </div>
                     </div>
                   </td>
