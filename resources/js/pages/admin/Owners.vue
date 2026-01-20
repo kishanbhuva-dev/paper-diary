@@ -264,10 +264,19 @@ const owners = ref([]);
 const tableColumns = [
   { label: 'Name', key: (row) => `${row?.firstName} ${row?.lastName}` },
   { label: 'Email', key: 'email' },
-  { label: 'Address', key: 'address' },
+  { label: 'Address', key: (item) => truncateString(item.address, 15) },
+  { label: 'City', key: 'city' },
+  { label: 'Country', key: 'country' },
   { label: 'Phone', key: 'phone' },
   { label: 'Role', key: 'role' },
 ];
+const truncateString = (str, maxLen = 15) => {
+  if (!str) {
+    return '';
+  }
+  const s = String(str);
+  return s.length > maxLen ? `${s.substring(0, maxLen)}...` : s;
+};
 
 const handleLoginAsUser = async (item) => {
   const { email } = item;

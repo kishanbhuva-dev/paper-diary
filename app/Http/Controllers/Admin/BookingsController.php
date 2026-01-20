@@ -35,7 +35,7 @@ class BookingsController extends Controller
                 COALESCE(property.propertyName, 'N/A') as propertyName,
                 COALESCE(CONCAT(users.firstName, ' ', users.lastName), 'N/A') as ownerName,
                 COALESCE(users.email, 'N/A') as ownerEmail,
-                CASE 
+                CASE
                     WHEN booking_orders.created_at >= NOW() - INTERVAL 1 HOUR THEN CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, booking_orders.created_at, NOW())), ' minutes ago')
                     WHEN booking_orders.created_at >= NOW() - INTERVAL 1 DAY THEN CONCAT(FLOOR(TIMESTAMPDIFF(HOUR, booking_orders.created_at, NOW())), ' hours ago')
                     WHEN booking_orders.created_at >= NOW() - INTERVAL 7 DAY THEN CONCAT(FLOOR(TIMESTAMPDIFF(DAY, booking_orders.created_at, NOW())), ' days ago')
@@ -155,7 +155,7 @@ class BookingsController extends Controller
                 }
             }
             $perPage = $request->perPage ?? 10;
-            $sortBy = $request->sortBy ?? 'id';
+            $sortBy = $request->sortBy ?? 'arrivalDateTime';
             $sortOrder = $request->sortOrder ?? 'desc';
             $sortMapping = [
                 'id'                => 'booking_orders.id',

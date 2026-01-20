@@ -263,11 +263,21 @@ const handlePerPageChange = (size) => {
 
 const tableColumns = [
   { label: 'Name', key: (row) => `${row?.firstName} ${row?.lastName}`, sortable: true },
-  { label: 'Email', key: 'email', ssortable: true },
-  { label: 'Address', key: 'address', sortable: true },
+  { label: 'Email', key: 'email', sortable: true },
+  { label: 'Address', key: (item) => truncateString(item.address, 15), sortable: true },
+  { label: 'City', key: 'city', sortable: true },
+  { label: 'Country', key: 'country', sortable: true },
   { label: 'Phone', key: 'phone', sortable: true },
   { label: 'Role', key: 'role', sortable: true },
 ];
+
+const truncateString = (str, maxLen = 15) => {
+  if (!str) {
+    return '';
+  }
+  const s = String(str);
+  return s.length > maxLen ? `${s.substring(0, maxLen)}...` : s;
+};
 
 const handleLoginAsUser = async (item) => {
   const { email } = item;

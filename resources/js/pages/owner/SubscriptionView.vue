@@ -115,7 +115,7 @@
         class="mt-12"
       >
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-slate-900 mb-2">Recent Subscriptions</h2>
+          <h2 class="text-2xl font-bold text-slate-900 mb-2">Subscriptions History</h2>
           <p class="text-slate-500">View your subscription history and past billing cycles</p>
         </div>
 
@@ -124,6 +124,11 @@
             <table class="w-full">
               <thead class="bg-slate-50 border-b border-slate-200">
                 <tr>
+                  <th
+                    class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                  >
+                    NO.
+                  </th>
                   <th
                     class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                   >
@@ -147,17 +152,26 @@
                   <th
                     class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
                   >
-                    Created
+                    Purchased On
                   </th>
                   <!-- <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th> -->
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-200">
                 <tr
-                  v-for="sub in recentSubscriptions"
+                  v-for="(sub, index) in recentSubscriptions"
                   :key="sub.id"
                   class="hover:bg-slate-50 transition-colors"
                 >
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div>
+                        <div class="text-sm font-medium text-slate-600 bold italic">
+                          {{ index + 1 }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                       <div>

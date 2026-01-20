@@ -28,7 +28,11 @@ class ResourceController extends Controller
             }
             $resources = Resource::whereHas('resourceType', function ($query) use ($request) {
                 $query->where('propertyId', $request->propertyId);
-            })->with('resourceType.property')->get();
+            })->with('resourceType.property')->get()->transform(function ($item) {
+                unset($item->resourceType->property);
+
+                return $item;
+            });
             if ($resources->count() > 0) {
                 $response = ['status' => true, 'message' => '', 'data' => $resources];
             } else {

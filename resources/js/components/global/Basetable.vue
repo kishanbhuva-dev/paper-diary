@@ -35,6 +35,7 @@
           <div class="relative">
             <button
               v-if="availableFilters.length"
+              type="button"
               :class="[
                 'flex items-center justify-center p-2 rounded-xl border transition-all duration-150 h-10 w-10 active:scale-95 cursor-pointer',
                 isFilterDropdownOpen || hasActiveFilters
@@ -65,6 +66,7 @@
                   >Filter Options</span
                 >
                 <button
+                  type="button"
                   class="text-[15px] font-bold text-red-500 hover:text-red-700 hover:bg-red-100 p-3 rounded-xl uppercase cursor-pointer"
                   @click="clearAllFilters"
                 >
@@ -128,6 +130,7 @@
 
               <div class="mt-5">
                 <button
+                  type="button"
                   class="w-full bg-slate-800 text-white cursor-pointer text-xs font-bold py-2.5 rounded-xl hover:bg-slate-700 transition-colors uppercase tracking-widest"
                   @click="isFilterDropdownOpen = false"
                 >
@@ -139,6 +142,7 @@
 
           <button
             v-if="showAdd"
+            type="button"
             class="flex items-center justify-center p-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 cursor-pointer transition duration-150 h-10 w-10 shadow-md shadow-blue-300 active:scale-95"
             title="Add New"
             @click="emit('open-add-modal')"
@@ -151,6 +155,7 @@
 
           <button
             v-if="showDownload"
+            type="button"
             class="flex items-center justify-center p-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-xl hover:bg-blue-200 cursor-pointer transition duration-150 h-10 w-10 active:scale-95"
             title="Download"
             @click="exportToExcel"
@@ -182,6 +187,7 @@
           <span class="opacity-50 uppercase text-[8px]">{{ getFilterLabel(key) }}:</span>
           <span>{{ getOptionLabel(key, value) }}</span>
           <button
+            type="button"
             class="p-0.5 rounded-md hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
             @click="handleFilterChange(key, '')"
           >
@@ -231,7 +237,7 @@
               </div>
             </th>
             <th
-              v-if="showView || showEdit || showDelete || adminLogin"
+              v-if="showView || showEdit || showDelete || adminLogin || $slots.actions"
               class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap"
             >
               Actions
@@ -274,16 +280,6 @@
                   >-</span
                 >
               </template>
-              <!-- <template v-else-if="col.key === 'status'">
-                <span
-                  v-if="getCellValue(item, col)"
-                  class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border"
-                  :class="getStatusClasses(getCellValue(item, col))"
-                >
-                  {{ formatStatusDisplay(getCellValue(item, col)) }}
-                </span>
-                <span v-else class="text-gray-300">-</span>
-              </template> -->
 
               <template v-else-if="col.key === 'status'">
                 <span
@@ -317,12 +313,18 @@
               </template>
             </td>
             <td
-              v-if="showView || showEdit || showDelete || adminLogin"
+              v-if="showView || showEdit || showDelete || adminLogin || $slots.actions"
               class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
             >
               <div class="flex items-center justify-center gap-1">
+                <slot
+                  name="actions"
+                  :row="item"
+                ></slot>
+
                 <button
                   v-if="showView"
+                  type="button"
                   class="text-emerald-600 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-emerald-600 transition duration-150"
                   title="View Details"
                   @click="emit('view', item)"
@@ -335,6 +337,7 @@
 
                 <button
                   v-if="showEdit"
+                  type="button"
                   class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-blue-600 transition duration-150"
                   title="Edit"
                   @click="emit('open-edit-modal', item)"
@@ -346,6 +349,7 @@
                 </button>
                 <button
                   v-if="showDelete"
+                  type="button"
                   class="text-red-600 hover:text-white cursor-pointer p-2 rounded-xl font-bold hover:bg-red-500 transition duration-150"
                   title="Delete"
                   @click="emit('delete', item.id)"
@@ -357,6 +361,7 @@
                 </button>
                 <button
                   v-if="adminLogin"
+                  type="button"
                   class="text-blue-600 hover:text-white cursor-pointer p-2 rounded-xl font-bold hover:bg-green-500 transition duration-150"
                   :title="adminLoginTitle"
                   @click="emit('admin-login', item)"
@@ -372,7 +377,9 @@
           <tr v-if="!paginatedData.length">
             <td
               :colspan="
-                columns.length + 1 + (showView || showEdit || showDelete || adminLogin ? 1 : 0)
+                columns.length +
+                1 +
+                (showView || showEdit || showDelete || adminLogin || $slots.actions ? 1 : 0)
               "
               class="no-data px-6 py-12 text-center text-gray-500 italic"
             >
@@ -432,6 +439,7 @@
             class="isolate inline-flex -space-x-px rounded-xl md:shadow-md w-full sm:w-auto justify-center"
           >
             <button
+              type="button"
               :disabled="currentPage === 1"
               class="relative inline-flex items-center rounded-l-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
               @click="changePage(currentPage - 1)"
@@ -452,6 +460,7 @@
               >
               <button
                 v-else
+                type="button"
                 :class="[
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold transition duration-150 border cursor-pointer',
                   page === currentPage
@@ -464,6 +473,7 @@
               </button>
             </template>
             <button
+              type="button"
               :disabled="currentPage === totalPages"
               class="relative inline-flex items-center rounded-r-xl px-3 py-2 text-gray-500 border border-gray-300 bg-white hover:bg-blue-50 hover:text-blue-600 transition duration-150 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed cursor-pointer"
               @click="changePage(currentPage + 1)"
@@ -517,7 +527,6 @@ const emit = defineEmits([
   'view',
 ]);
 
-// --- FILTER UI ---
 const isFilterDropdownOpen = ref(false);
 const appliedFilters = ref({});
 const activeFilterCount = computed(
@@ -550,11 +559,8 @@ const getOptionLabel = (key, value) => {
   return filter.options.find((o) => String(o.value) === String(value))?.label || value;
 };
 
-// --- STATUS LOGIC ---
 const getStatusClasses = (val) => {
-  // console.log('getStatusClasses val', val);
   const s = String(val).toLowerCase();
-  // console.log('getStatusClasses s', s);
   const success = ['1', 'active', 'confirm', 'paid', 'success', 'confirmed'];
   const danger = ['0', 'inactive', 'cancelled', 'unpaid', 'failed'];
   if (success.includes(s)) {
@@ -586,7 +592,6 @@ const getCellValue = (item, col) => {
   return col.key.split('.').reduce((acc, part) => acc && acc[part], item);
 };
 
-// --- SORT, SEARCH & PAGINATION ---
 const sortKey = ref('');
 const sortOrder = ref('asc');
 const localSearchTerm = ref('');

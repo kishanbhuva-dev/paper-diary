@@ -70,7 +70,7 @@
                 v-model="formData.description"
                 label="Property Description"
                 width="full"
-                placeholder="Describe your property, its unique features, and surroundings..."
+                placeholder="Describe your property..."
                 multiline
                 :rows="5"
                 :max-length="1000"
@@ -85,7 +85,6 @@
                   width="full"
                   placeholder="e.g. 123 Ocean Drive"
                   required
-                  :max-length="100"
                 />
                 <BaseInput
                   :ref="setInputRef"
@@ -95,7 +94,6 @@
                   width="full"
                   placeholder="contact@property.com"
                   required
-                  :max-length="50"
                 />
               </div>
             </div>
@@ -119,48 +117,68 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <BaseInput
-                :ref="setInputRef"
-                v-model="formData.city"
-                label="City"
-                placeholder="London"
-                required
-              />
-              <BaseInput
-                :ref="setInputRef"
-                v-model="formData.country"
-                label="Country"
-                placeholder="United Kingdom"
-                required
-              />
-              <BaseInput
-                :ref="setInputRef"
-                v-model="formData.postcode"
-                label="Postcode"
-                placeholder="SW1A 1AA"
-                required
-              />
-              <BaseInput
-                :ref="setInputRef"
-                v-model="formData.telephone"
-                label="Phone Number"
-                placeholder="+44..."
-              />
-              <BaseInput
-                :ref="setInputRef"
-                v-model="formData.latitude"
-                label="Latitude"
-                placeholder="51.5072"
-                required
-              />
-              <BaseInput
-                :ref="setInputRef"
-                v-model="formData.longitude"
-                label="Longitude"
-                placeholder="-0.1276"
-                required
-              />
+            <div class="space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <BaseInput
+                  :ref="setInputRef"
+                  v-model="formData.city"
+                  label="City"
+                  placeholder="London"
+                  required
+                />
+                <BaseInput
+                  :ref="setInputRef"
+                  v-model="formData.country"
+                  label="Country"
+                  placeholder="United Kingdom"
+                  required
+                />
+                <BaseInput
+                  :ref="setInputRef"
+                  v-model="formData.postcode"
+                  label="Postcode"
+                  placeholder="SW1A 1AA"
+                  required
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BaseInput
+                  :ref="setInputRef"
+                  v-model="formData.phone"
+                  label="Mobile Phone"
+                  placeholder="+447123456789"
+                  restrict="phone"
+                  :max-length="15"
+                  required
+                />
+                <BaseInput
+                  :ref="setInputRef"
+                  v-model="formData.telephone"
+                  label="Landline Telephone"
+                  restrict="phone"
+                  placeholder="+44 20 7946 0958"
+                  :max-length="15"
+                  required
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BaseInput
+                  :ref="setInputRef"
+                  v-model="formData.latitude"
+                  label="Latitude"
+                  placeholder="51.5072"
+                  required
+                />
+                <BaseInput
+                  :ref="setInputRef"
+                  v-model="formData.longitude"
+                  label="Longitude"
+                  placeholder="-0.1276"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -206,8 +224,7 @@
                   class="text-4xl filter grayscale opacity-50"
                 />
                 <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                  Connect your Stripe account to enable real-time payments. Ensure your keys match
-                  the environment (Test vs Live).
+                  Connect your Stripe account to enable real-time payments.
                 </p>
               </div>
             </div>
@@ -240,7 +257,6 @@
                   <select
                     v-model="formData.status"
                     class="block w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none appearance-none transition-all font-bold text-slate-700"
-                    required
                   >
                     <option :value="1">Active</option>
                     <option :value="0">Inactive</option>
@@ -271,7 +287,7 @@
                       v-model="formData.facilities"
                       type="checkbox"
                       :value="facility.id"
-                      class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      class="w-4 h-4 text-blue-600 border-gray-300 rounded"
                     />
                     <span class="text-sm font-bold">{{ facility.name }}</span>
                   </label>
@@ -297,7 +313,6 @@
                 </p>
               </div>
             </div>
-
             <div class="bg-slate-50/50 rounded-3xl p-4 border border-slate-100">
               <OwnerImageUploader
                 v-model="formData.images"
@@ -326,7 +341,6 @@ const props = defineProps({
   editMode: { type: Boolean, default: false },
 });
 const emits = defineEmits(['success', 'cancel']);
-
 const route = useRoute();
 
 const defaultFormData = {
@@ -342,6 +356,7 @@ const defaultFormData = {
   stripePublicKey: '',
   stripeSecretKey: '',
   postcode: '',
+  phone: '',
   telephone: '',
   images: [],
   facilities: [],
@@ -352,6 +367,7 @@ const loadingItem = ref(false);
 const submitting = ref(false);
 const initialImageIds = ref([]);
 const availableFacilities = ref([]);
+const ownerStripeData = ref({ publicKey: '', secretKey: '' });
 
 const effectiveId = computed(() => props.id || route.params.id || null);
 const isEditing = computed(() => !!effectiveId.value);
@@ -408,16 +424,15 @@ const loadPropertyForEdit = async (id) => {
     const remoteImages = await ownerService.fetchPropertyImages(item.id);
     const loadedImages = formatImages(remoteImages);
 
-    const res = await ownerService.getOwnerDetails();
-    const ownerData = res.data.data;
-
     const loadedData = JSON.parse(JSON.stringify(item));
     loadedData.images = loadedImages;
     loadedData.facilities = (item.facilities || []).map((f) => f.id);
 
-    if (loadedData.stripePublicKey === null || !loadedData.stripePublicKey) {
-      loadedData.stripePublicKey = ownerData?.stripePublicKey || '';
-      loadedData.stripeSecretKey = ownerData?.stripeSecretKey || '';
+    if (!loadedData.stripePublicKey) {
+      loadedData.stripePublicKey = ownerStripeData.value.publicKey;
+    }
+    if (!loadedData.stripeSecretKey) {
+      loadedData.stripeSecretKey = ownerStripeData.value.secretKey;
     }
 
     initialImageIds.value = loadedImages.map((i) => i.id).filter(Boolean);
@@ -429,13 +444,27 @@ const loadPropertyForEdit = async (id) => {
 
 onMounted(async () => {
   try {
+    const res = await ownerService.getOwnerDetails();
+    if (res?.data?.data) {
+      ownerStripeData.value = {
+        publicKey: res.data.data.stripePublicKey || '',
+        secretKey: res.data.data.stripeSecretKey || '',
+      };
+    }
     const facs = await ownerService.fetchFacilities();
     availableFacilities.value = Array.isArray(facs) ? facs : [];
   } catch (e) {
     console.error(e);
   }
+
   if (!isEditing.value) {
-    formData.value = { ...defaultFormData };
+    formData.value = {
+      ...defaultFormData,
+      stripePublicKey: ownerStripeData.value.publicKey,
+      stripeSecretKey: ownerStripeData.value.secretKey,
+    };
+  } else {
+    loadPropertyForEdit(effectiveId.value);
   }
 });
 
@@ -445,10 +474,13 @@ watch(
     if (val) {
       loadPropertyForEdit(val);
     } else {
-      formData.value = { ...defaultFormData };
+      formData.value = {
+        ...defaultFormData,
+        stripePublicKey: ownerStripeData.value.publicKey,
+        stripeSecretKey: ownerStripeData.value.secretKey,
+      };
     }
-  },
-  { immediate: true }
+  }
 );
 
 const onImagesReorder = (newImages) => {
@@ -456,40 +488,27 @@ const onImagesReorder = (newImages) => {
 };
 
 const handleDependentDataUpdates = async (propertyId, newFiles, removedIds) => {
-  // Batch deletions in parallel
   if (removedIds.length) {
     await Promise.all(removedIds.map((id) => ownerService.deletePropertyImage(id)));
   }
-
   let uploaded = [];
   if (newFiles.length) {
     uploaded = await ownerService.addPropertyImages(propertyId, newFiles);
   }
-
-  // Calculate final order using uploaded IDs
   const uploadedQueue = [...(uploaded || [])];
   const orderedIds = formData.value.images
-    .map((img) => {
-      if (img.id) {
-        return img.id;
-      }
-      const next = uploadedQueue.shift();
-      return next ? next.id : null;
-    })
+    .map((img) => img.id || uploadedQueue.shift()?.id)
     .filter(Boolean);
-
   const tasks = [];
   if (orderedIds.length) {
     tasks.push(ownerService.changePropertyImagePosition(propertyId, orderedIds));
   }
-
   const facilityIds = Array.isArray(formData.value.facilities)
     ? formData.value.facilities.map((id) => parseInt(id, 10)).filter((n) => n > 0)
     : [];
   if (facilityIds.length) {
     tasks.push(ownerService.setPropertyFacilities({ propertyId, facilityId: facilityIds }));
   }
-
   await Promise.all(tasks);
 };
 
@@ -497,18 +516,15 @@ const handleSubmit = async () => {
   if (!validateForm()) {
     return;
   }
-
   const newFiles = formData.value.images
     .filter((img) => img.file instanceof File)
     .map((i) => i.file);
   const existingIds = formData.value.images.filter((img) => img.id).map((i) => i.id);
   const removedIds = initialImageIds.value.filter((id) => !existingIds.includes(id));
-
   const apiPayload = JSON.parse(JSON.stringify(formData.value));
   delete apiPayload.images;
   delete apiPayload.facilities;
 
-  // Wizard Logic for applyEdits
   if (props.inWizard && props.editMode) {
     return {
       propertyPayload: apiPayload,
@@ -519,7 +535,6 @@ const handleSubmit = async () => {
     };
   }
 
-  // Logic for direct Create or Wizard Step 1 Success
   submitting.value = true;
   try {
     let savedId = formData.value.id;
@@ -529,11 +544,6 @@ const handleSubmit = async () => {
       const response = await ownerService.createProperty(apiPayload);
       savedId = response?.data;
     }
-
-    if (!savedId) {
-      throw new Error('Could not determine saved property id');
-    }
-
     await handleDependentDataUpdates(savedId, newFiles, removedIds);
     emits('success', { id: savedId });
     return { id: savedId };
