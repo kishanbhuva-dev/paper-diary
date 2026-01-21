@@ -117,7 +117,20 @@ class BookingsController extends Controller
         $pagination = $request->pagination ?? 10;
         $sortBy = $request->sortBy ?? 'arrivalDateTime';
         $sortOrder = $request->sortOrder ?? 'desc';
-        $bookingOrder = $bookingOrder->orderBy($sortBy, $sortOrder)->paginate($pagination);
+        // Handle sorting by related columns
+        if ($sortBy === 'property.propertyName') {
+            $bookingOrder->leftJoin('property', 'booking_orders.propertyId', '=', 'property.id')
+                ->orderBy('property.propertyName', $sortOrder)
+                ->select('booking_orders.*', 'property.propertyName');
+        } elseif ($sortBy === 'resource_type.name') {
+            $bookingOrder->leftJoin('resource_types', 'booking_orders.resourceTypeId', '=', 'resource_types.id')
+                ->orderBy('resource_types.name', $sortOrder)
+                ->select('booking_orders.*', 'resource_types.name as resourceTypeName');
+        } else {
+            $bookingOrder->orderBy($sortBy, $sortOrder);
+        }
+
+        $bookingOrder = $bookingOrder->paginate($pagination);
 
         return response()->json(['status' => true, 'message' => '', 'data' => $bookingOrder]);
     }
