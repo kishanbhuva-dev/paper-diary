@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class MigrationController extends Controller
@@ -13,6 +14,14 @@ class MigrationController extends Controller
     public function runMigrations(Request $request): JsonResponse
     {
         try {
+            $user = Auth::user();
+            if (! $user || $user->role !== 'admin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only administrators are authorized to run migrations',
+                ], 403);
+            }
+
             Artisan::call('migrate', ['--force' => true]);
 
             return response()->json([
@@ -34,6 +43,13 @@ class MigrationController extends Controller
     public function checkMigrationStatus(): JsonResponse
     {
         try {
+            $user = Auth::user();
+            if (! $user || $user->role !== 'admin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only administrators are authorized to check migration status',
+                ], 403);
+            }
             Artisan::call('migrate:status');
             $output = Artisan::output();
 

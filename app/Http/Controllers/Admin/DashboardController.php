@@ -109,9 +109,9 @@ class DashboardController extends Controller
             $details['topSites'] = $topSites;
 
             $bookingTotalPerMonth = BookingOrder::where('status', 'confirm')
-                ->selectRaw('DATE_FORMAT(arrivalDateTime, "%b-%Y") as month, SUM(price) as total, COUNT(*) as count')
-                ->groupBy('month')
-                ->orderBy('month')
+                ->selectRaw('DATE_FORMAT(arrivalDateTime, "%b-%Y") as month, SUM(price) as total, COUNT(*) as count, DATE_FORMAT(arrivalDateTime, "%Y-%m") as sort_date')
+                ->groupBy('month', 'sort_date')
+                ->orderBy('sort_date')
                 ->get();
 
             $monthlyBookingData = [];

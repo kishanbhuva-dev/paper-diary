@@ -109,6 +109,17 @@ const authService = {
     });
     return response.data;
   },
+
+  // Migration management
+  async runMigrations() {
+    const response = await apiClient.post('/migrations/run');
+    return response.data;
+  },
+
+  async checkMigrationStatus() {
+    const response = await apiClient.get('/migrations/status');
+    return response.data;
+  },
 };
 
 export default authService;
