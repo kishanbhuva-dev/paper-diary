@@ -40,9 +40,9 @@
       <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div class="flex gap-4">
           <button
-            @click="runMigrations"
             :disabled="loading.runMigration"
             class="btn btn-primary"
+            @click="runMigrations"
           >
             <span
               v-if="loading.runMigration"
@@ -53,9 +53,9 @@
           </button>
 
           <button
-            @click="checkMigrationStatus"
             :disabled="loading.checkStatus"
             class="btn btn-secondary"
+            @click="checkMigrationStatus"
           >
             <span
               v-if="loading.checkStatus"
