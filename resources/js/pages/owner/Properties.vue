@@ -67,7 +67,7 @@
   >
     <div
       v-if="isViewModalVisible"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
     >
       <div
         class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
@@ -75,29 +75,32 @@
       ></div>
 
       <div
-        class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] transform transition-all"
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] sm:max-h-[85vh] transform transition-all"
       >
         <div
-          class="px-8 py-6 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 flex justify-between items-center shrink-0"
+          class="px-5 py-4 sm:px-8 sm:py-6 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 flex justify-between items-center shrink-0"
         >
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 sm:gap-4">
             <div
-              class="flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200"
+              class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200"
             >
               <Icon
                 icon="heroicons:rss-20-solid"
-                class="text-2xl"
+                class="text-xl sm:text-2xl"
               />
             </div>
             <div>
-              <h3 class="text-xl font-bold text-slate-800 tracking-tight">
+              <h3 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">
                 Resource Synchronization
               </h3>
-              <p class="text-sm font-medium text-slate-500">iCalendar Feed Management</p>
+              <p class="text-[11px] sm:text-sm font-medium text-slate-500">
+                iCalendar Feed Management
+              </p>
             </div>
           </div>
           <button
-            class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+            type="button"
+            class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors active:scale-90"
             @click="isViewModalVisible = false"
           >
             <Icon
@@ -107,7 +110,7 @@
           </button>
         </div>
 
-        <div class="p-8 overflow-y-auto bg-white modal-inner-content">
+        <div class="p-4 sm:p-8 overflow-y-auto bg-white modal-inner-content min-h-0">
           <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-2">
               <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
@@ -129,21 +132,21 @@
             <div
               v-for="res in viewModalResources"
               :key="res.id"
-              class="group relative bg-slate-50/50 border border-slate-200 rounded-2xl p-5 hover:border-blue-400 hover:bg-white hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300"
+              class="group relative bg-slate-50/50 border border-slate-200 rounded-2xl p-4 sm:p-5 hover:border-blue-400 hover:bg-white transition-all duration-300"
             >
               <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-start gap-4">
                   <div
-                    class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-100 transition-colors shadow-sm"
+                    class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-100 transition-colors shadow-sm shrink-0"
                   >
                     <Icon
                       icon="heroicons:building-office-2"
                       class="text-2xl"
                     />
                   </div>
-                  <div>
+                  <div class="min-w-0 flex-1">
                     <h5
-                      class="text-[15px] font-bold text-slate-800 group-hover:text-blue-700 transition-colors"
+                      class="text-[15px] font-bold text-slate-800 group-hover:text-blue-700 transition-colors truncate"
                     >
                       {{ res.name }}
                     </h5>
@@ -154,20 +157,21 @@
                           :class="res.status ? 'bg-emerald-500' : 'bg-red-500'"
                         ></div>
                         <span class="text-xs font-semibold text-slate-500 uppercase">{{
-                          res.resource_type.name || 'Standard'
+                          res.resource_type?.name || 'Standard'
                         }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="flex flex-col items-end gap-2">
+                <div class="w-full md:w-auto">
                   <button
+                    type="button"
                     :class="[
                       'w-full md:w-auto px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300',
                       copiedId === res.id
-                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200 scale-[1.02]'
-                        : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 shadow-sm',
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200'
+                        : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white shadow-sm',
                     ]"
                     @click="copyIcalLink(res.id)"
                   >
@@ -185,12 +189,12 @@
               </div>
 
               <div
-                class="mt-4 border-t border-slate-100/50 flex items-center gap-2 overflow-hidden"
+                class="mt-4 border-t border-slate-100 pt-3 flex items-center gap-2 overflow-hidden"
               >
-                <span class="text-[10px] font-bold text-slate-600 uppercase shrink-0 tracking-tight"
+                <span class="text-[10px] font-bold text-slate-600 uppercase shrink-0"
                   >Endpoint:</span
                 >
-                <span class="text-[10px] font-mono text-slate-750 truncate opacity-60 italic">
+                <span class="text-[10px] font-mono text-slate-500 truncate opacity-70">
                   {{ hostOrigin }}/api/icalendar/{{ res.id }}/feed.ics
                 </span>
               </div>
@@ -199,38 +203,36 @@
 
           <div
             v-else
-            class="py-20 flex flex-col items-center justify-center bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2rem]"
+            class="py-12 sm:py-20 flex flex-col items-center justify-center bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2rem]"
           >
             <div
-              class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4"
+              class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4"
             >
               <Icon
                 icon="heroicons:circle-stack"
-                class="text-4xl text-slate-200"
+                class="text-3xl sm:text-4xl text-slate-200"
               />
             </div>
             <h5 class="text-slate-800 font-bold">No Resources Found</h5>
-            <p class="text-slate-500 text-sm mt-1">
-              There are no resources linked to this property yet.
-            </p>
+            <p class="text-slate-500 text-sm mt-1">There are no resources linked.</p>
           </div>
         </div>
 
         <div
-          class="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-end items-center gap-3 shrink-0"
+          class="px-5 py-4 sm:px-8 sm:py-5 bg-slate-50 border-t border-slate-100 flex justify-end items-center gap-3 shrink-0"
         >
           <span
-            class="mr-auto text-[11px] text-slate-400 font-medium italic hidden md:flex items-center"
+            class="mr-auto text-[10px] text-slate-400 font-medium italic hidden sm:flex items-center"
           >
             <Icon
               icon="heroicons:information-circle"
               class="mr-1 text-sm"
             />
-            External calendars sync automatically every 15 minutes.
+            Feeds sync every 15 minutes.
           </span>
           <button
             type="button"
-            class="px-8 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all active:scale-95 shadow-sm"
+            class="w-full sm:w-auto px-8 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all active:scale-95 shadow-sm"
             @click="isViewModalVisible = false"
           >
             Close
@@ -265,12 +267,10 @@ const propertyIdToDelete = ref(null);
 const propertyNameToDelete = ref('');
 const total = ref(0);
 
-// View Modal State
 const isViewModalVisible = ref(false);
 const viewModalResources = ref([]);
 const copiedId = ref(null);
 
-// Fixed: Define origin in script so template can access it safely
 const hostOrigin = computed(() => window.location.origin);
 
 const truncateString = (str, maxLen = 15) => {
@@ -385,7 +385,6 @@ const showResources = async (item) => {
       loading.value = true;
       const existing = await ownerService.fetchResources(item.id);
       viewModalResources.value = existing || [];
-      // Set visible AFTER data is fetched successfully
       isViewModalVisible.value = true;
     } catch (err) {
       console.error(err);
@@ -398,7 +397,6 @@ const showResources = async (item) => {
 
 const copyIcalLink = (resourceId) => {
   const link = `${hostOrigin.value}/api/icalendar/${resourceId}/feed.ics`;
-
   navigator.clipboard.writeText(link).then(() => {
     copiedId.value = resourceId;
     setTimeout(() => {
@@ -413,6 +411,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Standard professional scrollbar for modal content */
+.modal-inner-content {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
 .modal-inner-content::-webkit-scrollbar {
   width: 5px;
 }
