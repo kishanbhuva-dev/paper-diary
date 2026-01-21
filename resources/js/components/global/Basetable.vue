@@ -32,7 +32,10 @@
         </div>
 
         <div class="table-actions flex gap-3 order-1 shrink-0 relative">
-          <div class="relative">
+          <div
+            ref="filterContainer"
+            class="relative filter-container"
+          >
             <button
               v-if="availableFilters.length"
               type="button"
@@ -43,7 +46,7 @@
                   : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50 shadow-sm',
               ]"
               title="Toggle Filters"
-              @click="toggleFilterDropdown"
+              @click.stop="toggleFilterDropdown"
             >
               <Icon
                 :icon="isFilterDropdownOpen ? 'mdi:filter-off' : 'mdi:filter-variant'"
@@ -59,7 +62,13 @@
 
             <div
               v-if="isFilterDropdownOpen"
-              class="absolute right-0 mt-3 w-72 sm:w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-[100] p-5 origin-top-right animate-in fade-in zoom-in duration-150"
+              class="sm:hidden fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-[90]"
+              @click="isFilterDropdownOpen = false"
+            ></div>
+
+            <div
+              v-if="isFilterDropdownOpen"
+              class="fixed inset-x-4 top-24 sm:absolute sm:inset-auto sm:right-0 sm:top-full mt-3 w-auto sm:w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-[100] p-5 origin-top animate-in fade-in zoom-in duration-150"
             >
               <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
                 <span class="text-sm font-black text-slate-800 uppercase tracking-widest"
@@ -74,7 +83,9 @@
                 </button>
               </div>
 
-              <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+              <div
+                class="filter-scroll-area space-y-4 max-h-[50vh] sm:max-h-[60vh] overflow-y-auto overflow-x-hidden pr-3 -mr-1"
+              >
                 <div
                   v-for="filter in availableFilters"
                   :key="filter.key"
@@ -491,7 +502,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onBeforeUnmount, onMounted } from 'vue';
 import { Icon } from '@iconify/vue';
 import * as XLSX from 'xlsx';
 
@@ -528,7 +539,9 @@ const emit = defineEmits([
 ]);
 
 const isFilterDropdownOpen = ref(false);
+const filterContainer = ref(null);
 const appliedFilters = ref({});
+
 const activeFilterCount = computed(
   () => Object.values(appliedFilters.value).filter((v) => v !== '' && v !== null).length
 );
@@ -537,6 +550,21 @@ const hasActiveFilters = computed(() => activeFilterCount.value > 0);
 const toggleFilterDropdown = () => {
   isFilterDropdownOpen.value = !isFilterDropdownOpen.value;
 };
+
+const handleClickOutside = (event) => {
+  if (filterContainer.value && !filterContainer.value.contains(event.target)) {
+    isFilterDropdownOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
+  clearTimeout(debounceTimeout);
+});
 
 const handleFilterChange = (key, value) => {
   appliedFilters.value = { ...appliedFilters.value, [key]: value };
@@ -709,7 +737,6 @@ const exportToExcel = () => {
   emit('download');
 };
 
-onBeforeUnmount(() => clearTimeout(debounceTimeout));
 watch(perPageRef, (v) => {
   currentPage.value = 1;
   if (props.serverSide) {
@@ -719,9 +746,25 @@ watch(perPageRef, (v) => {
 </script>
 
 <style scoped>
+/* Main table scrollbar */
 .table-wrapper {
   scrollbar-color: #cbd5e1 #f8fafc;
   scrollbar-width: thin;
+}
+
+/* Custom scrollbar for filter dropdown area */
+.filter-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.filter-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.filter-scroll-area::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+.filter-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
 }
 
 @keyframes fade-in {

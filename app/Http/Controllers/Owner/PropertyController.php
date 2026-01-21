@@ -140,9 +140,6 @@ class PropertyController extends Controller
     {
         try {
             $property = Property::where('id', $id)->with('facilities')->first();
-            if (empty($property)) {
-                return response()->json(['status' => false, 'message' => 'Property not found', 'data' => ''], 404);
-            }
             $response = ['status' => true, 'message' => '', 'data' => $property];
 
             return response()->json($response);
@@ -441,9 +438,6 @@ class PropertyController extends Controller
                 return response()->json(['status' => false, 'message' => $validator->messages()->first(), 'data' => '']);
             }
             $propertyImages = PropertyImage::where('propertyId', $request->propertyId)->orderBy('position', 'asc')->get();
-            if ($propertyImages->isEmpty()) {
-                return response()->json(['status' => false, 'message' => 'Property images not found', 'data' => ''], 404);
-            }
             $response = ['status' => true, 'message' => '', 'data' => $propertyImages];
 
             return response()->json($response);
