@@ -151,6 +151,12 @@ const routes = [
         component: () => import('../pages/admin/Bookings.vue'),
         meta: { pageTitle: 'Admin Bookings' },
       },
+      {
+        path: '/admin/migrations',
+        name: 'admin-migrations',
+        component: () => import('../pages/admin/MigrationManager.vue'),
+        meta: { pageTitle: 'Migration Manager' },
+      },
     ],
   },
   {

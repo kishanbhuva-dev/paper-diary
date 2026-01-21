@@ -7,8 +7,6 @@ Route::post('register', [App\Http\Controllers\AuthController::class, 'register']
 Route::post('forget-password', [App\Http\Controllers\AuthController::class, 'forgetPassword']);
 Route::post('reset-password', [App\Http\Controllers\AuthController::class, 'resetPassword']);
 Route::get('property-detail', [App\Http\Controllers\User\BookingsController::class, 'propertyDetails']);
-Route::get('migrations/run', [App\Http\Controllers\MigrationController::class, 'runMigrations']);
-Route::get('migrations/status', [App\Http\Controllers\MigrationController::class, 'checkMigrationStatus']);
 Route::get('available-resources-types', [App\Http\Controllers\User\BookingsController::class, 'getAvailableResourcesTypes']);
 Route::get('products', [App\Http\Controllers\StripeController::class, 'getProducts']);
 Route::get('stripe/config', [App\Http\Controllers\StripeController::class, 'getStripeConfig']);
@@ -16,6 +14,8 @@ Route::get('icalendar/{resourceId}/feed.ics', [App\Http\Controllers\IcalControll
 Route::get('cancel-pending-bookings', [App\Http\Controllers\Admin\BookingsController::class, 'bookingCancel']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('migrations/run', [App\Http\Controllers\MigrationController::class, 'runMigrations']);
+    Route::get('migrations/status', [App\Http\Controllers\MigrationController::class, 'checkMigrationStatus']);
     Route::post('stripe/subscription', [App\Http\Controllers\StripeController::class, 'createSubscription']);
     Route::get('stripe/subscription/status', [App\Http\Controllers\StripeController::class, 'checkSubscriptionStatus']);
     Route::post('stripe/subscription/retry', [App\Http\Controllers\StripeController::class, 'retrySubscriptionPayment']);
