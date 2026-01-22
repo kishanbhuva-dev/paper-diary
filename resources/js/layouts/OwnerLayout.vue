@@ -11,9 +11,9 @@
         />
       </button>
 
-      <a href="/owner">
+      <a href="/">
         <img
-          src="main_logo.png"
+          src="/main_logo.png"
           class="h-10"
           alt="Logo"
         />
@@ -27,7 +27,7 @@
       ]"
     >
       <div class="flex items-center justify-center py-6 border-b border-gray-100">
-        <a href="/owner">
+        <a href="/">
           <img
             src="/main_logo.png"
             class="h-14"

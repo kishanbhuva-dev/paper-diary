@@ -2,7 +2,7 @@
   <div class="w-full max-w-xs min-w-[100px]">
     <label
       :for="labelSlug"
-      class="block text-sm font-medium text-gray-500"
+      class="block text-xs sm:text-sm font-medium text-gray-500"
     >
       {{ label }}
       <span
