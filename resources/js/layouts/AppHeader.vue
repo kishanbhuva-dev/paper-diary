@@ -195,7 +195,7 @@
         @click="toggleMobileMenu"
       ></div>
       <div
-        class="fixed inset-y-0 right-0 w-[280px] bg-white shadow-2xl z-50 p-6 flex flex-col transform transition-transform duration-300"
+        class="fixed top-0 right-0 w-70 h-screen bg-white shadow-2xl z-50 p-6 flex flex-col transform transition-transform duration-300"
       >
         <div class="flex justify-between items-center mb-8">
           <img

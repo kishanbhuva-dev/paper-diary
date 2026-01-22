@@ -3,7 +3,7 @@
     <label
       v-if="label"
       :for="uniqueId"
-      class="block text-sm font-semibold mb-1 text-slate-700"
+      class="block text-xs sm:text-sm font-semibold mb-1 text-slate-700"
     >
       {{ label }}
       <span

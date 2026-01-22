@@ -1,9 +1,13 @@
 <template>
   <div
-    class="p-8 bg-white rounded-3xl"
-    :class="[inWizard ? '' : 'border border-gray-100 shadow-xl shadow-gray-200/50']"
+    :class="[
+      'bg-white transition-all duration-300',
+      inWizard
+        ? 'p-4 sm:p-8 rounded-t-3xl sm:rounded-3xl'
+        : 'p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50',
+    ]"
   >
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div class="flex items-center gap-3">
         <div class="p-2.5 bg-blue-50 rounded-xl">
           <Icon
@@ -13,7 +17,7 @@
         </div>
         <div>
           <h3 class="text-xl font-bold text-slate-800">Resource Categories</h3>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             Define Resource Types
           </p>
         </div>
@@ -21,14 +25,14 @@
 
       <button
         type="button"
-        class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors group"
+        class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors group w-full sm:w-auto"
         @click="addType"
       >
         <Icon
           icon="mdi:plus-circle"
           class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
         />
-        Add New Resource Type
+        Add Type
       </button>
     </div>
 
@@ -37,9 +41,9 @@
         <div
           v-for="(type, idx) in types"
           :key="idx"
-          class="relative bg-white p-5 rounded-2xl border border-slate-100 hover:border-blue-200 transition-all duration-300"
+          class="relative bg-white p-2 sm:p-4 rounded-2xl border border-slate-100 hover:border-blue-200 transition-all duration-300 group/card"
         >
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-1 sm:gap-5 items-start">
             <div class="md:col-span-5">
               <BaseInput
                 :ref="setInputRef"
@@ -47,6 +51,7 @@
                 label="Resource Type Name"
                 width="full"
                 placeholder="e.g. Deluxe Suite"
+                class="text-base sm:text-sm"
               />
             </div>
 
@@ -60,6 +65,7 @@
                 placeholder="0.00"
                 :min="0"
                 prefix="£"
+                class="text-base sm:text-sm"
               />
             </div>
 
@@ -72,13 +78,14 @@
                 width="full"
                 placeholder="Guests"
                 :min="1"
+                class="text-base sm:text-sm"
               />
             </div>
 
-            <div class="md:col-span-1 flex justify-end mt-7">
+            <div class="md:col-span-1 flex justify-end md:mt-7">
               <button
                 type="button"
-                class="w-11 h-11 cursor-pointer text-slate-400 bg-slate-50 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center border border-transparent hover:border-red-100"
+                class="w-full md:w-11 h-11 cursor-pointer text-slate-400 bg-slate-50 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center border border-slate-100 md:border-transparent hover:border-red-100"
                 title="Delete type"
                 @click="openRemoveTypeModal(idx)"
               >
@@ -86,6 +93,7 @@
                   icon="mdi:trash-can-outline"
                   class="w-5 h-5"
                 />
+                <span class="md:hidden ml-2 font-bold text-sm">Remove Category</span>
               </button>
             </div>
           </div>
@@ -108,7 +116,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUpdate, computed } from 'vue';
+import { ref, onMounted, onBeforeUpdate, computed } from 'vue';
 import BaseInput from '../../components/global/BaseInput.vue';
 import DeleteModal from '../../components/global/DeleteModal.vue';
 import { Icon } from '@iconify/vue';
@@ -120,7 +128,7 @@ const props = defineProps({
   inWizard: { type: Boolean, default: false },
   editMode: { type: Boolean, default: false },
 });
-const emits = defineEmits(['success', 'cancel']);
+const emits = defineEmits(['success']);
 
 const types = ref([
   {
@@ -133,15 +141,21 @@ const types = ref([
     adjustedEnd: null,
   },
 ]);
+
 const deletedTypeIds = ref([]);
 const isConfirmationModalVisible = ref(false);
 const typeIndexToRemove = ref(null);
+const submitting = ref(false);
+const initialSnapshot = ref(null);
+
 const typeNameToRemove = computed(() => {
   const idx = typeIndexToRemove.value;
-  return idx !== null && types.value[idx]?.name ? types.value[idx].name : 'this resource type';
+  if (idx === null || !types.value[idx]) {
+    return 'this resource type';
+  }
+  return types.value[idx].name || 'this resource type';
 });
 
-const initialSnapshot = ref(null);
 const inputRefs = ref([]);
 const setInputRef = (el) => {
   if (el) {
@@ -185,35 +199,15 @@ const loadExistingTypes = async () => {
         adjustedEnd: null,
       });
       initialSnapshot.value = makeSnapshot(types.value);
-    } else {
-      types.value = [
-        {
-          name: '',
-          price: null,
-          capacity: 1,
-          slot: null,
-          adjustedPrice: null,
-          adjustedStart: null,
-          adjustedEnd: null,
-        },
-      ];
     }
   } catch (err) {
-    toast.error(err);
+    toast.error(err.message || 'Failed to load types');
   }
 };
 
-onMounted(() => {
-  loadExistingTypes();
+onMounted(async () => {
+  await loadExistingTypes();
 });
-watch(
-  () => props.propertyId,
-  (val) => {
-    if (val) {
-      loadExistingTypes();
-    }
-  }
-);
 
 const addType = () => {
   types.value.push({
@@ -229,25 +223,26 @@ const addType = () => {
 
 const openRemoveTypeModal = (idx) => {
   const type = types.value[idx];
-  const isDummyOrBlank = !type.id && (!type.name || type.name.toString().trim() === '');
-  if (types.value.length === 1 && !isDummyOrBlank) {
+  const isBlank = !type.id && (!type.name || type.name.toString().trim() === '');
+
+  if (types.value.length === 1 && !isBlank) {
     return;
   }
-  if (isDummyOrBlank) {
-    typeIndexToRemove.value = idx;
+
+  typeIndexToRemove.value = idx;
+  if (isBlank) {
     confirmRemoval();
   } else {
-    typeIndexToRemove.value = idx;
     isConfirmationModalVisible.value = true;
   }
 };
 
 const confirmRemoval = () => {
   const idx = typeIndexToRemove.value;
-  if (idx === null || idx === undefined) {
-    isConfirmationModalVisible.value = false;
+  if (idx === null) {
     return;
   }
+
   const t = types.value[idx];
   if (types.value.length === 1) {
     types.value[0] = {
@@ -259,16 +254,13 @@ const confirmRemoval = () => {
       adjustedStart: null,
       adjustedEnd: null,
     };
-    isConfirmationModalVisible.value = false;
-    typeIndexToRemove.value = null;
-    return;
-  }
-  if (t && t.id) {
-    deletedTypeIds.value.push(t.id);
-    types.value.splice(idx, 1);
   } else {
+    if (t.id) {
+      deletedTypeIds.value.push(t.id);
+    }
     types.value.splice(idx, 1);
   }
+
   isConfirmationModalVisible.value = false;
   typeIndexToRemove.value = null;
 };
@@ -278,54 +270,32 @@ const validate = () => {
     return false;
   }
   let isInputsValid = true;
-  inputRefs.value.forEach((inputComponent) => {
-    if (inputComponent && typeof inputComponent.validate === 'function') {
-      const isValid = inputComponent.validate();
-      if (!isValid) {
-        isInputsValid = false;
-      }
+
+  inputRefs.value.forEach((input) => {
+    if (input?.validate && !input.validate()) {
+      isInputsValid = false;
     }
   });
-  const filled = (types.value || []).filter((t) => t.name && t.name.toString().trim() !== '');
+
+  const filled = types.value.filter((t) => t.name?.toString().trim() !== '');
   if (filled.length === 0) {
     toast.error('At least one resource type must be filled.');
     return false;
   }
-  for (const t of filled) {
-    if (isNaN(t.price) || t.price === null || isNaN(t.capacity) || t.capacity === null) {
-      toast.error('Price and Capacity must be valid numbers for filled rows.');
-      return false;
-    }
-  }
   return isInputsValid;
 };
 
-const submitting = ref(false);
-
 const handleSubmit = async () => {
-  if (!validate()) {
-    toast.error('Please ensure all required fields are correctly filled.');
-    return;
+  if (!validate() || submitting.value) {
+    return null;
   }
-  if (submitting.value) {
-    return;
-  }
+
   submitting.value = true;
   try {
     const serverList = await ownerService.fetchResourceTypes(props.propertyId);
-    const serverById = (serverList || []).reduce((acc, r) => {
-      acc[r.id] = r;
-      return acc;
-    }, {});
-    const serverByName = (serverList || []).reduce((acc, r) => {
-      const key = (r.name || '').toString().trim().toLowerCase();
-      if (key) {
-        acc[key] = r;
-      }
-      return acc;
-    }, {});
     const toCreate = [];
     const toUpdate = [];
+
     for (const t of types.value) {
       const normalized = {
         name: (t.name || '').toString().trim(),
@@ -336,90 +306,61 @@ const handleSubmit = async () => {
       if (!normalized.name) {
         continue;
       }
+
       if (t.id) {
-        const server = serverById[t.id];
-        if (!server) {
-          toCreate.push(normalized);
-        } else {
-          const serverNorm = {
-            name: (server.name || '').toString().trim(),
-            price: Number(server.price) || 0,
-            capacity: Number(server.capacity) || 0,
-            slot: server.slot || null,
-          };
-          if (
-            serverNorm.name !== normalized.name ||
-            serverNorm.price !== normalized.price ||
-            serverNorm.capacity !== normalized.capacity ||
-            serverNorm.slot !== normalized.slot
-          ) {
-            toUpdate.push({ id: t.id, ...normalized });
-          }
-        }
+        toUpdate.push({ id: t.id, ...normalized });
       } else {
-        const key = (normalized.name || '').toLowerCase();
-        const existingMatch = key ? serverByName[key] : null;
-        if (existingMatch) {
-          const serverNorm = {
-            name: (existingMatch.name || '').toString().trim(),
-            price: Number(existingMatch.price) || 0,
-            capacity: Number(existingMatch.capacity) || 0,
-            slot: existingMatch.slot || null,
-          };
-          if (
-            serverNorm.name !== normalized.name ||
-            serverNorm.price !== normalized.price ||
-            serverNorm.capacity !== normalized.capacity ||
-            serverNorm.slot !== normalized.slot
-          ) {
-            toUpdate.push({ id: existingMatch.id, ...normalized });
-          }
+        const match = (serverList || []).find(
+          (s) => s.name?.toLowerCase() === normalized.name.toLowerCase()
+        );
+        if (match) {
+          toUpdate.push({ id: match.id, ...normalized });
         } else {
           toCreate.push(normalized);
         }
       }
     }
+
     if (props.inWizard && props.editMode) {
-      return { toCreate, toUpdate, deleted: deletedTypeIds.value.slice() };
+      return { toCreate, toUpdate, deleted: [...deletedTypeIds.value] };
     }
-    if (deletedTypeIds.value && deletedTypeIds.value.length) {
-      for (const id of deletedTypeIds.value) {
-        try {
-          // eslint-disable-next-line no-await-in-loop
-          await ownerService.deleteResourceType(id);
-        } catch (err) {
-          throw new Error(err);
-        }
-      }
+
+    // Process Deletions
+    if (deletedTypeIds.value.length) {
+      await Promise.all(deletedTypeIds.value.map((id) => ownerService.deleteResourceType(id)));
       deletedTypeIds.value = [];
     }
-    if (toUpdate.length > 0) {
-      const payload = {
+
+    // Process Updates
+    if (toUpdate.length) {
+      await ownerService.resourceTypeMultipleUpdate({
         propertyId: parseInt(props.propertyId, 10),
         ids: toUpdate.map((r) => r.id),
         name: toUpdate.map((r) => r.name),
         price: toUpdate.map((r) => r.price),
         capacity: toUpdate.map((r) => r.capacity),
         slot: toUpdate.map((r) => r.slot),
-      };
-      await ownerService.resourceTypeMultipleUpdate(payload);
+      });
     }
-    if (toCreate.length > 0) {
-      const payload = {
+
+    // Process Creates
+    if (toCreate.length) {
+      await ownerService.resourceTypeMultipleStore({
         propertyId: parseInt(props.propertyId, 10),
         name: toCreate.map((r) => r.name),
         price: toCreate.map((r) => r.price),
         capacity: toCreate.map((r) => r.capacity),
         slot: toCreate.map((r) => r.slot),
-      };
-      await ownerService.resourceTypeMultipleStore(payload);
+      });
     }
+
     const created = await ownerService.fetchResourceTypes(props.propertyId);
-    const ids = (created || []).map((r) => r.id);
     initialSnapshot.value = makeSnapshot(types.value);
-    emits('success', { resourceTypes: ids });
+    emits('success', { resourceTypes: (created || []).map((r) => r.id) });
+    return { resourceTypes: (created || []).map((r) => r.id) };
   } catch (err) {
-    toast.error(err.error || 'An error occurred during submission.');
+    toast.error(err.message || 'An error occurred during submission.');
+    return null;
   } finally {
     submitting.value = false;
   }
@@ -438,5 +379,10 @@ defineExpose({ handleSubmit, hasChanges });
 .list-complete-leave-active {
   position: absolute;
   width: 100%;
+}
+@media (max-width: 640px) {
+  input {
+    font-size: 16px !important;
+  }
 }
 </style>
