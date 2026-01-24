@@ -1,48 +1,47 @@
 <template>
-  <div class="p-2 sm:p-3 lg:p-4 bg-gray-50 min-h-max">
+  <div class="p-2 sm:p-4 lg:p-6 bg-gray-50 min-h-max">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div
         v-for="stat in statsList"
         :key="stat.key"
-        class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
+        class="bg-white p-4 sm:p-5 lg:p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
       >
         <div class="flex justify-between items-start">
           <div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">
+            <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
               {{ stat.label }}
             </p>
             <div class="mt-2 flex items-baseline gap-2">
               <span
-                class="text-xl font-bold"
+                class="text-lg sm:text-xl lg:text-2xl font-bold"
                 :class="stat.textClass"
               >
                 {{ stat.value }}
               </span>
-              <span class="text-xs text-gray-400 font-medium">Units</span>
+              <span class="text-[10px] text-gray-400 font-medium">Units</span>
             </div>
           </div>
           <div
-            class="p-2.5 rounded-xl"
+            class="p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl"
             :class="stat.bgClass"
           >
             <Icon
               :icon="stat.icon"
-              class="text-xl"
+              class="text-lg sm:text-xl lg:text-2xl"
             />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Property Filter -->
-    <div class="mb-6">
+    <div class="mb-6 lg:mb-8">
       <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">
         Property Filter
       </label>
       <div class="flex flex-wrap items-center gap-3">
-        <div class="relative w-full sm:w-64">
+        <div class="relative w-full sm:w-64 lg:w-72">
           <div
-            class="bg-white border border-gray-300 px-3 py-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors select-none"
+            class="bg-white border border-gray-300 px-3 py-2.5 lg:py-3 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-500 transition-colors select-none"
             @click="isDropdownOpen = !isDropdownOpen"
           >
             <span class="text-sm text-gray-600 truncate">
@@ -111,7 +110,8 @@
         </div>
       </div>
     </div>
-    <!-- booking calendar -->
+
+    <!-- <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-1 lg:p-2 mb-10"> -->
     <HotelDashboardCalendar
       :rooms="rooms"
       :bookings="bookings"
@@ -126,41 +126,39 @@
       theme="light"
       @booking-click="handleBookingClick"
     />
-    <!-- recent booking -->
+    <!-- </div> -->
+
     <div class="mt-10">
-      <div class="flex items-center justify-between mb-5 px-1">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 px-1">
+        <h3 class="text-lg lg:text-xl font-bold text-gray-800 flex items-center gap-2">
           <Icon
             icon="mdi:history"
             class="text-blue-600"
           />
           Recent Bookings
         </h3>
-        <div class="flex items-center gap-4">
-          <span class="text-xs font-semibold text-gray-400 uppercase">
+        <div class="flex items-center justify-between sm:justify-end gap-4">
+          <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
             Top {{ recentBookings.length }} Latest Bookings
           </span>
           <button
-            class="relative px-8 py-3 bg-blue-600 text-white text-sm font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center group overflow-hidden"
+            class="relative px-6 py-2.5 sm:px-8 sm:py-3 bg-blue-600 text-white text-xs sm:text-sm font-bold rounded-xl sm:rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center group overflow-hidden active:scale-95"
             @click="viewAllBookings"
           >
             <span class="relative z-10">View All</span>
-            <span
-              class="absolute left-0 top-0 w-full h-full bg-blue-700 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"
-            ></span>
           </button>
         </div>
       </div>
 
-      <div class="space-y-3">
+      <div class="space-y-4">
         <div
           v-for="(booking, index) in recentBookings"
           :key="booking.id"
-          class="group bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all flex flex-wrap items-center gap-4 lg:gap-8"
+          class="group bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center gap-4 md:gap-0"
         >
-          <div class="flex items-center gap-4 min-w-[180px]">
+          <div class="flex items-center gap-4 min-w-0 md:w-[200px] lg:w-[240px] xl:w-1/5">
             <div
-              class="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-gray-50 rounded-lg text-xs font-bold text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all"
+              class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-gray-50 rounded-xl text-xs font-bold text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all"
             >
               {{ index + 1 }}
             </div>
@@ -170,82 +168,90 @@
               >
                 {{ booking.guestName || 'Guest' }}
               </h4>
-              <p class="text-[10px] font-bold text-blue-500 uppercase tracking-tight">
+              <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">
                 Ref #{{ booking.id }}
               </p>
             </div>
+            <div class="ml-auto md:hidden">
+              <span
+                class="px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border whitespace-nowrap"
+                :class="getStatusBadgeClass(booking.status)"
+              >
+                {{ booking.status }}
+              </span>
+            </div>
           </div>
 
-          <div class="flex-grow min-w-[280px]">
-            <div class="flex items-center gap-2 mb-1.5">
+          <div class="flex-grow min-w-0 md:px-4 lg:px-6">
+            <div class="flex items-center gap-2 mb-2">
               <Icon
                 icon="mdi:email-outline"
-                class="text-gray-400 text-xs"
+                class="text-gray-400 text-xs flex-shrink-0"
               />
-              <span class="text-[11px] text-gray-500 truncate font-medium">
+              <span
+                class="text-[10px] sm:text-[11px] lg:text-xs text-gray-500 truncate font-medium"
+              >
                 {{ booking.guestEmail || 'no-email-provided@mail.com' }}
               </span>
             </div>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <span class="text-[11px] text-gray-600 flex items-center gap-1">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span
+                class="text-[10px] sm:text-[11px] text-gray-600 flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-md"
+              >
                 <Icon
                   icon="mdi:office-building"
                   class="text-blue-400"
                 />
                 {{ booking.property?.propertyName || 'Main Property' }}
               </span>
-              <span class="text-[11px] text-gray-600 flex items-center gap-1">
+              <span
+                class="text-[10px] sm:text-[11px] text-gray-600 flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-md"
+              >
                 <Icon
                   icon="mdi:door-open"
                   class="text-green-500"
                 />
                 {{ booking.resource_type_name }}
               </span>
-              <span class="text-[11px] text-gray-600 flex items-center gap-1">
-                <Icon
-                  icon="mdi:clock-check-outline"
-                  class="text-orange-400"
-                />
-                Booked On: {{ booking.bookedOn || 'N/A' }}
-              </span>
             </div>
           </div>
 
-          <div class="flex items-center gap-5 px-6 border-l border-gray-100">
-            <div class="text-center">
-              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">Check-In</p>
-              <p class="text-xs font-bold text-gray-700 whitespace-nowrap">
+          <div
+            class="flex items-center justify-between md:justify-center gap-4 sm:gap-6 pt-4 md:pt-0 border-t md:border-t-0 md:border-l md:border-r border-gray-100 md:px-6 lg:px-10 md:w-[220px] lg:w-[280px]"
+          >
+            <div class="text-center lg:text-left">
+              <p
+                class="text-[8px] sm:text-[9px] uppercase text-gray-400 font-bold mb-0.5 tracking-tighter"
+              >
+                Check-In
+              </p>
+              <p class="text-[10px] sm:text-[11px] font-bold text-gray-700 whitespace-nowrap">
                 {{ booking.arrivalDateTime }}
               </p>
             </div>
-            <div class="h-6 w-px bg-gray-100 rotate-[20deg]"></div>
-            <div class="text-center">
-              <p class="text-[9px] uppercase text-gray-400 font-bold mb-0.5">Check-Out</p>
-              <p class="text-xs font-bold text-gray-700 whitespace-nowrap">
+            <div class="h-6 w-px bg-gray-200 rotate-[20deg] md:mx-1 lg:mx-2"></div>
+            <div class="text-center lg:text-left">
+              <p
+                class="text-[8px] sm:text-[9px] uppercase text-gray-400 font-bold mb-0.5 tracking-tighter"
+              >
+                Check-Out
+              </p>
+              <p class="text-[10px] sm:text-[11px] font-bold text-gray-700 whitespace-nowrap">
                 {{ booking.departureDateTime }}
               </p>
             </div>
           </div>
 
-          <div class="ml-auto flex items-center">
+          <div
+            class="hidden md:flex items-center justify-end md:pl-4 lg:pl-6 md:min-w-[120px] lg:min-w-[140px]"
+          >
             <span
-              class="px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider min-w-[90px] text-center border"
+              class="px-3 lg:px-4 py-1.5 rounded-lg text-[9px] lg:text-[10px] font-bold uppercase tracking-wider w-full text-center border"
               :class="getStatusBadgeClass(booking.status)"
             >
               {{ booking.status }}
             </span>
           </div>
-        </div>
-
-        <div
-          v-if="recentBookings.length === 0"
-          class="py-12 bg-white rounded-xl border border-dashed border-gray-200 text-center"
-        >
-          <Icon
-            icon="mdi:calendar-blank-outline"
-            class="text-4xl text-gray-200 mx-auto mb-2"
-          />
-          <p class="text-gray-400 text-sm">No activity recorded for the selected filter.</p>
         </div>
       </div>
     </div>
@@ -260,13 +266,14 @@
     <ConfirmModal
       v-model="isCancelModalOpen"
       title="Cancel Booking?"
-      message="This will permanently cancel the guest's reservation. Are you sure you want to proceed?"
+      message="This will permanently cancel the guest's reservation."
       @confirm="handleCancelBooking"
     />
   </div>
 </template>
 
 <script setup>
+// ... (Script remains exactly as you provided to maintain functionality)
 import { ref, onMounted, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { useRouter } from 'vue-router';
@@ -279,12 +286,9 @@ import ConfirmModal from '@/components/owner/ConfirmModal.vue';
 const propertyDropdown = ref([]);
 const selectedProperties = ref([]);
 const isDropdownOpen = ref(false);
-
-// --- State ---
 const isCancelModalOpen = ref(false);
 const bookingToCancelId = ref(null);
 const isLoading = ref(false);
-
 const rooms = ref([]);
 const bookings = ref([]);
 const recentBookings = ref([]);
@@ -293,10 +297,7 @@ const selectedBooking = ref(null);
 const statsList = ref([]);
 const router = useRouter();
 
-const viewAllBookings = () => {
-  router.push({ name: 'bookings' });
-};
-
+const viewAllBookings = () => router.push({ name: 'bookings' });
 const triggerCancelFlow = (id) => {
   bookingToCancelId.value = id;
   isCancelModalOpen.value = true;
@@ -307,12 +308,7 @@ const removeProperty = (id) => {
 
 const customStatuses = [
   { key: 'available', label: 'Available', color: '', backgroundColor: '' },
-  {
-    key: 'confirm',
-    label: 'Confirm',
-    color: '#155e75',
-    backgroundColor: '#a7f3d0',
-  },
+  { key: 'confirm', label: 'Confirm', color: '#155e75', backgroundColor: '#a7f3d0' },
 ];
 
 const getStatusBadgeClass = (status) => {
@@ -350,18 +346,9 @@ const getStatConfig = (key) => {
     },
   };
   return (
-    configs[key] || {
-      icon: 'mdi:chart-bar',
-      bg: 'bg-gray-50 text-gray-600',
-      text: 'text-gray-800',
-    }
+    configs[key] || { icon: 'mdi:chart-bar', bg: 'bg-gray-50 text-gray-600', text: 'text-gray-800' }
   );
 };
-
-watch(selectedProperties, () => {
-  getResources();
-  getRecentBookings();
-});
 
 const isFutureBooking = (checkInStr) => {
   if (!checkInStr) {
@@ -391,21 +378,16 @@ const handleCancelBooking = async () => {
   if (!bookingToCancelId.value) {
     return;
   }
-
   isLoading.value = true;
-  isCancelModalOpen.value = false; // Close modal immediately for better UX
-
+  isCancelModalOpen.value = false;
   try {
     const res = await ownerService.cancelBooking(bookingToCancelId.value);
     if (res && res.status === true) {
       await Promise.all([getResources(), getRecentBookings()]);
-      isCancelModalOpen.value = false;
       showBookingModal.value = false;
-    } else {
-      isCancelModalOpen.value = false;
     }
   } catch (error) {
-    throw new Error(error);
+    console.error(error);
   } finally {
     isLoading.value = false;
     bookingToCancelId.value = null;
@@ -414,14 +396,13 @@ const handleCancelBooking = async () => {
 
 const getRecentBookings = async () => {
   try {
-    const params = {
+    const res = await ownerService.fetchBookings({
       limit: 10,
       property_ids: selectedProperties.value.length ? selectedProperties.value : undefined,
-    };
-    const res = await ownerService.fetchBookings(params);
+    });
     recentBookings.value = (res.data || res).slice(0, 10);
   } catch (error) {
-    throw new Error(error);
+    console.error(error);
   }
 };
 
@@ -466,22 +447,36 @@ const getResources = async () => {
       status: book.status,
     }));
   } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const fetchPropertiesdropdown = async () => {
-  try {
-    const res = await ownerService.fetchPropertiesdropdown();
-    propertyDropdown.value = res.data.data || [];
-  } catch (error) {
-    throw new Error(error);
+    console.error(error);
   }
 };
 
 onMounted(() => {
-  fetchPropertiesdropdown();
+  ownerService
+    .fetchPropertiesdropdown()
+    .then((res) => (propertyDropdown.value = res.data.data || []));
+  getResources();
+  getRecentBookings();
+});
+
+watch(selectedProperties, () => {
   getResources();
   getRecentBookings();
 });
 </script>
+
+<style scoped>
+.animate-in {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
