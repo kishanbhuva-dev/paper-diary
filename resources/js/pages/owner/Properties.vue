@@ -2,7 +2,7 @@
   <div class="px-2 sm:px-3 py-4 bg-gray-50 min-h-screen">
     <div
       v-if="loading && !properties.length"
-      class="fixed inset-0 bg-white/80 z-[60] flex flex-col justify-center items-center backdrop-blur-sm transition-opacity duration-300"
+      class="fixed inset-0 bg-white/80 z-60 flex flex-col justify-center items-center backdrop-blur-sm transition-opacity duration-300"
     >
       <Icon
         icon="eos-icons:loading"

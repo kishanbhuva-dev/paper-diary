@@ -1,132 +1,178 @@
 <template>
-  <div
-    v-if="show"
-    class="fixed inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm"
+  <Transition
+    enter-active-class="transition duration-300 ease-out"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="transition duration-200 ease-in"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
   >
     <div
-      class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden border border-indigo-200 flex flex-col max-h-[90vh]"
+      v-if="show"
+      class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
     >
       <div
-        class="p-5 bg-indigo-100 flex justify-between items-center border-b border-indigo-200 shrink-0"
+        class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+        @click="$emit('close')"
+      ></div>
+
+      <div
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] sm:max-h-[85vh] transform transition-all"
       >
-        <h3 class="text-xl font-bold text-indigo-900 flex items-center gap-2">
-          <Icon
-            icon="mdi:calendar-account"
-            class="w-6 h-6"
-          />
-          Booking Details
-        </h3>
-        <button
-          class="text-indigo-400 hover:text-red-500 transition duration-150 p-1 rounded-full hover:bg-white/50"
-          @click="$emit('close')"
-        >
-          <Icon
-            icon="mdi:close"
-            class="w-6 h-6"
-          />
-        </button>
-      </div>
-
-      <div class="p-6 overflow-y-auto modal-inner-content">
         <div
-          v-if="booking"
-          class="space-y-6"
+          class="px-4 py-3 sm:px-8 sm:py-6 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 flex justify-between items-center shrink-0"
         >
-          <div class="border-b border-gray-100">
-            <p class="text-md text-gray-400">Booking Reference ID: #{{ booking.id }}</p>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <label class="text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >Guest Name</label
-              >
-              <p class="text-indigo-900 font-semibold mt-1">
-                {{ booking.guestName }}
-              </p>
+          <div class="flex items-center gap-3 sm:gap-4">
+            <div
+              class="flex items-center justify-center w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200"
+            >
+              <Icon
+                icon="mdi:calendar-account"
+                class="text-lg sm:text-2xl"
+              />
             </div>
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <label class="text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >Adult / Child</label
-              >
-              <p class="text-indigo-900 font-semibold mt-1">
-                {{ booking.adult }} Adults
-                <span v-if="booking.child"> / {{ booking.child }} Children</span>
+            <div class="min-w-0">
+              <h3 class="text-base sm:text-xl font-bold text-slate-800 tracking-tight truncate">
+                Booking Details
+              </h3>
+              <p class="text-[10px] sm:text-sm font-medium text-slate-500">
+                Ref: #{{ booking?.id }}
               </p>
             </div>
           </div>
+          <button
+            type="button"
+            class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors active:scale-90"
+            @click="$emit('close')"
+          >
+            <Icon
+              icon="mdi:close"
+              class="text-xl sm:text-2xl"
+            />
+          </button>
+        </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div class="p-3 bg-green-50/50 rounded-lg border border-green-100">
-              <label
-                class="text-xs font-bold text-green-600 uppercase tracking-wider flex items-center gap-1"
+        <div class="p-4 sm:p-8 overflow-y-auto bg-white modal-inner-content">
+          <div
+            v-if="booking"
+            class="space-y-3 sm:space-y-6"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div
+                class="p-3 sm:p-4 bg-slate-50/50 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-white transition-all duration-300"
               >
-                <Icon icon="mdi:login" /> Check-In
-              </label>
-              <p class="text-gray-800 font-medium mt-1">
-                {{ booking.modalcheckIn }}
-              </p>
+                <label
+                  class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest"
+                  >Guest Name</label
+                >
+                <p class="text-slate-800 text-sm sm:text-base font-bold mt-0.5 sm:mt-1 truncate">
+                  {{ booking.guestName }}
+                </p>
+              </div>
+              <div
+                class="p-3 sm:p-4 bg-slate-50/50 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-white transition-all duration-300"
+              >
+                <label
+                  class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest"
+                  >Adult / Child</label
+                >
+                <p class="text-slate-800 text-sm sm:text-base font-bold mt-0.5 sm:mt-1">
+                  {{ booking.adult }} Adults
+                  <span
+                    v-if="booking.child"
+                    class="text-blue-600"
+                    >/ {{ booking.child }} Child</span
+                  >
+                </p>
+              </div>
             </div>
-            <div class="p-3 bg-amber-50/50 rounded-lg border border-amber-100">
-              <label
-                class="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1"
-              >
-                <Icon icon="mdi:logout" /> Check-Out
-              </label>
-              <p class="text-gray-800 font-medium mt-1">
-                {{ booking.modalcheckOut }}
-              </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div class="p-3 sm:p-4 bg-blue-50/30 rounded-2xl border border-blue-100">
+                <label
+                  class="text-[9px] sm:text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1"
+                >
+                  <Icon icon="mdi:login" /> Check-In
+                </label>
+                <p class="text-slate-700 font-bold mt-0.5 sm:mt-1 text-xs sm:text-base">
+                  {{ booking.modalcheckIn }}
+                </p>
+              </div>
+              <div class="p-3 sm:p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <label
+                  class="text-[9px] sm:text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1"
+                >
+                  <Icon icon="mdi:logout" /> Check-Out
+                </label>
+                <p class="text-slate-700 font-bold mt-0.5 sm:mt-1 text-xs sm:text-base">
+                  {{ booking.modalcheckOut }}
+                </p>
+              </div>
             </div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <label class="text-xs font-bold text-gray-400 uppercase tracking-wider"
-                >Resource</label
-              >
-              <p class="text-indigo-900 font-semibold mt-1">
-                {{ booking.roomNumber }}
-              </p>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2"
-                >Booking Status</label
-              >
-              <span
-                :class="getStatusClasses(booking.status)"
-                class="px-3 py-1 rounded-full text-xs font-bold uppercase"
-              >
-                {{ booking.status }}
-              </span>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div class="p-3 sm:p-4 bg-slate-50/50 rounded-2xl border border-slate-200">
+                <label
+                  class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest"
+                  >Resource</label
+                >
+                <div class="flex items-center gap-2 mt-0.5 sm:mt-1">
+                  <Icon
+                    icon="heroicons:building-office-2"
+                    class="text-blue-600 text-base sm:text-lg"
+                  />
+                  <p class="text-slate-800 text-sm sm:text-base font-bold">
+                    {{ booking.roomNumber }}
+                  </p>
+                </div>
+              </div>
+              <div class="p-3 sm:p-4 bg-slate-50/50 rounded-2xl border border-slate-200">
+                <label
+                  class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5 sm:mb-2"
+                  >Booking Status</label
+                >
+                <span
+                  :class="getStatusClasses(booking.status)"
+                  class="px-3 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase border inline-block"
+                >
+                  {{ booking.status }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div
-        class="flex justify-between items-center pt-4 px-6 pb-6 bg-white border-t border-gray-300 shrink-0"
-      >
-        <button
-          v-if="booking?.status?.toLowerCase() !== 'cancelled' && canCancel"
-          type="button"
-          class="px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 border border-red-200 rounded-lg transition duration-150 flex items-center"
-          @click="$emit('cancel', booking.id)"
+        <div
+          class="px-4 py-3 sm:px-8 sm:py-5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3 shrink-0"
         >
-          <Icon
-            icon="mdi:calendar-remove"
-            class="w-5 h-5 mr-1"
-          />
-          Cancel Booking
-        </button>
-        <div v-else></div>
-        <button
-          type="button"
-          class="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-150 flex items-center shadow-md outline-indigo-400 shadow-indigo-200"
-          @click="$emit('close')"
-        >
-          Done
-        </button>
+          <div class="w-full sm:w-auto order-2 sm:order-1">
+            <button
+              v-if="booking?.status?.toLowerCase() !== 'cancelled' && canCancel"
+              type="button"
+              class="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-bold text-red-600 bg-white border border-red-200 rounded-xl hover:bg-red-50 transition-all active:scale-95 flex items-center justify-center gap-2"
+              @click="$emit('cancel', booking.id)"
+            >
+              <Icon
+                icon="mdi:calendar-remove"
+                class="w-4 h-4 sm:w-5 sm:h-5"
+              />
+              Cancel Booking
+            </button>
+          </div>
+
+          <div class="w-full sm:w-auto order-1 sm:order-2">
+            <button
+              type="button"
+              class="w-full sm:w-auto px-8 py-2 sm:px-10 sm:py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-100 flex items-center justify-center"
+              @click="$emit('close')"
+            >
+              Done
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -152,18 +198,19 @@ defineEmits(['close', 'cancel']);
 const getStatusClasses = (status) => {
   switch (status?.toLowerCase()) {
     case 'confirm':
-      return 'bg-green-100 text-green-700 border border-green-200';
+    case 'confirmed':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-100';
     case 'cancelled':
-      return 'bg-red-100 text-red-700 border border-red-200';
+      return 'bg-red-50 text-red-700 border-red-100';
     default:
-      return 'bg-gray-100 text-gray-700 border border-gray-200';
+      return 'bg-slate-100 text-slate-600 border-slate-200';
   }
 };
 </script>
 
 <style scoped>
 .modal-inner-content::-webkit-scrollbar {
-  width: 8px;
+  width: 4px; /* Slimmer scrollbar for mobile */
 }
 .modal-inner-content::-webkit-scrollbar-track {
   background-color: transparent;
@@ -171,7 +218,5 @@ const getStatusClasses = (status) => {
 .modal-inner-content::-webkit-scrollbar-thumb {
   background-color: #cbd5e1;
   border-radius: 20px;
-  border: 2px solid transparent;
-  background-clip: content-box;
 }
 </style>

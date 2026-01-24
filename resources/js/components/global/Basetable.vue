@@ -4,7 +4,7 @@
       class="table-header p-6 flex flex-wrap gap-4 sm:gap-6 justify-between items-center border-b border-gray-200 pb-5 sm:flex-nowrap"
     >
       <div class="flex flex-col gap-1">
-        <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight shrink-0">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight shrink-0">
           {{ title }}
         </h2>
       </div>
@@ -303,7 +303,7 @@
                 <span
                   v-else
                   class="text-gray-300"
-                  >-</span
+                  >--</span
                 >
               </template>
               <template v-else>
@@ -413,7 +413,7 @@
       <div
         class="ml-4 flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto mt-2 sm:mt-0"
       >
-        <p class="text-sm text-gray-700 whitespace-nowrap font-medium">
+        <p class="text-xs sm:text-sm text-gray-700 whitespace-nowrap font-medium">
           Page <span class="font-bold">{{ currentPage }}</span> of
           <span class="font-bold">{{ totalPages }}</span>
         </p>
@@ -424,7 +424,7 @@
         <div class="flex items-center">
           <label
             for="perPage"
-            class="text-sm text-gray-700 mr-2 whitespace-nowrap font-medium"
+            class="text-xs sm:text-sm text-gray-700 mr-2 whitespace-nowrap font-medium"
             >Items per page:</label
           >
           <select
