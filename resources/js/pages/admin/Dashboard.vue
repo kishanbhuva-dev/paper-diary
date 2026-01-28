@@ -1,421 +1,474 @@
 <template>
-  <div class="base-table bg-white p-4 w-full box-border border border-slate-100 shadow-sm">
-    <!-- Header Section -->
-    <div class="mb-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900 mb-1">Admin Dashboard</h1>
-          <p class="text-gray-600 text-sm">
-            Welcome back! Here's what's happening with your platform today.
-          </p>
-        </div>
-        <!-- <button
-          class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+  <div class="min-h-screen bg-[#f8fafc] font-sans text-[#1e293b] antialiased">
+    <main class="mx-auto max-w-[1600px] px-0 py-6 sm:px-6 lg:px-8 xl:px-10 space-y-6 sm:space-y-8">
+      <header>
+        <h1
+          class="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl md:text-2xl lg:text-3xl"
         >
-          <Icon
-            icon="heroicons:arrow-path"
-            class="w-4 h-4"
-          />
-          <span>Refresh</span>
-        </button> -->
-      </div>
-    </div>
+          Admin Dashboard
+        </h1>
+      </header>
 
-    <!-- Main Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div
-        v-for="(stat, index) in mainStats"
-        :key="index"
-        class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-medium text-gray-600 mb-1">{{ stat.label }}</p>
-            <p class="text-xl font-bold text-gray-900">{{ stat.value || '0' }}</p>
-            <p
-              v-if="stat.trend"
-              class="text-xs text-green-600 mt-1"
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 sm:gap-6">
+        <div
+          v-for="(stat, index) in mainStats"
+          :key="index"
+          class="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md"
+        >
+          <div class="flex flex-col gap-2 sm:gap-3">
+            <span
+              class="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-400"
             >
-              {{ stat.trend }}
-            </p>
-          </div>
-          <div
-            class="p-2 rounded-lg"
-            :class="stat.iconBgClass"
-          >
-            <Icon
-              :icon="stat.icon"
-              class="text-lg text-white"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Revenue & Growth Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <!-- Revenue Overview -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900">Revenue Overview</h2>
-            <div class="flex items-center space-x-2">
-              <span class="text-xs text-gray-500">Last 7 days</span>
-              <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              {{ stat.label }}
+            </span>
+            <div class="flex items-center justify-between">
+              <span class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                {{ stat.value || '0' }}
+              </span>
+              <div :class="[stat.iconBgClass, 'p-2 rounded-xl text-white shadow-sm flex-shrink-0']">
+                <Icon
+                  :icon="stat.icon"
+                  class="w-5 h-5 sm:w-6 h-6"
+                />
+              </div>
             </div>
           </div>
         </div>
-        <div class="p-4">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      </section>
+
+      <section class="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
+        <div
+          class="xl:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
+        >
+          <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center gap-3 bg-slate-50/30">
             <div
-              class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100"
+              class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600"
             >
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-xs font-medium text-gray-600 mb-1">Today</p>
-                  <p class="text-lg font-bold text-gray-900">
-                    £{{ formatCurrency(dashboardDetail?.details?.revenue?.today) }}
-                  </p>
-                </div>
-                <div class="p-2 rounded-lg bg-green-500">
-                  <Icon
-                    icon="heroicons:currency-pound"
-                    class="text-sm text-white"
-                  />
-                </div>
-              </div>
+              <Icon
+                icon="heroicons:presentation-chart-line"
+                class="w-5 h-5 sm:w-6 sm:h-6"
+              />
             </div>
-            <div
-              class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100"
-            >
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-xs font-medium text-gray-600 mb-1">This Week</p>
-                  <p class="text-lg font-bold text-gray-900">
-                    £{{ formatCurrency(dashboardDetail?.details?.revenue?.thisWeek) }}
-                  </p>
-                </div>
-                <div class="p-2 rounded-lg bg-blue-500">
-                  <Icon
-                    icon="heroicons:calendar"
-                    class="text-sm text-white"
-                  />
-                </div>
-              </div>
-            </div>
-            <div
-              class="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-3 border border-purple-100"
-            >
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-xs font-medium text-gray-600 mb-1">This Month</p>
-                  <p class="text-lg font-bold text-gray-900">
-                    £{{ formatCurrency(dashboardDetail?.details?.revenue?.thisMonth) }}
-                  </p>
-                </div>
-                <div class="p-2 rounded-lg bg-purple-500">
-                  <Icon
-                    icon="heroicons:chart-bar"
-                    class="text-sm text-white"
-                  />
-                </div>
-              </div>
-            </div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-800">Revenue Overview</h2>
           </div>
 
-          <!-- Revenue Chart -->
-          <div class="space-y-3">
-            <h3 class="text-sm font-semibold text-gray-900">Revenue Trend</h3>
-            <div class="bg-gray-50 rounded-lg p-3">
-              <div class="flex items-end space-x-1 h-24">
+          <div class="p-5 sm:p-8">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+              <div
+                v-for="item in revenueBreakdown"
+                :key="item.label"
+                class="p-4 rounded-2xl bg-slate-50 border border-slate-100"
+              >
+                <p class="text-[9px] sm:text-[10px] font-bold uppercase text-slate-400 mb-1">
+                  {{ item.label }}
+                </p>
+                <p class="text-lg sm:text-xl font-bold text-slate-900">£{{ item.value }}</p>
+              </div>
+            </div>
+
+            <div class="relative overflow-hidden">
+              <h3
+                class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 mb-6"
+              >
+                Last 7 Days Trend
+              </h3>
+              <div class="flex items-end gap-2 sm:gap-3 h-32 sm:h-40">
                 <div
                   v-for="(day, index) in dashboardDetail?.details?.revenue?.trend7Days || []"
                   :key="index"
-                  class="flex-1 bg-blue-500 rounded-t"
-                  :style="{ height: getChartHeight(day.amount, maxRevenue) + '%' }"
-                ></div>
-              </div>
-              <div class="flex justify-between text-xs text-gray-500 mt-2">
-                <span
-                  v-for="(day, index) in dashboardDetail?.details?.revenue?.trend7Days || []"
-                  :key="index"
+                  class="flex-1 group relative h-full flex flex-col justify-end"
                 >
-                  {{ day.day }}
-                </span>
+                  <div
+                    class="w-full bg-blue-500 rounded-t-lg transition-all hover:bg-blue-600"
+                    :style="{
+                      height: getChartHeight(day.amount, maxRevenue) + '%',
+                      minHeight: '4px',
+                    }"
+                  ></div>
+
+                  <div class="mt-3 text-center">
+                    <p class="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase">
+                      {{ day.day }}
+                    </p>
+                  </div>
+
+                  <div
+                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10"
+                  >
+                    <span class="bg-slate-800 text-white text-[9px] px-2 py-1 rounded">
+                      {{ day.amount }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Booking Analytics -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900">Booking Analytics</h2>
-            <div class="flex items-center space-x-2">
-              <span class="text-xs text-gray-500">Today's data</span>
-              <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            </div>
+        <div
+          class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
+        >
+          <div class="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/30">
+            <h2 class="text-base sm:text-lg font-bold text-slate-800">Booking Analytics</h2>
           </div>
-        </div>
-
-        <div class="p-4">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-            <div
-              class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100"
-            >
-              <div class="flex items-center justify-between">
+          <div class="p-5 sm:p-8 space-y-6 flex-1">
+            <div class="space-y-3">
+              <div
+                class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100"
+              >
                 <div>
-                  <p class="text-xs font-medium text-gray-600 mb-1">Today's Bookings</p>
-                  <p class="text-lg font-bold text-gray-900">
+                  <p class="text-[9px] sm:text-[10px] font-black uppercase text-slate-400">
+                    Today's Bookings
+                  </p>
+                  <p class="text-xl sm:text-2xl font-bold text-slate-900">
                     {{ dashboardDetail?.details?.bookingAnalytics?.todaysBookings || 0 }}
                   </p>
                 </div>
-                <div class="p-2 rounded-lg bg-blue-500">
-                  <Icon
-                    icon="heroicons:calendar"
-                    class="text-sm text-white"
-                  />
-                </div>
+                <Icon
+                  icon="heroicons:shopping-cart"
+                  class="w-5 h-5 sm:w-6 text-blue-600"
+                />
               </div>
-            </div>
-            <div
-              class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100"
-            >
-              <div class="flex items-center justify-between">
+              <div
+                class="flex items-center justify-between p-4 bg-rose-50 rounded-2xl border border-rose-100"
+              >
                 <div>
-                  <p class="text-xs font-medium text-gray-600 mb-1">Today's Revenue</p>
-                  <p class="text-lg font-bold text-gray-900">
-                    {{ dashboardDetail?.details?.bookingAnalytics?.todaysRevenue || 0 }}
+                  <p class="text-[9px] sm:text-[10px] font-black uppercase text-rose-400">
+                    Today's Lost Amount
                   </p>
-                </div>
-                <div class="p-2 rounded-lg bg-green-500">
-                  <Icon
-                    icon="heroicons:currency-pound"
-                    class="text-sm text-white"
-                  />
-                </div>
-              </div>
-            </div>
-            <div
-              class="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-3 border border-purple-100"
-            >
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-xs font-medium text-gray-600 mb-1">Today's Lost</p>
-                  <p class="text-lg font-bold text-gray-900">
+                  <p class="text-xl sm:text-2xl font-bold text-rose-700">
                     £{{
-                      formatCurrency(dashboardDetail?.details?.bookingAnalytics?.lostAmountToday) ||
-                      0
+                      formatCurrency(dashboardDetail?.details?.bookingAnalytics?.lostAmountToday)
                     }}
                   </p>
                 </div>
-                <div class="p-2 rounded-lg bg-purple-500">
-                  <Icon
-                    icon="heroicons:currency-pound"
-                    class="text-sm text-white"
-                  />
-                </div>
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  class="w-5 h-5 sm:w-6 text-rose-600"
+                />
               </div>
             </div>
-          </div>
 
-          <!-- Booking Status -->
-          <div class="space-y-3">
-            <h3 class="text-sm font-semibold text-gray-900">Booking Status</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="text-center p-3 bg-green-50 rounded-lg">
-                <p class="text-lg font-bold text-green-600">
-                  {{ dashboardDetail?.details?.bookingAnalytics?.bookingStatus?.confirmed || 0 }}
-                </p>
-                <p class="text-xs text-green-700">Confirmed</p>
-              </div>
-              <div class="text-center p-3 bg-red-50 rounded-lg">
-                <p class="text-lg font-bold text-red-600">
-                  {{ dashboardDetail?.details?.bookingAnalytics?.bookingStatus?.cancelled || 0 }}
-                </p>
-                <p class="text-xs text-red-700">Cancelled</p>
-              </div>
-              <div class="text-center p-3 bg-yellow-50 rounded-lg">
-                <p class="text-lg font-bold text-yellow-600">
-                  {{ dashboardDetail?.details?.bookingAnalytics?.bookingStatus?.pending || 0 }}
-                </p>
-                <p class="text-xs text-yellow-700">Pending</p>
+            <div class="pt-6 border-t border-slate-100">
+              <p
+                class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 mb-5"
+              >
+                Booking Status
+              </p>
+              <div class="space-y-4">
+                <div
+                  v-for="(val, label) in statusMap"
+                  :key="label"
+                >
+                  <div
+                    class="flex justify-between text-[10px] sm:text-[11px] font-bold mb-2 uppercase"
+                  >
+                    <span class="text-slate-500">{{ label }}</span>
+                    <span class="text-slate-900">{{ val.count }}</span>
+                  </div>
+                  <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      :class="['h-full rounded-full transition-all duration-1000', val.color]"
+                      :style="{
+                        width: val.count > 0 ? (val.count / totalBookingsCount) * 100 + '%' : '0%',
+                      }"
+                    ></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Recent Activity & Top Sites -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <!-- Recent Activity -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900">Recent Activity</h2>
+      <section class="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+        <div
+          class="bg-white rounded-3xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden"
+        >
+          <div
+            class="p-5 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-white"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600"
+              >
+                <Icon
+                  icon="heroicons:clock"
+                  class="w-5 h-5"
+                />
+              </div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-800">Recent Activity</h2>
+            </div>
             <button
-              class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200"
+              class="text-xs font-bold text-blue-600 hover:underline px-2 py-1"
               @click="router.push('/admin/bookings')"
             >
               View All
             </button>
           </div>
-        </div>
-        <div class="p-4">
-          <div class="space-y-3">
-            <div
-              v-for="(booking, index) in recentBookings || []"
-              :key="index"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-            >
-              <div class="flex items-center space-x-3">
-                <div class="p-2 bg-blue-100 rounded-lg">
-                  <Icon
-                    icon="heroicons:calendar"
-                    class="text-blue-600 text-sm"
-                  />
-                </div>
-                <div>
-                  <p class="font-medium text-gray-900 text-sm">
-                    {{ booking.propertyName || 'Unknown Site' }}
-                  </p>
-                  <p class="text-xs text-gray-600">
-                    {{ booking.ownerName }}
-                  </p>
-                </div>
-              </div>
-              <div class="text-right">
-                <p class="text-xs font-medium text-gray-900">{{ booking.bookedOn }}</p>
-                <p class="text-xs text-gray-500">{{ booking.status }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Top Sites -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900">Today's Top Sites</h2>
-            <button
-              class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200"
-            >
-              View All
-            </button>
-          </div>
-        </div>
-        <div class="p-4">
-          <!-- No Data State -->
-          <div
-            v-if="!dashboardDetail?.details?.topSites?.length"
-            class="flex flex-col items-center justify-center py-12 text-center"
-          >
-            <div class="p-4 bg-gray-100 rounded-full mb-4">
-              <Icon
-                icon="heroicons:map-pin"
-                class="w-8 h-8 text-gray-400"
-              />
+          <div class="w-full">
+            <table class="hidden sm:table w-full text-left border-separate border-spacing-0">
+              <thead>
+                <tr class="bg-slate-50/50">
+                  <th
+                    class="px-6 py-4 text-[10px] font-black uppercase tracking-wider text-slate-400"
+                  >
+                    Site / Property
+                  </th>
+                  <th
+                    class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-wider text-slate-400"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-6 py-4 text-right text-[10px] font-black uppercase tracking-wider text-slate-400"
+                  >
+                    Booked On
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr
+                  v-for="(booking, index) in recentBookings"
+                  :key="index"
+                  class="hover:bg-slate-50 transition-colors"
+                >
+                  <td class="px-6 py-4">
+                    <p class="text-sm font-bold text-slate-800">
+                      {{ booking.propertyName || 'Unknown Site' }}
+                    </p>
+                    <p class="text-[11px] font-medium text-slate-500">{{ booking.ownerName }}</p>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ring-1 ring-inset"
+                      :class="getStatusClasses(booking.status)"
+                    >
+                      <span
+                        class="w-1.5 h-1.5 rounded-full mr-2"
+                        :class="getDotClass(booking.status)"
+                      ></span>
+                      {{ booking.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-right text-xs font-bold text-slate-600">
+                    {{ booking.bookedOn }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="sm:hidden divide-y divide-slate-100">
+              <div
+                v-for="(booking, index) in recentBookings"
+                :key="'mob-' + index"
+                class="p-4 flex flex-col gap-3"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="min-w-0 pr-2">
+                    <p class="text-xs font-bold text-slate-800 truncate">
+                      {{ booking.propertyName || 'Unknown Site' }}
+                    </p>
+                    <p class="text-[10px] font-medium text-slate-500">{{ booking.ownerName }}</p>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase ring-1 ring-inset whitespace-nowrap"
+                    :class="getStatusClasses(booking.status)"
+                  >
+                    {{ booking.status }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center pt-1 border-t border-slate-50">
+                  <span class="text-[9px] font-black uppercase tracking-widest text-slate-400"
+                    >Booked On</span
+                  >
+                  <span class="text-[10px] font-bold text-slate-600">{{ booking.bookedOn }}</span>
+                </div>
+              </div>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No Top Sites Today</h3>
-            <p class="text-sm text-gray-500 mb-4">
-              There are no bookings or activity for today's top sites.
+          </div>
+
+          <div
+            v-if="!recentBookings.length"
+            class="py-12 text-center"
+          >
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              No Recent Activity
             </p>
           </div>
-          <div
-            v-else
-            class="space-y-3"
-          >
+        </div>
+
+        <div
+          class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
+        >
+          <div class="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/30">
+            <h2 class="text-base sm:text-lg font-bold text-slate-800">Top Sites</h2>
+          </div>
+          <div class="p-5 sm:p-6 flex-1">
             <div
-              v-for="(site, index) in dashboardDetail?.details?.topSites || []"
-              :key="index"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              v-if="!dashboardDetail?.details?.topSites?.length"
+              class="h-full flex flex-col items-center justify-center py-10 text-center"
             >
-              <div class="flex items-center space-x-3">
-                <div class="p-2 bg-green-100 rounded-lg">
+              <Icon
+                icon="heroicons:map"
+                class="w-12 h-12 text-slate-200 mb-4"
+              />
+              <p class="text-xs font-bold text-slate-400 uppercase">No site data available</p>
+            </div>
+            <div
+              v-else
+              class="space-y-4"
+            >
+              <div
+                v-for="(site, index) in dashboardDetail?.details?.topSites"
+                :key="index"
+                class="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 hover:border-blue-100 transition-all"
+              >
+                <div
+                  class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center flex-shrink-0"
+                >
                   <Icon
-                    icon="heroicons:map-pin"
-                    class="text-green-600 text-sm"
+                    icon="heroicons:building-storefront"
+                    class="w-5 h-5 sm:w-6 sm:h-6"
                   />
                 </div>
-                <div>
-                  <p class="font-medium text-gray-900 text-sm">{{ site.property_name }}</p>
-                  <p class="text-xs text-gray-600">{{ site.owner_name }}</p>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-bold text-slate-900 truncate">{{ site.property_name }}</p>
+                  <p class="text-xs font-medium text-slate-500">
+                    {{ site.booking_count }} bookings
+                  </p>
                 </div>
-              </div>
-              <div class="text-right">
-                <p class="font-bold text-gray-900 text-sm">
-                  £{{ formatCurrency(site.totalAmount) }}
-                </p>
-                <p class="text-xs text-gray-500">{{ site.booking_count }} bookings</p>
+                <div class="text-right">
+                  <p class="text-sm font-black text-slate-900">
+                    £{{ formatCurrency(site.totalAmount) }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <TotalBookingPerMonthChart :chart-data="totalBookingPerMonthChartData" />
-      </div>
-    </div>
+      <section
+        class="bg-white rounded-3xl border border-slate-200 px-2 py-6 sm:px-8 sm:py-8 shadow-sm"
+      >
+        <!-- <h3 class="text-base sm:text-lg font-bold text-slate-800 mb-8">Total Booking Per Month</h3> -->
+        <div class="w-full min-h-[300px]">
+          <TotalBookingPerMonthChart :chart-data="totalBookingPerMonthChartData" />
+        </div>
+      </section>
+    </main>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { Icon } from '@iconify/vue';
 import adminService from '../../services/adminService';
 import TotalBookingPerMonthChart from '@/components/admin/Dashboard/TotalBookingPerMonthChart.vue';
 
+// --- DATA STATES ---
 const dashboardDetail = ref({});
 const recentBookings = ref([]);
 const totalBookingPerMonthChartData = ref([]);
 const loading = ref(true);
-const error = ref(null);
 const router = useRouter();
+
+// --- COMPUTED LOGIC ---
+const revenueBreakdown = computed(() => [
+  { label: 'Today', value: formatCurrency(dashboardDetail.value?.details?.revenue?.today) },
+  { label: 'This Week', value: formatCurrency(dashboardDetail.value?.details?.revenue?.thisWeek) },
+  {
+    label: 'This Month',
+    value: formatCurrency(dashboardDetail.value?.details?.revenue?.thisMonth),
+  },
+]);
+
+const getStatusClasses = (status) => {
+  const s = status?.toLowerCase();
+  if (s === 'confirm') {
+    return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+  }
+  if (s === 'pending') {
+    return 'bg-amber-50 text-amber-700 ring-amber-600/20';
+  }
+  if (s === 'cancelled') {
+    return 'bg-rose-50 text-rose-700 ring-rose-600/20';
+  }
+  return 'bg-slate-50 text-slate-600 ring-slate-600/20';
+};
+
+const getDotClass = (status) => {
+  const s = status?.toLowerCase();
+  if (s === 'confirm') {
+    return 'bg-emerald-500';
+  }
+  if (s === 'pending') {
+    return 'bg-amber-500';
+  }
+  if (s === 'cancelled') {
+    return 'bg-rose-500';
+  }
+  return 'bg-slate-400';
+};
+const statusMap = computed(() => ({
+  Confirm: {
+    count: dashboardDetail.value?.details?.bookingAnalytics?.bookingStatus?.confirmed || 0,
+    color: 'bg-green-500',
+  },
+  Pending: {
+    count: dashboardDetail.value?.details?.bookingAnalytics?.bookingStatus?.pending || 0,
+    color: 'bg-amber-500',
+  },
+  Cancelled: {
+    count: dashboardDetail.value?.details?.bookingAnalytics?.bookingStatus?.cancelled || 0,
+    color: 'bg-rose-500',
+  },
+}));
+
+const totalBookingsCount = computed(() => {
+  const stats = dashboardDetail.value?.details?.bookingAnalytics?.bookingStatus;
+  if (!stats) {
+    return 1;
+  }
+  return (stats.confirmed || 0) + (stats.pending || 0) + (stats.cancelled || 0) || 1;
+});
 
 const mainStats = computed(() => [
   {
     label: 'Live Properties',
     value: dashboardDetail.value?.summary?.liveProperties,
     icon: 'heroicons:map-pin',
-    iconBgClass: 'bg-blue-500',
-    trend: '',
+    iconBgClass: 'bg-blue-600',
   },
   {
     label: 'Total Properties',
     value: dashboardDetail.value?.summary?.totalProperties,
     icon: 'heroicons:building-office-2',
-    iconBgClass: 'bg-indigo-500',
-    trend: '',
+    iconBgClass: 'bg-indigo-600',
   },
   {
-    label: 'Total LostAmount',
-    value: `£${formatCurrency(dashboardDetail.value?.summary?.totalLostAmount) || '0.00'}`,
+    label: 'Total Lost Amount',
+    value: `£${formatCurrency(dashboardDetail.value?.summary?.totalLostAmount)}`,
     icon: 'heroicons:currency-pound',
-    iconBgClass: 'bg-purple-500',
-    trend: '',
+    iconBgClass: 'bg-purple-600',
   },
   {
     label: 'Total Revenue',
-    value: `£${formatCurrency(dashboardDetail.value?.summary?.totalRevenue) || '0.00'}`,
-    icon: 'heroicons:currency-pound',
-    iconBgClass: 'bg-green-500',
-    trend: '',
+    value: `£${formatCurrency(dashboardDetail.value?.summary?.totalRevenue)}`,
+    icon: 'heroicons:banknotes',
+    iconBgClass: 'bg-emerald-600',
   },
 ]);
 
+// --- API METHODS ---
 const dashboardData = async () => {
   loading.value = true;
-  error.value = null;
   try {
     const response = await adminService.adminDashboard();
-
+    console.log(response.data.data);
     if (response.data.status === true) {
       dashboardDetail.value = response.data.data;
       const bookingData = response?.data?.data?.details?.bookingTotalPerMonth?.data || [];
@@ -426,7 +479,7 @@ const dashboardData = async () => {
       }));
     }
   } catch (err) {
-    error.value = err.message || 'Failed to load dashboard data';
+    console.error(err);
   } finally {
     loading.value = false;
   }
@@ -440,7 +493,6 @@ const fetchAdminBookings = async () => {
     sortBy: 'created_at',
     sortOrder: 'desc',
   });
-
   if (res.status) {
     recentBookings.value = res.data.data;
   }
@@ -456,16 +508,21 @@ const formatCurrency = (amount) => {
   });
 };
 
-const getChartHeight = (value, max) => {
-  if (!value || !max) {
-    return 0;
-  }
-  return Math.max((value / max) * 100, 5);
+const getChartHeight = (val, max) => {
+  const numericVal = Number(val) || 0;
+  const numericMax = Number(max) || 1;
+  // Returns a percentage. If val is max, returns 100%.
+  return (numericVal / numericMax) * 100;
 };
 
 const maxRevenue = computed(() => {
-  const trends = dashboardDetail?.value?.details?.revenue?.trend7Days || [];
-  return Math.max(...trends.map((t) => t.amount), 1);
+  const trends = dashboardDetail.value?.details?.revenue?.trend7Days || [];
+  if (trends.length === 0) {
+    return 1;
+  }
+  // Use Number() to ensure the string "14588" from your log is treated as a number
+  const values = trends.map((t) => Number(t.amount) || 0);
+  return Math.max(...values, 1);
 });
 
 onMounted(() => {

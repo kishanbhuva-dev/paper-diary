@@ -1,13 +1,15 @@
 <template>
-  <div class="chart-container">
+  <div class="chart-container w-full">
     <div
       v-if="title"
-      class="chart-header mb-4"
+      class="mb-4 sm:mb-6 md:mb-8"
     >
-      <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
+      <h3 class="text-base sm:text-lg md:text-xl font-bold text-slate-900 tracking-tight">
+        {{ title }}
+      </h3>
       <p
         v-if="subtitle"
-        class="text-sm text-gray-600"
+        class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed mt-1"
       >
         {{ subtitle }}
       </p>
@@ -33,330 +35,147 @@ import { computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 
 const props = defineProps({
-  // Chart type: 'line', 'bar', 'pie', 'area', 'donut'
-  type: {
-    type: String,
-    default: 'line',
-    validator: (value) => ['line', 'bar', 'pie', 'area', 'donut'].includes(value),
-  },
-
-  // Chart data
-  series: {
-    type: Array,
-    required: true,
-  },
-
-  // Chart categories/labels for x-axis
-  categories: {
-    type: Array,
-    default: () => [],
-  },
-
-  // Booking count data for tooltip
-  bookingCountData: {
-    type: Array,
-    default: () => [],
-  },
-
-  // Chart title
-  title: {
-    type: String,
-    default: '',
-  },
-
-  // Chart subtitle
-  subtitle: {
-    type: String,
-    default: '',
-  },
-
-  // Chart dimensions
-  height: {
-    type: Number,
-    default: 300,
-  },
-
-  width: {
-    type: String,
-    default: '100%',
-  },
-
-  // Chart colors
-  colors: {
-    type: Array,
-    default: () => ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'],
-  },
-
-  // Chart styling options
-  showLegend: {
-    type: Boolean,
-    default: true,
-  },
-
-  showDataLabels: {
-    type: Boolean,
-    default: false,
-  },
-
-  showGrid: {
-    type: Boolean,
-    default: true,
-  },
-
-  showToolbar: {
-    type: Boolean,
-    default: false,
-  },
-
-  // Animation options
-  animated: {
-    type: Boolean,
-    default: true,
-  },
-
-  // Custom chart options
-  customOptions: {
-    type: Object,
-    default: () => ({}),
-  },
+  type: { type: String, default: 'bar' },
+  series: { type: Array, required: true },
+  categories: { type: Array, default: () => [] },
+  bookingCountData: { type: Array, default: () => [] },
+  title: { type: String, default: '' },
+  subtitle: { type: String, default: '' },
+  height: { type: Number, default: 300 },
+  width: { type: String, default: '100%' },
+  colors: { type: Array, default: () => ['#7C3AED'] },
+  showLegend: { type: Boolean, default: false },
+  showDataLabels: { type: Boolean, default: false },
+  showGrid: { type: Boolean, default: true },
+  showToolbar: { type: Boolean, default: false },
+  animated: { type: Boolean, default: true },
+  customOptions: { type: Object, default: () => ({}) },
 });
 
-const chartOptions = computed(() => {
-  const baseOptions = {
-    chart: {
-      type: props.type,
-      height: props.height,
-      width: props.width,
-      toolbar: {
-        show: props.showToolbar,
-        tools: {
-          download: true,
-          selection: false,
-          zoom: false,
-          zoomin: false,
-          zoomout: false,
-          pan: false,
-          reset: false,
-        },
-      },
-      animations: {
-        enabled: props.animated,
-        easing: 'easeinout',
-        speed: 800,
+const chartOptions = computed(() => ({
+  chart: {
+    type: props.type,
+    fontFamily: 'Inter, sans-serif',
+    toolbar: { show: props.showToolbar },
+    animations: {
+      enabled: props.animated,
+      speed: 600,
+      animateGradually: { enabled: true, delay: 150 },
+    },
+    sparkline: { enabled: false },
+  },
+  colors: props.colors,
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'light',
+      type: 'vertical',
+      shadeIntensity: 0.3,
+      gradientToColors: ['#A78BFA'], // Fades from Violet to Lavender
+      inverseColors: false,
+      opacityFrom: 0.95,
+      opacityTo: 0.85,
+      stops: [0, 100],
+    },
+  },
+  dataLabels: { enabled: props.showDataLabels },
+  stroke: { show: true, width: 2, colors: ['transparent'] },
+  grid: {
+    show: props.showGrid,
+    borderColor: '#f1f5f9',
+    strokeDashArray: 6,
+    xaxis: { lines: { show: false } },
+    padding: { top: 0, right: 0, bottom: 0, left: 10 },
+  },
+  tooltip: {
+    theme: 'dark',
+    custom({ series, seriesIndex, dataPointIndex, w }) {
+      const val = series[seriesIndex][dataPointIndex];
+      const count = props.bookingCountData?.[dataPointIndex] ?? 0;
+      return `
+          <div class="px-4 py-3 bg-slate-900 shadow-2xl rounded-xl border border-slate-800">
+            <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">${w.globals.labels[dataPointIndex]}</div>
+            <div class="flex items-center gap-3 mb-1">
+              <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+              <span class="text-xs text-slate-300">Revenue: <b class="text-white text-sm ml-1">£${val.toLocaleString()}</b></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span class="text-xs text-slate-300">Bookings: <b class="text-white text-sm ml-1">${count}</b></span>
+            </div>
+          </div>
+        `;
+    },
+  },
+  xaxis: {
+    categories: props.categories,
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    labels: {
+      style: { colors: '#94a3b8', fontSize: '12px', fontWeight: 600 },
+      hideOverlappingLabels: true,
+      trim: true,
+    },
+  },
+  yaxis: {
+    labels: {
+      style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 },
+      formatter: (val) => (val >= 1000 ? `£${(val / 1000).toFixed(0)}k` : `£${val}`),
+    },
+  },
+  plotOptions: {
+    bar: {
+      borderRadius: 8,
+      columnWidth: '40%',
+      endingShape: 'rounded',
+      dataLabels: { position: 'top' },
+    },
+  },
+  responsive: [
+    {
+      breakpoint: 480,
+      options: {
+        chart: { height: 280 },
+        plotOptions: { bar: { columnWidth: '65%', borderRadius: 3 } },
+        xaxis: { labels: { rotate: -45, style: { fontSize: '9px' } } },
+        yaxis: { labels: { style: { fontSize: '9px' } } },
       },
     },
-    colors: props.colors,
-    dataLabels: {
-      enabled: props.showDataLabels,
-    },
-    legend: {
-      show: props.showLegend,
-      position: 'top',
-      horizontalAlign: 'center',
-      fontSize: '12px',
-      fontFamily: 'Inter, sans-serif',
-      markers: {
-        width: 8,
-        height: 8,
-        radius: 4,
+    {
+      breakpoint: 640,
+      options: {
+        chart: { height: 320 },
+        plotOptions: { bar: { columnWidth: '60%', borderRadius: 4 } },
+        xaxis: { labels: { rotate: -35, style: { fontSize: '10px' } } },
+        yaxis: { labels: { style: { fontSize: '10px' } } },
       },
     },
-    grid: {
-      show: props.showGrid,
-      borderColor: '#E5E7EB',
-      strokeDashArray: 0,
-      xaxis: {
-        lines: {
-          show: false,
-        },
-      },
-      yaxis: {
-        lines: {
-          show: true,
-        },
+    {
+      breakpoint: 768,
+      options: {
+        chart: { height: 360 },
+        plotOptions: { bar: { columnWidth: '50%', borderRadius: 6 } },
+        xaxis: { labels: { rotate: -25, style: { fontSize: '11px' } } },
+        yaxis: { labels: { style: { fontSize: '11px' } } },
       },
     },
-    stroke: {
-      curve: 'smooth',
-      width: 2,
-    },
-    fill: {
-      type: 'solid',
-      opacity: 0.8,
-    },
-    tooltip: {
-      enabled: true,
-      shared: true,
-      intersect: false,
-      style: {
-        fontSize: '12px',
-        fontFamily: 'Inter, sans-serif',
-      },
-      // y: {
-      //   formatter(val) {
-      //     return val ? val.toLocaleString() : '0';
-      //   },
-      // },
-      y: {
-        formatter(val, opts) {
-          // Get booking count for this data point
-          const bookingCount =
-            props.bookingCountData && props.bookingCountData[opts.dataPointIndex]
-              ? props.bookingCountData[opts.dataPointIndex]
-              : 0;
-
-          // Return exactly the format you want
-          return `Total Booking: ${bookingCount}<br>Total Amount: £${val.toLocaleString()}`;
-        },
-      },
-    },
-    xaxis: {
-      categories: props.categories,
-      axisBorder: {
-        show: false,
-      },
-      axisTicks: {
-        show: false,
-      },
-      labels: {
-        style: {
-          colors: '#6B7280',
-          fontSize: '12px',
-          fontFamily: 'Inter, sans-serif',
-        },
-      },
-    },
-    yaxis: [
-      {
-        labels: {
-          style: {
-            colors: '#6B7280',
-            fontSize: '12px',
-            fontFamily: 'Inter, sans-serif',
-          },
-          formatter(val) {
-            return val ? val.toLocaleString() : '0';
-          },
-        },
-      },
-    ],
-    plotOptions: {
-      bar: {
-        borderRadius: 4,
-        columnWidth: '60%',
-        dataLabels: {
-          position: 'top',
-        },
-      },
-      pie: {
-        donut: {
-          size: '70%',
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: 'Total',
-              formatter(w) {
-                return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-              },
-            },
-          },
-        },
-      },
-    },
-    responsive: [
-      {
-        breakpoint: 768,
-        options: {
-          chart: {
-            height: 250,
-          },
-          legend: {
-            position: 'bottom',
-          },
-        },
-      },
-    ],
-  };
-
-  // Merge with custom options
-  return { ...baseOptions, ...props.customOptions };
-});
+  ],
+  ...props.customOptions,
+}));
 </script>
 
 <style scoped>
 .chart-container {
-  border-radius: 0.5rem;
-  box-shadow: none;
-  border: none;
-  padding: 1rem;
+  padding: 0;
 }
-
-.chart-header {
-  border-bottom: none;
-  padding-bottom: 0.75rem;
-}
-
 .chart-wrapper {
   width: 100%;
 }
-
-/* Custom ApexCharts styling */
-:deep(.apexcharts-legend) {
-  justify-content: center;
+/* Professional smooth-in animation for bars */
+:deep(.apexcharts-bar-area) {
+  transition: all 0.3s ease;
 }
-
-:deep(.apexcharts-tooltip) {
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border: 0;
-}
-
-:deep(.apexcharts-gridline) {
-  opacity: 0.3;
-}
-
-:deep(.apexcharts-xaxis-label) {
-  color: #6b7280;
-}
-
-:deep(.apexcharts-yaxis-label) {
-  color: #6b7280;
+:deep(.apexcharts-bar-area:hover) {
+  filter: brightness(1.1);
 }
 </style>
-
-<!-- <style scoped>
-.chart-container {
-  @apply rounded-lg shadow-none border border-none p-4;
-}
-
-.chart-header {
-  @apply border-b border-none pb-3;
-}
-
-.chart-wrapper {
-  @apply w-full;
-}
-
-/* Custom ApexCharts styling */
-:deep(.apexcharts-legend) {
-  @apply justify-center;
-}
-
-:deep(.apexcharts-tooltip) {
-  @apply shadow-lg border-0;
-}
-
-:deep(.apexcharts-gridline) {
-  @apply opacity-30;
-}
-
-:deep(.apexcharts-xaxis-label) {
-  @apply text-gray-500;
-}
-
-:deep(.apexcharts-yaxis-label) {
-  @apply text-gray-500;
-}
-</style> -->

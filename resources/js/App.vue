@@ -12,17 +12,11 @@
 
 <script setup>
 import { Toaster } from 'vue-sonner';
-import { ref, provide, onMounted } from 'vue';
+import { ref, provide } from 'vue';
 import Loader from '../js/components/global/Loader.vue';
 import apiClient from '../js/services/apiClient';
-import { useAuth } from '../js/composables/useAuth';
 
 const loaderRef = ref(null);
-const { checkAuth } = useAuth();
-
-onMounted(() => {
-  checkAuth();
-});
 
 provide('$loading', {
   show: () => loaderRef.value?.show(),

@@ -327,12 +327,12 @@ const getStatConfig = (key) => {
     totalProperty: {
       icon: 'mdi:office-building-marker-outline',
       bg: 'bg-blue-50 text-blue-600',
-      text: 'text-gray-800',
+      text: 'text-blue-600',
     },
     totalBooking: {
       icon: 'mdi:calendar-check',
       bg: 'bg-indigo-50 text-indigo-600',
-      text: 'text-gray-800',
+      text: 'text-indigo-600',
     },
     todayBooking: {
       icon: 'mdi:calendar-today',

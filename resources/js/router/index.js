@@ -25,7 +25,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (!isAdmin.value) {
-      return next(isOwner.value ? { name: 'owner-dashboard' } : { name: 'home' });
+      return next(isOwner.value ? { name: 'owner-dashboard' } : { name: 'my-bookings' });
     }
   }
 
@@ -35,7 +35,20 @@ router.beforeEach((to, from, next) => {
     }
 
     if (!isOwner.value) {
-      return next(isAdmin.value ? { name: 'admin-dashboard' } : { name: 'home' });
+      return next(isAdmin.value ? { name: 'admin-dashboard' } : { name: 'my-bookings' });
+    }
+  }
+
+  // Redirect authenticated admin/owner users from guest pages to their dashboards
+  if (isAuthenticated.value && (path === '/' || path.startsWith('/property'))) {
+    if (isAdmin.value) {
+      return next({ name: 'admin-dashboard' });
+    }
+    if (isOwner.value) {
+      return next({ name: 'owner-dashboard' });
+    }
+    if (!isAdmin.value && !isOwner.value) {
+      return next({ name: 'my-bookings' });
     }
   }
 

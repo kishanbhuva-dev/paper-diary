@@ -69,8 +69,8 @@
 
           <span
             v-else
-            class="text-gray-300"
-            >-</span
+            class="text-gray-400"
+            >--</span
           >
         </div>
       </template>

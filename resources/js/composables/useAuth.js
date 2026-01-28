@@ -82,7 +82,7 @@ export function useAuth() {
     }
 
     const role = data.user.role?.toLowerCase();
-    let routeName = 'home';
+    let routeName = 'my-bookings';
 
     if (role === 'owner') {
       routeName = data.subscription?.is_active === 'active' ? 'owner-dashboard' : 'subscription';
