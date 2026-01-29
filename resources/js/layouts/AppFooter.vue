@@ -77,11 +77,11 @@
             <input
               type="email"
               placeholder="Enter your email address."
-              class="flex-grow h-12 px-4 text-sm text-gray-700 bg-white border-none rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="grow h-10 sm:h-12 px-4 text-xs sm:text-sm text-gray-700 bg-white border-none rounded-l-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <button
               type="submit"
-              class="h-12 px-6 text-white text-sm font-semibold bg-primary rounded-r-lg hover:bg-primary-dark transition duration-300 whitespace-nowrap"
+              class="h-10 sm:h-12 px-6 text-white text-xs sm:text-sm font-semibold bg-primary rounded-r-lg hover:bg-primary-dark transition duration-300 whitespace-nowrap"
             >
               Get in touch
             </button>

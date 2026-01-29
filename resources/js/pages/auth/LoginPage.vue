@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-lg sm:mx-auto mx-4 my-10 rounded-lg p-6 shadow-md">
+  <div class="max-w-lg sm:mx-auto mx-4 my-10 rounded-lg p-2 sm:p-6 sm:shadow-md">
     <h2 class="text-2xl font-semibold text-gray-800 mb-1">Login to your account</h2>
     <p class="text-gray-500 mb-6 text-sm">Welcome back! Please enter your details.</p>
 

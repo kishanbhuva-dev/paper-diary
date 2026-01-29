@@ -4,7 +4,7 @@
       <div
         v-for="stat in statsList"
         :key="stat.key"
-        class="bg-white p-4 sm:p-5 lg:p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
+        class="bg-white p-3 sm:p-4 lg:p-3 xl:p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
       >
         <div class="flex justify-between items-start">
           <div>

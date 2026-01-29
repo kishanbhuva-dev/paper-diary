@@ -1,10 +1,10 @@
 <template>
-  <div class="max-w-3xl shadow-md rounded-lg p-6 my-10 mx-4 sm:mx-auto">
+  <div class="max-w-3xl sm:shadow-md rounded-lg p-2 sm:p-6 my-10 mx-4 sm:mx-auto">
     <h2 class="text-2xl font-semibold text-gray-800 mb-1">Create an Account</h2>
     <p class="text-gray-500 mb-8 text-sm">Register now to access your Paper Diary account.</p>
 
     <form
-      class="grid grid-cols-2 gap-5"
+      class="sm:grid sm:grid-cols-2 gap-5"
       @submit.prevent="handleRegister"
     >
       <BaseInput

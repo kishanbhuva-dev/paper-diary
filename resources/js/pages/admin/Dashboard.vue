@@ -468,7 +468,6 @@ const dashboardData = async () => {
   loading.value = true;
   try {
     const response = await adminService.adminDashboard();
-    console.log(response.data.data);
     if (response.data.status === true) {
       dashboardDetail.value = response.data.data;
       const bookingData = response?.data?.data?.details?.bookingTotalPerMonth?.data || [];

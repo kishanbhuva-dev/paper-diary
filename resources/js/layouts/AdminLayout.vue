@@ -1,6 +1,12 @@
 <template>
   <section class="h-screen w-full flex bg-gray-50 relative overflow-hidden font-sans">
     <div
+      v-if="sidebarOpen"
+      class="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300"
+      @click="sidebarOpen = false"
+    ></div>
+
+    <div
       class="lg:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-gray-100 fixed top-0 left-0 right-0 z-40 shadow-sm"
     >
       <button @click="sidebarOpen = !sidebarOpen">
@@ -22,10 +28,23 @@
 
     <aside
       :class="[
-        'fixed lg:static top-0 left-0 h-full w-64 z-50 backdrop-blur-xl bg-white/70 shadow-2xl lg:shadow-xl transition-all duration-300',
+        'fixed lg:static top-0 left-0 h-full w-64 z-50 bg-white shadow-2xl lg:shadow-xl transition-all duration-300',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       ]"
     >
+      <div class="lg:hidden absolute top-4 right-4">
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full"
+          @click="sidebarOpen = false"
+        >
+          <Icon
+            icon="material-symbols:close-rounded"
+            width="24"
+            class="text-gray-500"
+          />
+        </button>
+      </div>
+
       <div class="flex items-center justify-center py-6 border-b border-gray-100">
         <a href="/admin">
           <img
@@ -272,11 +291,7 @@ const sidebarOpen = ref(false);
 const settingsOpen = ref(false);
 const propertyOpen = ref(false);
 
-const menuItems = [
-  { label: 'Dashboard', to: '/admin', icon: 'heroicons:home-modern' },
-  // { label: "Analytics", to: "/admin/analytics", icon: "heroicons:chart-bar" },
-  // { label: "Reports", to: "/admin/reports", icon: "heroicons:document-chart-bar"},
-];
+const menuItems = [{ label: 'Dashboard', to: '/admin', icon: 'heroicons:home-modern' }];
 
 const propertyMenu = [
   {
@@ -302,17 +317,16 @@ const systemMenuItems = [
   {
     label: 'Profile',
     icon: 'mdi:account-circle-outline',
-    to: '/admin/profile', // Adjusting path to match your manageMenu original path
+    to: '/admin/profile',
   },
   {
     label: 'Change Password',
     icon: 'mdi:lock-outline',
-    to: '/admin/change-password', // Change this to your actual admin password route
+    to: '/admin/change-password',
   },
 ];
 
 const isSystemRouteActive = computed(() => systemMenuItems.some((item) => item.to === route.path));
-
 const isPropertyMenuActive = computed(() => propertyMenu.some((item) => item.to === route.path));
 
 onMounted(() => {

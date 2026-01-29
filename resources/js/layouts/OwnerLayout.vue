@@ -1,6 +1,12 @@
 <template>
   <section class="h-screen w-full flex bg-gray-50 relative overflow-hidden font-sans">
     <div
+      v-if="sidebarOpen"
+      class="fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300"
+      @click="sidebarOpen = false"
+    ></div>
+
+    <div
       class="lg:hidden flex items-center justify-between bg-white px-4 py-3 border-b border-gray-100 fixed top-0 left-0 right-0 z-40 shadow-sm"
     >
       <button @click="sidebarOpen = !sidebarOpen">
@@ -22,10 +28,23 @@
 
     <aside
       :class="[
-        'fixed lg:static top-0 left-0 h-full w-64 z-50 backdrop-blur-xl bg-white/70 shadow-2xl lg:shadow-xl transition-all duration-300',
+        'fixed lg:static top-0 left-0 h-full w-64 z-50  bg-white shadow-2xl lg:shadow-xl transition-all duration-300',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       ]"
     >
+      <div class="lg:hidden absolute top-4 right-4">
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          @click="sidebarOpen = false"
+        >
+          <Icon
+            icon="material-symbols:close-rounded"
+            width="24"
+            class="text-gray-500"
+          />
+        </button>
+      </div>
+
       <div class="flex items-center justify-center py-6 border-b border-gray-100">
         <a href="/">
           <img
@@ -109,39 +128,6 @@
             />
           </button>
 
-          <!-- <div v-show="settingsOpen" class="pl-12 space-y-1 mt-1">
-            <router-link
-              v-for="subItem in group.children"
-              :key="subItem.name"
-              :to="subItem.to"
-              class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
-              :class="{
-                'bg-blue-600 text-white shadow-sm shadow-blue-500/50':
-                  $route.name === subItem.name,
-                'text-gray-700 hover:bg-blue-50': $route.name !== subItem.name,
-              }"
-              @click="closeOnMobile"
-            >
-              <Icon
-                :icon="subItem.icon"
-                width="16"
-                :class="
-                  $route.name === subItem.name ? 'text-white' : 'text-blue-600'
-                "
-              />
-              {{ subItem.label }}
-            </router-link>
-
-            <button
-                v-if="showBackButton"
-                @click="backToAdmin"
-                class="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-xl transition-all duration-200"
-            >
-                <Icon icon="lucide:step-back" class="w-4 h-4 mr-3 text-blue-600" />
-                Back To Admin
-            </button>
-          </div> -->
-
           <div
             v-show="settingsOpen"
             class="pl-12 space-y-1 mt-1"
@@ -157,7 +143,7 @@
                 'bg-blue-600 text-white shadow-sm shadow-blue-500/50': $route.name === subItem.name,
                 'text-gray-700 hover:bg-blue-50': $route.name !== subItem.name,
               }"
-              @click="subItem.onClick && subItem.onClick()"
+              @click="subItem.onClick ? subItem.onClick() : closeOnMobile()"
             >
               <Icon
                 :icon="subItem.icon"

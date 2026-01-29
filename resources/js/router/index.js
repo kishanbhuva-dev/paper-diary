@@ -40,7 +40,7 @@ router.beforeEach((to, from, next) => {
   }
 
   // Redirect authenticated admin/owner users from guest pages to their dashboards
-  if (isAuthenticated.value && (path === '/' || path.startsWith('/property'))) {
+  if (isAuthenticated.value && path === '/') {
     if (isAdmin.value) {
       return next({ name: 'admin-dashboard' });
     }
