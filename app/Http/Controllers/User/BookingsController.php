@@ -161,7 +161,7 @@ class BookingsController extends Controller
                 'data'    => [],
             ]);
         }
-        $stripe = new StripeClient(config('services.stripe.secret'));
+        $stripe = new StripeClient($ownerStripeSecret);
         $booking = Bookings::where('bookingOrderId', $request->bookingId)->get();
         $paymentIntentId = $request->payment_intent_id;
         $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId);

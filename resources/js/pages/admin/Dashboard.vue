@@ -354,8 +354,18 @@
         class="bg-white rounded-3xl border border-slate-200 px-2 py-6 sm:px-8 sm:py-8 shadow-sm"
       >
         <!-- <h3 class="text-base sm:text-lg font-bold text-slate-800 mb-8">Total Booking Per Month</h3> -->
-        <div class="w-full min-h-[300px]">
-          <TotalBookingPerMonthChart :chart-data="totalBookingPerMonthChartData" />
+        <div class="w-full min-h-75">
+          <TotalBookingPerMonthChart
+            v-if="!loading && totalBookingPerMonthChartData.length"
+            :key="chartKey"
+            :chart-data="totalBookingPerMonthChartData"
+          />
+          <div
+            v-else
+            class="h-full w-full flex items-center justify-center min-h-75"
+          >
+            <span class="text-sm font-bold text-slate-400 animate-pulse">Loading Chart...</span>
+          </div>
         </div>
       </section>
     </main>
@@ -377,6 +387,12 @@ const loading = ref(true);
 const router = useRouter();
 
 // --- COMPUTED LOGIC ---
+const chartKey = computed(
+  () =>
+    // Whenever the length of data changes or the first item changes,
+    // this key updates, forcing Vue to re-mount the component entirely.
+    `booking-chart-${totalBookingPerMonthChartData.value.length || 0}`
+);
 const revenueBreakdown = computed(() => [
   { label: 'Today', value: formatCurrency(dashboardDetail.value?.details?.revenue?.today) },
   { label: 'This Week', value: formatCurrency(dashboardDetail.value?.details?.revenue?.thisWeek) },

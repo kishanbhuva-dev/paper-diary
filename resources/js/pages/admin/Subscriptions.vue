@@ -1,75 +1,34 @@
 <template>
   <main class="bg-[#f8fafc] min-h-screen font-sans antialiased text-slate-900">
     <div class="p-4">
-      <!-- Header Section -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2">Owner Subscriptions</h1>
         <p class="text-slate-500">Manage and monitor all owner subscriptions</p>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div class="flex flex-wrap gap-6 mb-8">
+        <div
+          v-for="(stat, index) in statsCards"
+          :key="index"
+          class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex-1 min-w-65"
+        >
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-slate-600">Total Owners</p>
-              <p class="text-2xl font-bold text-slate-900">{{ stats.totalOwners }}</p>
+              <p class="text-sm font-medium text-slate-600">{{ stat.label }}</p>
+              <p :class="['text-2xl font-bold', stat.valueClass]">
+                {{ stat.prefix }}{{ stat.value }}
+              </p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div :class="['w-12 h-12 rounded-lg flex items-center justify-center', stat.bgClass]">
               <Icon
-                icon="heroicons:user-group-20-solid"
-                class="w-6 h-6 text-blue-600"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-slate-600">Active Subscriptions</p>
-              <p class="text-2xl font-bold text-emerald-600">{{ stats.activeSubscriptions }}</p>
-            </div>
-            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <Icon
-                icon="heroicons:check-circle-20-solid"
-                class="w-6 h-6 text-emerald-600"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-slate-600">Canceled Subscriptions</p>
-              <p class="text-2xl font-bold text-rose-600">{{ stats.canceledSubscriptions }}</p>
-            </div>
-            <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center">
-              <Icon
-                icon="heroicons:x-circle-20-solid"
-                class="w-6 h-6 text-rose-600"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-slate-600">Total Revenue</p>
-              <p class="text-2xl font-bold text-slate-900">£{{ stats.totalRevenue }}</p>
-            </div>
-            <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-              <Icon
-                icon="heroicons:currency-dollar-20-solid"
-                class="w-6 h-6 text-amber-600"
+                :icon="stat.icon"
+                :class="['w-6 h-6', stat.iconClass]"
               />
             </div>
           </div>
         </div>
       </div>
-      <!-- Owner Subscriptions History -->
+
       <div
         v-if="subscriptions.length > 0"
         class="mt-12"
@@ -82,7 +41,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full">
-              <thead class="bg-slate-50 border-b border-slate-200">
+              <thead class="bg-slate-5 border-b border-slate-200">
                 <tr>
                   <th
                     class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
@@ -226,7 +185,6 @@
       </div>
     </div>
 
-    <!-- Subscription Details Modal -->
     <div
       v-if="showDetailsModal && selectedSubscription"
       class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
@@ -247,7 +205,6 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Owner Information -->
             <div class="bg-slate-50 rounded-xl p-6">
               <h4 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Icon
@@ -276,7 +233,6 @@
               </div>
             </div>
 
-            <!-- Plan Information -->
             <div class="bg-blue-50 rounded-xl p-6">
               <h4 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Icon
@@ -370,7 +326,7 @@ const currentPage = ref(1);
 const currentSearch = ref('');
 const total = ref(0);
 
-// Stats
+// Raw Stats Calculation
 const stats = computed(() => {
   const active = subscriptions.value.filter((sub) => sub.status === 'active').length;
   const canceled = subscriptions.value.filter((sub) => sub.status === 'canceled').length;
@@ -385,6 +341,46 @@ const stats = computed(() => {
     totalRevenue: revenue.toFixed(2),
   };
 });
+
+// Dynamic Stats Cards Array
+const statsCards = computed(() => [
+  {
+    label: 'Total Owners',
+    value: stats.value.totalOwners,
+    valueClass: 'text-slate-900',
+    icon: 'heroicons:user-group-20-solid',
+    iconClass: 'text-blue-600',
+    bgClass: 'bg-blue-100',
+    prefix: '',
+  },
+  {
+    label: 'Active Subscriptions',
+    value: stats.value.activeSubscriptions,
+    valueClass: 'text-emerald-600',
+    icon: 'heroicons:check-circle-20-solid',
+    iconClass: 'text-emerald-600',
+    bgClass: 'bg-emerald-100',
+    prefix: '',
+  },
+  {
+    label: 'Canceled Subscriptions',
+    value: stats.value.canceledSubscriptions,
+    valueClass: 'text-rose-600',
+    icon: 'heroicons:x-circle-20-solid',
+    iconClass: 'text-rose-600',
+    bgClass: 'bg-rose-100',
+    prefix: '',
+  },
+  {
+    label: 'Total Revenue',
+    value: stats.value.totalRevenue,
+    valueClass: 'text-slate-900',
+    icon: 'heroicons:currency-dollar-20-solid',
+    iconClass: 'text-amber-600',
+    bgClass: 'bg-amber-100',
+    prefix: '£',
+  },
+]);
 
 const fetchSubscriptions = async () => {
   try {

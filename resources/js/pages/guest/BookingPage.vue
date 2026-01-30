@@ -1,64 +1,80 @@
 <template>
-  <main class="container mx-auto py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
+  <main
+    class="container mx-auto py-6 sm:py-8 md:py-10 lg:py-12 px-2 sm:px-4 md:px-6 lg:px-8 bg-gray-50 min-h-screen"
+  >
     <div
       v-if="isProcessingFinal"
       class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/90 backdrop-blur-md"
     >
       <Icon
         icon="svg-spinners:ring-resize"
-        class="text-7xl text-primary"
+        class="text-5xl sm:text-6xl lg:text-7xl text-primary"
       />
-      <h2 class="mt-6 text-2xl font-black text-gray-900 font-oswald uppercase tracking-widest">
+      <h2
+        class="mt-4 sm:mt-6 text-lg sm:text-xl md:text-2xl font-black text-gray-900 font-oswald uppercase tracking-widest px-2"
+      >
         Processing Payment
       </h2>
-      <p class="mt-2 text-gray-500 font-medium">Please do not refresh the page...</p>
+      <p class="mt-2 text-sm sm:text-base text-gray-500 font-medium px-2 text-center">
+        Please do not refresh the page...
+      </p>
     </div>
 
     <div
       v-if="loadingInitial"
-      class="flex flex-col items-center justify-center py-32"
+      class="flex flex-col items-center justify-center py-16 sm:py-24 md:py-32"
     >
       <Icon
         icon="svg-spinners:90-ring-with-bg"
-        class="text-6xl text-primary"
+        class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary"
       />
-      <p class="mt-4 text-gray-500 font-medium animate-pulse">Syncing availability...</p>
+      <p class="mt-3 sm:mt-4 text-sm sm:text-base text-gray-500 font-medium animate-pulse">
+        Syncing availability...
+      </p>
     </div>
 
     <div
       v-else
       class="max-w-7xl mx-auto"
     >
-      <div class="flex items-center gap-3 mb-8">
+      <div class="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
         <button
-          class="p-2 hover:bg-gray-200 rounded-full transition-colors"
+          class="p-1.5 sm:p-2 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0"
           @click="showPaymentArea ? handleDeleteBooking() : router.back()"
         >
           <Icon
             icon="mdi:arrow-left"
-            class="text-2xl"
+            class="text-lg sm:text-2xl"
           />
         </button>
-        <h2 class="text-3xl font-black tracking-tight text-gray-900 uppercase font-oswald">
+        <h2
+          class="text-lg sm:text-2xl md:text-3xl font-black tracking-tight text-gray-900 uppercase font-oswald"
+        >
           {{ showPaymentArea ? 'Complete Payment' : 'Confirm Booking' }}
         </h2>
       </div>
 
-      <div class="grid gap-10 lg:grid-cols-3">
-        <div class="space-y-8 lg:col-span-2">
+      <div class="grid gap-6 sm:gap-8 lg:gap-10 lg:grid-cols-3">
+        <div class="space-y-6 sm:space-y-8 lg:col-span-2">
           <template v-if="!showPaymentArea">
             <section
               ref="stayDetailsSection"
-              class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm"
+              class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 md:p-8 shadow-sm"
             >
-              <div class="mb-8 flex items-center justify-between border-b border-gray-100 pb-6">
+              <div
+                class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 sm:pb-6 gap-4 sm:gap-0"
+              >
                 <div>
-                  <h3 class="text-xl font-bold text-gray-800">1. Stay Details</h3>
-                  <p class="text-sm text-gray-500">Review or modify your booking period</p>
+                  <h3 class="text-base sm:text-lg md:text-xl font-bold text-gray-800">
+                    1. Stay Details
+                  </h3>
+                  <p class="text-xs sm:text-sm text-gray-500">
+                    Review or modify your booking period
+                  </p>
                 </div>
                 <button
                   type="button"
-                  class="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold transition-all shadow-sm active:scale-95"
+                  class="flex items-center gap-2 rounded-xl px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition-all shadow-sm active:scale-95 w-full sm:w-auto justify-center sm:justify-start"
                   :class="
                     isEditing
                       ? 'bg-green-600 text-white hover:bg-green-700'
@@ -71,21 +87,23 @@
                 </button>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                <div class="relative p-3 sm:p-5 rounded-2xl bg-gray-50 border border-gray-100">
                   <span
-                    class="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2"
+                    class="text-[9px] sm:text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2"
                     >Check-In</span
                   >
                   <div
                     v-if="!isEditing"
-                    class="flex items-center gap-3 text-gray-800"
+                    class="flex items-center gap-2 sm:gap-3 text-gray-800"
                   >
                     <Icon
                       icon="mdi:calendar-import"
-                      class="text-primary text-xl"
+                      class="text-primary text-lg sm:text-xl flex-shrink-0"
                     />
-                    <span class="font-bold">{{ formatDateDisplay(bookingDates.checkIn) }}</span>
+                    <span class="font-bold text-xs sm:text-sm">{{
+                      formatDateDisplay(bookingDates.checkIn)
+                    }}</span>
                   </div>
                   <BaseDatePicker
                     v-else
@@ -93,20 +111,22 @@
                   />
                 </div>
 
-                <div class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100">
+                <div class="relative p-3 sm:p-5 rounded-2xl bg-gray-50 border border-gray-100">
                   <span
-                    class="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2"
+                    class="text-[9px] sm:text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2"
                     >Check-Out</span
                   >
                   <div
                     v-if="!isEditing"
-                    class="flex items-center gap-3 text-gray-800"
+                    class="flex items-center gap-2 sm:gap-3 text-gray-800"
                   >
                     <Icon
                       icon="mdi:calendar-export"
-                      class="text-primary text-xl"
+                      class="text-primary text-lg sm:text-xl flex-shrink-0"
                     />
-                    <span class="font-bold">{{ formatDateDisplay(bookingDates.checkOut) }}</span>
+                    <span class="font-bold text-xs sm:text-sm">{{
+                      formatDateDisplay(bookingDates.checkOut)
+                    }}</span>
                   </div>
                   <BaseDatePicker
                     v-else
@@ -116,26 +136,28 @@
 
                 <div
                   v-if="isDateValid"
-                  class="relative p-5 rounded-2xl bg-gray-50 border border-gray-100 md:col-span-1"
+                  class="relative p-3 sm:p-5 rounded-2xl bg-gray-50 border border-gray-100 sm:col-span-1"
                 >
                   <span
-                    class="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2"
+                    class="text-[9px] sm:text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2"
                     >Resource Type</span
                   >
                   <div
                     v-if="!isEditing"
-                    class="flex items-center gap-3 text-gray-800"
+                    class="flex items-center gap-2 sm:gap-3 text-gray-800"
                   >
                     <Icon
                       icon="hugeicons:villa"
-                      class="text-primary text-xl"
+                      class="text-primary text-lg sm:text-xl flex-shrink-0"
                     />
-                    <span class="font-bold truncate">{{ bookingInfo?.resourcetype?.name }}</span>
+                    <span class="font-bold text-xs sm:text-sm truncate">{{
+                      bookingInfo?.resourcetype?.name
+                    }}</span>
                   </div>
                   <select
                     v-else
                     v-model="selectedResourceId"
-                    class="w-full bg-white border border-gray-300 rounded-lg p-2 text-sm font-bold outline-none"
+                    class="w-full bg-white border border-gray-300 rounded-lg p-2 text-xs sm:text-sm font-bold outline-none"
                   >
                     <option
                       v-for="res in availableResources"
@@ -148,103 +170,123 @@
                 </div>
                 <div
                   v-else
-                  class="relative p-5 rounded-2xl bg-red-50 border border-red-100 md:col-span-1 flex items-center justify-center"
+                  class="relative p-3 sm:p-5 rounded-2xl bg-red-50 border border-red-100 sm:col-span-1 flex items-center justify-center"
                 >
-                  <span class="text-xs font-bold text-red-600">Select valid future dates</span>
+                  <span class="text-xs sm:text-sm font-bold text-red-600"
+                    >Select valid future dates</span
+                  >
                 </div>
               </div>
             </section>
 
             <section
-              class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm relative overflow-hidden"
+              class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 md:p-8 shadow-sm relative overflow-hidden"
             >
-              <h3 class="mb-8 text-xl font-bold text-gray-800 border-b border-gray-100 pb-6">
+              <h3
+                class="mb-6 sm:mb-8 text-base sm:text-lg md:text-xl font-bold text-gray-800 border-b border-gray-100 pb-4 sm:pb-6"
+              >
                 2. Guest Information
               </h3>
 
               <form
-                class="space-y-8"
+                class="space-y-6 sm:space-y-8"
                 @submit.prevent="initiateBooking"
               >
-                <div class="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-                  <div
-                    v-for="(field, key) in formSchema"
-                    :key="key"
-                    class="space-y-1.5"
-                  >
-                    <label class="block text-sm font-bold text-gray-700"
-                      >{{ field.label }} <span class="text-red-500">*</span></label
-                    >
-                    <input
-                      v-model="guestDetails[key]"
-                      :type="field.type"
-                      class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none placeholder:text-gray-400"
-                      :placeholder="field.placeholder"
-                      :class="{ 'border-red-500 bg-red-50': errors[key] }"
-                    />
-                    <p
-                      v-if="errors[key]"
-                      class="text-[11px] font-bold text-red-500"
-                    >
-                      {{ errors[key] }}
-                    </p>
-                  </div>
+                <div class="grid gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-4 sm:gap-y-6 sm:grid-cols-2">
+                  <BaseInput
+                    ref="input_fullName"
+                    v-model="guestDetails.fullName"
+                    label="Full Name"
+                    width="full"
+                    required
+                    placeholder="e.g. John Doe"
+                  />
+                  <BaseInput
+                    ref="input_email"
+                    v-model="guestDetails.email"
+                    label="Email Address"
+                    type="email"
+                    width="full"
+                    required
+                    placeholder="user@example.com"
+                  />
+                  <BaseInput
+                    ref="input_contactNo"
+                    v-model="guestDetails.contactNo"
+                    label="Contact Number"
+                    width="full"
+                    required
+                    restrict="phone"
+                    placeholder="+44 ..."
+                  />
+                  <BaseInput
+                    ref="input_contactAddress"
+                    v-model="guestDetails.contactAddress"
+                    label="Home Address"
+                    width="full"
+                    required
+                    placeholder="Street, City, Postcode"
+                  />
 
                   <div class="sm:col-span-2 space-y-1.5">
-                    <label class="block text-sm font-bold text-gray-700"
+                    <label class="block text-xs sm:text-sm font-bold text-gray-700"
                       >Additional Information / Requests</label
                     >
                     <textarea
                       v-model="guestDetails.additionalInfo"
                       rows="3"
-                      class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none resize-none"
+                      class="w-full rounded-xl border border-gray-300 bg-white px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none resize-none"
                       placeholder="e.g. Early check-in requests..."
                     ></textarea>
                   </div>
 
-                  <div class="flex gap-12 items-center sm:col-span-2 pt-4">
-                    <div class="space-y-3">
-                      <label class="block text-sm font-bold text-gray-700">Adults</label>
+                  <div
+                    class="flex flex-row gap-6 sm:gap-8 md:gap-12 items-start sm:items-center sm:col-span-2 pt-2 sm:pt-4"
+                  >
+                    <div class="space-y-2 sm:space-y-3">
+                      <label class="block text-xs sm:text-sm font-bold text-gray-700">Adults</label>
                       <div
-                        class="inline-flex items-center gap-4 rounded-xl border border-gray-200 p-1.5 bg-gray-50"
+                        class="inline-flex items-center gap-2 sm:gap-4 rounded-xl border border-gray-200 p-1 sm:p-1.5 bg-gray-50"
                       >
                         <button
                           type="button"
-                          class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all"
+                          class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all text-sm sm:text-base"
                           @click="updateGuests('adults', -1)"
                         >
                           <Icon icon="mdi:minus" />
                         </button>
-                        <span class="w-6 text-center font-bold text-lg">{{
+                        <span class="w-5 sm:w-6 text-center font-bold text-base sm:text-lg">{{
                           guestDetails.adults
                         }}</span>
                         <button
                           type="button"
-                          class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all"
+                          class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all text-sm sm:text-base"
                           @click="updateGuests('adults', 1)"
                         >
                           <Icon icon="mdi:plus" />
                         </button>
                       </div>
                     </div>
-                    <div class="space-y-3">
-                      <label class="block text-sm font-bold text-gray-700">Children</label>
+                    <div class="space-y-2 sm:space-y-3">
+                      <label class="block text-xs sm:text-sm font-bold text-gray-700"
+                        >Children</label
+                      >
                       <div
-                        class="inline-flex items-center gap-4 rounded-xl border border-gray-200 p-1.5 bg-gray-50"
+                        class="inline-flex items-center gap-2 sm:gap-4 rounded-xl border border-gray-200 p-1 sm:p-1.5 bg-gray-50"
                       >
                         <button
                           type="button"
-                          class="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all"
+                          class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-primary transition-all text-sm sm:text-base"
                           @click="updateGuests('children', -1)"
                         >
                           <Icon icon="mdi:minus" />
                         </button>
-                        <span class="w-6 text-center font-bold text-lg">{{
+                        <span class="w-5 sm:w-6 text-center font-bold text-base sm:text-lg">{{
                           guestDetails.children
                         }}</span>
                         <button
                           type="button"
-                          class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all"
+                          class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-blue-700 transition-all text-sm sm:text-base"
                           @click="updateGuests('children', 1)"
                         >
                           <Icon icon="mdi:plus" />
@@ -254,18 +296,18 @@
                   </div>
                 </div>
 
-                <div class="pt-6 border-t border-gray-100">
-                  <div class="flex items-center gap-3 mb-8">
+                <div class="pt-4 sm:pt-6 border-t border-gray-100">
+                  <div class="flex flex-row sm:items-center gap-3 mb-6 sm:mb-8">
                     <input
                       id="agreement"
                       v-model="isAgreed"
                       type="checkbox"
-                      class="h-6 w-6 rounded-lg border-gray-300 text-primary cursor-pointer transition-all focus:ring-primary"
+                      class="h-5 w-5 sm:h-6 sm:w-6 rounded-lg border-gray-300 text-primary cursor-pointer transition-all focus:ring-primary flex-shrink-0"
                       required
                     />
                     <label
                       for="agreement"
-                      class="text-sm text-gray-600 font-medium cursor-pointer"
+                      class="text-xs sm:text-sm text-gray-600 font-medium cursor-pointer"
                       >I agree to the
                       <span class="text-primary underline font-bold"
                         >Booking Terms & Cancellation Policy</span
@@ -273,21 +315,22 @@
                     >
                   </div>
 
-                  <div class="flex flex-col sm:flex-row gap-4">
+                  <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <button
                       type="submit"
                       :disabled="isSubmitting || isEditing || !isAgreed || !isDateValid"
-                      class="flex-[2] rounded-2xl bg-primary py-5 px-8 text-lg font-black text-white shadow-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all uppercase tracking-widest font-oswald flex items-center justify-center gap-4"
+                      class="flex-1 sm:flex-[2] rounded-xl sm:rounded-2xl bg-primary py-3 sm:py-5 px-4 sm:px-8 text-sm sm:text-lg font-black text-white shadow-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all uppercase tracking-widest font-oswald flex items-center justify-center gap-2 sm:gap-4"
                     >
                       <Icon
                         v-if="isSubmitting"
                         icon="svg-spinners:ring-resize"
+                        class="text-lg sm:text-xl"
                       />
                       <span>Confirm & Proceed to Payment</span>
                     </button>
                     <button
                       type="button"
-                      class="flex-1 rounded-2xl border-2 border-gray-200 bg-white py-5 px-8 text-sm font-black text-gray-400 hover:bg-gray-50 transition-all uppercase tracking-widest font-oswald"
+                      class="flex-1 rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-white py-3 sm:py-5 px-4 sm:px-8 text-xs sm:text-sm font-black text-gray-400 hover:bg-gray-50 transition-all uppercase tracking-widest font-oswald"
                       @click="cancelAndExit"
                     >
                       Cancel
@@ -303,43 +346,51 @@
             class="animate-in slide-in-from-bottom duration-500"
           >
             <section
-              class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm relative overflow-hidden"
+              class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 md:p-8 shadow-sm relative overflow-hidden"
             >
-              <div class="flex items-center gap-3 mb-8 border-b border-gray-100 pb-6">
+              <div
+                class="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 border-b border-gray-100 pb-4 sm:pb-6"
+              >
                 <div
-                  class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold"
+                  class="bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm"
                 >
                   3
                 </div>
-                <h3 class="text-xl font-black text-gray-900 font-oswald uppercase tracking-widest">
+                <h3
+                  class="text-base sm:text-lg md:text-xl font-black text-gray-900 font-oswald uppercase tracking-widest"
+                >
                   Payment Details
                 </h3>
               </div>
 
-              <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6">
-                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3"
+              <div
+                class="sm:bg-gray-50 sm:border-2 sm:border-gray-200 sm:rounded-2xl p-0 sm:p-4 md:p-6"
+              >
+                <label
+                  class="block text-[9px] sm:text-xs font-black text-gray-400 uppercase tracking-widest mb-2 sm:mb-3"
                   >Secure Payment</label
                 >
                 <div
-                  class="bg-white border border-gray-300 rounded-xl p-4 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+                  class="bg-white sm:border sm:border-gray-300 rounded-xl p-0 sm:p-4 sm:shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all"
                 >
                   <div id="payment-element"></div>
                 </div>
                 <p
                   id="card-errors"
-                  class="mt-3 text-xs font-bold text-red-500"
+                  class="mt-2 sm:mt-3 text-xs font-bold text-red-500"
                   role="alert"
                 ></p>
 
-                <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <button
                     :disabled="isProcessingFinal"
-                    class="flex-[2] rounded-xl bg-green-600 py-5 px-8 text-lg font-black text-white shadow-lg hover:bg-green-700 disabled:bg-gray-300 transition-all uppercase tracking-widest font-oswald flex items-center justify-center gap-3"
+                    class="flex-1 sm:flex-[2] rounded-xl sm:rounded-2xl bg-green-600 py-3 sm:py-5 px-4 sm:px-8 text-sm sm:text-lg font-black text-white shadow-lg hover:bg-green-700 disabled:bg-gray-300 transition-all uppercase tracking-widest font-oswald flex items-center justify-center gap-2 sm:gap-3"
                     @click="processFinalPayment"
                   >
                     <Icon
                       v-if="isProcessingFinal"
                       icon="svg-spinners:ring-resize"
+                      class="text-base sm:text-lg"
                     />
                     {{
                       isProcessingFinal
@@ -348,19 +399,22 @@
                     }}
                   </button>
                   <button
-                    class="flex-1 text-sm font-bold text-gray-400 hover:text-gray-600"
-                    @click="showPaymentArea = false"
+                    class="flex-1 text-xs sm:text-sm font-bold text-gray-400 hover:text-gray-600 py-2 sm:py-0"
+                    @click="handleDeleteBooking()"
                   >
                     Go Back
                   </button>
                 </div>
 
-                <div class="mt-6 flex items-center justify-center gap-4 opacity-50">
+                <div
+                  class="mt-4 sm:mt-6 flex items-center justify-center gap-2 sm:gap-4 opacity-50"
+                >
                   <Icon
                     icon="logos:stripe"
-                    class="h-6"
+                    class="h-4 sm:h-6"
                   />
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500"
+                  <span
+                    class="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-gray-500"
                     >Secure 256-bit SSL Encrypted</span
                   >
                 </div>
@@ -369,60 +423,67 @@
           </div>
         </div>
 
-        <aside class="lg:col-span-1">
+        <aside class="lg:col-span-1 mt-8 lg:mt-0">
           <div
-            class="sticky top-8 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl"
+            class="sticky top-4 sm:top-6 lg:top-8 overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-200 bg-white shadow-2xl"
           >
-            <div class="relative h-64 overflow-hidden">
+            <div class="relative h-40 sm:h-48 md:h-56 lg:h-64 overflow-hidden">
               <img
                 :src="bookingInfo?.property?.image || '/hotel-1.jpg'"
                 class="h-full w-full object-cover"
               />
               <div
-                class="absolute inset-0 bg-gradient-to-t from-black via-transparent p-8 flex flex-col justify-end"
+                class="absolute inset-0 bg-gradient-to-t from-black via-transparent p-4 sm:p-6 md:p-8 flex flex-col justify-end"
               >
-                <h4 class="text-2xl font-black text-white font-oswald tracking-wide mb-2">
+                <h4
+                  class="text-lg sm:text-2xl font-black text-white font-oswald tracking-wide mb-1 sm:mb-2 line-clamp-2"
+                >
                   {{ bookingInfo?.property?.name }}
                 </h4>
                 <div
-                  class="flex items-center text-xs text-gray-300 font-bold uppercase tracking-tighter"
+                  class="flex items-center text-xs sm:text-sm text-gray-300 font-bold uppercase tracking-tighter"
                 >
                   <Icon
                     icon="mdi:map-marker"
-                    class="mr-1 text-primary"
+                    class="mr-1 text-primary text-sm sm:text-base"
                   />
-                  {{ bookingInfo?.property?.address }}
+                  <span class="line-clamp-1">{{ bookingInfo?.property?.address }}</span>
                 </div>
               </div>
             </div>
 
-            <div class="p-8">
+            <div class="p-3 sm:p-4 md:p-6 lg:p-8">
               <h5
-                class="mb-6 text-[11px] font-black uppercase text-gray-400 tracking-[0.2em] border-b border-gray-100 pb-2"
+                class="mb-4 sm:mb-6 text-[9px] sm:text-[11px] font-black uppercase text-gray-400 tracking-[0.15em] sm:tracking-[0.2em] border-b border-gray-100 pb-2 sm:pb-3"
               >
                 Order Breakdown
               </h5>
-              <div class="space-y-5">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <span class="text-sm font-black text-gray-900 block">{{
+              <div class="space-y-3 sm:space-y-5">
+                <div class="flex justify-between items-start gap-3">
+                  <div class="flex-1">
+                    <span class="text-xs sm:text-sm font-black text-gray-900 block">{{
                       bookingInfo?.resourcetype?.name
                     }}</span>
-                    <p class="text-[11px] font-bold text-gray-500 mt-1 uppercase tracking-wide">
+                    <p
+                      class="text-[9px] sm:text-[11px] font-bold text-gray-500 mt-1 uppercase tracking-wide"
+                    >
                       £{{ bookingInfo?.resourcetype?.price }} / night × {{ totalNights }} nights
                     </p>
                   </div>
-                  <span class="font-black text-gray-900"
+                  <span class="font-black text-gray-900 text-sm sm:text-base whitespace-nowrap"
                     >£{{ (bookingInfo?.resourcetype?.price * totalNights).toLocaleString() }}</span
                   >
                 </div>
 
-                <div class="flex justify-between items-center border-t-2 border-gray-900 pt-6">
+                <div
+                  class="flex justify-between items-center border-t-2 border-gray-900 pt-4 sm:pt-6 gap-3"
+                >
                   <span
-                    class="text-lg font-black text-gray-900 font-oswald uppercase tracking-widest"
+                    class="text-base sm:text-lg md:text-2xl lg:text-4xl font-black text-gray-900 font-oswald uppercase tracking-widest"
                     >Total</span
                   >
-                  <span class="text-4xl font-black text-primary font-oswald tracking-tighter"
+                  <span
+                    class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-black text-primary font-oswald tracking-tighter"
                     >£{{ totalPrice.toLocaleString() }}</span
                   >
                 </div>
@@ -443,19 +504,13 @@ import { loadStripe } from '@stripe/stripe-js';
 import { userService } from '../../services/userService';
 import { useAuth } from '../../composables/useAuth';
 import BaseDatePicker from '../../components/global/BaseDatePicker.vue';
+import BaseInput from '../../components/global/BaseInput.vue';
 import dayjs from 'dayjs';
 import { toast } from 'vue-sonner';
 
 const router = useRouter();
 const route = useRoute();
 const { user } = useAuth();
-
-const formSchema = {
-  fullName: { label: 'Full Name', placeholder: 'e.g. John Doe', type: 'text' },
-  email: { label: 'Email Address', placeholder: 'user@example.com', type: 'email' },
-  contactNo: { label: 'Contact Number', placeholder: '+44 ...', type: 'text' },
-  contactAddress: { label: 'Home Address', placeholder: 'Street, City, Postcode', type: 'text' },
-};
 
 // --- State ---
 const loadingInitial = ref(true);
@@ -464,7 +519,12 @@ const isProcessingFinal = ref(false);
 const showPaymentArea = ref(false);
 const isEditing = ref(false);
 const isAgreed = ref(false);
-const errors = ref({});
+
+// Input Refs for Validation
+const input_fullName = ref(null);
+const input_email = ref(null);
+const input_contactNo = ref(null);
+const input_contactAddress = ref(null);
 
 const availableResources = ref([]);
 const selectedResourceId = ref(null);
@@ -489,6 +549,7 @@ const paymentElement = ref(null);
 const clientSecret = ref(null);
 const publishableKey = ref(null);
 const pendingBookingId = ref(null);
+const paymentHistoryPushed = ref(false);
 
 // --- New Requirements Logic ---
 
@@ -531,6 +592,22 @@ const handleDeleteBooking = async () => {
     toast.error(err.message || 'Error deleting booking.');
   } finally {
     isProcessingFinal.value = false;
+  }
+};
+
+// Handle browser / hardware back when in payment flow
+const handlePopState = async () => {
+  if (showPaymentArea.value) {
+    try {
+      if (pendingBookingId.value) {
+        await handleDeleteBooking();
+      } else {
+        router.back();
+      }
+    } catch (err) {
+      console.error('Error handling popstate during payment flow:', err);
+      router.back();
+    }
   }
 };
 
@@ -619,6 +696,7 @@ const handleEditToggle = async () => {
 
 onMounted(async () => {
   window.addEventListener('click', handleOutsideClick);
+  window.addEventListener('popstate', handlePopState);
   const storedUser = JSON.parse(localStorage.getItem('user'));
   if (storedUser) {
     guestDetails.value.fullName =
@@ -642,18 +720,42 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('click', handleOutsideClick);
+  window.removeEventListener('popstate', handlePopState);
 });
 
 const validateForm = () => {
-  errors.value = {};
-  let valid = true;
-  Object.keys(formSchema).forEach((key) => {
-    if (!guestDetails.value[key]) {
-      errors.value[key] = `${formSchema[key].label} is required`;
-      valid = false;
+  const inputsToValidate = [
+    input_fullName.value,
+    input_email.value,
+    input_contactNo.value,
+    input_contactAddress.value,
+  ];
+
+  let firstInvalidInput = null;
+  const isFormValid = inputsToValidate
+    .filter((input) => input !== null)
+    .every((input) => {
+      if (!input.validate()) {
+        if (!firstInvalidInput) {
+          firstInvalidInput = input;
+        }
+        return false;
+      }
+      return true;
+    });
+
+  if (!isFormValid) {
+    // Scroll to and focus the first invalid input with smooth animation
+    if (firstInvalidInput) {
+      setTimeout(() => {
+        firstInvalidInput.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalidInput.focus();
+      }, 150);
     }
-  });
-  return valid;
+    return false;
+  }
+
+  return true;
 };
 
 const initiateBooking = async () => {
@@ -695,6 +797,13 @@ const initiateBooking = async () => {
       stripe.value = await loadStripe(publishableKey.value);
     }
     showPaymentArea.value = true;
+    // push a history entry so hardware/browser back can be detected
+    try {
+      history.pushState({ bookingPayment: true }, '', window.location.href);
+      paymentHistoryPushed.value = true;
+    } catch (e) {
+      console.error('Error pushing history state for payment flow:', e);
+    }
 
     await nextTick();
     if (!elements.value) {

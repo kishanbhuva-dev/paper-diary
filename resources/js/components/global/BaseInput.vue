@@ -239,7 +239,7 @@ const handleInput = (event) => {
   }
 };
 
-const patterns = { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ };
+const patterns = { email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ };
 const errorMessage = ref('');
 const isValid = ref(true);
 

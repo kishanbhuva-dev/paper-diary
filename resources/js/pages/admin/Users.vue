@@ -67,7 +67,7 @@
           type="password"
           autocomplete="new-password"
           width="full"
-          :required="!form.id"
+          required
           :min-length="6"
           icon="lucide:lock"
           placeholder="••••••••"
@@ -268,7 +268,6 @@ const tableColumns = [
   { label: 'City', key: 'city', sortable: true },
   { label: 'Country', key: 'country', sortable: true },
   { label: 'Phone', key: 'phone', sortable: true },
-  { label: 'Role', key: 'role', sortable: true },
 ];
 
 const truncateString = (str, maxLen = 15) => {

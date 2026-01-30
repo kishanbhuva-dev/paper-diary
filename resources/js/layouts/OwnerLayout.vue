@@ -234,10 +234,10 @@ const mainMenuItems = [
     to: { name: 'bookings' },
   },
   {
-    name: 'owner-subcription-view',
-    label: 'Subcription',
+    name: 'owner-subscription-view',
+    label: 'Subscription',
     icon: 'heroicons:credit-card-20-solid',
-    to: { name: 'owner-subcription-view' },
+    to: { name: 'owner-subscription-view' },
   },
 ];
 

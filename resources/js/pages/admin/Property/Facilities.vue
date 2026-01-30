@@ -10,7 +10,7 @@
       show-delete
       show-search
       show-add
-      show-download
+      :show-download="false"
       show-edit
       :admin-login="false"
       :show-view="false"

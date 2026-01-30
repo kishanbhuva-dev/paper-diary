@@ -14,7 +14,7 @@
       show-download
       server-side
       show-search
-      admin-login-title="Login as User"
+      admin-login-title="Login as Owner"
       @search="handleSearch"
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"

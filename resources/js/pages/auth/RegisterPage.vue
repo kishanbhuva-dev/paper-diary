@@ -66,7 +66,6 @@
         v-model="form.password"
         label="Password"
         type="password"
-        autocomplete="new-password"
         width="full"
         required
         :min-length="6"
@@ -78,7 +77,6 @@
         v-model="form.confirm_password"
         label="Confirm Password"
         type="password"
-        autocomplete="new-password"
         width="full"
         required
         :pattern="new RegExp(`^${form.password}$`)"
@@ -137,20 +135,21 @@
         ref="phoneInput"
         v-model="form.phone"
         label="Phone"
-        type="phone"
+        restrict="phone"
         width="full"
         required
         icon="lucide:phone"
-        placeholder="(123) 456-7890"
+        placeholder="123 456 7890"
       />
       <BaseInput
         ref="telephoneInput"
         v-model="form.telephone"
         label="telephone"
-        type="phone"
+        restrict="phone"
         width="full"
+        required
         icon="lucide:phone"
-        placeholder="(123) 456-7890"
+        placeholder="123 456 7890"
       />
 
       <div class="col-span-2 pt-1">
@@ -222,15 +221,28 @@ const handleRegister = async () => {
     countryInput,
     postcodeInput,
     phoneInput,
+    telephoneInput,
   ];
 
   const allValid = inputs.every((input) => input.value.validate());
 
-  if (allValid) {
-    const res = await authService.register(form.value);
-    if (res.status) {
-      router.push({ name: 'login' });
+  if (!allValid) {
+    // Find first invalid input and scroll to it
+    for (const input of inputs) {
+      if (input.value && !input.value.validate()) {
+        setTimeout(() => {
+          input.value.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          input.value.focus();
+        }, 150);
+        break;
+      }
     }
+    return;
+  }
+
+  const res = await authService.register(form.value);
+  if (res.status) {
+    router.push({ name: 'login' });
   }
 };
 </script>

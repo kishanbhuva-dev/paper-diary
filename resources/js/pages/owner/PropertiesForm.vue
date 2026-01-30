@@ -136,6 +136,8 @@
                 v-model="formData.latitude"
                 label="Latitude"
                 required
+                rules="latitude"
+                :pattern="latRegex"
                 class="text-base"
               />
               <BaseInput
@@ -143,6 +145,7 @@
                 v-model="formData.longitude"
                 label="Longitude"
                 required
+                :pattern="lngRegex"
                 class="text-base"
               />
             </div>
@@ -258,6 +261,8 @@ const props = defineProps({
 });
 const emits = defineEmits(['success']);
 const route = useRoute();
+const latRegex = /^([-+]?([0-8]?\d(\.\d+)?|90(\.0+)?))$/;
+const lngRegex = /^([-+]?((1[0-7]\d|[0-9]?\d)(\.\d+)?|180(\.0+)?))$/;
 
 const formData = ref({
   status: 1,
@@ -296,11 +301,23 @@ const isEditing = computed(() => !!effectiveId.value);
 
 const validateForm = () => {
   let ok = true;
+  let firstInvalidInput = null;
   inputRefs.value.forEach((c) => {
     if (c?.validate && !c.validate()) {
       ok = false;
+      if (!firstInvalidInput) {
+        firstInvalidInput = c;
+      }
     }
   });
+
+  if (!ok && firstInvalidInput) {
+    setTimeout(() => {
+      firstInvalidInput.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstInvalidInput.focus();
+    }, 150);
+  }
+
   return ok;
 };
 

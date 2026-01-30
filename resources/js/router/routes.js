@@ -84,10 +84,10 @@ const routes = [
         meta: { pageTitle: 'Change Password' },
       },
       {
-        path: 'subcription-view',
-        name: 'owner-subcription-view',
+        path: '/owner/subscription',
+        name: 'owner-subscription-view',
         component: () => import('../../js/pages/owner/SubscriptionView.vue'),
-        meta: { pageTitle: 'Manage Subcription' },
+        meta: { pageTitle: 'Manage Subscription' },
       },
     ],
   },
@@ -131,13 +131,13 @@ const routes = [
         path: '/admin/listings',
         name: 'listings',
         component: () => import('../pages/admin/Property/Listing.vue'),
-        meta: { pageTitle: 'Poperty Listings' },
+        meta: { pageTitle: 'Property Listings' },
       },
       {
         path: '/admin/facilities',
         name: 'facilities',
         component: () => import('../pages/admin/Property/Facilities.vue'),
-        meta: { pageTitle: 'Poperty Facilities' },
+        meta: { pageTitle: 'Property Facilities' },
       },
       {
         path: '/admin/subscriptions',
@@ -164,12 +164,6 @@ const routes = [
     component: () => import('../../js/layouts/AuthLayout.vue'),
     meta: { requiresAuth: true, role: 'user' },
     children: [
-      // {
-      //   path: "dashboard",
-      //   name: "user-dashboard",
-      //   component: () => import("../../js/pages/user/UserDashboard.vue"),
-      //   meta: { pageTitle: "My Dashboard" },
-      // },
       {
         path: '/booking-summary',
         name: 'booking-summary',
@@ -184,7 +178,7 @@ const routes = [
         path: 'profile',
         name: 'user-profile',
         component: () => import('../../js/pages/auth/Profile.vue'),
-        meta: { pageTitle: 'Admin Profile' },
+        meta: { pageTitle: 'User Profile' },
       },
       {
         path: 'change-password',

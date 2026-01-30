@@ -27,29 +27,31 @@
         autocomplete="current-password"
         width="full"
         required
+        :min-length="6"
         placeholder="••••••••"
         icon="lucide:lock"
       />
 
       <div class="flex justify-between text-sm text-primary">
-        <a
-          href="/forgot-password"
+        <router-link
+          to="/forgot-password"
           class="hover:text-primary hover:underline"
         >
           Forgot password?
-        </a>
+        </router-link>
       </div>
 
       <button
         type="submit"
         class="btn-primary w-full py-1.5"
+        :disabled="isLoading"
       >
-        Log In
+        {{ isLoading ? 'Logging in...' : 'Log In' }}
       </button>
     </form>
 
     <p class="text-center text-gray-500 text-sm mt-6">
-      Don’t have an account?
+      Don't have an account?
       <router-link
         to="/register"
         class="text-primary font-medium hover:underline"
@@ -62,9 +64,8 @@
 
 <script setup>
 import { ref } from 'vue';
-
-import BaseInput from '../../components/global/BaseInput.vue';
-import { useAuth } from '../../composables/useAuth';
+import BaseInput from '@components/global/BaseInput.vue';
+import { useAuth } from '@composables/useAuth';
 
 const { login } = useAuth();
 
@@ -75,13 +76,27 @@ const form = ref({
 
 const emailInput = ref(null);
 const passwordInput = ref(null);
+const isLoading = ref(false);
+const errorMessage = ref('');
 
 const handleLogin = async () => {
+  errorMessage.value = '';
+
   const isEmailValid = emailInput.value.validate();
   const isPasswordValid = passwordInput.value.validate();
 
-  if (isEmailValid && isPasswordValid) {
+  if (!isEmailValid || !isPasswordValid) {
+    return;
+  }
+
+  try {
+    isLoading.value = true;
     await login(form.value);
+  } catch (error) {
+    console.error('Login error:', error);
+    errorMessage.value = error.message || 'Login failed. Please try again.';
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

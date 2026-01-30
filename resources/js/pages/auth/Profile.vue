@@ -85,6 +85,8 @@
                 v-model="form.phone"
                 label="Phone Number"
                 width="full"
+                restrict="phone"
+                required
                 icon="mdi:phone"
                 placeholder="+44 123 456 7890"
               />
@@ -93,6 +95,7 @@
                 v-model="form.telephone"
                 label="Secondary Telephone"
                 width="full"
+                restrict="phone"
                 icon="mdi:phone-classic"
                 placeholder="Home or office number"
               />
@@ -118,6 +121,7 @@
                 v-model="form.address"
                 label="Address Line 1"
                 width="full"
+                required
                 icon="mdi:home-outline"
                 placeholder="123 Main Street"
               />
@@ -332,11 +336,27 @@ const handleUpdateProfile = async () => {
     inputsToValidate.push(input_stripePublicKey.value, input_stripeSecretKey.value);
   }
 
+  let firstInvalidInput = null;
   const isFormValid = inputsToValidate
     .filter((input) => input !== null)
-    .every((input) => input.validate());
+    .every((input) => {
+      if (!input.validate()) {
+        if (!firstInvalidInput) {
+          firstInvalidInput = input;
+        }
+        return false;
+      }
+      return true;
+    });
 
   if (!isFormValid) {
+    // Scroll to and focus the first invalid input with smooth animation
+    if (firstInvalidInput) {
+      setTimeout(() => {
+        firstInvalidInput.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalidInput.focus();
+      }, 150);
+    }
     return;
   }
 
