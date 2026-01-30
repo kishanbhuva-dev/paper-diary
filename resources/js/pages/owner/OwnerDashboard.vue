@@ -1,4 +1,5 @@
 <template>
+  <!-- Comment -->
   <div class="p-2 sm:p-4 lg:p-6 bg-gray-50 min-h-max">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div
